@@ -9,7 +9,7 @@ import { LuLogOut } from "react-icons/lu";
 import CompanyLogo from "../../assets/images/brainrock_logo.png";
 import MenuIcon from "../../assets/images/menu_icon.png";
 import "../../assets/css/LeftNav.css";
-
+import { Dropdown, NavDropdown } from "react-bootstrap";
 import { BiDonateHeart } from "react-icons/bi";
 import { GiByzantinTemple } from "react-icons/gi";
 import { LiaCalendarCheck } from "react-icons/lia";
@@ -32,9 +32,7 @@ function LeftNav() {
     if (storedUser?.name) {
       setUserName(storedUser.name);
     }
-
     setActivePath(location.pathname);
-
     // Poll for updates
     const interval = setInterval(() => {
       const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -126,15 +124,31 @@ function LeftNav() {
           </div> */}
         </div>
 
-        <div className="message">
+       <div className="message">
+        
+  <div className="nd-msg">User: {userName}
 
-          <div className="nd-msg">User: {userName}</div>
-          <div className="dp" title="Click to logout" onClick={logout}>
-            <div className="nd-log-icon">
-              <LuLogOut />
-            </div>
-          </div>
-        </div>
+    
+  </div>
+  
+  <Dropdown align="end" className="dp">
+
+    <Dropdown.Toggle variant="light" id="dropdown-basic" className="nd-log-icon border-0">
+      <LuLogOut />
+    </Dropdown.Toggle>
+
+    <Dropdown.Menu>
+      <Dropdown.Item href="/UserProfile">My Profile</Dropdown.Item>
+     
+
+     
+
+      <Dropdown.Divider />
+      <Dropdown.Item onClick={logout}>Logout</Dropdown.Item>
+    </Dropdown.Menu>
+  </Dropdown>
+
+</div>
       </header>
 
       {/* Sidebar Navigation */}

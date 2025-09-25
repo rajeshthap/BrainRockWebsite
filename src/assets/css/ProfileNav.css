@@ -1,0 +1,16 @@
+.logo-textt{
+    align-items: center;
+    margin-top: 12px;
+}
+.logo-textt h1{
+    font-size: 26px;
+    color: #007bff!important;
+    padding-left: 16px;
+}
+.logo-textt span{
+    font-size: 20px;
+    color: #000;
+}
+.dashboard-title{
+    padding:10px ;
+}

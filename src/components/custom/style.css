@@ -69,10 +69,10 @@ body {
 
 
 /* ----------------Drag & drop files Start ---------------------------  */
-a {
+/* a {
     color: white;
     text-decoration: none !important;
-}
+} */
 
 @media (max-width: 575.98px) {
         .awc-title span{
