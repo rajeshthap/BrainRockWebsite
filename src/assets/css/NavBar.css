@@ -3,7 +3,8 @@
     background-color: #ffff !important;
 
 }
-.br-span{
+
+.br-span {
     color: var(--br-primary) !important;
     font-size: var(--br-space-400) !important;
     font-weight: var(--br-space-800) !important;
@@ -67,9 +68,42 @@ img.logo-wecd {
     margin-left: 12px;
 }
 
+
+/* Rajesh*/
+
+/* Navbar adjustments */
+.navbar-top {
+    width: 100%;
+    max-width: 100vw;
+}
+
+.nd-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.nd-nav::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+/* For mobile responsiveness */
+@media (max-width: 992px) {
+    .nd-nav {
+        overflow-x: visible;
+        padding-left: 28px !important;
+    }
+}
+
+/*Rajesh End*/
+
 @media (max-width: 576px) {
 
-    .awc-title p{
+    .awc-title p {
         font-size: var(--awc-space-200);
     }
 
