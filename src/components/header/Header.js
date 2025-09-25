@@ -31,10 +31,10 @@ function Header() {
               <RiUser3Fill className="br-header-icon" />
               Register
             </li>
-            
+
             <li className="header-item">
-             <Link to="/InnerDashBoard">  <PiSignInBold className="br-header-icon" />
-            Login</Link> 
+              <Link to="/InnerDashBoard">  <PiSignInBold className="br-header-icon" />
+                Login</Link>
             </li>
             <ImFacebook className="br-m-left br-header-icon" />
             <FaInstagram className="br-header-icon" />
