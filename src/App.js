@@ -16,25 +16,30 @@ import Footer from "../src/components/footer/Footer";
 // admindashboard
 import "../src/components/custom/customstyle.css";
 import "../src/components/custom/style.css";
-import LeftNav from "./components/DashBoard/LeftNav";
-import InnerDashBoard from "./components/DashBoard/InnerDashBoard";
-import UserLogin from "./components/login/UserLogin";
-import UserRegistration from "./components/registration/UserRegistration";
-import UserProfile from "./components/DashBoard/UserProfile";
-import UserVerifyOtp from "./components/DashBoard/UserVerifyOtp";
-import ForgotPassword from "./components/registration/ForgotPassword";
+
+import UserRegistration from "./components/UserDashBoard/registration/UserRegistration";
+import UserLogin from "./components/UserDashBoard/login/UserLogin";
+
+import InnerDashBoard from "./components/UserDashBoard/InnerDashBoard";
+
+import UserProfile from "./components/UserDashBoard/UserProfile";
+import UserVerifyOtp from "./components/UserDashBoard/UserVerifyOtp";
+import ForgotPassword from "./components/UserDashBoard/registration/ForgotPassword";
+import LeftNav from "./components/UserDashBoard/LeftNav";
+import AdminInnerDashBoard from "./components/AdminDashBoard/admin_dashboard/AdminInnerDashBoard";
+import AdminLeftNav from "./components/AdminDashBoard/admin_dashboard/AdminLeftNav";
 
 function App() {
   const location = useLocation();
 
   // Paths where NavBar should be hidden
   const hiddenPaths = new Set([
-    "/InnerDashBoard",  "/LeftNav", "/UserProfile"
+    "/InnerDashBoard",  "/LeftNav", "/UserProfile", "/AdminInnerDashBoard","/AdminLeftNav"
   ]);
 
   // Paths where Footer should be hidden
   const hiddenFooter1 = new Set([
-    "/InnerDashBoard","/LeftNav","/UserLogin","/UserRegistration","/UserProfile"
+    "/InnerDashBoard","/LeftNav","/UserLogin","/UserRegistration","/UserProfile","/AdminInnerDashBoard", "/AdminLeftNav"
   ]);
 
   const shouldHideNavbar = hiddenPaths.has(location.pathname);
@@ -55,6 +60,8 @@ function App() {
         <Route path="/UserProfile" element={<UserProfile />} />
         <Route path="/UserVerifyOtp" element={<UserVerifyOtp />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
+        <Route path="/AdminInnerDashBoard" element={<AdminInnerDashBoard />} />
+        <Route path="/AdminLeftNav" element={<AdminLeftNav />} />
         
         
       </Routes>

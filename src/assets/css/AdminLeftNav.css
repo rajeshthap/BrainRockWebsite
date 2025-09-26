@@ -115,20 +115,23 @@
   position: relative;
   cursor: pointer;
   font-size: var(--nd-space-350);
+
 }
 
 .message span {
   gap: 40px;
   position: relative;
   cursor: pointer;
-  color: var(--nd-black);
-padding-right: var(--br-space-150);
+  color: var(--br-black) !important;
+  padding-right: var(--br-space-150);
+
 }
 
 
 
 
 .dp {
+
   border-radius: 50%;
   color: var(--nd-white);
 
@@ -165,7 +168,7 @@ padding-right: var(--br-space-150);
 .nav {
   min-height: 100vh;
   width: 250px;
-  background-color: #49256e;
+  background-color: #a962f0;
   position: absolute;
   top: 0px;
   left: 00;
