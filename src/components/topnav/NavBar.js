@@ -39,21 +39,21 @@ function NavBar() {
             <Nav className="me-auto justify-content-end flex-grow-1 nd-nav">
               {/* Main Navigation Items */}
               <NavDropdown title="Home" id="Home">
-                <NavDropdown.Item to="#">Overview</NavDropdown.Item>
-                <NavDropdown.Item to="#">Why Choose Us</NavDropdown.Item>
+                <NavDropdown.Item to="/Overview">Overview</NavDropdown.Item>
+                <NavDropdown.Item to="/WhyChooiceUs">Why Choose Us</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title="About Us" id="AboutUs">
-                <NavDropdown.Item href="#overview">Company Profile</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Our Team</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Careers</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Partners</NavDropdown.Item>
+                <NavDropdown.Item href="/CompanyProfile">Company Profile</NavDropdown.Item>
+                <NavDropdown.Item href="/OurTeam">Our Team</NavDropdown.Item>
+                <NavDropdown.Item href="/Careers">Careers</NavDropdown.Item>
+                <NavDropdown.Item href="/Partners">Partners</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title="Services" id="Services">
-                <NavDropdown.Item href="#overview">Web Development</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Mobile App Development</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Cloud Solutions</NavDropdown.Item>
+                <NavDropdown.Item href="/WebDevelopment">Web Development</NavDropdown.Item>
+                <NavDropdown.Item href="/MobileAppDevelopment">Mobile App Development</NavDropdown.Item>
+                <NavDropdown.Item href="/CloudSolutions">Cloud Solutions</NavDropdown.Item>
                 <NavDropdown.Item href="#why-choose-us">IT Consulting</NavDropdown.Item>
                 <NavDropdown.Item href="#why-choose-us">UI/UX Design</NavDropdown.Item>
                 <NavDropdown.Item href="#why-choose-us">QA & Testing</NavDropdown.Item>
