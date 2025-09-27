@@ -37,8 +37,8 @@ function NavBar() {
             <Nav className="me-auto justify-content-end flex-grow-1 nd-nav">
               {/* Main Navigation Items */}
               <NavDropdown title="Home" id="Home">
-                <NavDropdown.Item to="/Overview">Overview</NavDropdown.Item>
-                <NavDropdown.Item to="/WhyChooiceUs">Why Choose Us</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/Overview">Overview</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/WhyChooiceUs">Why Choose Us</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title="About Us" id="AboutUs">
