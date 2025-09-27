@@ -31,11 +31,13 @@ body {
 :root {
 
   --br-primary: #00AEFF;
+  
   --br-white: #ffffff;
   --br-blue-dark: #152036;
+  --br-blue-dark: #1A202C;
   --br-bg-green: #278557;
   --br-black:#000000;
-
+  --br-gray:#4A5568;
 
 
   /* custom padding abr margin*/

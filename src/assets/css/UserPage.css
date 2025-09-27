@@ -21,19 +21,81 @@
 }
 
 .resorce-sub-title p {
-    font-size: var(--awc-space-550);
-    color: var(--awc-black);
-    font-weight: 600;
+    font-size: var(--br-space-400);
+    color: var(--br-gray);
+    
 
 
 }
+.br-span-sublist{
+    color: var(--br-primary);
+}
 
+.br-span-list{
+    color:#1A202C;
+    font-weight: 700;
+padding: var(--br-space-300);
+}
+
+.br-span-list-desig{
+    color:var(--br-primary) !important;
+    font-weight: 700;
+padding-top: var(--br-space-400) !important;
+}
+.resorce-sub-list-design h1{
+    color: var(--br-primary) !important;
+    font-size: var(--br-space-700);
+}
+.resorce-sub-list-design p{
+    font-size: var(--br-space-300);
+
+}
+.card-box-details{
+    border: var(--br-space-25) solid var(--br-primary);
+}
+.br-span-title{
+    font-weight: 300 !important;
+
+}
+.bg-opacity{
+    font-size: var(--awc-space-700);
+}
 .resorce-sub-list h1 {
-    font-size: var(--awc-space-500);
-    color: var(--awc-black);
+    font-size: var(--br-space-700);
+    color: var(--br-primary) !important;
     font-weight: 700;
 
 }
+.resorce-sub-list p {
+    font-size: var(--br-space-400);
+    color: var(--br-gray) !important;
+    line-height: 36px;
+    font-weight: 400;
+    text-align: justify;
+}
+.br-head-box{
+    background-color: #DAF2FD;
+    margin-top: var(--br-space-500) !important;
+}
+.br-head-box h1{
+    color: var(--br-gray) !important;
+    font-weight: 700;
+    font-size: var(--br-space-700) !important;
+   padding-top: var(--br-space-700);
+}
+.mobile-app-img {
+    width: 50px;
+    display: flex;
+    justify-content: left;
+}
+.br-img{
+    border-radius: var(--br-space-400) !important;
+}
+.resorce-about-list{
+    color: var(--br-gray);
+    font-weight: 700;
+}
+
 
 
 
@@ -113,6 +175,20 @@
     border-radius: var(--awc-space-300) !important;
     width: 12px !important;
     height: 12px !important;
+}
+.services-design-head h2{
+    font-size: var(--br-space-500);
+    color: var(--br-blue-dark);
+    font-weight: 600;
+}
+.services-design-head p{
+    color: var(--br-gray);
+    line-height: 162%;
+
+}
+.design-icon {
+    font-size: 42px;
+    color: var(--br-primary);
 }
 
 @media (max-width: 1180px) {
