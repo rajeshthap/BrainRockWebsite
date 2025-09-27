@@ -21,6 +21,9 @@ import UserVerifyOtp from "./components/UserDashBoard/UserVerifyOtp";
 import ForgotPassword from "./components/UserDashBoard/registration/ForgotPassword";
 import LeftNav from "./components/UserDashBoard/LeftNav";
 import AdminInnerDashBoard from "./components/AdminDashBoard/admin_dashboard/AdminInnerDashBoard";
+// Shanu start
+import ProjectDetail from "./components/AdminDashBoard/AddProject/ProjectDetail";
+// Shanu end
 import AdminLeftNav from "./components/AdminDashBoard/admin_dashboard/AdminLeftNav";
 import Overview from "./components/navigation/Home/Overview";
 import WhyChooiceUs from "./components/navigation/Home/WhyChooiceUs";
@@ -43,7 +46,7 @@ function App() {
 
   // Paths where NavBar should be hidden
   const hiddenPaths = new Set([
-    "/InnerDashBoard",  "/LeftNav", "/UserProfile", "/AdminInnerDashBoard","/AdminLeftNav"
+    "/InnerDashBoard",  "/LeftNav", "/UserProfile", "/AdminInnerDashBoard","/AdminLeftNav","/ProjectDetail"
   ]);
 
   // Paths where Footer should be hidden
@@ -70,6 +73,13 @@ function App() {
         <Route path="/UserVerifyOtp" element={<UserVerifyOtp />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/AdminInnerDashBoard" element={<AdminInnerDashBoard />} />
+        {/* Shanu start   */}
+        <Route path="/ProjectDetail" element={<ProjectDetail />} /> 
+        {/* Shanu end */}
+          
+          
+
+
         <Route path="/AdminLeftNav" element={<AdminLeftNav />} />
         <Route path="/Overview" element={<Overview />} />
         <Route path="/WhyChooiceUs" element={<WhyChooiceUs />} />
