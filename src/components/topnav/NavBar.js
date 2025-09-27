@@ -15,8 +15,6 @@ function NavBar() {
     <>
       <Header />
 
-
-
       <Navbar
         sticky="top"
         expand="lg"
@@ -54,9 +52,9 @@ function NavBar() {
                 <NavDropdown.Item href="/WebDevelopment">Web Development</NavDropdown.Item>
                 <NavDropdown.Item href="/MobileAppDevelopment">Mobile App Development</NavDropdown.Item>
                 <NavDropdown.Item href="/CloudSolutions">Cloud Solutions</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">IT Consulting</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">UI/UX Design</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">QA & Testing</NavDropdown.Item>
+                <NavDropdown.Item href="/ITConsulting">IT Consulting</NavDropdown.Item>
+                <NavDropdown.Item href="/UIUXDesign">UI/UX Design</NavDropdown.Item>
+                <NavDropdown.Item href="/QATesting">QA & Testing</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title="Solutions" id="Solutions">

@@ -31,6 +31,11 @@ import Partners from "./components/navigation/AboutUs/Partners";
 import WebDevelopment from "./components/navigation/Services/WebDevelopment";
 import MobileAppDevelopment from "./components/navigation/Services/MobileAppDevelopment";
 import CloudSolutions from "./components/navigation/Services/CloudSolutions";
+import ITConsulting from "./components/navigation/Services/ITConsulting";
+import UIUXDesign from "./components/navigation/Services/UIUXDesign";
+import QATesting from "./components/navigation/Services/QATesting";
+
+
 
 
 function App() {
@@ -75,6 +80,9 @@ function App() {
         <Route path="/WebDevelopment" element={<WebDevelopment />} />
         <Route path="/MobileAppDevelopment" element={<MobileAppDevelopment />} />
         <Route path="/CloudSolutions" element={<CloudSolutions />} />
+        <Route path="/ITConsulting" element={<ITConsulting />} />
+        <Route path="/UIUXDesign" element={<UIUXDesign />} />
+        <Route path="/QATesting" element={<QATesting />} />
       
         
         
