@@ -42,19 +42,19 @@ function NavBar() {
               </NavDropdown>
 
               <NavDropdown title="About Us" id="AboutUs">
-                <NavDropdown.Item href="/CompanyProfile">Company Profile</NavDropdown.Item>
-                <NavDropdown.Item href="/OurTeam">Our Team</NavDropdown.Item>
-                <NavDropdown.Item href="/Careers">Careers</NavDropdown.Item>
-                <NavDropdown.Item href="/Partners">Partners</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/CompanyProfile">Company Profile</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/OurTeam">Our Team</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/Careers">Careers</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/Partners">Partners</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title="Services" id="Services">
-                <NavDropdown.Item href="/WebDevelopment">Web Development</NavDropdown.Item>
-                <NavDropdown.Item href="/MobileAppDevelopment">Mobile App Development</NavDropdown.Item>
-                <NavDropdown.Item href="/CloudSolutions">Cloud Solutions</NavDropdown.Item>
-                <NavDropdown.Item href="/ITConsulting">IT Consulting</NavDropdown.Item>
-                <NavDropdown.Item href="/UIUXDesign">UI/UX Design</NavDropdown.Item>
-                <NavDropdown.Item href="/QATesting">QA & Testing</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/WebDevelopment">Web Development</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/MobileAppDevelopment">Mobile App Development</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/CloudSolutions">Cloud Solutions</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/ITConsulting">IT Consulting</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/UIUXDesign">UI/UX Design</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/QATesting">QA & Testing</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title="Solutions" id="Solutions">
