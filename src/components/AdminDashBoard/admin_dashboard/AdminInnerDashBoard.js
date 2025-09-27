@@ -20,12 +20,12 @@ import AdminLeftNav from "./AdminLeftNav";
 
 const AdminInnerDashBoard = () => {
 
-    const [attendanceData, setAttendanceData] = useState([]);
+  const [attendanceData, setAttendanceData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
   const navigate = useNavigate();
 
-   //  Logout handler
+  //  Logout handler
   const handleLogout = () => {
     localStorage.clear(); // clear session storage
     sessionStorage.clear();
@@ -162,135 +162,141 @@ const AdminInnerDashBoard = () => {
     name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-    return (
-        <>
-            {/* Main Wrapper */}
-            <div className="dashboard-wrapper">
-                {/* Sidebar */}
-                <aside className="sidebar">
-                    <AdminLeftNav />
-                </aside>
+  return (
+    <>
+      {/* Main Wrapper */}
+      <div className="dashboard-wrapper">
+        {/* Sidebar */}
+        <aside className="sidebar">
+          <AdminLeftNav />
+        </aside>
 
-                {/* Right-hand Main Container */}
-                <main className="main-container">
-                    <div className="content-box">
+        {/* Right-hand Main Container */}
+        <main className="main-container">
+          <div className="content-box">
 
- 
-                       <Container fluid className="px-4" style={{ maxWidth: "100%" }}>
-        <Row className="align-items-center mb-4 mt-3">
-    <Col>
-      <h2 className="fw-bold text-center">👨‍💼 Admin Dashboard</h2>
-    </Col>
-    <Col xs="auto">
-      <Button
-        className="btn btn-danger px-4 py-2 shadow-sm"
-        onClick={handleLogout}
-      >
-        🚪 Logout
-      </Button>
-    </Col>
-  </Row>
 
-      <Row className="mb-4">
-        {/* Search Bar */}
-        <Col md={6}>
-          <Form.Control
-            type="text"
-            placeholder="🔍 Search employee by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="p-3 rounded-pill shadow-sm"
-          />
-        </Col>
+            <Container fluid className="px-4" style={{ maxWidth: "100%" }}>
+              <Row className="align-items-center mb-4 mt-3">
+                <Col>
+                  <h2 className="fw-bold text-center">👨‍💼 Admin Dashboard</h2>
+                </Col>
+                <Col xs="auto" className="d-flex align-items-center gap-2">
+                  <Button
+                    className="btn btn-primary px-4 py-2 shadow-sm"
+                    onClick={() => navigate("/ProjectDetail")}
+                  >
+                    ➕ Add Project
+                  </Button>
+                  <Button
+                    className="btn btn-danger px-4 py-2 shadow-sm"
+                    onClick={handleLogout}
+                  >
+                    🚪 Logout
+                  </Button>
+                </Col>
+              </Row>
 
-        {/* Filter Dropdown */}
-        <Col md={6}>
-          <Form.Select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="p-3 rounded-pill shadow-sm"
-          >
-            <option value="all">All Records</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-          </Form.Select>
-        </Col>
-      </Row>
+              <Row className="mb-4">
+                {/* Search Bar */}
+                <Col md={6}>
+                  <Form.Control
+                    type="text"
+                    placeholder="🔍 Search employee by name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="p-3 rounded-pill shadow-sm"
+                  />
+                </Col>
 
-      {/* Accordion per User */}
-      <Accordion alwaysOpen className="w-100">
-        {filteredUsers.length > 0 ? (
-          filteredUsers.map((userName, index) => {
-            const filteredLogs = filterByDate(groupedByUser[userName]);
-            const { green, orange, red } = getLogColorCounts(filteredLogs);
+                {/* Filter Dropdown */}
+                <Col md={6}>
+                  <Form.Select
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="p-3 rounded-pill shadow-sm"
+                  >
+                    <option value="all">All Records</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="year">This Year</option>
+                  </Form.Select>
+                </Col>
+              </Row>
 
-            return (
-              <Accordion.Item
-                eventKey={index.toString()}
-                key={userName}
-                className="w-100"
-              >
-                <Accordion.Header>
-                  <span className="fw-bold">{userName}</span>{" "}
-                  <Badge bg="secondary" className="ms-2">
-                    {filteredLogs.length} Logs
-                  </Badge>
-                  {/* Color badges */}
-                  <Badge bg="success" className="ms-2">
-                    Green: {green}
-                  </Badge>
-                  <Badge bg="warning" className="ms-2 text-dark">
-                    Orange: {orange}
-                  </Badge>
-                  <Badge bg="danger" className="ms-2">
-                    Red: {red}
-                  </Badge>
-                </Accordion.Header>
-                <Accordion.Body className="w-100">
-                  {filteredLogs.length > 0 ? (
-                    <Table striped bordered hover className="shadow-sm w-100">
-                      <thead>
-                        <tr>
-                          <th>🕒 Date/Time</th>
-                          <th>📌 Mode</th>
-                          <th>📝 Reason</th>
-                          <th>📍 Location</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredLogs.map((log) => (
-                          <tr key={log.id}>
-                            <td>{formatIndianDateTime(log.login_time)}</td>
-                            <td>
-                              <Badge bg="primary">{log.Mode}</Badge>
-                            </td>
-                            <td>{log.Reason_query || "N/A"}</td>
-                            <td>{log.live_location || "N/A"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  ) : (
-                    <p className="text-muted">No logs found for this filter.</p>
-                  )}
-                </Accordion.Body>
-              </Accordion.Item>
-            );
-          })
-        ) : (
-          <p className="text-muted text-center">No employees found.</p>
-        )}
-      </Accordion>
-    </Container>
-     
+              {/* Accordion per User */}
+              <Accordion alwaysOpen className="w-100">
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((userName, index) => {
+                    const filteredLogs = filterByDate(groupedByUser[userName]);
+                    const { green, orange, red } = getLogColorCounts(filteredLogs);
 
-                      
-                    </div>
-                </main>
-            </div>
-        </>
-    );
+                    return (
+                      <Accordion.Item
+                        eventKey={index.toString()}
+                        key={userName}
+                        className="w-100"
+                      >
+                        <Accordion.Header>
+                          <span className="fw-bold">{userName}</span>{" "}
+                          <Badge bg="secondary" className="ms-2">
+                            {filteredLogs.length} Logs
+                          </Badge>
+                          {/* Color badges */}
+                          <Badge bg="success" className="ms-2">
+                            Green: {green}
+                          </Badge>
+                          <Badge bg="warning" className="ms-2 text-dark">
+                            Orange: {orange}
+                          </Badge>
+                          <Badge bg="danger" className="ms-2">
+                            Red: {red}
+                          </Badge>
+                        </Accordion.Header>
+                        <Accordion.Body className="w-100">
+                          {filteredLogs.length > 0 ? (
+                            <Table striped bordered hover className="shadow-sm w-100">
+                              <thead>
+                                <tr>
+                                  <th>🕒 Date/Time</th>
+                                  <th>📌 Mode</th>
+                                  <th>📝 Reason</th>
+                                  <th>📍 Location</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {filteredLogs.map((log) => (
+                                  <tr key={log.id}>
+                                    <td>{formatIndianDateTime(log.login_time)}</td>
+                                    <td>
+                                      <Badge bg="primary">{log.Mode}</Badge>
+                                    </td>
+                                    <td>{log.Reason_query || "N/A"}</td>
+                                    <td>{log.live_location || "N/A"}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </Table>
+                          ) : (
+                            <p className="text-muted">No logs found for this filter.</p>
+                          )}
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    );
+                  })
+                ) : (
+                  <p className="text-muted text-center">No employees found.</p>
+                )}
+              </Accordion>
+            </Container>
+
+
+
+          </div>
+        </main>
+      </div>
+    </>
+  );
 };
 
 export default AdminInnerDashBoard;

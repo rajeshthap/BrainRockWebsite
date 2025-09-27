@@ -248,13 +248,13 @@ const UserRegistration = () => {
                 onChange={handleInputChange}
               >
                 <option value="">Select designation</option>
-                <option value="">Project Manager</option>
-                <option value="">UI/UX Designer</option>
-                <option value="">Software Developer/Engineer</option>
+                <option value="Project Manager">Project Manager</option>
+                <option value="UI/UX Designer">UI/UX Designer</option>
+                <option value="Software Developer/Engineer">Software Developer/Engineer</option>
                 <option value="Frontend Developer">Frontend Developer</option>
-                <option value="">Backend Developer</option>
-                <option value="">Full Stack Developer</option>
-                <option value="">Quality Assurance (QA)Engineer</option>
+                <option value="Backend Developer">Backend Developer</option>
+                <option value="Full Stack Developer">Full Stack Developer</option>
+                <option value="Quality Assurance (QA) Engineer">Quality Assurance (QA) Engineer</option>
               </Form.Select>
               {errorReason_querys.Designation && <div className="text-danger">{errorReason_querys.Designation}</div>}
             </Form.Group>
