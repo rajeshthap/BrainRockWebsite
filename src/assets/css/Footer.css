@@ -14,3 +14,32 @@
     color: var(--awc-blue);
 
 }
+
+
+
+.br-footer-box{
+    background-color: #F9F9FF;;
+}
+.br-footer-heading h4{
+    color: var(--br-primary);
+    margin-left: var(--br-space-700);
+    
+}
+.br-footer-details p{
+    font-size: var(--br-space-400);
+    padding: var(--br-space-200);
+    line-height: 24px;
+}
+.google-img{
+    max-width: 100px;
+}
+.footer-icon{
+ 
+    margin-left: var(--br-space-300);
+    font-size: 36px;
+    border-radius: 30px;
+    color: var(--br-primary);
+    background-color: var(--br-white);
+    padding: var(--br-space-200);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
