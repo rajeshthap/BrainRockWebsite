@@ -27,7 +27,7 @@ import RailsIcon from "../../src/assets/images/rails.png";
 import ReactIcon from "../../src/assets/images/reacticon.png"
 import MongoDBIcon from "../../src/assets/images/mongodb.png"
 
-import Customer from "./CarouselComponet/Customer";
+
 
 import { data } from "react-router-dom";
 
@@ -576,7 +576,6 @@ function UserPage() {
                 introduce their work to someone else.
               </p>
 
-              <Customer />
             </div>
           </Carousel.Item>
 
@@ -588,7 +587,7 @@ function UserPage() {
                 Everything went smoothly.
               </p>
 
-             <Customer />
+           
             </div>
           </Carousel.Item>
         </Carousel>
