@@ -10,12 +10,12 @@ import Banner1 from "../assets/images/banner-1.png";
 
 import Slider1 from "../assets/images/slider1.png";
 import Slider2 from "../assets/images/slider2.png";
-import Slider3 from "../assets/images/slider3.png";
+import Slider3 from "../assets/images/slider1.png"
 import "../assets/css/slider.css";
 
 import { ImProfile } from "react-icons/im";
 
-import { MdReviews, MdStarRate } from "react-icons/md";
+import { MdReviews } from "react-icons/md";
 
 import NodeImg from "../../src/assets/images/node.png";
 import PHPIcon from "../../src/assets/images/php.png";
@@ -26,10 +26,8 @@ import PythonIcon from "../../src/assets/images/python.png";
 import RailsIcon from "../../src/assets/images/rails.png";
 import ReactIcon from "../../src/assets/images/reacticon.png"
 import MongoDBIcon from "../../src/assets/images/mongodb.png"
-
-
-
-import { data } from "react-router-dom";
+import TestimonialCarousel from "./TestimonialCarousel";
+import ServicesCarousel from "./ServicesCarousel";
 
 function UserPage() {
   return (
@@ -196,163 +194,8 @@ function UserPage() {
           </Col>
         </Row>
       </Container>
-
-      <div className="container-fluid br-head-box">
-        <h1 className="text-center mb-4">Services we offer</h1>
-      {/* <Data data={data} activeSlide={2} /> */}
-        <div
-          id="servicesCarousel"
-          className="carousel slide"
-          data-bs-ride="carousel"
-          data-bs-interval="3000"
-          data-bs-pause="false" // <- disables pause on hover
-          data-bs-wrap="true"
-        >
-          <div className="carousel-inner">
-            {/* First Slide */}
-            <div className="carousel-item active">
-              <div className="row justify-content-center d-flex">
-                <div className="col-md-4 col-sm-12 mb-3 flex-fill">
-                  <div className="service-card p-3 border rounded shadow-sm">
-                    <div className="">
-                      <img
-                        src={Slider1}
-                        alt="Slider One"
-                        className="img-fluid mobile-app-img"
-                      ></img>
-                    </div>
-                    <h4>Mobile App Development</h4>
-                    <p>
-                      We design and build high-performing, user-friendly mobile
-                      apps tailored to your business needs, ensuring seamless
-                      experiences across Android and iOS platforms.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="col-md-4 col-sm-12 mb-3 d-flex">
-                  <div className="service-card p-3 border rounded shadow-sm flex-fill">
-                    <div className="">
-                      <img
-                        src={Slider2}
-                        alt="Slider One"
-                        className="img-fluid mobile-app-img"
-                      ></img>
-                    </div>
-                    <h4>Web Design & Development</h4>
-                    <p>
-                      We craft visually stunning, responsive, and user-friendly
-                      websites that drive engagement and deliver seamless
-                      digital experiences.
-                    </p>
-                  </div>
-                </div>
-                <div className="col-md-4 col-sm-12 mb-3 d-flex">
-                  <div className="service-card p-3 border rounded shadow-sm flex-fill">
-                    <div className="">
-                      <img
-                        src={Slider3}
-                        alt="Slider One"
-                        className="img-fluid mobile-app-img"
-                      ></img>
-                    </div>
-                    <h4>Software Testing Service</h4>
-                    <p>
-                      We craft visually stunning, responsive, and user-friendly
-                      websites that drive engagement and deliver seamless
-                      digital experiences.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Second Slide */}
-            <div className="carousel-item">
-              <div className="row justify-content-center">
-                <div className="col-md-4 col-sm-12 mb-3 d-flex">
-                  <div className="service-card p-3 border rounded shadow-sm flex-fill">
-                    <div className="">
-                      <img
-                        src={Slider1}
-                        alt="Slider One"
-                        className="img-fluid mobile-app-img"
-                      ></img>
-                    </div>
-                    <h4>Mobile App Development</h4>
-                    <p>
-                      We design and build high-performing, user-friendly mobile
-                      apps tailored to your business needs, ensuring seamless
-                      experiences across Android and iOS platforms.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="col-md-4 col-sm-12 mb-3 d-flex">
-                  <div className="service-card p-3 border rounded shadow-sm flex-fill">
-                    <div className="">
-                      <img
-                        src={Slider2}
-                        alt="Slider One"
-                        className="img-fluid mobile-app-img"
-                      ></img>
-                    </div>
-                    <h4>Web Design & Development</h4>
-                    <p>
-                      We craft visually stunning, responsive, and user-friendly
-                      websites that drive engagement and deliver seamless
-                      digital experiences.
-                    </p>
-                  </div>
-                </div>
-                <div className="col-md-4 col-sm-12 mb-3 d-flex">
-                  <div className="service-card p-3 border rounded shadow-sm flex-fill">
-                    <div className="">
-                      <img
-                        src={Slider3}
-                        alt="Slider One"
-                        className="img-fluid mobile-app-img"
-                      ></img>
-                    </div>
-                    <h4>Software Testing Service</h4>
-                    <p>
-                      We craft visually stunning, responsive, and user-friendly
-                      websites that drive engagement and deliver seamless
-                      digital experiences.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Carousel Controls */}
-          <button
-            className="carousel-control-prev"
-            type="button"
-            data-bs-target="#servicesCarousel"
-            data-bs-slide="prev"
-          >
-            <span
-              className="carousel-control-prev-icon"
-              aria-hidden="true"
-            ></span>
-            <span className="visually-hidden">Previous</span>
-          </button>
-          <button
-            className="carousel-control-next"
-            type="button"
-            data-bs-target="#servicesCarousel"
-            data-bs-slide="next"
-          >
-            <span
-              className="carousel-control-next-icon"
-              aria-hidden="true"
-            ></span>
-            <span className="visually-hidden">Next</span>
-          </button>
-        </div>
-      </div>
+<ServicesCarousel />
+      
 
       <Container>
         <div className="resorce-sub-list-design">
@@ -547,50 +390,19 @@ function UserPage() {
               <img src={MongoDBIcon} alt="MongoDB-img"></img>
             </div>
           </Col>
-         
-
-         
+     
         </Row>
         </div>
       </Container>
-     
-
-      <div className="testimonial-section resorce-sub-list-design py-5">
+        <div className="testimonial-section resorce-sub-list-design py-5">
        
-<h1 className="text-center">
+{/* <h1 className="text-center">
             Why customers love <br></br>
             <span className="br-span-list mt-3">working with us</span>
-          </h1>
-        <Carousel
-          indicators={false}
-          interval={4000}
-          className="testimonial-carousel"
-        >
-          {/* Slide 1 */}
-          <Carousel.Item>
-            <div className="text-center p-4 shadow-sm border-0">
-              <p className="testimonial-text">
-                Without any doubt I recommend Alcaline Solutions as one of the
-                best web design and digital marketing agencies. One of the best
-                agencies I’ve come across so far. Wouldn’t be hesitated to
-                introduce their work to someone else.
-              </p>
+          </h1> */}
+     <TestimonialCarousel />
 
-            </div>
-          </Carousel.Item>
-
-          {/* Slide 2 */}
-          <Carousel.Item>
-            <div className="text-center p-4 shadow-sm border-0">
-              <p className="testimonial-text">
-                The service was excellent and I really liked the design process.
-                Everything went smoothly.
-              </p>
-
-           
-            </div>
-          </Carousel.Item>
-        </Carousel>
+    
       </div>
 
 
