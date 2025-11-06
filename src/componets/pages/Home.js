@@ -4,7 +4,8 @@ import UserPage from './UserPage'
 function Home() {
   return (
     <>
-      <UserPage />
+    <UserPage />
+
     </>
   )
 }

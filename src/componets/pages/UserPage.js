@@ -1,33 +1,32 @@
 import React from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
-import "../assets/css/UserPage.css";
-import PoorImg from "../assets/images/poorimg.jpg";
+import "../../assets/css/Userpage.css"
+import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
 
- // ✅ Component
+ // Component
   
-import Banner1 from "../assets/images/banner-1.png";
+import Banner1 from "../../assets/images/banner-1.png";
 
-import Slider1 from "../assets/images/slider1.png";
-import Slider2 from "../assets/images/slider2.png";
-import Slider3 from "../assets/images/slider1.png"
-import "../assets/css/slider.css";
+import "../../assets/css/Slider.css"
 
 import { ImProfile } from "react-icons/im";
 
 import { MdReviews } from "react-icons/md";
 
-import NodeImg from "../../src/assets/images/node.png";
-import PHPIcon from "../../src/assets/images/php.png";
-import MySqlIcon from "../../src/assets/images/mysql.png"
-import JavaIcon from "../../src/assets/images/java.png"
-import DoutNetIcon from "../../src/assets/images/doutNet.png";
-import PythonIcon from "../../src/assets/images/python.png";
-import RailsIcon from "../../src/assets/images/rails.png";
-import ReactIcon from "../../src/assets/images/reacticon.png"
-import MongoDBIcon from "../../src/assets/images/mongodb.png"
-import TestimonialCarousel from "./TestimonialCarousel";
+
+import PHPIcon from "../../assets/images/php.png";
+import MySqlIcon from "../../assets/images/mysql.png"
+import JavaIcon from "../../assets/images/java.png"
+import DoutNetIcon from "../../assets/images/doutNet.png";
+import PythonIcon from "../../assets/images/python.png";
+import RailsIcon from "../../assets/images/rails.png";
+import ReactIcon from "../../assets/images/reacticon.png"
+import MongoDBIcon from "../../assets/images/mongodb.png"
+
 import ServicesCarousel from "./ServicesCarousel";
+import TestimonialCarousel from "./TestimonialCarousel";
+
 
 function UserPage() {
   return (
@@ -336,7 +335,7 @@ function UserPage() {
           <Col lg={2} md={2} sm={6} className="mb-3">
          
             <div>
-              <img src={NodeImg} alt="node-img" className="img-fluid mt-3"></img>
+              <img src={PHPIcon} alt="node-img" className="img-fluid mt-3"></img>
             </div>
           </Col>
 

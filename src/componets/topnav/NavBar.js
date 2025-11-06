@@ -1,14 +1,12 @@
 import React from "react";
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
-
-
-import "font-awesome/css/font-awesome.min.css";
 import Logo from "../../assets/images/brainrock_logo.png";
 // import Wecdlogo from "../../assets/images/wecdlogo.png";
 
 import { Link } from "react-router-dom";
 import "../../assets/css/NavBar.css";
-import Header from "../header/Header";
+import Header from "./Header";
+
 
 function NavBar() {
   return (

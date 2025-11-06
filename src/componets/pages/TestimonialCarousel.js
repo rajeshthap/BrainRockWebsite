@@ -1,8 +1,8 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Row, Col, Carousel } from "react-bootstrap";
-import "../../src/assets/css/section.css";
-import Customer1 from "../assets/images/women.jpg";
+import { Carousel } from "react-bootstrap";
+import "../../assets/css/section.css";
+import Customer1 from "../../assets/images/women.jpg";
 import { FaStar } from "react-icons/fa";
 
 const TestimonialCarousel = () => {

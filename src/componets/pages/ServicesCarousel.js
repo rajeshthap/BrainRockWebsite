@@ -1,10 +1,10 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Carousel, Row, Col } from "react-bootstrap";
-import Slider1 from "../assets/images/slider1.png";
-import Slider2 from "../assets/images/slider2.png";
-import Slider3 from "../assets/images/slider1.png"
-import "../../src/assets/css/section.css";
+import Slider1 from "../../assets/images/slider1.png";
+import Slider2 from "../../assets/images/slider2.png";
+import Slider3 from "../../assets/images/slider1.png"
+import "../../assets/css/section.css";
 
 const ServicesCarousel = () => {
   const slides = [
