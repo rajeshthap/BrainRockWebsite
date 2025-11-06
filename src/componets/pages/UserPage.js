@@ -14,7 +14,6 @@ import { ImProfile } from "react-icons/im";
 
 import { MdReviews } from "react-icons/md";
 
-
 import PHPIcon from "../../assets/images/php.png";
 import MySqlIcon from "../../assets/images/mysql.png"
 import JavaIcon from "../../assets/images/java.png"
