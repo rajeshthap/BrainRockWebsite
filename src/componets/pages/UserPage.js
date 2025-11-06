@@ -1,31 +1,30 @@
 import React from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
-import "../../assets/css/Userpage.css"
+// import "../../assets/css/Userpage.css"
 import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
 
- // Component
-  
+// Component
+
 import Banner1 from "../../assets/images/banner-1.png";
 
-import "../../assets/css/Slider.css"
+// import "../../assets/css/Slider.css";
 
 import { ImProfile } from "react-icons/im";
 
 import { MdReviews } from "react-icons/md";
 
 import PHPIcon from "../../assets/images/php.png";
-import MySqlIcon from "../../assets/images/mysql.png"
-import JavaIcon from "../../assets/images/java.png"
+import MySqlIcon from "../../assets/images/mysql.png";
+import JavaIcon from "../../assets/images/java.png";
 import DoutNetIcon from "../../assets/images/doutNet.png";
 import PythonIcon from "../../assets/images/python.png";
 import RailsIcon from "../../assets/images/rails.png";
-import ReactIcon from "../../assets/images/reacticon.png"
-import MongoDBIcon from "../../assets/images/mongodb.png"
+import ReactIcon from "../../assets/images/reacticon.png";
+import MongoDBIcon from "../../assets/images/mongodb.png";
 
 import ServicesCarousel from "./ServicesCarousel";
 import TestimonialCarousel from "./TestimonialCarousel";
-
 
 function UserPage() {
   return (
@@ -192,8 +191,7 @@ function UserPage() {
           </Col>
         </Row>
       </Container>
-<ServicesCarousel />
-      
+      <ServicesCarousel />
 
       <Container>
         <div className="resorce-sub-list-design">
@@ -287,7 +285,7 @@ function UserPage() {
                 <Row>
                   <Col lg={2} md={2} sm={12}>
                     <div className="card-box-image">
-                      <MdReviews  className="design-icon" />
+                      <MdReviews className="design-icon" />
                     </div>
                   </Col>
                   <Col lg={10} md={10} sm={12} className="services-design-head">
@@ -329,95 +327,100 @@ function UserPage() {
           </h1>
         </div>
         <div>
-        <Row className="d-flex justify-content-center br-tech-stack">
-         
-          <Col lg={2} md={2} sm={6} className="mb-3">
-         
-            <div>
-              <img src={PHPIcon} alt="node-img" className="img-fluid mt-3"></img>
-            </div>
-          </Col>
+          <Row className="d-flex justify-content-center br-tech-stack">
+            <Col lg={2} md={2} sm={6} className="mb-3">
+              <div>
+                <img
+                  src={PHPIcon}
+                  alt="node-img"
+                  className="img-fluid mt-3"
+                ></img>
+              </div>
+            </Col>
 
             <Col lg={2} md={2} sm={6} className="mb-3">
-         
-            <div>
-              <img src={PHPIcon} alt="php-img"></img>
-            </div>
-          </Col>
-          <Col lg={2} md={2} sm={6} className="mb-3"> 
-         
-            <div>
-              <img src={MySqlIcon} alt="MySql-img"></img>
-            </div>
-          </Col>
-          <Col lg={2} md={2} sm={6} className="mb-3">
-         
-            <div>
-              <img src={JavaIcon} alt="Java-img"></img>
-            </div>
-          </Col>
-          <Col lg={2} md={2} sm={6} className="mb-3">
-         
-            <div>
-              <img src={DoutNetIcon} alt=".Net-img"></img>
-            </div>
-          </Col>
-          <Col lg={2} md={2} sm={6} className="mt-3">
-         
-            <div>
-              <img src={PythonIcon} alt="Python-img" className="img-fluid br-tech-img"></img>
-            </div>
-          </Col>
-        
-          <Col lg={3} md={3} sm={6} className="mt-3">
-         
-            <div>
-              <img src={RailsIcon} alt="Rails-img" className="img-fluid "></img>
-            </div>
-          </Col>
-          <Col lg={3} md={3} sm={6}>
-         
-            <div>
-              <img src={ReactIcon} alt="react-img"></img>
-            </div>
-          </Col>
-         
-          <Col lg={3} md={3} sm={6} className="mt-3">
-         
-            <div>
-              <img src={MongoDBIcon} alt="MongoDB-img"></img>
-            </div>
-          </Col>
-     
-        </Row>
+              <div>
+                <img src={PHPIcon} alt="php-img"></img>
+              </div>
+            </Col>
+            <Col lg={2} md={2} sm={6} className="mb-3">
+              <div>
+                <img src={MySqlIcon} alt="MySql-img"></img>
+              </div>
+            </Col>
+            <Col lg={2} md={2} sm={6} className="mb-3">
+              <div>
+                <img src={JavaIcon} alt="Java-img"></img>
+              </div>
+            </Col>
+            <Col lg={2} md={2} sm={6} className="mb-3">
+              <div>
+                <img src={DoutNetIcon} alt=".Net-img"></img>
+              </div>
+            </Col>
+            <Col lg={2} md={2} sm={6} className="mt-3">
+              <div>
+                <img
+                  src={PythonIcon}
+                  alt="Python-img"
+                  className="img-fluid br-tech-img"
+                ></img>
+              </div>
+            </Col>
+
+            <Col lg={3} md={3} sm={6} className="mt-3">
+              <div>
+                <img
+                  src={RailsIcon}
+                  alt="Rails-img"
+                  className="img-fluid "
+                ></img>
+              </div>
+            </Col>
+            <Col lg={3} md={3} sm={6}>
+              <div>
+                <img src={ReactIcon} alt="react-img"></img>
+              </div>
+            </Col>
+
+            <Col lg={3} md={3} sm={6} className="mt-3">
+              <div>
+                <img src={MongoDBIcon} alt="MongoDB-img"></img>
+              </div>
+            </Col>
+          </Row>
         </div>
       </Container>
-        <div className="testimonial-section resorce-sub-list-design py-5">
-       
-{/* <h1 className="text-center">
+      <div className="testimonial-section resorce-sub-list-design py-5">
+        {/* <h1 className="text-center">
             Why customers love <br></br>
             <span className="br-span-list mt-3">working with us</span>
           </h1> */}
-     <TestimonialCarousel />
-
-    
+        <TestimonialCarousel />
       </div>
 
-
-        <Container>
-      <div className="br-card-bg">
-        <Row>
-        
-          <Col lg={12} md={12} sm={12} className=""> <h3><span className="br-card-span-text">Hire the best developers and</span> <br></br><span>designers around!</span></h3></Col>
-                <Col lg={6} md={6} sm={12}> <Button variant="" className="hire-btn text-end">Hire Top Developers</Button></Col>
-        </Row>
-   
-
-      </div>
-    
-
-
-</Container>
+      <Container>
+        <div className="br-card-bg">
+          <Row>
+            <Col lg={12} md={12} sm={12} className="">
+              {" "}
+              <h3>
+                <span className="br-card-span-text">
+                  Hire the best developers and
+                </span>{" "}
+                <br></br>
+                <span>designers around!</span>
+              </h3>
+            </Col>
+            <Col lg={6} md={6} sm={12}>
+              {" "}
+              <Button variant="" className="hire-btn text-end">
+                Hire Top Developers
+              </Button>
+            </Col>
+          </Row>
+        </div>
+      </Container>
     </div>
   );
 }
