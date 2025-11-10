@@ -7,8 +7,7 @@ import {
   Badge,
   Dropdown,
   Image,
-  Card,
-  Table,
+ 
 } from "react-bootstrap";
 import {
   FaBars,
@@ -18,11 +17,10 @@ import {
   FaChartLine,
   FaUsers,
   FaCog,
-  FaFileAlt,
   FaSignOutAlt,
   FaSearch,
   FaShoppingCart,
-  FaPlus,
+
 } from "react-icons/fa";
 
 import SideNav from "../SideNav";

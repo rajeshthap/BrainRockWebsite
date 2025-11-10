@@ -1,19 +1,15 @@
-/* body {
-    margin: 0;
-    font-family: var(--bs-body-font-family);
-    font-size: var(--bs-body-font-size);
-    font-weight: var(--bs-body-font-weight);
-    line-height: var(--bs-body-line-height);
-    color: var(--bs-body-color);
-    text-align: var(--bs-body-text-align);
-    backgroubr-color: var(--bs-body-bg);
-    -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: transparent;
-    backgroubr-color: var(--br-blue-light-bg);
-  } */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+@font-face {
+  font-family: 'Poppins', sans-serif;
+}
+
 body {
-  font-family: 'Roboto', sans-serif;
-  font-family: "Roboto Slab", serif;
+
+
+  font-family: 'Poppins', sans-serif;
+
+
 }
 
 /* svg {
@@ -31,13 +27,13 @@ body {
 :root {
 
   --br-primary: #00AEFF;
-  
+
   --br-white: #ffffff;
   --br-blue-dark: #152036;
   --br-blue-dark: #1A202C;
   --br-bg-green: #278557;
-  --br-black:#000000;
-  --br-gray:#4A5568;
+  --br-black: #000000;
+  --br-gray: #4A5568;
 
 
   /* custom padding abr margin*/
@@ -67,18 +63,20 @@ body {
   --br-space-1200: 48px;
 }
 
-.main-mobile-header{
-  display: none ;
+.main-mobile-header {
+  display: none;
 }
 
 @media only screen and (max-width: 568px) {
   .br-login {
     margin: var(--br-space-200) var(--br-space-0) var(--br-space-0) var(--br-space-0) !important;
   }
+
   .main-mobile-header {
     display: block;
   }
-  .main-header{
+
+  .main-header {
     display: none;
   }
 }

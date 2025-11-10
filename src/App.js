@@ -1,6 +1,8 @@
 import './App.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import "@fontsource/poppins"; // default weight 400
+
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Routes, Route, useLocation } from "react-router-dom";
 import "../src/componets/custom/style.css"
