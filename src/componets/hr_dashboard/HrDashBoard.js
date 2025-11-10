@@ -63,18 +63,8 @@ const HrDashBoard = () => {
       change: "+3%",
       icon: <FaUsers />,
     },
-    {
-      title: "Present Today",
-      value: "218",
-      change: "+1.2%",
-      icon: <FaChartLine />,
-    },
-    {
-      title: "On Leave",
-      value: "12",
-      change: "-0.5%",
-      icon: <FaCalendarAlt />,
-    },
+    
+   
     {
       title: "Leave Calender",
       value: "5",
