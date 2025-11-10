@@ -62,7 +62,7 @@ const HrDashBoard = () => {
       title: "Employee Overview",
       value: "Total Employees:",
       number: " 250",
-      change: "Active:",
+      change: "Active",
       leavnumber: " 230",
       Leavechange: "On Leave:",
       onleave: "15",
@@ -75,7 +75,7 @@ const HrDashBoard = () => {
       title: " Attendance Summary",
       value: "Absent:",
       number: " 250",
-      change: "Present:",
+      change: "Present",
       leavnumber: " 230",
       icon: <FaTachometerAlt />,
     },
@@ -83,7 +83,7 @@ const HrDashBoard = () => {
       title: "Leave Requests",
       value: "Pending:",
       number: " 5",
-      change: "Approved:",
+      change: "Approved",
       leavnumber: " 1",
       resign: "Rejected:",
       resignumber: "5",
@@ -93,7 +93,7 @@ const HrDashBoard = () => {
       title: " Payroll Summary",
       value: "Current Month Processed:",
       number: " ₹24,00,000",
-      change: "Processed:",
+      change: "Processed",
 
       icon: <FaTachometerAlt />,
     },
@@ -279,12 +279,12 @@ const HrDashBoard = () => {
                         <div className="br-stat-info ">
                           <Button
                             className={`br-stat-btn ${stat.change?.toLowerCase().includes("active")
-                                ? "btn-primary"
-                                : stat.change?.toLowerCase().includes("approved")
-                                  ? "btn-success"
-                                  : stat.change?.toLowerCase().includes("absent")
-                                    ? "btn-danger btn-br-dgr"
-                                    : "btn-secondary"
+                              ? "btn-primary"
+                              : stat.change?.toLowerCase().includes("approved")
+                                ? "btn-success"
+                                : stat.change?.toLowerCase().includes("absent")
+                                  ? "btn-danger btn-br-dgr"
+                                  : "btn-secondary"
                               }`}
                           >
                             {stat.change}

@@ -1,27 +1,33 @@
-/* LeaveCalendar.css */
+/* LeaveCalendar.css - Responsive Version */
 .leave-calendar-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 15px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   background-color: #fff;
-  /* soft shadow */
   border-radius: 8px;
+}
+
+.leave-clender-heading {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
 .leave-clender-heading h1 {
   text-align: center;
   color: #333;
-  font-size: 16px !important;
-  padding-top: 10px;
+  font-size: 18px;
+  padding-top: 0;
   font-weight: 700;
+  flex: 1;
 }
 
 .calendar-container h2 {
   color: #444;
   margin-bottom: 15px;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 h3 {
@@ -52,19 +58,18 @@ h3 {
 .calendar-section {
   display: flex;
   justify-content: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .calendar-container {
   flex: 1;
   max-width: 600px;
   background: #fff;
-  padding: 20px;
+  padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: visible;
-  /* Important for tooltip visibility */
 }
 
 .selected-dates {
@@ -72,6 +77,7 @@ h3 {
   padding: 10px;
   background-color: #f8f9fa;
   border-radius: 4px;
+  font-size: 14px;
 }
 
 .react-calendar {
@@ -100,7 +106,6 @@ h3 {
   position: relative;
   display: inline-block;
   z-index: 10;
-  /* Ensure proper stacking context */
 }
 
 .tooltip-trigger {
@@ -133,8 +138,8 @@ h3 {
 
 .tooltip {
   position: absolute;
-
-
+  top: 50px;
+  left: 50%;
   transform: translateX(-50%);
   background: white;
   border: 1px solid #ddd;
@@ -163,12 +168,12 @@ h3 {
 .tooltip::after {
   content: "";
   position: absolute;
-  top: 100%;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
   border-width: 8px;
   border-style: solid;
-  border-color: white transparent transparent transparent;
+  border-color: transparent transparent white transparent;
   filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
 }
 
@@ -219,13 +224,14 @@ textarea {
 
 textarea {
   resize: vertical;
+  min-height: 80px;
 }
 
 .submit-btn {
   background-color: #007bff;
   color: white;
   border: none;
-  padding: 10px 15px;
+  padding: 12px 15px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
@@ -244,9 +250,14 @@ textarea {
 
 .previous-requests {
   background: #fff;
-  padding: 20px;
+  padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.previous-requests h2 {
+  font-size: 16px;
+  margin-bottom: 15px;
 }
 
 .requests-list {
@@ -258,19 +269,20 @@ textarea {
 .request-item {
   border: 1px solid #e9ecef;
   border-radius: 6px;
-  padding: 15px;
+  padding: 12px;
 }
 
 .request-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .status {
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -292,24 +304,27 @@ textarea {
 .leave-type {
   text-transform: capitalize;
   font-weight: 500;
+  font-size: 14px;
 }
 
 .request-dates {
   margin-bottom: 8px;
+  font-size: 14px;
 }
 
 .date-count {
   color: #6c757d;
-  font-size: 14px;
-  margin-left: 8px;
+  font-size: 12px;
+  margin-left: 5px;
 }
 
 .request-reason {
   margin-bottom: 8px;
+  font-size: 14px;
 }
 
 .request-submitted {
-  font-size: 14px;
+  font-size: 12px;
   color: #6c757d;
 }
 
@@ -317,4 +332,330 @@ textarea {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .leave-calendar-container {
+    padding: 10px;
+  }
+
+  .leave-clender-heading h1 {
+    font-size: 16px;
+  }
+
+  .calendar-container {
+    padding: 10px;
+  }
+
+  .calendar-container h2 {
+    font-size: 14px;
+  }
+
+  .selected-dates {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .tooltip {
+    width: 280px;
+    padding: 15px;
+  }
+
+  .tooltip-header h3 {
+    font-size: 16px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  select,
+  textarea {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .submit-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .previous-requests {
+    padding: 10px;
+  }
+
+  .previous-requests h2 {
+    font-size: 14px;
+  }
+
+  .request-item {
+    padding: 10px;
+  }
+
+  .status,
+  .leave-type {
+    font-size: 11px;
+  }
+
+  .request-dates,
+  .request-reason {
+    font-size: 13px;
+  }
+
+  .request-submitted {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leave-calendar-container {
+    padding: 8px;
+  }
+
+  .leave-clender-heading h1 {
+    font-size: 14px;
+  }
+
+  .calendar-container {
+    padding: 8px;
+  }
+
+  .calendar-container h2 {
+    font-size: 13px;
+  }
+
+  .selected-dates {
+    font-size: 11px;
+    padding: 6px;
+  }
+
+  .tooltip {
+    width: 250px;
+    padding: 12px;
+    left: 0;
+    transform: none;
+  }
+
+  .tooltip::after {
+    left: 20px;
+    transform: none;
+  }
+
+  .tooltip-header h3 {
+    font-size: 15px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  select,
+  textarea {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .submit-btn {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .previous-requests {
+    padding: 8px;
+  }
+
+  .previous-requests h2 {
+    font-size: 13px;
+  }
+
+  .request-item {
+    padding: 8px;
+  }
+
+  .status,
+  .leave-type {
+    font-size: 10px;
+  }
+
+  .request-dates,
+  .request-reason {
+    font-size: 12px;
+  }
+
+  .request-submitted {
+    font-size: 10px;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .leave-calendar-container {
+    padding: 12px;
+  }
+
+  .calendar-container {
+    max-width: 500px;
+  }
+
+  .tooltip {
+    width: 280px;
+  }
+}
+
+/* Tooltip styles - Responsive version */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  z-index: 10;
+}
+
+.tooltip-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.tooltip-trigger:hover {
+  background-color: #f0f0f0;
+}
+
+.dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #555;
+  margin: 2px 0;
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  left: 50px;
+  /* Position to the right of the trigger button */
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  width: 300px;
+  max-width: 90vw;
+  /* Prevent overflow on small screens */
+  z-index: 100;
+  padding: 20px;
+  margin-bottom: 10px;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  /* Align with the trigger button's vertical center */
+  left: -8px;
+  /* Position arrow on the left side of tooltip */
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent white transparent transparent;
+  filter: drop-shadow(-2px 0 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Desktop tooltip positioning */
+@media (min-width: 481px) {
+  .tooltip {
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .tooltip::after {
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-color: transparent transparent white transparent;
+    filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
+  }
+}
+
+/* Mobile tooltip adjustments */
+@media (max-width: 480px) {
+  .tooltip {
+    width: 250px;
+    max-width: 85vw;
+    /* More conservative max-width for very small screens */
+    padding: 12px;
+    top: 0;
+    left: 50px;
+    /* Position to the right of the trigger button */
+    transform: none;
+    /* Remove centering transform */
+  }
+
+  .tooltip::after {
+    top: 20px;
+    /* Align with the trigger button's vertical center */
+    left: -8px;
+    /* Position arrow on the left side of tooltip */
+    border-color: transparent white transparent transparent;
+    filter: drop-shadow(-2px 0 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .tooltip-header h3 {
+    font-size: 15px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  select,
+  textarea {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .submit-btn {
+    padding: 8px;
+    font-size: 12px;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .tooltip {
+    max-height: 70vh;
+    /* Limit height in landscape */
+    overflow-y: auto;
+    /* Add scroll if content is too long */
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tooltip {
+    width: 280px;
+    padding: 15px;
+  }
 }
