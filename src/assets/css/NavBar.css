@@ -11,20 +11,20 @@
 }
 
 .nav-sub-list {
-    font-size: var(--awc-space-300) !important;
+    font-size: var(--br-space-300) !important;
     background-color: #F6B325;
     border-top-right-radius: 24px;
     border-bottom-right-radius: 24px;
     border-bottom-left-radius: 24px;
-    color: var(--awc-white) !important;
-    padding-left: var(--awc-space-200);
+    color: var(--br-white) !important;
+    padding-left: var(--br-space-200);
     box-shadow: 1px 1px 5px rgba(161, 182, 253, 0.825);
     max-width: 178px;
 }
 
 .awc-title {
     line-height: var(--awc-space-400);
-    color: var(--awc-black) !important;
+    color: var(--br-black) !important;
     margin-top: 18px;
 }
 
@@ -34,10 +34,10 @@ img.logo1 {
 
 
 .awc-subtitle {
-    color: var(--awc-blue-dark-bg) !important;
-    font-size: var(--awc-space-450) !important;
+    color: var(--br-blue-dark-bg) !important;
+    font-size: var(--br-space-450) !important;
     display: flex;
-    margin-left: var(--awc-space-300);
+    margin-left: var(--br-space-300);
 
 }
 
@@ -46,15 +46,15 @@ img.logo-wecd {
 }
 
 .subtitle {
-    color: var(--awc-Primary) !important;
-    font-size: var(--awc-space-350) !important;
-    line-height: var(--awc-space-600) !important;
+    color: var(--br-Primary) !important;
+    font-size: var(--br-space-350) !important;
+    line-height: var(--br-space-600) !important;
 }
 
 .nav-link {
-    color: var(--awc-black);
-    font-weight: var(--awc-space-800) !important;
-    font-size: var(--awc-space-400);
+    color: var(--br-black);
+    font-weight: var(--br-space-800) !important;
+    font-size: var(--br-space-400);
 }
 
 .nav-link:hover {
@@ -63,8 +63,8 @@ img.logo-wecd {
 
 .awc-title p {
     font-size: var(--awc-space-300);
-    color: var(--awc-Primary);
-    margin-top: var(--awc-space-100);
+    color: var(--br-Primary);
+    margin-top: var(--br-space-100);
     margin-left: 12px;
 }
 
@@ -74,7 +74,7 @@ img.logo-wecd {
 @media (max-width: 576px) {
 
     .awc-title p {
-        font-size: var(--awc-space-200);
+        font-size: var(--br-space-200);
     }
 
     .awc-title p {
@@ -87,26 +87,26 @@ img.logo-wecd {
 
     .logo {
         display: flex;
-        margin-right: var(--awc-space-0) !important;
+        margin-right: var(--br-space-0) !important;
     }
 
     .awc-title {
 
-        font-size: var(--awc-space-200) !important;
+        font-size: var(--br-space-200) !important;
     }
 
     .awc-subtitle {
 
         display: flex;
-        font-size: var(--awc-space-300) !important;
+        font-size: var(--br-space-300) !important;
     }
 
     .subtitle {
-        font-size: var(--awc-space-250) !important;
+        font-size: var(--br-space-250) !important;
     }
 
     .awc-mob-responsive {
-        padding: var(--awc-space-150)var(--awc-space-150) var(--awc-space-150) var(--awc-space-150) !important;
+        padding: var(--br-space-150)var(--br-space-150) var(--br-space-150) var(--br-space-150) !important;
     }
 
 }

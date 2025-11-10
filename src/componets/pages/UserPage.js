@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
-import "../../assets/css/Userpage.css"
+import "../../assets/css/UserPage.css"
 import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
 
@@ -8,7 +8,7 @@ import Carousel from "react-bootstrap/Carousel";
 
 import Banner1 from "../../assets/images/banner-1.png";
 
-import "../../assets/css/Slider.css"
+import "../../assets/css/slider.css"
 
 import { ImProfile } from "react-icons/im";
 

@@ -2,13 +2,13 @@ import './App.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import "../src/componets/custom/style.css"
 import Home from './componets/pages/Home';
 import Footer from './componets/footer/Footer';
 import NavBar from './componets/topnav/NavBar';
-import EmpDashBoard from './componets/emp_dashboard/EmpDashBoard';
+import HrDashBoard from './componets/hr_dashboard/HrDashBoard';
+import EmployeeManagement from './componets/hr_dashboard/hr_iinerpage/EmployeeManagement';
 
 
 
@@ -18,7 +18,8 @@ function App() {
 
   // Paths where NavBar should be hidden
   const hiddenPaths = new Set([
-    "/EmpDashBoard",
+    "/HrDashBoard",
+    "/EmployeeManagement",
   ]);
 
   // Paths where Footer should be hidden
@@ -34,7 +35,8 @@ function App() {
     
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/EmpDashBoard" element={<EmpDashBoard/>} />
+            <Route path="/HrDashBoard" element={<HrDashBoard/>} />
+            <Route path="/EmployeeManagement" element={<EmployeeManagement/>} />
             
           </Routes>
       {!shouldHideFooter1 && <Footer />}

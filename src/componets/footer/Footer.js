@@ -4,13 +4,13 @@ import BrLogo from "../../assets/images/brainrock_logo.png"
 import Logogoogleimg from "../../assets/images/google-img.png"
 import { Link } from 'react-router-dom';
 import "../../assets/css/Footer.css";
-import { FaFacebook, FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/fa';
+import { FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/fa';
 import { TiSocialFacebook } from 'react-icons/ti';
 function Footer() {
   return (
     <>
     <Container>
-<Row className='br-footer-box p-4'>
+{/* <Row className='br-footer-box p-4'>
   <Col lg={3} md={3} sm={12} className='br-footer-details'>
   <div>
     <img src={BrLogo} alt="br-logo" className='img-fluid google-img'></img>
@@ -57,7 +57,7 @@ function Footer() {
    </Col>
 
    
-</Row>
+</Row> */}
       <div >
 
         <Col className='awc-footer-main '>

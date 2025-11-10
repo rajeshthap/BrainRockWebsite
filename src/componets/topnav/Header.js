@@ -33,7 +33,7 @@ function Header() {
             </li>
 
             <li className="header-item">
-             <Link to="/EmpDashBoard">  <PiSignInBold className="br-header-icon" />
+             <Link to="/HrDashBoard">  <PiSignInBold className="br-header-icon" />
             Login</Link> 
             </li>
             <ImFacebook className="br-m-left br-header-icon" />
