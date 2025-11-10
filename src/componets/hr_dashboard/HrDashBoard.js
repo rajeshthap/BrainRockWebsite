@@ -97,8 +97,8 @@ const HrDashBoard = () => {
 
       icon: <FaTachometerAlt />,
     },
-   
-    
+
+
   ];
 
   // Responsive check
@@ -185,9 +185,8 @@ const HrDashBoard = () => {
                       {notifications.map((notif) => (
                         <Dropdown.Item
                           key={notif.id}
-                          className={`notification-item ${
-                            !notif.read ? "unread" : ""
-                          }`}
+                          className={`notification-item ${!notif.read ? "unread" : ""
+                            }`}
                           onClick={() => markAsRead(notif.id)}
                         >
                           <div className="notification-content">
@@ -250,7 +249,7 @@ const HrDashBoard = () => {
                     <Card.Body>
                       <div className="stat-content">
                         <div className="stat-icon">{stat.icon}</div>
-                        
+
                         <div className="stat-info">
                           <h6 className="stat-title">{stat.title}</h6>
                           <h3 className="stat-value">
@@ -277,33 +276,32 @@ const HrDashBoard = () => {
                             </span>
                           </h3>
                         </div>
-                    <div className="br-stat-info mt-3">
-  <Button
-    className={`br-stat-btn ${
-      stat.change?.toLowerCase().includes("active")
-        ? "btn-primary" 
-        : stat.change?.toLowerCase().includes("approved")
-        ? "btn-success" 
-        : stat.change?.toLowerCase().includes("absent")
-        ? "btn-danger btn-br-dgr" 
-        : "btn-secondary" 
-    }`}
-  >
-    {stat.change}
-  </Button>
-</div>
+                        <div className="br-stat-info mt-3">
+                          <Button
+                            className={`br-stat-btn ${stat.change?.toLowerCase().includes("active")
+                                ? "btn-primary"
+                                : stat.change?.toLowerCase().includes("approved")
+                                  ? "btn-success"
+                                  : stat.change?.toLowerCase().includes("absent")
+                                    ? "btn-danger btn-br-dgr"
+                                    : "btn-secondary"
+                              }`}
+                          >
+                            {stat.change}
+                          </Button>
+                        </div>
 
 
 
-                      
+
                       </div>
-                      
+
                     </Card.Body>
                   </Card>
                 </Col>
               ))}
             </Col>
-            <Col lg={6} md={6} sm={12} className="mb-3">
+            <Col lg={5} md={5} sm={12} className="mb-3">
               Feed
               <Card className="stat-card">
                 <Card.Body>
@@ -317,12 +315,12 @@ const HrDashBoard = () => {
                 </Card.Body>
               </Card>
             </Col>
-            <Col lg={3} md={3} sm={12} className="mb-3">
-          <LeaveCalendar />
+            <Col lg={4} md={4} sm={12} className="mb-3">
+              <LeaveCalendar />
             </Col>
           </Row>
           {/* Stats Cards */}
-        
+
 
           <Row>
             {/* Pie Chart */}

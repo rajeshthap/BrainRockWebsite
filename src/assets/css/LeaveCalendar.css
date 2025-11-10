@@ -4,14 +4,18 @@
   margin: 0 auto;
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* soft shadow */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  /* soft shadow */
+  border-radius: 8px;
 }
 
 .leave-clender-heading h1 {
   text-align: center;
   color: #333;
-  margin-bottom: 30px;
-  font-size: 12px !important;
+  font-size: 16px !important;
+  padding-top: 10px;
+  font-weight: 700;
 }
 
 .calendar-container h2 {
@@ -59,7 +63,8 @@ h3 {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   position: relative;
-  overflow: visible; /* Important for tooltip visibility */
+  overflow: visible;
+  /* Important for tooltip visibility */
 }
 
 .selected-dates {
@@ -94,7 +99,8 @@ h3 {
 .tooltip-container {
   position: relative;
   display: inline-block;
-  z-index: 10; /* Ensure proper stacking context */
+  z-index: 10;
+  /* Ensure proper stacking context */
 }
 
 .tooltip-trigger {
@@ -128,7 +134,7 @@ h3 {
 .tooltip {
   position: absolute;
 
- 
+
   transform: translateX(-50%);
   background: white;
   border: 1px solid #ddd;
@@ -143,8 +149,15 @@ h3 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .tooltip::after {
@@ -195,7 +208,8 @@ label {
   font-size: 14px;
 }
 
-select, textarea {
+select,
+textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
@@ -297,4 +311,10 @@ textarea {
 .request-submitted {
   font-size: 14px;
   color: #6c757d;
+}
+
+.dot-popup {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
 }

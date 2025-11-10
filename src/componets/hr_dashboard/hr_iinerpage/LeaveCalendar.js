@@ -1,20 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
+import React, { useState, useRef, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import "../../../assets/css/LeaveCalendar.css";
-import { Card } from "react-bootstrap";
 
 function LeaveCalendar() {
   const [selectedDates, setSelectedDates] = useState([]);
-  const [leaveType, setLeaveType] = useState("annual");
-  const [reason, setReason] = useState("");
+  const [leaveType, setLeaveType] = useState('annual');
+  const [reason, setReason] = useState('');
   const [submittedRequests, setSubmittedRequests] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [notification, setNotification] = useState({
-    show: false,
-    message: "",
-    type: "",
-  });
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipRef = useRef(null);
 
@@ -28,7 +23,7 @@ function LeaveCalendar() {
     e.preventDefault();
 
     if (selectedDates.length === 0) {
-      showNotification("Please select at least one date", "error");
+      showNotification('Please select at least one date', 'error');
       return;
     }
 
@@ -41,16 +36,16 @@ function LeaveCalendar() {
         dates: [...selectedDates],
         type: leaveType,
         reason,
-        status: "pending",
-        submittedAt: new Date(),
+        status: 'pending',
+        submittedAt: new Date()
       };
 
       setSubmittedRequests([...submittedRequests, newRequest]);
       setSelectedDates([]);
-      setReason("");
+      setReason('');
       setIsSubmitting(false);
       setShowTooltip(false);
-      showNotification("Leave request submitted successfully!", "success");
+      showNotification('Leave request submitted successfully!', 'success');
     }, 1000);
   };
 
@@ -58,7 +53,7 @@ function LeaveCalendar() {
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
     setTimeout(() => {
-      setNotification({ show: false, message: "", type: "" });
+      setNotification({ show: false, message: '', type: '' });
     }, 3000);
   };
 
@@ -70,37 +65,38 @@ function LeaveCalendar() {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
   // Format date range for display
   const formatDateRange = (dates) => {
-    if (dates.length === 0) return "No dates selected";
+    if (dates.length === 0) return 'No dates selected';
 
     const sortedDates = [...dates].sort((a, b) => a - b);
     const startDate = sortedDates[0].toLocaleDateString();
     const endDate = sortedDates[sortedDates.length - 1].toLocaleDateString();
 
-    return startDate === endDate ? startDate : `${startDate} - ${endDate}`;
+    return startDate === endDate
+      ? startDate
+      : `${startDate} - ${endDate}`;
   };
 
   // Format date for display in requests list
   const formatDate = (date) => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
   return (
     <div className="leave-calendar-container">
-      <div className="d-flex justify-content-between leave-clender-heading">
-        <h1>Leave Request Calendar</h1>
+      <div className='dot-popup leave-clender-heading'>
         <div className="tooltip-container" ref={tooltipRef}>
           <button
             className="tooltip-trigger"
@@ -124,7 +120,7 @@ function LeaveCalendar() {
                   ×
                 </button>
               </div>
-              <div>
+
               <form onSubmit={handleSubmitRequest}>
                 <div className="form-group">
                   <label htmlFor="leaveType">Leave Type</label>
@@ -157,14 +153,12 @@ function LeaveCalendar() {
                   className="submit-btn"
                   disabled={isSubmitting || selectedDates.length === 0}
                 >
-                  {isSubmitting ? "Submitting..." : "Submit Request"}
+                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
                 </button>
               </form>
-              </div>
-            
             </div>
           )}
-        </div>
+        </div> <h1>Leave Request Calendar</h1>
       </div>
 
       {notification.show && (
@@ -182,19 +176,16 @@ function LeaveCalendar() {
             selectRange={true}
             minDate={new Date()}
             tileClassName={({ date, view }) =>
-              view === "month" &&
-              selectedDates.some(
-                (d) => d.toDateString() === date.toDateString()
-              )
-                ? "selected-date"
-                : null
+              view === 'month' && selectedDates.some(d =>
+                d.toDateString() === date.toDateString()
+              ) ? 'selected-date' : null
             }
           />
           <div className="selected-dates">
             <strong>Selected Dates:</strong> {formatDateRange(selectedDates)}
           </div>
 
-       
+
         </div>
       </div>
 
@@ -204,12 +195,10 @@ function LeaveCalendar() {
           <p>No leave requests submitted yet.</p>
         ) : (
           <div className="requests-list">
-            {submittedRequests.map((request) => (
+            {submittedRequests.map(request => (
               <div key={request.id} className="request-item">
                 <div className="request-header">
-                  <span className={`status ${request.status}`}>
-                    {request.status}
-                  </span>
+                  <span className={`status ${request.status}`}>{request.status}</span>
                   <span className="leave-type">{request.type}</span>
                 </div>
                 <div className="request-dates">
@@ -217,13 +206,11 @@ function LeaveCalendar() {
                     <span>{formatDate(request.dates[0])}</span>
                   ) : (
                     <span>
-                      {formatDate(request.dates[0])} -{" "}
-                      {formatDate(request.dates[request.dates.length - 1])}
+                      {formatDate(request.dates[0])} - {formatDate(request.dates[request.dates.length - 1])}
                     </span>
                   )}
                   <span className="date-count">
-                    ({request.dates.length} day
-                    {request.dates.length > 1 ? "s" : ""})
+                    ({request.dates.length} day{request.dates.length > 1 ? 's' : ''})
                   </span>
                 </div>
                 {request.reason && (
