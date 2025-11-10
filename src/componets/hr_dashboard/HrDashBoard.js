@@ -276,7 +276,7 @@ const HrDashBoard = () => {
                             </span>
                           </h3>
                         </div>
-                        <div className="br-stat-info mt-3">
+                        <div className="br-stat-info ">
                           <Button
                             className={`br-stat-btn ${stat.change?.toLowerCase().includes("active")
                                 ? "btn-primary"
