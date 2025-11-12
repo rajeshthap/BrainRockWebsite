@@ -321,6 +321,7 @@
 /* Stat Cards */
 .birthday-card{
     padding: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 .birthday-icon{
     font-size: 24px !important;
