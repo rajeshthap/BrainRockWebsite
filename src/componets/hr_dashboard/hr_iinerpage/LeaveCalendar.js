@@ -95,7 +95,7 @@ function LeaveCalendar() {
   };
 
   return (
-    <div className="leave-calendar-container">
+    <div className="leave-calendar-container mt-3">
       <div className='dot-popup leave-clender-heading'>
         <div className="tooltip-container" ref={tooltipRef}>
           <button
