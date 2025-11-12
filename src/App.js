@@ -11,6 +11,7 @@ import Footer from './componets/footer/Footer';
 import NavBar from './componets/topnav/NavBar';
 import HrDashBoard from './componets/hr_dashboard/HrDashBoard';
 import EmployeeManagement from './componets/hr_dashboard/hr_iinerpage/EmployeeManagement';
+import EmployeeRegistration from './componets/hr_dashboard/emp_regis/EmployeeRegistration';
 
 
 
@@ -22,6 +23,7 @@ function App() {
   const hiddenPaths = new Set([
     "/HrDashBoard",
     "/EmployeeManagement",
+    "/EmployeeRegistration"
   ]);
 
   // Paths where Footer should be hidden
@@ -39,6 +41,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/HrDashBoard" element={<HrDashBoard/>} />
             <Route path="/EmployeeManagement" element={<EmployeeManagement/>} />
+            <Route path="/EmployeeRegistration" element={<EmployeeRegistration/>} />
             
           </Routes>
       {!shouldHideFooter1 && <Footer />}
