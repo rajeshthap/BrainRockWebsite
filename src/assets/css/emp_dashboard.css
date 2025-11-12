@@ -270,7 +270,7 @@
 }
 
 .notification-content p {
-    margin: 0;
+    margin: var(--br-space-0);
     font-size: 0.9rem;
 }
 
@@ -299,8 +299,47 @@
     color: #2c3e50;
     margin-bottom: 0.5rem;
 }
+.br-post-top-btn{
+    font-size: 10px;
+    padding: 4px;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+   background-color: #f8f9fa;
+}
+.br-post-top-btn{
+      font-weight: 100;
+    border-radius: 4px;
+    background-color: #00553c;
+    padding: 9px;
+    color: #fff;
+}
 
+.br-post-top-icon{
+    margin-right: 12px;
+    font-size: 16px;
+}
 /* Stat Cards */
+.birthday-card{
+    padding: 8px;
+}
+.birthday-icon{
+    font-size: 24px !important;
+    color: #e65f46;
+    background-color: #fadfda;
+    border-radius: 50%;
+}
+.birthday-text{
+    font-size: 12px;
+}
+.birthday-title{
+        font-size: 16px;
+    font-weight: 600;
+}
+.br-birthday{
+ 
+    font-size: 12px;
+    font-weight: 600;
+}
 .stat-card {
     border: none;
     border-radius: 15px;
@@ -597,7 +636,7 @@
 
 /* Mobile Sidebar */
 .mobile-sidebar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #00553c;
 }
 
 .mobile-sidebar .nav-item {

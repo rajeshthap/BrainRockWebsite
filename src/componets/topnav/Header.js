@@ -63,8 +63,8 @@ function Header() {
               Register
             </li>
             <li className="header-item">
-              <PiSignInBold className="br-header-icon" />
-              Signin
+              <Link to ="/HrDashBoard"><PiSignInBold className="br-header-icon" />
+              Signin</Link>
             </li>
             <ImFacebook className="br-m-left br-header-icon" />
             <FaInstagram className="br-header-icon" />

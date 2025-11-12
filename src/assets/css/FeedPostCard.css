@@ -1,0 +1,158 @@
+.post-container {
+  max-width: 600px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+ 
+.post-card {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+ .br-post-img{
+   
+  padding: var(--br-space-250);
+ }
+.author-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #6c63ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+ 
+.author-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+ 
+.author-info {
+  font-size: 0.9rem;
+}
+ 
+.post-time {
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+ 
+.post-content {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+ 
+.illustration-container {
+  margin: 1.5rem 0;
+}
+ 
+.illustration {
+  width: 200px;
+  height: 200px;
+  position: relative;
+}
+ 
+.character {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+ 
+.head {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-color: #9c88ff;
+  border-radius: 50%;
+}
+ 
+.body {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  background-color: #4cd137;
+  border-radius: 10px;
+}
+ 
+.laptop {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 40px;
+  background-color: #7f8fa6;
+  border-radius: 5px;
+}
+ 
+.laptop::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background-color: #576574;
+  border-radius: 0 0 5px 5px;
+}
+ 
+.quote-container {
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c63ff;
+}
+ 
+.quote-text {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+ 
+.quote-author {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 12px;
+}
+ 
+.engagement-metrics {
+  display: flex;
+  gap: 0.5rem;
+}
+ 
+.action-button {
+  flex: 1;
+  border-radius: 20px;
+  font-weight: 500;
+}
+ 
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .post-container {
+    margin: 1rem;
+  }
+  .illustration {
+    width: 150px;
+    height: 150px;
+  }
+  .head {
+    width: 45px;
+    height: 45px;
+    top: 15px;
+  }
+  .body {
+    width: 60px;
+    height: 60px;
+    top: 55px;
+  }
+  .laptop {
+    width: 55px;
+    height: 30px;
+    top: 95px;
+  }
+}

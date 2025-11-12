@@ -19,6 +19,7 @@ import { IoDocumentsOutline } from "react-icons/io5";
 import { IoIosNotifications } from "react-icons/io";
 import { AiOutlineFile } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
+import BRLogo from "../../assets/images/brainrock_logo.png";
 import { FaUsersViewfinder } from "react-icons/fa6";
 
 const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
@@ -27,6 +28,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
   const toggleSubmenu = (index) => {
     setOpenSubmenu(openSubmenu === index ? null : index);
   };
+  
   const menuItems = [
     {
       icon: <FaTachometerAlt />,
@@ -537,6 +539,12 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     },
   ];
 
+  
+  
+
+  // 🔹 Auto-close sidebar when switching to mobile or tablet
+  
+
   return (
     <>
       {/* Desktop Sidebar */}
@@ -546,8 +554,8 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
         <div className="sidebar-header">
           <div className="logo-container">
             <div className="logo">
-              <span className="logo-icon">D</span>
-              <span className="logo-text">Dashboard</span>
+             
+              <span className="logo-text"><img src={BRLogo} alt="text"></img></span>
             </div>
           </div>
         </div>
@@ -623,67 +631,67 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
       </div>
 
       {/*  Mobile / Tablet Sidebar (Offcanvas) */}
-      <Offcanvas
-        show={(isMobile || isTablet) && sidebarOpen}
-        onHide={() => setSidebarOpen(false)}
-        className="mobile-sidebar"
-      >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Menu</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body className="br-offcanvas">
-          <Nav className="flex-column">
-            {menuItems.map((item, index) => (
-              <div key={index}>
-                {item.submenu ? (
-                  <Nav.Link
-                    className={`nav-item ${item.active ? "active" : ""}`}
-                    onClick={() => toggleSubmenu(index)}
-                  >
-                    <span className="nav-icon">{item.icon}</span>
-                    <span className="nav-text br-nav-text-mob">{item.label}</span>
-                    <span className="submenu-arrow">
-                      {openSubmenu === index ? (
-                        <FaChevronDown />
-                      ) : (
-                        <FaChevronRight />
-                      )}
-                    </span>
-                  </Nav.Link>
-                ) : (
+  <Offcanvas
+  show={(isMobile || isTablet) && sidebarOpen}
+  onHide={() => setSidebarOpen(false)}
+  className="mobile-sidebar"
+  placement="start"
+  backdrop={true}
+  scroll={false}
+  enforceFocus={false} //  ADD THIS LINE — fixes close button focus issue
+>
+  <Offcanvas.Header closeButton className="br-offcanvas-header">
+    <Offcanvas.Title className="br-off-title">Menu</Offcanvas.Title>
+  </Offcanvas.Header>
+
+  <Offcanvas.Body className="br-offcanvas">
+    <Nav className="flex-column">
+      {menuItems.map((item, index) => (
+        <div key={index}>
+          {item.submenu ? (
+            <Nav.Link
+              className={`nav-item ${item.active ? "active" : ""}`}
+              onClick={() => toggleSubmenu(index)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-text br-nav-text-mob">{item.label}</span>
+              <span className="submenu-arrow">
+                {openSubmenu === index ? <FaChevronDown /> : <FaChevronRight />}
+              </span>
+            </Nav.Link>
+          ) : (
+            <Link
+              to={item.path}
+              className={`nav-item nav-link ${item.active ? "active" : ""}`}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-text br-nav-text-mob">{item.label}</span>
+            </Link>
+          )}
+
+          {item.submenu && (
+            <Collapse in={openSubmenu === index}>
+              <div className="submenu-container">
+                {item.submenu.map((subItem, subIndex) => (
                   <Link
-                    to={item.path}
-                    className={`nav-item nav-link ${
-                      item.active ? "active" : ""
-                    }`}
+                    key={subIndex}
+                    to={subItem.path}
+                    className="submenu-item nav-link"
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <span className="nav-icon">{item.icon}</span>
-                    <span className="nav-text br-nav-text-mob">{item.label}</span>
+                    <span className="nav-text">{subItem.label}</span>
                   </Link>
-                )}
-
-                {item.submenu && (
-                  <Collapse in={openSubmenu === index}>
-                    <div className="submenu-container">
-                      {item.submenu.map((subItem, subIndex) => (
-                        <Link
-                          key={subIndex}
-                          to={subItem.path}
-                          className="submenu-item nav-link"
-                          onClick={() => setSidebarOpen(false)}
-                        >
-                          <span className="nav-text">{subItem.label}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </Collapse>
-                )}
+                ))}
               </div>
-            ))}
-          </Nav>
-        </Offcanvas.Body>
-      </Offcanvas>
+            </Collapse>
+          )}
+        </div>
+      ))}
+    </Nav>
+  </Offcanvas.Body>
+</Offcanvas>
+
     </>
   );
 };
