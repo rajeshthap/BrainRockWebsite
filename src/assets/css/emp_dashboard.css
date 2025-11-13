@@ -479,7 +479,9 @@
     overflow-x: auto;
 }
 
-
+.btn-emp{
+    font-size: 12px;
+}
 
 /* Responsive Design */
 /* Mobile Styles */

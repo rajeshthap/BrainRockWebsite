@@ -30,12 +30,13 @@ import LeaveCalendar from "./hr_iinerpage/LeaveCalendar";
 import FeedBackPost from "./FeedBackPost";
 import { CiEdit } from "react-icons/ci";
 import { IoClose } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
 const HrDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -236,25 +237,47 @@ const HrDashBoard = () => {
 
         {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
-         <Row className="align-items-center mb-4">
-  <Col lg={6} md={12} sm={12}>
-    <h1 className="page-title">HR Dashboard</h1>
-  </Col>
+          <Row className="align-items-center mb-4">
+            <Col lg={6} md={12} sm={12}>
+              <h1 className="page-title">HR Dashboard</h1>
+              <Col lg={4} md={12} sm={12}>
+                <div className="quick-actions">
+                  <Button
+                    variant="primary"
+                    className="w-100 btn-emp mb-2"
+                    onClick={() => navigate("/EmployeeRegistration")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <FaPlus className="me-2" /> Add Employee
+                  </Button>
+                </div>
+              </Col>
+            </Col>
 
- <Col lg={6} md={12} sm={12} className="d-flex gap-2 br-post-top-btn align-items-center">
-
-
-  <span><CiEdit className="br-post-top-icon" />Post</span>
-  <span className="border-start ps-2"><CiEdit className="br-post-top-icon" />Badge</span>
-  <span className="border-start ps-2"><CiEdit className="br-post-top-icon" />Reward Point</span>
-  <span className="border-start ps-2"><CiEdit className="br-post-top-icon" />Endorse</span>
-
-    
- 
-</Col>
-
-  
-</Row>
+            <Col
+              lg={6}
+              md={12}
+              sm={12}
+              className="d-flex gap-2 br-post-top-btn align-items-center"
+            >
+              <span>
+                <CiEdit className="br-post-top-icon" />
+                Post
+              </span>
+              <span className="border-start ps-2">
+                <CiEdit className="br-post-top-icon" />
+                Badge
+              </span>
+              <span className="border-start ps-2">
+                <CiEdit className="br-post-top-icon" />
+                Reward Point
+              </span>
+              <span className="border-start ps-2">
+                <CiEdit className="br-post-top-icon" />
+                Endorse
+              </span>
+            </Col>
+          </Row>
 
           <Row>
             <Col lg={3} md={12} sm={12} xm={12} className="mb-3">
@@ -330,21 +353,20 @@ const HrDashBoard = () => {
               <FeedBackPost />
             </Col>
             <Col lg={4} md={12} sm={12} className="mb-3">
-            <Card className="birthday-card d-flex  justify-content-between">
-      <div className="birthday-left d-flex align-items-center gap-3">
-        <FaGift className="birthday-icon" />
-        <div className="birthday-text">
-          
-          <h6 className="birthday-title">Happy Birthday!</h6>
-          
-          <p className="birthday-subtext mb-0">
-            <FaUsers className="me-1 br-birthday" /> 15 people wished you
-          </p>
-          <small className="birthday-date">Today</small>
-        </div>
-      </div>
-      
-    </Card>
+              <Card className="birthday-card d-flex  justify-content-between">
+                <div className="birthday-left d-flex align-items-center gap-3">
+                  <FaGift className="birthday-icon" />
+                  <div className="birthday-text">
+                    <h6 className="birthday-title">Happy Birthday!</h6>
+
+                    <p className="birthday-subtext mb-0">
+                      <FaUsers className="me-1 br-birthday" /> 15 people wished
+                      you
+                    </p>
+                    <small className="birthday-date">Today</small>
+                  </div>
+                </div>
+              </Card>
               <LeaveCalendar />
             </Col>
           </Row>
@@ -456,9 +478,6 @@ const HrDashBoard = () => {
                     </Card.Header>
                     <Card.Body>
                       <div className="quick-actions">
-                        <Button variant="primary" className="w-100 mb-2">
-                          <FaPlus className="me-2" /> Add Employee
-                        </Button>
                         <Button
                           variant="outline-primary"
                           className="w-100 mb-2"
