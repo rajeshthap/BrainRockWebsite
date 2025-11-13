@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { FaBars, FaSearch, FaTrash, FaCheckCircle } from "react-icons/fa";
-import "../../../assets/css/employeeregistration.css";
+import "../../assets/css/employeeregistration.css";
 import { RiFolderImageLine } from "react-icons/ri";
-import SideNav from "../SideNav";
 import { FaCircleCheck } from "react-icons/fa6";
+import SideNav from "../hr_dashboard/SideNav";
 
 const EmployeeRegistration = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);

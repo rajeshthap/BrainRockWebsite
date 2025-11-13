@@ -1,3 +1,5 @@
+// App.js
+
 import './App.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -5,15 +7,17 @@ import "@fontsource/poppins";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import "../src/componets/custom/style.css";
+
 import Home from './componets/pages/Home';
 import Footer from './componets/footer/Footer';
 import NavBar from './componets/topnav/NavBar';
 import HrDashBoard from './componets/hr_dashboard/HrDashBoard';
 import EmployeeManagement from './componets/hr_dashboard/hr_iinerpage/EmployeeManagement';
-import EmployeeRegistration from './componets/hr_dashboard/emp_regis/EmployeeRegistration';
 import Login from './componets/all_login/Login';
-import { AuthProvider } from './componets/context/AuthContext';
-import HrRegistration from './assets/css/HrRegistration';
+import { AuthProvider } from './componets/context/AuthContext'; 
+import HrRegistration from './componets/all_registration/HrRegistration';
+import EmployeeRegistration from './componets/all_registration/EmployeeRegistration';
+import ProtectedRoute from './componets/context/ProtectedRoute';
 
 
 
@@ -38,12 +42,30 @@ function AppContent() {
     <>
       {!shouldHideNavbar && <NavBar />}
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/HrDashBoard" element={<HrDashBoard/>} />
-        <Route path="/EmployeeManagement" element={<EmployeeManagement/>} />
-        <Route path="/EmployeeRegistration" element={<EmployeeRegistration/>} />
-        <Route path="/Login" element={<Login/>} />
-        <Route path="/HrRegistration" element={<HrRegistration/>} />
+        <Route path="/Login" element={<Login />} />
+        <Route path="/HrRegistration" element={<HrRegistration />} />
+        <Route path="/EmployeeRegistration" element={<EmployeeRegistration />} />
+        {/* <Route path="/HrDashBoard" element={<HrDashBoard />} /> */}
+
+        {/* Protected Routes */}
+        <Route 
+          path="/HrDashBoard" 
+          element={
+            <ProtectedRoute>
+              <HrDashBoard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/EmployeeManagement" 
+          element={
+            <ProtectedRoute>
+              <EmployeeManagement />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
       {!shouldHideFooter1 && <Footer />}
     </>

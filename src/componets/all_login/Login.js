@@ -1,17 +1,19 @@
+
 import React, { useState, useContext, useEffect } from "react";
 import { Button, Col, Container, Row, Form } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ModifyAlert from "../alerts/ModifyAlert";
-import DevoteeImg from "../../assets/images/women.jpg"; 
-import PanditImg from "../../assets/images/women.jpg"; 
-import TempleImg from "../../assets/images/women.jpg"; 
-import AdminImg from "../../assets/images/women.jpg"; 
-import DefaultImg from "../../assets/images/women.jpg"; 
+import DevoteeImg from "../../assets/images/women.jpg";
+import PanditImg from "../../assets/images/women.jpg";
+import TempleImg from "../../assets/images/women.jpg";
+import AdminImg from "../../assets/images/women.jpg";
+import DefaultImg from "../../assets/images/women.jpg";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
   const { login, loading: authLoading, user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     role: "admin",
@@ -31,32 +33,41 @@ export default function Login() {
     manager: DefaultImg,
   };
 
+  // This effect runs when the 'user' object is set in the context after a successful login
   useEffect(() => {
     if (user) {
-      switch (formData.role.toLowerCase()) {
-        case "admin":
-          navigate("/AdminDashBoard", { state: { unique_id: user.id } });
-          break;
-        case "hr":
-          navigate("/HRDashboard", { state: { unique_id: user.id } });
-          break;
-        case "employe":
-          navigate("/EmployeeDashboard", { state: { unique_id: user.id } });
-          break;
-        case "client":
-          navigate("/ClientDashboard", { state: { unique_id: user.id } });
-          break;
-        case "administrator":
-          navigate("/AdministratorDashboard", { state: { unique_id: user.id } });
-          break;
-        case "manager":
-          navigate("/ManagerDashboard", { state: { unique_id: user.id } });
-          break;
-        default:
-          navigate("/", { state: { unique_id: user.id } });
+      const from = location.state?.from?.pathname;
+
+      if (from) {
+        navigate(from, { state: { unique_id: user.id }, replace: true });
+      } else {
+        // Use the role from the 'user' object for secure redirection
+        switch (user.role?.toLowerCase()) {
+          case "admin":
+            // CORRECTED: Admin now navigates to its own dashboard
+            navigate("/HRDashboard", { state: { unique_id: user.id }, replace: true });
+            break;
+          case "hr":
+            navigate("/HRDashboard", { state: { unique_id: user.id }, replace: true });
+            break;
+          case "employe":
+            navigate("/EmployeeDashboard", { state: { unique_id: user.id }, replace: true });
+            break;
+          case "client":
+            navigate("/ClientDashboard", { state: { unique_id: user.id }, replace: true });
+            break;
+          case "administrator":
+            navigate("/AdministratorDashboard", { state: { unique_id: user.id }, replace: true });
+            break;
+          case "manager":
+            navigate("/ManagerDashboard", { state: { unique_id: user.id }, replace: true });
+            break;
+          default:
+            navigate("/", { replace: true });
+        }
       }
     }
-  }, [user, navigate, formData.role]);
+  }, [user, navigate, location.state]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -95,6 +106,7 @@ export default function Login() {
           <Form onSubmit={handleSubmit}>
             <Row className="mt-3">
               <Col lg={6} md={6}>
+                {/* Role Selection */}
                 <Form.Group className="mb-3">
                   <Form.Label className="temp-label ">
                     Login As <span className="temp-span-star">*</span>
@@ -115,6 +127,7 @@ export default function Login() {
                   </Form.Select>
                 </Form.Group>
 
+                {/* Email / Mobile */}
                 <Form.Group className="mb-3">
                   <Form.Label className="temp-label">
                     Email or Mobile Number{" "}
@@ -131,6 +144,7 @@ export default function Login() {
                   />
                 </Form.Group>
 
+                {/* Password */}
                 <Form.Group className="mb-3">
                   <Form.Label className="temp-label">
                     Password <span className="temp-span-star">*</span>
@@ -159,6 +173,7 @@ export default function Login() {
                   </div>
                 </Form.Group>
 
+                {/* Buttons */}
                 <div className="d-grid gap-3 text-center mt-3">
                   <Button
                     variant="danger"
