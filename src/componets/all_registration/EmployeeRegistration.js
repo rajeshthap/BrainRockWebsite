@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { FaBars, FaSearch, FaTrash, FaCheckCircle } from "react-icons/fa";
+import { Container, Row, Col, Button, Form, Card, } from "react-bootstrap";
+import { FaBars, FaSearch, FaTrash, FaCheckCircle, FaRegFile, FaIdCard } from "react-icons/fa";
 import "../../assets/css/employeeregistration.css";
 import { RiFolderImageLine } from "react-icons/ri";
-import { FaCircleCheck } from "react-icons/fa6";
+import { GrDocumentText } from "react-icons/gr";
+import { PiCertificate } from "react-icons/pi";
 import SideNav from "../hr_dashboard/SideNav";
 
 const EmployeeRegistration = () => {
@@ -13,86 +14,176 @@ const EmployeeRegistration = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [fileName, setFileName] = useState("");
-  const [fileSelected, setFileSelected] = useState(false);
-  const [uploadComplete, setUploadComplete] = useState(false);
+ 
 //  Add this state along with your existing resume and aadhar states
-const [photo, setPhoto] = useState({
-  fileSelected: false,
-  fileName: "",
-  uploadProgress: 0,
-  uploadComplete: false,
-});
-
-  const [resume, setResume] = useState({
-  fileSelected: false,
-  fileName: "",
-  fileURL: "",
-  uploadProgress: 0,
-  uploadComplete: false,
-  showSuccess: false,
-});
-
-const [aadhar, setAadhar] = useState({
-  fileSelected: false,
-  fileName: "",
-  fileURL: "",
-  uploadProgress: 0,
-  uploadComplete: false,
-  showSuccess: false,
-});
-
-// ================= FILE UPLOAD HANDLER =================
-const handleFileUpload = (e, setter) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const fileURL = URL.createObjectURL(file); // For preview
-  setter({
-    fileSelected: true,
-    fileName: file.name,
-    fileURL,
-    uploadProgress: 0,
-    uploadComplete: false,
-    showSuccess: false,
-  });
-
-  // Simulate Upload Progress
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 10;
-    setter((prev) => ({ ...prev, uploadProgress: progress }));
-    if (progress >= 100) {
-      clearInterval(interval);
-      setter((prev) => ({
-        ...prev,
-        uploadComplete: true,
-        showSuccess: true,
-      }));
-    }
-  }, 200);
-};
-
-// ================= DELETE HANDLER =================
-const handleDelete = (setter, inputId) => {
-  setter({
+ const [photo, setPhoto] = useState({
     fileSelected: false,
     fileName: "",
     fileURL: "",
     uploadProgress: 0,
     uploadComplete: false,
-    showSuccess: false,
   });
 
-  const input = document.getElementById(inputId);
-  if (input) input.value = "";
+  const [resume, setResume] = useState({
+    fileSelected: false,
+    fileName: "",
+    fileURL: "",
+    uploadProgress: 0,
+    uploadComplete: false,
+  });
+
+  const [aadhar, setAadhar] = useState({
+    fileSelected: false,
+    fileName: "",
+    fileURL: "",
+    uploadProgress: 0,
+    uploadComplete: false,
+  });
+
+const [offerLetter, setOfferLetter] = useState({
+  fileSelected: false,
+  fileName: "",
+  fileURL: "",
+  uploadProgress: 0,
+  uploadComplete: false,
+});
+
+const [panCard, setPanCard] = useState({
+  fileSelected: false,
+  fileName: "",
+  fileURL: "",
+  uploadProgress: 0,
+  uploadComplete: false,
+});
+
+  const [experienceFiles, setExperienceFiles] = useState([]);
+
+  // ===================== FILE UPLOAD HANDLER =====================
+  const handleFileUpload = (e, setter, multiple = false) => {
+    const files = e.target.files;
+    if (!files.length) return;
+
+    if (multiple) {
+      const uploadedFiles = Array.from(files).map((file) => ({
+        fileName: file.name,
+        fileURL: URL.createObjectURL(file),
+        uploadProgress: 0,
+        uploadComplete: false,
+      }));
+
+      setExperienceFiles((prev) => [...prev, ...uploadedFiles]);
+
+      // Simulate Upload Progress
+      uploadedFiles.forEach((file, index) => {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          setExperienceFiles((prev) =>
+            prev.map((f, i) =>
+              i === prev.length - uploadedFiles.length + index
+                ? { ...f, uploadProgress: progress }
+                : f
+            )
+          );
+          if (progress >= 100) {
+            clearInterval(interval);
+            setExperienceFiles((prev) =>
+              prev.map((f, i) =>
+                i === prev.length - uploadedFiles.length + index
+                  ? { ...f, uploadComplete: true }
+                  : f
+              )
+            );
+          }
+        }, 200);
+      });
+    } else {
+      const file = files[0];
+      const fileURL = URL.createObjectURL(file);
+      setter({
+        fileSelected: true,
+        fileName: file.name,
+        fileURL,
+        uploadProgress: 0,
+        uploadComplete: false,
+      });
+
+      // Simulate Upload Progress
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        setter((prev) => ({ ...prev, uploadProgress: progress }));
+        if (progress >= 100) {
+          clearInterval(interval);
+          setter((prev) => ({ ...prev, uploadComplete: true }));
+        }
+      }, 200);
+    }
+  };
+
+  // ===================== DELETE HANDLER =====================
+  const handleDelete = (setter, inputId) => {
+    setter({
+      fileSelected: false,
+      fileName: "",
+      fileURL: "",
+      uploadProgress: 0,
+      uploadComplete: false,
+    });
+    const input = document.getElementById(inputId);
+    if (input) input.value = "";
+  };
+
+ 
+
+  // ===================== PREVIEW HANDLER =====================
+  const handlePreview = (fileData) => {
+    if (fileData.fileURL) window.open(fileData.fileURL, "_blank");
+  };
+
+// Multiple file upload handler
+const handleMultipleFileUpload = (e) => {
+  const files = Array.from(e.target.files);
+  const newFiles = files.map((file) => ({
+    fileName: file.name,
+    fileSelected: true,
+    fileURL: URL.createObjectURL(file),
+    uploadProgress: 0,
+    uploadComplete: false,
+  }));
+
+  setExperienceFiles((prev) => [...prev, ...newFiles]);
+
+  // Simulate upload progress
+  newFiles.forEach((file, idx) => {
+    const uploadInterval = setInterval(() => {
+      setExperienceFiles((prev) =>
+        prev.map((f, i) => {
+          if (prev.length - newFiles.length + idx === i) {
+            const newProgress = Math.min(f.uploadProgress + 20, 100);
+            return {
+              ...f,
+              uploadProgress: newProgress,
+              uploadComplete: newProgress === 100,
+            };
+          }
+          return f;
+        })
+      );
+    }, 300);
+
+    setTimeout(() => clearInterval(uploadInterval), 1600);
+  });
 };
 
-// ================= PREVIEW HANDLER =================
-const handlePreview = (fileData) => {
-  if (fileData.fileURL) window.open(fileData.fileURL, "_blank");
+// Delete a file
+const handleDeleteFile = (index) => {
+  setExperienceFiles((prev) => prev.filter((_, i) => i !== index));
 };
+
+// Preview file
+
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -358,24 +449,13 @@ const handlePreview = (fileData) => {
   </Form.Group>
 </Col>
 
-{/* Emergency Contact Name */}
-<Col lg={4} md={6} sm={12}>
-  <Form.Group className="mb-3" controlId="emergencyName">
-    <Form.Label className="br-label">Emergency Contact Name</Form.Label>
-    <Form.Control
-      type="text"
-      placeholder="Enter Emergency Contact Name"
-      className="br-form-control"
-      name="emergency_contact_name"
-    />
-  </Form.Group>
-</Col>
+
 
 {/* Emergency Contact Number */}
 <Col lg={4} md={6} sm={12}>
     <Form.Group className="mb-3" controlId="emergencyRelationship">
       <Form.Label className="br-label">
-        Relationship <span className="br-span-star">*</span>
+        Emergency Contact Name <span className="br-span-star">*</span>
       </Form.Label>
       <Form.Select
         className="br-form-control"
@@ -386,7 +466,7 @@ const handlePreview = (fileData) => {
         <option value="Father">Father</option>
         <option value="Mother">Mother</option>
         <option value="Spouse">Spouse</option>
-        <option value="Relative">Relative</option>
+        <option value="Cousin">Cousin</option>
       </Form.Select>
     </Form.Group>
   </Col>
@@ -606,19 +686,21 @@ const handlePreview = (fileData) => {
     />
   </Form.Group>
 </Col>
-{/* ================= Documets ================= */}
+
+{/* ================= Documents ================= */}
 <div className="br-basic-info mt-4">
   <h1>6. Documents</h1>
 </div>
-  <Col lg={4} md={4} sm={12}>
+
+{/* Resume Upload */}
+<Col lg={3} md={6} sm={12}>
   <Form.Group className="mb-3" controlId="resumeUpload">
     <Form.Label className="br-label">Resume / CV</Form.Label>
-
     <div className="br-doc-box text-center">
       {!resume.fileSelected ? (
         <>
           <div className="upload-icon">
-            <i className="bi bi-folder-fill"></i>
+           <FaRegFile />
           </div>
           <p className="doc-text">Drag your resume here</p>
           <p className="upload-or">or</p>
@@ -628,7 +710,7 @@ const handlePreview = (fileData) => {
           <Form.Control
             type="file"
             id="resumeFile"
-            accept=".pdf,.doc,.docx"
+            accept=".pdf,.jpg,.jpeg,.png"
             className="d-none"
             onChange={(e) => handleFileUpload(e, setResume)}
           />
@@ -677,9 +759,9 @@ const handlePreview = (fileData) => {
             </div>
           </div>
 
-          {resume.showSuccess && (
+          {resume.uploadComplete && (
             <div className="text-success mt-2 fw-bold br-card-success">
-               File uploaded successfully!
+              File uploaded successfully!
             </div>
           )}
         </div>
@@ -688,8 +770,391 @@ const handlePreview = (fileData) => {
   </Form.Group>
 </Col>
 
+{/* Aadhar Card */}
+<Col lg={3} md={6} sm={12}>
+  <Form.Group className="mb-3" controlId="aadharUpload">
+    <Form.Label className="br-label">Aadhar Card</Form.Label>
 
-    
+    <div className="br-doc-box text-center">
+      {!aadhar.fileSelected ? (
+        <>
+          <div className="upload-icon">
+           <FaIdCard />
+          </div>
+          <p className="doc-text">Drag your Aadhar card file here</p>
+          <p className="upload-or">or</p>
+          <Form.Label htmlFor="aadharFile" className="upload-browse">
+            Browse your computer
+          </Form.Label>
+          <Form.Control
+            type="file"
+            id="aadharFile"
+            accept=".pdf,.jpg,.jpeg,.png"
+            className="d-none"
+            onChange={(e) => handleFileUpload(e, setAadhar)}
+          />
+        </>
+      ) : (
+        <div className="upload-progress-box">
+          <div className="progress-info d-flex justify-content-between align-items-center">
+            <div>
+              {aadhar.uploadComplete ? (
+                <FaCheckCircle color="green" className="me-2" />
+              ) : (
+                <i className="bi bi-file-earmark-text-fill progress-icon me-2"></i>
+              )}
+              <span className="progress-filename">{aadhar.fileName}</span>
+            </div>
+            <div>
+              {aadhar.fileURL && (
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={() => handlePreview(aadhar)}
+                  className="me-2"
+                  title="Preview File"
+                >
+                  <i className="bi bi-eye"></i>
+                </Button>
+              )}
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => handleDelete(setAadhar, "aadharFile")}
+                title="Delete File"
+              >
+                <FaTrash />
+              </Button>
+            </div>
+          </div>
+
+          <div className="progress mt-2">
+            <div
+              className="progress-bar"
+              role="progressbar"
+              style={{ width: `${aadhar.uploadProgress}%` }}
+            >
+              {aadhar.uploadProgress}%
+            </div>
+          </div>
+
+          {aadhar.uploadComplete && (
+            <div className="text-success mt-2 fw-bold br-card-success">
+              File uploaded successfully!
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </Form.Group>
+</Col>
+
+{/* Offer Letter */}
+<Col lg={3} md={3} sm={12}>
+  <Form.Group className="mb-3" controlId="offerLetterUpload">
+    <Form.Label className="br-label">Offer Letter</Form.Label>
+    <div className="br-doc-box text-center">
+      {!offerLetter.fileSelected ? (
+        <>
+          <div className="upload-icon">
+            <GrDocumentText />
+          </div>
+          <p className="doc-text">Drag your Offer Letter here</p>
+          <p className="upload-or">or</p>
+          <Form.Label htmlFor="offerLetterFile" className="upload-browse">
+            Browse your computer
+          </Form.Label>
+          <Form.Control
+            type="file"
+            id="offerLetterFile"
+            accept=".pdf,.jpg,.jpeg,.png"
+            className="d-none"
+            onChange={(e) => handleFileUpload(e, setOfferLetter)}
+          />
+        </>
+      ) : (
+        <div className="upload-progress-box">
+          <div className="progress-info d-flex justify-content-between align-items-center">
+            <div>
+              {offerLetter.uploadComplete ? (
+                <FaCheckCircle color="green" className="me-2" />
+              ) : (
+                <i className="bi bi-file-earmark-text-fill progress-icon me-2"></i>
+              )}
+              <span className="progress-filename">{offerLetter.fileName}</span>
+            </div>
+            <div>
+              {offerLetter.fileURL && (
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={() => handlePreview(offerLetter)}
+                  className="me-2"
+                  title="Preview File"
+                >
+                  <i className="bi bi-eye"></i>
+                </Button>
+              )}
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => handleDelete(setOfferLetter, "offerLetterFile")}
+                title="Delete File"
+              >
+                <FaTrash />
+              </Button>
+            </div>
+          </div>
+
+          <div className="progress mt-2">
+            <div
+              className="progress-bar"
+              role="progressbar"
+              style={{ width: `${offerLetter.uploadProgress}%` }}
+            ></div>
+          </div>
+
+          {offerLetter.uploadComplete && (
+            <div className="text-success mt-2 fw-bold br-card-success">
+              File uploaded successfully!
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </Form.Group>
+</Col>
+
+{/* Pan Card */}
+<Col lg={3} md={6} sm={12}>
+  <Form.Group className="mb-3" controlId="panCardUpload">
+    <Form.Label className="br-label">Pan Card</Form.Label>
+    <div className="br-doc-box text-center">
+      {!panCard.fileSelected ? (
+        <>
+          <div className="upload-icon">
+           <FaIdCard />
+          </div>
+          <p className="doc-text">Drag your Pan Card here</p>
+          <p className="upload-or">or</p>
+          <Form.Label htmlFor="panCardFile" className="upload-browse">
+            Browse your computer
+          </Form.Label>
+          <Form.Control
+            type="file"
+            id="panCardFile"
+            accept=".pdf,.jpg,.jpeg,.png"
+            className="d-none"
+            onChange={(e) => handleFileUpload(e, setPanCard)}
+          />
+        </>
+      ) : (
+        <div className="upload-progress-box">
+          <div className="progress-info d-flex justify-content-between align-items-center">
+            <div>
+              {panCard.uploadComplete ? (
+                <FaCheckCircle color="green" className="me-2" />
+              ) : (
+                <i className="bi bi-file-earmark-text-fill progress-icon me-2"></i>
+              )}
+              <span className="progress-filename">{panCard.fileName}</span>
+            </div>
+            <div>
+              {panCard.fileURL && (
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={() => handlePreview(panCard)}
+                  className="me-2"
+                  title="Preview File"
+                >
+                  <i className="bi bi-eye"></i>
+                </Button>
+              )}
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => handleDelete(setPanCard, "panCardFile")}
+                title="Delete File"
+              >
+                <FaTrash />
+              </Button>
+            </div>
+          </div>
+
+          <div className="progress mt-2">
+            <div
+              className="progress-bar"
+              role="progressbar"
+              style={{ width: `${panCard.uploadProgress}%` }}
+            ></div>
+          </div>
+
+          {panCard.uploadComplete && (
+            <div className="text-success mt-2 fw-bold br-card-success">
+              File uploaded successfully!
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </Form.Group>
+</Col>
+
+{/* Experience Certificates (Multiple) */}
+<Col lg={6} md={6} sm={12}>
+  <Form.Group className="mb-3" controlId="experienceUpload">
+    <Form.Label className="br-label">Experience Certificates</Form.Label>
+    <Row>
+      <Col lg={6}>
+        <div className="br-doc-box text-center">
+          <div className="upload-icon">
+           <PiCertificate />
+          </div>
+          <p className="doc-text">Drag your Experience Certificates here</p>
+          <p className="upload-or">or</p>
+          <Form.Label htmlFor="experienceFiles" className="upload-browse">
+            Browse your computer
+          </Form.Label>
+          <Form.Control
+            type="file"
+            id="experienceFiles"
+            accept=".pdf,.jpg,.jpeg,.png"
+            multiple
+            className="d-none"
+            onChange={(e) => handleMultipleFileUpload(e)}
+          />
+        </div>
+      </Col>
+
+      <Col lg={6}>
+        {experienceFiles.length > 0 && (
+          <div className="uploaded-files">
+            {experienceFiles.map((file, index) => (
+              <Card key={index} className="shadow-sm mb-2 border-0">
+                <Card.Body className="p-2">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-center">
+                      {file.uploadComplete ? (
+                        <FaCheckCircle color="green" className="me-2" />
+                      ) : (
+                        <i className="bi bi-file-earmark-text-fill text-secondary me-2"></i>
+                      )}
+                      <span
+                        className="fw-semibold text-truncate"
+                        style={{ maxWidth: "150px" }}
+                      >
+                        {file.fileName}
+                      </span>
+                    </div>
+                    <div>
+                      {file.fileURL && (
+                        <Button
+                          variant="success"
+                          size="sm"
+                          onClick={() => handlePreview(file)}
+                          className="me-2"
+                          title="Preview File"
+                        >
+                          <i className="bi bi-eye"></i>
+                        </Button>
+                      )}
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDeleteFile(index)}
+                        title="Delete File"
+                      >
+                        <FaTrash />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="progress mt-2" style={{ height: "6px" }}>
+                    <div
+                      className="progress-bar"
+                      role="progressbar"
+                      style={{ width: `${file.uploadProgress}%` }}
+                    ></div>
+                  </div>
+
+                  {file.uploadComplete && (
+                    <div className="text-success mt-1 small fw-bold">
+                      Uploaded successfully!
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            ))}
+          </div>
+        )}
+      </Col>
+    </Row>
+  </Form.Group>
+</Col>
+
+
+
+<div className="br-basic-info mt-4">
+  <h1>6. System Access & Role (if using admin panel)</h1>
+</div>
+    {/* User Role */}
+<Col lg={4} md={6} sm={12}>
+  <Form.Group className="mb-3" controlId="userRole">
+    <Form.Label className="br-label">
+      User Role <span className="br-span-star">*</span>
+    </Form.Label>
+    <Form.Select
+      className="br-form-control"
+      name="user_role"
+      required
+    >
+      <option value="">Select Role</option>
+      <option value="Admin">Admin</option>
+      <option value="Manager">Manager</option>
+      <option value="Employee">Employee</option>
+    </Form.Select>
+  </Form.Group>
+</Col>
+
+{/* Username */}
+<Col lg={4} md={6} sm={12}>
+  <Form.Group className="mb-3" controlId="username">
+    <Form.Label className="br-label">
+      Username <span className="br-span-star">*</span>
+    </Form.Label>
+    <Form.Control
+      type="text"
+      placeholder="Enter or auto-generate username"
+      className="br-form-control"
+      name="username"
+      required
+    />
+  </Form.Group>
+</Col>
+
+{/* Password */}
+<Col lg={4} md={6} sm={12}>
+  <Form.Group className="mb-3" controlId="password">
+    <Form.Label className="br-label">
+      Password <span className="br-span-star">*</span>
+    </Form.Label>
+    <Form.Control
+      type="password"
+      placeholder="Enter or auto-generate password"
+      className="br-form-control"
+      name="password"
+      required
+    />
+  </Form.Group>
+</Col>
+
+ <div>
+  <Button variant="primary" type="submit" className="br-submit-btn">
+    Register Employee
+  </Button>
+ </div>
+
 
 
             </Row>
