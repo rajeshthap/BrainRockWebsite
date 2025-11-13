@@ -12,6 +12,7 @@ import NavBar from './componets/topnav/NavBar';
 import HrDashBoard from './componets/hr_dashboard/HrDashBoard';
 import EmployeeManagement from './componets/hr_dashboard/hr_iinerpage/EmployeeManagement';
 import EmployeeRegistration from './componets/hr_dashboard/emp_regis/EmployeeRegistration';
+import Login from './componets/all_login/Login';
 
 
 
@@ -42,7 +43,8 @@ function App() {
             <Route path="/HrDashBoard" element={<HrDashBoard/>} />
             <Route path="/EmployeeManagement" element={<EmployeeManagement/>} />
             <Route path="/EmployeeRegistration" element={<EmployeeRegistration/>} />
-            
+            <Route path="/Login" element={<Login/>} />
+
           </Routes>
       {!shouldHideFooter1 && <Footer />}
  </>
