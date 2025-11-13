@@ -1,17 +1,17 @@
 .awc-footer-main {
     text-align: center;
-    font-size: var(--awc-space-300);
-    margin-bottom: var(--awc-space-0) !important;
-    padding-top: var(--awc-space-200);
+    font-size: var(--br-space-300);
+    margin-bottom: var(--br-space-0) !important;
+    padding-top: var(--br-space-200);
 }
 
 .awc-footer-main a {
     text-decoration: none;
-    color: var(--awc-black);
+    color: var(--br-black);
 }
 
 .awc-footer-main a:hover {
-    color: var(--awc-blue);
+    color: var(--br-blue);
 
 }
 

@@ -13,6 +13,8 @@ import EmployeeManagement from './componets/hr_dashboard/hr_iinerpage/EmployeeMa
 import EmployeeRegistration from './componets/hr_dashboard/emp_regis/EmployeeRegistration';
 import Login from './componets/all_login/Login';
 import { AuthProvider } from './componets/context/AuthContext';
+import HrRegistration from './assets/css/HrRegistration';
+
 
 
 function AppContent() {
@@ -21,7 +23,8 @@ function AppContent() {
   const hiddenPaths = new Set([
     "/HrDashBoard",
     "/EmployeeManagement",
-    "/EmployeeRegistration"
+    "/EmployeeRegistration",
+    "/HrRegistration"
   ]);
 
   const hiddenFooter1 = new Set([
@@ -40,6 +43,7 @@ function AppContent() {
         <Route path="/EmployeeManagement" element={<EmployeeManagement/>} />
         <Route path="/EmployeeRegistration" element={<EmployeeRegistration/>} />
         <Route path="/Login" element={<Login/>} />
+        <Route path="/HrRegistration" element={<HrRegistration/>} />
       </Routes>
       {!shouldHideFooter1 && <Footer />}
     </>

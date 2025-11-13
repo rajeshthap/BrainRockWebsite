@@ -7,7 +7,7 @@
 /* Sidebar Styles */
 .sidebar {
     width: 260px;
-    background-color: #00553c;
+    background-color: #0080ff;
     color: white;
     transition: all 0.3s ease;
     position: fixed;
@@ -297,7 +297,7 @@
 .br-post-top-btn{
       font-weight: 100;
     border-radius: 4px;
-    background-color: #00553c;
+    background-color: #006edc;
     padding: 9px;
     color: #fff;
 }
@@ -310,6 +310,8 @@
 .birthday-card{
     padding: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background-color: #fff4d8;
+     border-block-start: #fadd87 3px solid;
 }
 .birthday-icon{
     font-size: 24px !important;
@@ -347,7 +349,9 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     height: 100%;
+    border-block-start: #f9baae 3px solid;
 }
+
 
 .stat-card:hover {
     transform: translateY(-5px);
@@ -583,6 +587,13 @@
     .sidebar-closed+.main-content {
         margin-left: 0 !important;
     }
+      .sidebar {
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: thin;
+        scrollbar-color: #999 #f2f2f2;
+        scroll-snap-type: x mandatory;
+    }
 }
 
 /* Reset sidebar state when viewport changes */
@@ -642,7 +653,7 @@
 
 /* Mobile Sidebar */
 .mobile-sidebar {
-     background-color: #00553c;
+     background-color: #006edc;
 }
 
 .mobile-sidebar .nav-item {

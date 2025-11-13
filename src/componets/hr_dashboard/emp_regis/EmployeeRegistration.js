@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { FaBars, FaSearch, FaTrash, FaCheckCircle } from "react-icons/fa";
 import "../../../assets/css/employeeregistration.css";
+import { RiFolderImageLine } from "react-icons/ri";
 import SideNav from "../SideNav";
+import { FaCircleCheck } from "react-icons/fa6";
 
 const EmployeeRegistration = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -139,7 +141,7 @@ const handlePreview = (fileData) => {
               {/* Employee ID */}
              
 
-              <div className="br-basic-info mb-4">
+              <div className="br-basic-info">
   <h1>1. Basic Information</h1>
 </div>
 
@@ -233,7 +235,7 @@ const handlePreview = (fileData) => {
       {!photo.fileSelected ? (
         <>
           <div className="upload-icon">
-            <i className="bi bi-folder-fill"></i>
+           <RiFolderImageLine />
           </div>
           <p className="upload-text">Drag your photo here</p>
           <p className="upload-or">or</p>
@@ -254,9 +256,9 @@ const handlePreview = (fileData) => {
           <div className="progress-info d-flex justify-content-between align-items-center">
             <div>
               {photo.uploadComplete ? (
-                <FaCheckCircle color="green" className="me-2" />
+                <FaCheckCircle color="green" className="me-2 br-check-icon" />
               ) : (
-                <i className="bi bi-image-fill progress-icon me-2"></i>
+              <FaCheckCircle color="green" className=" br-check-icon"/> 
               )}
               <span className="progress-filename">{photo.fileName}</span>
             </div>
@@ -265,7 +267,7 @@ const handlePreview = (fileData) => {
               variant="danger"
               size="sm"
               onClick={() => handleDelete(setPhoto, "photoInput")}
-              className="ms-2"
+              className="ms-2 br-btn-delete"
               title="Delete File"
             >
               <FaTrash />

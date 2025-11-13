@@ -7,6 +7,8 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   background-color: #fff;
   border-radius: 8px;
+  border-block-start: #fadd87 3px solid;
+ 
 }
 
 .leave-clender-heading {
