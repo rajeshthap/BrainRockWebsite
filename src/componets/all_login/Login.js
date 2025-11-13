@@ -45,10 +45,10 @@ export default function Login() {
         switch (user.role?.toLowerCase()) {
           case "admin":
             // CORRECTED: Admin now navigates to its own dashboard
-            navigate("/HrDashboard", { state: { unique_id: user.id }, replace: true });
+            navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
             break;
           case "hr":
-            navigate("/HrDashboard", { state: { unique_id: user.id }, replace: true });
+            navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
             break;
           case "employe":
             navigate("/EmployeeDashboard", { state: { unique_id: user.id }, replace: true });

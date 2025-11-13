@@ -14,7 +14,6 @@ const EmployeeRegistration = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
- 
 //  Add this state along with your existing resume and aadhar states
  const [photo, setPhoto] = useState({
     fileSelected: false,

@@ -1,6 +1,26 @@
-.br-team-img {
-        border-radius: 48%;
-    width: 48px;
-    height: 48px;
 
+
+.br-team-card h3{
+    font-size: var(--br-space-400);
+    font-weight: 600;
+}
+.br-team-card p{
+    font-size: var(--br-space-300);
+    font-weight: 500;
+    margin-top: 12px;
+}
+.br-team-card{
+  margin-top: 12px;
+}
+.br-team-card {
+  border-radius: 15px;
+  background-color: #fff;
+}
+
+.br-team-img {
+      width: 50px;
+    height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #dee2e6;
 }
