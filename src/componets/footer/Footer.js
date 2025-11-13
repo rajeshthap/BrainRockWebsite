@@ -1,11 +1,9 @@
 import React from 'react'
-import { Col, Container, Row } from "react-bootstrap";
-import BrLogo from "../../assets/images/brainrock_logo.png"
-import Logogoogleimg from "../../assets/images/google-img.png"
+import { Col, Container } from "react-bootstrap";
+
 import { Link } from 'react-router-dom';
 import "../../assets/css/Footer.css";
-import { FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/fa';
-import { TiSocialFacebook } from 'react-icons/ti';
+
 function Footer() {
   return (
     <>

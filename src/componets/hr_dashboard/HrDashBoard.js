@@ -31,6 +31,7 @@ import FeedBackPost from "./FeedBackPost";
 import { CiEdit } from "react-icons/ci";
 import { IoClose } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import TeamMember from "./hr_iinerpage/TeamMember";
 
 const HrDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -367,8 +368,12 @@ const HrDashBoard = () => {
                   </div>
                 </div>
               </Card>
+          <TeamMember />
               <LeaveCalendar />
             </Col>
+          
+
+            
           </Row>
           {/* Stats Cards */}
 
@@ -383,7 +388,7 @@ const HrDashBoard = () => {
                   <h5 className="card-title mb-0">Attendance (Last 6 Days)</h5>
                 </Card.Header>
                 <Card.Body style={{ height: 300 }}>
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer>
                     <LineChart
                       data={[
                         { day: "Mon", present: 50, absent: 10 },

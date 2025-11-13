@@ -61,10 +61,10 @@ const FeedBackPost = () => {
             {/* Engagement metrics */}
             <div className="d-flex justify-content-between my-3">
               <div className="engagement-metrics">
-                <Badge pill bg-light text-dark className="me-2">
+                <Badge pill bg="light" text="dark"  className="me-2">
                   <i className="bi bi-heart-fill text-danger me-1"></i> 90
                 </Badge>
-                <Badge pill bg-light text-dark>
+                <Badge pill bg="light" text="dark">
                   <i className="bi bi-chat-fill text-primary me-1"></i> 10
                 </Badge>
               </div>
