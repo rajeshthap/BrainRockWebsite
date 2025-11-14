@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useState, useEffect, useRef } from 'react';
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -20,15 +20,14 @@ export const AuthProvider = ({ children }) => {
       const res = await axiosInstance.post("login/", { email_or_phone, password });
 
       setUser({
-  id: res.data.user?.id || res.data.user_id || res.data.id,
-  unique_id: res.data.user?.unique_id || res.data.unique_id || null,
-  email: res.data.user?.email || res.data.email || null,
-  full_name: res.data.user?.full_name || res.data.full_name || null,
-  role: res.data.user?.role || res.data.role || null,
-});
+        id: res.data.user?.id || res.data.user_id || res.data.id,
+        unique_id: res.data.user?.unique_id || res.data.unique_id || null,
+        email: res.data.user?.email || res.data.email || null,
+        full_name: res.data.user?.full_name || res.data.full_name || null,
+        role: res.data.user?.role || res.data.role || null,
+      });
 
-
-      return { success: true, data: res.data }; 
+      return { success: true, data: res.data };
     } catch (err) {
       return {
         success: false,
@@ -44,11 +43,12 @@ export const AuthProvider = ({ children }) => {
       const res = await axiosInstance.post("logout/");
       console.log("Logout response:", res.data);
 
-      Cookies.remove("user_id");
+      // Clear all cookies when logging out
+      clearAllCookies();
       setUser(null);
       setHasRefreshFailed(false);
 
-      return { success: true, data: res.data }; 
+      return { success: true, data: res.data };
     } catch (err) {
       console.error("Logout failed:", err.response?.data || err.message);
       return {
@@ -77,17 +77,27 @@ export const AuthProvider = ({ children }) => {
 
       setHasRefreshFailed(false);
       setLoading(false);
-      return { success: true, data: res.data }; 
+      return { success: true, data: res.data };
     } catch (err) {
       setHasRefreshFailed(true);
       setLoading(false);
-       await logout();
+      await logout();
       return {
         success: false,
         error: err.response?.data || { message: err.message },
       };
     } finally {
       isRefreshing.current = false;
+    }
+  };
+
+  const clearAllCookies = () => {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     }
   };
 
@@ -102,7 +112,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         if (
-          originalRequest.url.includes("login") 
+          originalRequest.url.includes("login")
           ||
           originalRequest.url.includes("logout")
         ) {
@@ -116,7 +126,6 @@ export const AuthProvider = ({ children }) => {
             if (refreshed.success) {
               return axiosInstance(originalRequest);
             }
-          } else {
           }
         }
 

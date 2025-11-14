@@ -1,4 +1,3 @@
-
 import React, { useState, useContext, useEffect } from "react";
 import { Button, Col, Container, Row, Form } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -11,7 +10,7 @@ import DefaultImg from "../../assets/images/women.jpg";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
-  const { login, loading: authLoading, user } = useContext(AuthContext);
+  const { login, loading: authLoading, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,6 +32,27 @@ export default function Login() {
     manager: DefaultImg,
   };
 
+  // Function to clear all cookies
+  const clearAllCookies = () => {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    }
+  };
+
+  // This effect runs when the component mounts to clear cookies
+  useEffect(() => {
+    clearAllCookies();
+    
+    // If there's a logout function in AuthContext, call it
+    if (logout) {
+      logout();
+    }
+  }, []);
+
   // This effect runs when the 'user' object is set in the context after a successful login
   useEffect(() => {
     if (user) {
@@ -44,7 +64,6 @@ export default function Login() {
         // Use the role from the 'user' object for secure redirection
         switch (user.role?.toLowerCase()) {
           case "admin":
-            // CORRECTED: Admin now navigates to its own dashboard
             navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
             break;
           case "hr":
