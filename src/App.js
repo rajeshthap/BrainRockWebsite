@@ -47,17 +47,17 @@ function AppContent() {
         <Route path="/Login" element={<Login />} />
         <Route path="/HrRegistration" element={<HrRegistration />} />
         <Route path="/EmployeeRegistration" element={<EmployeeRegistration />} />
-        {/* <Route path="/HrDashBoard" element={<HrDashBoard />} /> */}
+        <Route path="/HrDashBoard" element={<HrDashBoard />} />
 
         {/* Protected Routes */}
-        <Route 
+        {/* <Route 
           path="/HrDashBoard" 
           element={
             <ProtectedRoute>
               <HrDashBoard />
             </ProtectedRoute>
           } 
-        />
+        /> */}
         <Route 
           path="/EmployeeManagement" 
           element={

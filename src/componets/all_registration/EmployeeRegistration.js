@@ -6,6 +6,7 @@ import { RiFolderImageLine } from "react-icons/ri";
 import { GrDocumentText } from "react-icons/gr";
 import { PiCertificate } from "react-icons/pi";
 import SideNav from "../hr_dashboard/SideNav";
+import HrHeader from "../hr_dashboard/HrHeader";
 
 const EmployeeRegistration = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -196,31 +197,7 @@ const handleDeleteFile = (index) => {
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
-        <header className="dashboard-header">
-          <Container fluid>
-            <Row className="align-items-center">
-              <Col xs="auto">
-                <Button
-                  variant="light"
-                  className="sidebar-toggle"
-                  onClick={toggleSidebar}
-                >
-                  <FaBars />
-                </Button>
-              </Col>
-              <Col>
-                <div className="search-bar">
-                  <FaSearch className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="search-input"
-                  />
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </header>
+       <HrHeader toggleSidebar={toggleSidebar} />
 
         {/* Dashboard Body */}
         <Container fluid className="dashboard-body">

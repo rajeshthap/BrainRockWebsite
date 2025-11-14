@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Nav, Offcanvas, Collapse } from "react-bootstrap";
 import {
   FaTachometerAlt,
@@ -9,7 +9,7 @@ import {
   FaUserCheck,
 } from "react-icons/fa";
 import "../../assets/css/emp_dashboard.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { PiPaypalLogo, PiUserListBold, PiUsersThreeBold } from "react-icons/pi";
 import { RiPlayListAddFill, RiSettings2Line } from "react-icons/ri";
 import { ImProfile } from "react-icons/im";
@@ -21,9 +21,11 @@ import { AiOutlineFile } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import BRLogo from "../../assets/images/brainrock_logo.png";
 import { FaUsersViewfinder } from "react-icons/fa6";
+import { AuthContext } from "../context/AuthContext";
+
 
 const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
-  const navigate = useNavigate();
+    const { logout } = useContext(AuthContext);
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const toggleSubmenu = (index) => {
     setOpenSubmenu(openSubmenu === index ? null : index);
@@ -617,10 +619,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
         <div className="sidebar-footer">
           <Nav.Link
             className="nav-item logout-btn"
-            onClick={() => {
-              // handle logout logic here
-              navigate("/login");
-            }}
+           onClick={logout}
           >
             <span className="nav-icon">
               <FaSignOutAlt />

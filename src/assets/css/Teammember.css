@@ -1,37 +1,87 @@
-
-
-.br-team-card h3{
-    font-size: var(--br-space-400);
-    font-weight: 600;
+.br-team-card h3 {
+  font-size: var(--br-space-400);
+  font-weight: 600;
 }
-.br-team-card p{
-    font-size: var(--br-space-300);
-    font-weight: 500;
-    margin-top: 12px;
-}
-.br-team-card{
+
+.br-team-card p {
+  font-size: var(--br-space-300);
+  font-weight: 500;
   margin-top: 12px;
 }
+
+.br-team-card {
+  margin-top: 12px;
+}
+
 .br-team-card {
   border-radius: 15px;
   background-color: #fff;
 }
 
 .br-team-img {
-      width: 50px;
-    height: 50px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid #dee2e6;
 }
-.br-team-img-checked{
-border: 2px solid #28a745;
+
+.br-team-img-checked {
+  border: 2px solid #36d686;
 }
-.br-wfh-img{
-    
-  border: 2px solid hsl(53, 85%, 49%);
+
+.br-wfh-img {
+  border: 2px solid green;
 }
-.br-leave-img{
-    
-  border: 2px solid hsla(347, 26%, 7%, 0.185);
+
+.br-leave-img {
+
+  border: 2px solid gray;
+}
+
+.br-span-dout {
+  background-color: green;
+  border-radius: 100%;
+  max-width: 14px !important;
+  max-height: 14px !important;
+  padding: 5px;
+  margin: 0px 4px 4px -12px;
+  position: absolute;
+
+}
+.br-span-wfm-dout{
+  background-color: rgb(196, 127, 0);
+  border-radius: 100%;
+  max-width: 14px !important;
+  max-height: 14px !important;
+  padding: 5px;
+  margin: 0px 4px 4px -12px;
+  position: absolute;
+}
+.br-span-dout-text{
+   background-color: green;
+  border-radius: 100%;
+  max-width: 14px !important;
+  max-height: 14px !important;
+  padding: 5px;
+  margin: 2px 4px 4px -12px;
+  position: absolute;
+}
+.br-span-notchecked-text{
+   background-color: rgb(196, 127, 0);
+  border-radius: 100%;
+  max-width: 14px !important;
+  max-height: 14px !important;
+  padding: 5px;
+  margin: 2px 4px 4px -12px;
+  position: absolute;
+}
+.br-span-leave-text{
+    background-color: gray;
+    border-radius: 100%;
+    max-width: 14px !important;
+    max-height: 14px !important;
+    padding: 5px;
+    margin: 2px 4px 4px -12px;
+    position: absolute;
 }
