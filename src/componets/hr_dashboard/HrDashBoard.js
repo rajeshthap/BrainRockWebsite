@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Container,
   Row,
@@ -22,6 +22,7 @@ import {
   FaPlus,
   FaGift,
 } from "react-icons/fa";
+import { AuthContext } from "../context/AuthContext";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { Tooltip, ResponsiveContainer } from "recharts";
 import "../../assets/css/emp_dashboard.css";
@@ -34,6 +35,7 @@ import { useNavigate } from "react-router-dom";
 import TeamMember from "./hr_iinerpage/TeamMember";
 
 const HrDashBoard = () => {
+  const { logout } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -225,7 +227,7 @@ const HrDashBoard = () => {
                         <FaCog className="me-2" /> Settings
                       </Dropdown.Item>
                       <Dropdown.Divider />
-                      <Dropdown.Item href="#">
+                      <Dropdown.Item onClick={logout} href="#">
                         <FaSignOutAlt className="me-2" /> Logout
                       </Dropdown.Item>
                     </Dropdown.Menu>

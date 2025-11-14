@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import "../../assets/css/NavBar.css";
 import Header from "./Header";
 
-
 function NavBar() {
   return (
     <>
