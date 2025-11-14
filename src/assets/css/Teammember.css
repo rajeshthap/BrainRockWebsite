@@ -24,3 +24,14 @@
   border-radius: 50%;
   border: 2px solid #dee2e6;
 }
+.br-team-img-checked{
+border: 2px solid #28a745;
+}
+.br-wfh-img{
+    
+  border: 2px solid hsl(53, 85%, 49%);
+}
+.br-leave-img{
+    
+  border: 2px solid hsla(347, 26%, 7%, 0.185);
+}

@@ -81,9 +81,9 @@ body {
     font-size: var(--br-space-300);
 }
 .br-basic-info h1{
-    font-size: var(--br-space-500);
+       font-size: var(--br-space-400);
     font-weight: 600;
-    color:#000;
+    color: #0b51b7;
     margin-bottom: var(--br-space-700);
 }
 .br-box-container{
@@ -93,6 +93,16 @@ body {
     border-radius: var(--br-space-400);
     padding: var(--br-space-800);
     margin-bottom: var(--br-space-1000);
+}
+.br-submit-btn{
+    background-color: #0b51b7;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+.br-btn-submit{
+    text-align: center;
+    margin-top: 12px;
 }
 @media only screen and (max-width: 568px) {
   .br-login {

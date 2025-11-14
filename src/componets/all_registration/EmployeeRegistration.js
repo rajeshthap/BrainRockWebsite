@@ -1148,7 +1148,7 @@ const handleDeleteFile = (index) => {
   </Form.Group>
 </Col>
 
- <div>
+ <div className="br-btn-submit">
   <Button variant="primary" type="submit" className="br-submit-btn">
     Register Employee
   </Button>

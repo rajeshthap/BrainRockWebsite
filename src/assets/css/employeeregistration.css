@@ -25,9 +25,9 @@ span.br-span-star {
 }
 
 .upload-icon {
-  font-size: 32px;
-  color: #006edc;
-  margin-bottom: var(--br-space-250);
+    font-size: 32px;
+    color: #2a3e7f;
+    margin-bottom: var(--br-space-250);
 }
 
 .upload-text {
@@ -43,11 +43,11 @@ span.br-span-star {
 }
 
 .upload-browse {
-  color: #006edc;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: 12px;
+    color: #0b51b7;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 12px;
 }
 
 .upload-browse:hover {
@@ -110,8 +110,8 @@ span.br-span-star {
     font-size: 12px;
 }
 .br-doc-box {
-    border: 2px dashed #6c757d;
-    background-color: #ebebeb;
+    border: 2px dashed #eceff5;
+    background-color: #f8f9fb;
     border-radius: var(--br-space-300);
     padding: 8px;
     transition: 0.3s 

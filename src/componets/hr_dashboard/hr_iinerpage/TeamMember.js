@@ -17,27 +17,24 @@ function TeamMember() {
 
         {/* Team Member Row */}
         <div className="d-flex justify-content-between flex-wrap">
-          
           <div className="text-center">
             <img
               src={Women}
               alt="team"
-              className="img-fluid br-team-img mb-2"
+              className="img-fluid br-team-img br-team-img-checked mb-2"
+            />
+            <p className="text-muted mb-0">Checked</p>
+          </div>
+
+          <div className="text-center">
+            <img
+              src={Women}
+              alt="team"
+              className="img-fluid br-team-img  br-leave-img mb-2"
             />
             <p className="text-muted mb-0">On Leave</p>
           </div>
 
-         
-          <div className="text-center">
-            <img
-              src={Women}
-              alt="team"
-              className="img-fluid br-team-img mb-2"
-            />
-            <p className="text-muted mb-0">Work From Home</p>
-          </div>
-
-         
           <div className="text-center">
             <img
               src={Women}
@@ -47,22 +44,13 @@ function TeamMember() {
             <p className="text-muted mb-0">Present</p>
           </div>
 
-        
           <div className="text-center">
             <img
               src={Women}
               alt="team"
-              className="img-fluid br-team-img mb-2"
+              className="img-fluid br-team-img br-wfh-img mb-2"
             />
-            <p className="text-muted mb-0">On Field</p>
-          </div>
-           <div className="text-center">
-            <img
-              src={Women}
-              alt="team"
-              className="img-fluid br-team-img mb-2"
-            />
-            <p className="text-muted mb-0">On Field</p>
+            <p className="text-muted mb-0">WFH</p>
           </div>
         </div>
       </Card>
