@@ -1,28 +1,18 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
   Col,
   Button,
-  Badge,
-  Dropdown,
-  Image,
   Card,
   Table,
 } from "react-bootstrap";
 import {
-  FaBars,
-  FaBell,
-  FaUserCircle,
   FaTachometerAlt,
   FaUsers,
-  FaCog,
-  FaSignOutAlt,
-  FaSearch,
   FaPlus,
   FaGift,
 } from "react-icons/fa";
-import { AuthContext } from "../context/AuthContext";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { Tooltip, ResponsiveContainer } from "recharts";
 import "../../assets/css/emp_dashboard.css";
@@ -30,37 +20,15 @@ import SideNav from "./SideNav";
 import LeaveCalendar from "./hr_iinerpage/LeaveCalendar";
 import FeedBackPost from "./FeedBackPost";
 import { CiEdit } from "react-icons/ci";
-import { IoClose } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import TeamMember from "./hr_iinerpage/TeamMember";
+import HrHeader from "./HrHeader";
 
 const HrDashBoard = () => {
-  const { logout } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      text: "New employee joined - Rahul Sharma",
-      time: "10 min ago",
-      read: false,
-    },
-    {
-      id: 2,
-      text: "HR meeting scheduled at 4 PM",
-      time: "1 hour ago",
-      read: false,
-    },
-    {
-      id: 3,
-      text: "Payroll processed successfully",
-      time: "3 hours ago",
-      read: true,
-    },
-  ]);
-  const [unreadCount, setUnreadCount] = useState(2);
 
   // HR Stats Data
   const statsData = [
@@ -120,14 +88,7 @@ const HrDashBoard = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const markAsRead = (id) => {
-    setNotifications(
-      notifications.map((notif) =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-    setUnreadCount((prev) => prev - 1);
-  };
+
 
   return (
     <div className="dashboard-container">
@@ -142,101 +103,9 @@ const HrDashBoard = () => {
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
-        <header className="dashboard-header">
-          <Container fluid>
-            <Row className="align-items-center">
-              <Col xs="auto">
-                <Button
-                  variant="light"
-                  className="sidebar-toggle"
-                  onClick={toggleSidebar}
-                >
-                  <FaBars />
-                </Button>
-              </Col>
-              <Col>
-                <div className="search-bar">
-                  <FaSearch className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="search-input"
-                  />
-                </div>
-              </Col>
-              <Col xs="auto">
-                <div className="header-actions">
-                  {/* Notifications */}
-                  <Dropdown align="end">
-                    <Dropdown.Toggle
-                      variant="light"
-                      className="notification-btn"
-                    >
-                      <FaBell />
-                      {unreadCount > 0 && (
-                        <Badge pill bg="danger" className="notification-badge">
-                          {unreadCount}
-                        </Badge>
-                      )}
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu className="notification-dropdown">
-                      <div className="notification-header">
-                        <h6>Notifications</h6>
-                        <Button variant="link" size="sm">
-                          Mark all as read
-                        </Button>
-                      </div>
-                      {notifications.map((notif) => (
-                        <Dropdown.Item
-                          key={notif.id}
-                          className={`notification-item ${
-                            !notif.read ? "unread" : ""
-                          }`}
-                          onClick={() => markAsRead(notif.id)}
-                        >
-                          <div className="notification-content">
-                            <p>{notif.text}</p>
-                            <small>{notif.time}</small>
-                          </div>
-                          {!notif.read && <div className="unread-dot"></div>}
-                        </Dropdown.Item>
-                      ))}
-                    </Dropdown.Menu>
-                  </Dropdown>
+      
+        <HrHeader toggleSidebar={toggleSidebar} />
 
-                  {/* Profile */}
-                  <Dropdown align="end">
-                    <Dropdown.Toggle
-                      variant="light"
-                      className="user-profile-btn"
-                    >
-                      <Image
-                        src="https://picsum.photos/seed/user123/40/40.jpg"
-                        roundedCircle
-                        className="user-avatar"
-                      />
-                      <span className="user-name d-none d-md-inline">
-                        John Doe
-                      </span>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      <Dropdown.Item href="#">
-                        <FaUserCircle className="me-2" /> Profile
-                      </Dropdown.Item>
-                      <Dropdown.Item href="#">
-                        <FaCog className="me-2" /> Settings
-                      </Dropdown.Item>
-                      <Dropdown.Divider />
-                      <Dropdown.Item onClick={logout} href="#">
-                        <FaSignOutAlt className="me-2" /> Logout
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </header>
 
         {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
