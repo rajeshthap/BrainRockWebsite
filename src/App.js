@@ -20,6 +20,7 @@ import EmployeeRegistration from './componets/all_registration/EmployeeRegistrat
 import ProtectedRoute from './componets/context/ProtectedRoute';
 import DailyAttendance from './componets/hr_dashboard/attendance/DailyAttendance';
 import HrProfile from './componets/all_profile/HrProfile';
+import ForgotPassword from './componets/all_login/ForgotPassword';
 
 
 
@@ -51,9 +52,9 @@ function AppContent() {
         <Route path="/Login" element={<Login />} />
         <Route path="/HrRegistration" element={<HrRegistration />} />
         <Route path="/EmployeeRegistration" element={<EmployeeRegistration />} />
-        <Route path="/HrDashBoard" element={<HrDashBoard />} />
+        {/* <Route path="/HrDashBoard" element={<HrDashBoard />} /> */}
         <Route path="/DailyAttendance" element={<DailyAttendance />} />
-      
+        <Route path="/ForgotPassword" element={<ForgotPassword />} />
 
         {/* Protected Routes */}
         { <Route 

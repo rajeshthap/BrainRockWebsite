@@ -26,7 +26,7 @@ function NavBar() {
             <span className="awc-subtitle">
               <span className="br-span">Brainrock</span> Consulting Services
             </span>
-            <p>I.S.O certified 9001:2015</p>
+            <p className="sub-awc-title">I.S.O certified 9001:2015</p>
           </div>
 
           <Navbar.Toggle aria-controls="basic-navbar-nav" className="toggle-logo" />

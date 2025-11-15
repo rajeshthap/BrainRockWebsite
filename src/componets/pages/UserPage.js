@@ -3,17 +3,17 @@ import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import "../../assets/css/UserPage.css"
 import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
-
+import { FaArrowRight } from "react-icons/fa6";
 // Component
 
 import Banner1 from "../../assets/images/banner-1.png";
 
 import "../../assets/css/slider.css"
-
+import { LuBrainCircuit } from "react-icons/lu";
 import { ImProfile } from "react-icons/im";
-
+import { SiCircuitverse } from "react-icons/si";
 import { MdReviews } from "react-icons/md";
-
+import { SiAmazoncloudwatch } from "react-icons/si";
 import PHPIcon from "../../assets/images/php.png";
 import MySqlIcon from "../../assets/images/mysql.png";
 import JavaIcon from "../../assets/images/java.png";
@@ -25,142 +25,160 @@ import MongoDBIcon from "../../assets/images/mongodb.png";
 
 import ServicesCarousel from "./ServicesCarousel";
 import TestimonialCarousel from "./TestimonialCarousel";
+import { Link } from "react-router-dom";
 
 function UserPage() {
   return (
-    <div className="container-fluid">
-      <Carousel className="resorce-craousal  " interval={3000} pause={false}>
-        <Carousel.Item>
-          <Row className="resorce-img">
-            <Col lg={6} md={6} sm={12}>
-              <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
-                <h1 className=" bg-opacity-50 py-2 px-4">
-                  <span className="br-span-title"> Empowering</span>{" "}
-                  <span className="br-span-sublist">Your Business</span>{" "}
-                  <span className="br-span-title">With</span>
-                  <br></br> <span className="br-span-list">Next-Gen IT</span>{" "}
-                  <span className="br-span-sublist">Solutions</span>
-                </h1>
-                <p className=" bg-opacity-50 py-2 px-4">
-                  We deliver innovative IT solutions to help your business stay
-                  ahead in the digital worldd
-                </p>
-              </div>
-            </Col>
+    <div className="container-fluid p-0">
+      <div className="craousal-main">
+        <Carousel className="resorce-craousal  " interval={3000} pause={false}>
+          <Carousel.Item>
+            <Row className="resorce-img">
+              <Col lg={6} md={6} sm={12}>
+                <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
+                  <h1 className=" bg-opacity-50 py-2 px-4">
+                    <span class="hero-sub-title mb-20">Professional it solution ~</span>{" "}<br></br>
+                    <span className="br-span-title"> Best It Solution Company</span>{" "}
+                    {" "}
 
-            <Col lg={6} md={6} sm={12}>
-              <div>
-                <i>
-                  <img
-                    src={Banner1}
-                    alt="groupimage"
-                    className="img-fluid"
-                  ></img>
-                </i>
-              </div>
-            </Col>
-          </Row>
-          <Carousel.Caption></Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item>
-          <Row className="resorce-img">
-            <Col lg={6} md={6} sm={12}>
-              <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
-                <h1 className=" bg-opacity-50 py-2 px-4">
-                  <span className="br-span-title"> Empowering</span>{" "}
-                  <span className="br-span-sublist">Your Business</span>{" "}
-                  <span className="br-span-title">With</span>
-                  <br></br> <span className="br-span-list">Next-Gen IT</span>{" "}
-                  <span className="br-span-sublist">Solutions</span>
-                </h1>
-                <p className=" bg-opacity-50 py-2 px-4">
-                  We deliver innovative IT solutions to help your business stay
-                  ahead in the digital worldd
-                </p>
-              </div>
-            </Col>
+                  </h1>
+                  <p className=" bg-opacity-50 py-2 px-4">
+                    We deliver innovative IT solutions to help your business stay
+                    ahead in the digital worldd
+                  </p>
+                </div>
+              </Col>
 
-            <Col lg={6} md={6} sm={12}>
-              <div>
-                <i>
-                  <img
-                    src={Banner1}
-                    alt="groupimage"
-                    className="img-fluid"
-                  ></img>
-                </i>
-              </div>
-            </Col>
-          </Row>
-          <Carousel.Caption></Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item>
-          <Row className="resorce-img">
-            <Col lg={6} md={6} sm={12}>
-              <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
-                <h1 className=" bg-opacity-50 py-2 px-4">
-                  <span className="br-span-title"> Empowering</span>{" "}
-                  <span className="br-span-sublist">Your Business</span>{" "}
-                  <span className="br-span-title">With</span>
-                  <br></br> <span className="br-span-list">Next-Gen IT</span>{" "}
-                  <span className="br-span-sublist">Solutions</span>
-                </h1>
-                <p className=" bg-opacity-50 py-2 px-4">
-                  We deliver innovative IT solutions to help your business stay
-                  ahead in the digital worldd
-                </p>
-              </div>
-            </Col>
+              <Col lg={6} md={6} sm={12}>
+                <div>
+                  <i>
+                    <img
+                      src={Banner1}
+                      alt="groupimage"
+                      className="img-fluid"
+                    ></img>
+                  </i>
+                </div>
+              </Col>
+            </Row>
+            <Carousel.Caption></Carousel.Caption>
 
-            <Col lg={6} md={6} sm={12}>
-              <div>
-                <i>
-                  <img
-                    src={Banner1}
-                    alt="groupimage"
-                    className="img-fluid"
-                  ></img>
-                </i>
-              </div>
-            </Col>
-          </Row>
-          <Carousel.Caption></Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item>
-          <Row className="resorce-img">
-            <Col lg={6} md={6} sm={12}>
-              <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
-                <h1 className=" bg-opacity-50 py-2 px-4">
-                  <span className="br-span-title"> Empowering</span>{" "}
-                  <span className="br-span-sublist">Your Business</span>{" "}
-                  <span className="br-span-title">With</span>
-                  <br></br> <span className="br-span-list">Next-Gen IT</span>{" "}
-                  <span className="br-span-sublist">Solutions</span>
-                </h1>
-                <p className=" bg-opacity-50 py-2 px-4">
-                  We deliver innovative IT solutions to help your business stay
-                  ahead in the digital worldd
-                </p>
-              </div>
-            </Col>
+          </Carousel.Item>
 
-            <Col lg={6} md={6} sm={12}>
-              <div>
-                <i>
-                  <img
-                    src={Banner1}
-                    alt="groupimage"
-                    className="img-fluid"
-                  ></img>
-                </i>
-              </div>
-            </Col>
-          </Row>
-          <Carousel.Caption></Carousel.Caption>
-        </Carousel.Item>
-      </Carousel>
+
+          <Carousel.Item>
+            <Row className="resorce-img">
+              <Col lg={6} md={6} sm={12}>
+                <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
+                  <h1 className=" bg-opacity-50 py-2 px-4">
+                    <span class="hero-sub-title mb-20">Professional it solution ~</span>{" "}<br></br>
+                    <span className="br-span-title"> Best It Solution Company</span>{" "}
+                    {" "}
+
+                  </h1>
+                  <p className=" bg-opacity-50 py-2 px-4">
+                    We deliver innovative IT solutions to help your business stay
+                    ahead in the digital worldd
+                  </p>
+                </div>
+              </Col>
+
+              <Col lg={6} md={6} sm={12}>
+                <div>
+                  <i>
+                    <img
+                      src={Banner1}
+                      alt="groupimage"
+                      className="img-fluid"
+                    ></img>
+                  </i>
+                </div>
+              </Col>
+            </Row>
+            <Carousel.Caption></Carousel.Caption>
+
+          </Carousel.Item>
+        </Carousel>
+      </div>
       <div />
       <Container>
+        <Row className="feature-area feature-minus">
+
+          <Container>
+            <div className="feature-wpr grid-3">
+
+              <div className="feature-box">
+                <div className="feature-icon">
+                  <i class="flaticon-cloud"><LuBrainCircuit /></i>
+
+
+
+                </div>
+                <div className="flaticon-cloud">
+
+
+                </div>
+                <div className="feature-desc">   <h4>It Solution</h4>
+                  <p>
+                    It Solution
+                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
+
+                  <Link to="/service-single" className="feature-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </Link>
+                </div>
+              </div>
+              <div className="feature-box">
+                <div className="feature-icon">
+                  <i class="flaticon-cloud"><SiCircuitverse /></i>
+
+
+
+                </div>
+                <div className="flaticon-cloud">
+
+
+                </div>
+                <div className="feature-desc">   <h4>
+                  It Management</h4>
+                  <p>
+                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
+
+                  <Link to="/service-single" className="feature-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </Link>
+                </div>
+              </div>
+              <div className="feature-box">
+                <div className="feature-icon">
+                  <i class="flaticon-cloud"><SiAmazoncloudwatch /></i>
+
+
+
+                </div>
+                <div className="flaticon-cloud">
+
+
+                </div>
+                <div className="feature-desc">   <h4>
+                  It Consultancy</h4>
+                  <p>
+                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
+
+                  <Link to="/service-single" className="feature-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+          </Container>
+        </Row>
+
+
         <Row className="mt-3">
           <Col lg={6} md={6} sm={12}>
             <div className="resorce-sub-list">

@@ -25,7 +25,7 @@
 .awc-title {
     line-height: var(--awc-space-400);
     color: var(--br-black) !important;
-    margin-top: 18px;
+    margin-top: 0px;
 }
 
 img.logo1 {
@@ -35,14 +35,14 @@ img.logo1 {
 
 .awc-subtitle {
     color: var(--br-blue-dark-bg) !important;
-    font-size: var(--br-space-450) !important;
+    font-size: var(--br-space-400) !important;
     display: flex;
-    margin-left: var(--br-space-300);
-
+    font-weight: 600;
 }
 
 img.logo-wecd {
     width: 88px;
+    text-align: center;
 }
 
 .subtitle {
@@ -54,7 +54,7 @@ img.logo-wecd {
 .nav-link {
     color: var(--br-black);
     font-weight: var(--br-space-800) !important;
-    font-size: var(--br-space-400);
+    font-size: var(--br-space-300);
 }
 
 .nav-link:hover {
@@ -62,10 +62,10 @@ img.logo-wecd {
 }
 
 .awc-title p {
-    font-size: var(--awc-space-300);
+    font-size: var(--br-space-250) !important;
     color: var(--br-Primary);
-    margin-top: var(--br-space-100);
-    margin-left: 12px;
+    margin-top: var(--br-space-50);
+    margin-bottom: var(--br-space-50);
 }
 
 
