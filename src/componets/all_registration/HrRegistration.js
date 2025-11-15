@@ -221,16 +221,25 @@ const HrRegistration = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "bank_name" && bankDetailsFetched) {
-      return; 
-    }
-    setFormData((prev) => ({ ...prev, [name]: value }));
+ const handleInputChange = (e) => {
+  const { name, value } = e.target;
+  
+  let formattedValue = value;
+  if (value instanceof Date) {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    formattedValue = `${year}-${month}-${day}`;
+  }
+  
+  if (name === "bank_name" && bankDetailsFetched) {
+    return;
+  }
+  setFormData((prev) => ({ ...prev, [name]: formattedValue }));
 
-    const errorMessage = validateField(name, value);
-    setErrors((prev) => ({ ...prev, [name]: errorMessage }));
-  };
+  const errorMessage = validateField(name, formattedValue);
+  setErrors((prev) => ({ ...prev, [name]: errorMessage }));
+};
 
   // Validation function
   const validateField = (name, value) => {
@@ -893,7 +902,7 @@ const HrRegistration = () => {
       className="br-date-picker"
         selected={formData.date_of_birth ? new Date(formData.date_of_birth) : null}
         onChange={(date) => handleInputChange({ target: { name: 'date_of_birth', value: date } })}
-        dateFormat="MMMM d, yyyy"
+        dateFormat="yyyy-MM-dd"
         placeholderText="Select Date of Birth"
         customInput={<CustomDatePickerInput placeholder="Select Date of Birth" />}
         maxDate={new Date(new Date().setFullYear(new Date().getFullYear() - 18))}
@@ -1263,7 +1272,7 @@ const HrRegistration = () => {
       <DatePicker
         selected={formData.joining_date ? new Date(formData.joining_date) : null}
         onChange={(date) => handleInputChange({ target: { name: 'joining_date', value: date } })}
-        dateFormat="MMMM d, yyyy"
+        dateFormat="yyyy-MM-dd"
         placeholderText="Select Joining Date"
         customInput={<CustomDatePickerInput placeholder="Select Joining Date" />}
         minDate={new Date()}

@@ -1,0 +1,99 @@
+.br-attendance-card {
+  border-radius: 14px;
+  background: #f8faff;
+}
+
+.br-att-row {
+  background: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0px 1px 3px rgba(0,0,0,0.06);
+}
+.att-time-set{
+    font-size: 12px;
+}
+.att-upt-btn{
+    font-size: 10px;
+}
+.br-day-text {
+  font-size: var(--br-space-300);
+  font-weight: 600;
+}
+.br-time-dropdown {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+}
+
+.br-date-text {
+  font-size: 14px;
+  color: #777;
+}
+
+.br-time-label {
+  font-size: var(--br-space-300);
+  font-weight: 600;
+}
+
+.br-hours-text {
+  font-size: var(--br-space-300);
+  font-weight: 700;
+}
+
+.br-timeline {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.br-timeline .dot {
+  width: 10px;
+  height: 10px;
+  background: #bbb;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.br-timeline .line {
+  flex-grow: 1;
+  height: 4px;
+  border-radius: 10px;
+  margin: 0 6px;
+}
+
+.line-green {
+  background: #4caf50;
+}
+
+.line-red {
+  background: #e53935;
+}
+
+.line-yellow {
+  background: #ffcc00;
+}
+
+.br-status-badge {
+  position: absolute;
+  top: -12px;
+  left: 40%;
+  padding: 3px 10px;
+  font-size: 10px;
+  border-radius: 8px;
+}
+.br-edit-btn{
+    font-size: 12px;
+}
+/* Responsive Fixes */
+
+@media (max-width: 768px) {
+  .br-att-row {
+    text-align: center;
+  }
+  .br-timeline {
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+}

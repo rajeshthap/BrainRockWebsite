@@ -21,40 +21,49 @@ function TeamMember() {
             <img
               src={Women}
               alt="team"
-              className="img-fluid br-team-img br-team-img-checked mb-2"
+              className="img-fluid br-team-img br-team-img-checked border-gradient-green mb-2"
             />
             <span className="br-span-dout"></span>
-            <p className="text-muted mb-0"><span className="br-span-dout-text"></span>Checked-in</p>
           </div>
-          
-  <div className="text-center">
+
+          <div className="text-center">
             <img
               src={Women}
               alt="team"
-              className="img-fluid br-team-img br-team-img-checked mb-2"
-            /> <span className="br-span-wfm-dout"></span>
-         
-            <p className="text-muted mb-0"><span className="br-span-notchecked-text"></span>Not Checked-in</p>
+              className="img-fluid br-team-img br-team-img-checked border-gradient-green mb-2"
+            />{" "}
+            <span className="br-span-wfm-dout"></span>
           </div>
           <div className="text-center">
             <img
               src={Women}
               alt="team"
-              className="img-fluid br-team-img  br-leave-img mb-2"
+              className="img-fluid br-team-img border-gradient-green  br-leave-img mb-2"
             />
-            <p className="text-muted mb-0"><span className="br-span-leave-text"></span>Leave</p>
           </div>
-
-         
 
           <div className="text-center">
             <img
               src={Women}
               alt="team"
-              className="img-fluid br-team-img br-wfh-img mb-2"
-            /> <span className="br-span-wfm-dout"></span>
-            <p className="text-muted mb-0"><span className="br-span-notchecked-text"></span>WFH</p>
+              className="img-fluid br-team-img br-wfh-img border-gradient-green mb-2"
+            />{" "}
+            <span className="br-span-wfm-dout"></span>
           </div>
+        </div>
+        <div className="d-flex justify-content-start flex-wrap mt-3">
+          <p className="text-muted mb-0 mx-3">
+            <span className="br-span-dout-text"></span>Checked-in
+          </p>
+          <p className="text-muted mb-0 mx-3">
+            <span className="br-span-notchecked-text"></span>Not Checked-in
+          </p>
+          <p className="text-muted mb-0 mx-3">
+            <span className="br-span-leave-text"></span>Leave
+          </p>
+          <p className="text-muted mb-0 mx-2">
+            <span className="br-span-notchecked-text"></span>WFH
+          </p>
         </div>
       </Card>
     </div>

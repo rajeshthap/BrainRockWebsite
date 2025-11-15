@@ -128,7 +128,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
       submenu: [
         {
           label: "Daily Attendance",
-          path: "/EmployeeManagement",
+          path: "/DailyAttendance",
           icon: <FaChartLine />,
         },
         {

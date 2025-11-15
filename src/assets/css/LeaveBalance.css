@@ -1,0 +1,94 @@
+.leave-wrapper {
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.title {
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* -------- Table Layout -------- */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.leave-table {
+  width: max-content;
+  border-collapse: collapse;
+  background: #fff;
+  min-width: 900px;
+  border-radius: 8px;
+}
+
+.leave-table th,
+.leave-table td {
+  border: 1px solid #dee2e6;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Sticky Employee Column */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+  font-weight: bold;
+}
+
+/* Day Columns */
+.day-col {
+  background: #f1f5f9;
+  font-size: 12px;
+}
+
+/* Leave Summary Columns */
+.sum-col {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* -------- Leave Badges -------- */
+.leave-badge {
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  display: inline-block;
+}
+
+.PL {
+  background-color: #0d6efd; /* Blue */
+}
+
+.SL {
+  background-color: #198754; /* Green */
+}
+
+.CL {
+  background-color: #fd7e14; /* Orange */
+}
+
+.LWP {
+  background-color: #dc3545; /* Red */
+}
+
+/* Mobile View Optimization */
+@media (max-width: 600px) {
+  .leave-wrapper {
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .emp-col,
+  .sum-col {
+    font-size: 12px;
+  }
+}
