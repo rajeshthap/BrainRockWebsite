@@ -118,21 +118,21 @@ export default function Login() {
   const roleImage = roleImages[formData.role] || DefaultImg;
 
   return (
-    <div className="temp-donate">
-      <Container className="temp-container">
-        <div className="temple-registration-heading">
+    <div className="br-donate">
+      <Container className="br-container">
+        <div className="br-registration-heading">
           <h1>{roleHeading}</h1>
           <Form onSubmit={handleSubmit}>
             <Row className="mt-3">
               <Col lg={6} md={6}>
                 {/* Role Selection */}
                 <Form.Group className="mb-3">
-                  <Form.Label className="temp-label ">
-                    Login As <span className="temp-span-star">*</span>
+                  <Form.Label className="br-label">
+                    Login As <span className="br-span-star">*</span>
                   </Form.Label>
                   <Form.Select
                     name="role"
-                    className="temp-form-control-option-bg"
+                    className="br-form-control-option-bg"
                     value={formData.role}
                     onChange={handleChange}
                     disabled={authLoading}
@@ -148,9 +148,9 @@ export default function Login() {
 
                 {/* Email / Mobile */}
                 <Form.Group className="mb-3">
-                  <Form.Label className="temp-label">
+                  <Form.Label className="br-label">
                     Email or Mobile Number{" "}
-                    <span className="temp-span-star">*</span>
+                    <span className="br-span-star">*</span>
                   </Form.Label>
                   <Form.Control
                     type="text"
@@ -158,15 +158,15 @@ export default function Login() {
                     value={formData.email_or_phone}
                     onChange={handleChange}
                     placeholder="Registered Mobile No. / Email"
-                    className="temp-form-control-bg"
+                    className="br-form-control-bg"
                     disabled={authLoading}
                   />
                 </Form.Group>
 
                 {/* Password */}
                 <Form.Group className="mb-3">
-                  <Form.Label className="temp-label">
-                    Password <span className="temp-span-star">*</span>
+                  <Form.Label className="br-label">
+                    Password <span className="br-span-star">*</span>
                   </Form.Label>
                   <div className="password-wrapper" style={{ position: "relative" }}>
                     <Form.Control
@@ -175,7 +175,7 @@ export default function Login() {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Your Password"
-                      className="temp-form-control-bg"
+                      className="br-form-control-bg"
                       disabled={authLoading}
                     />
                     <i
@@ -198,13 +198,13 @@ export default function Login() {
                     variant="danger"
                     type="submit"
                     disabled={authLoading}
-                    className="temp-submit-btn"
+                    className="br-submit-btn"
                   >
                     {authLoading ? "Logging in..." : "Login"}
                   </Button>
                   <Button
                     variant="danger"
-                    className="temp-submit-btn-login"
+                    className="br-submit-btn-login"
                     type="button"
                     onClick={() => navigate("/ForgotPassword")}
                     disabled={authLoading}
