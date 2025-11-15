@@ -9,7 +9,7 @@ import {
   Card,
   Spinner,
 } from "react-bootstrap";
-import { FaLock, FaArrowLeft, FaCheckCircle } from "react-icons/fa";
+import { FaLock, FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
@@ -255,18 +255,7 @@ const handleSendOtp = async (e) => {
     }, 1000);
   };
 
-  const resetForm = () => {
-    setPhone("");
-    setOtp("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setErrors({});
-    setApiError("");
-    setSuccessMessage("");
-    setCurrentStep("phone");
-    setResendTimer(0);
-    setOtpSent(false);
-  };
+  
 
   const handlePhoneChange = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 10);
