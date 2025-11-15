@@ -1,15 +1,26 @@
-.br-header{
-    padding: var(--br-space-200) var(--br-space-300);
+.br-header {
+  padding: var(--br-space-100);
+  font-size: var(--br-space-250);
 }
+
 .br-header-icon {
-  font-size: var(--br-space-500);
+  font-size: var(--br-space-300);
   margin-right: var(--br-space-200);
+  color: var(--br-white);
 }
-.main-header{
-  background-color: var(--br-primary);
+
+.main-header {
+  background: var(--br-primary) !important;
   color: var(--br-white);
   padding: var(--br-space-200) var(--br-space-400);
 }
-.br-m-left{
+
+.br-m-left {
   margin-left: var(--br-space-300);
+}
+
+.main-header a {
+  color: var(--br-white);
+  text-decoration: none;
+  font-weight: 500;
 }

@@ -35,8 +35,10 @@
 
 /* Bootstrap Carousel Override */
 .carousel-inner {
-  padding: 20px 0;
+  padding: 0px 0;
 }
+
+
 
 .carousel-control-prev,
 .carousel-control-next {
