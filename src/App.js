@@ -18,6 +18,8 @@ import { AuthProvider } from './componets/context/AuthContext';
 import HrRegistration from './componets/all_registration/HrRegistration';
 import EmployeeRegistration from './componets/all_registration/EmployeeRegistration';
 import ProtectedRoute from './componets/context/ProtectedRoute';
+import DailyAttendance from './componets/hr_dashboard/attendance/DailyAttendance';
+import HrProfile from './componets/all_profile/HrProfile';
 
 
 
@@ -28,7 +30,9 @@ function AppContent() {
     "/HrDashBoard",
     "/EmployeeManagement",
     "/EmployeeRegistration",
-    "/HrRegistration"
+    "/HrRegistration",
+    "/DailyAttendance",
+    "/HrProfile"
   ]);
 
   const hiddenFooter1 = new Set([
@@ -48,16 +52,18 @@ function AppContent() {
         <Route path="/HrRegistration" element={<HrRegistration />} />
         <Route path="/EmployeeRegistration" element={<EmployeeRegistration />} />
         <Route path="/HrDashBoard" element={<HrDashBoard />} />
+        <Route path="/DailyAttendance" element={<DailyAttendance />} />
+      
 
         {/* Protected Routes */}
-        {/* <Route 
+        { <Route 
           path="/HrDashBoard" 
           element={
             <ProtectedRoute>
               <HrDashBoard />
             </ProtectedRoute>
           } 
-        /> */}
+        /> }
         <Route 
           path="/EmployeeManagement" 
           element={
@@ -66,7 +72,17 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/HrProfile" 
+          element={
+            <ProtectedRoute>
+              <HrProfile />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
+
+      
       {!shouldHideFooter1 && <Footer />}
     </>
   );

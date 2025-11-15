@@ -23,6 +23,7 @@ import { CiEdit } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import TeamMember from "./hr_iinerpage/TeamMember";
 import HrHeader from "./HrHeader";
+import LeaveBalance from "./hr_iinerpage/LeaveBalance";
 
 const HrDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -241,6 +242,7 @@ const HrDashBoard = () => {
               </Card>
           <TeamMember />
               <LeaveCalendar />
+              <LeaveBalance />
             </Col>
           
 
