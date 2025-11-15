@@ -3,17 +3,17 @@ import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import "../../assets/css/UserPage.css"
 import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
-
+import { FaArrowRight } from "react-icons/fa6";
 // Component
 
 import Banner1 from "../../assets/images/banner-1.png";
 
 import "../../assets/css/slider.css"
-
+import { LuBrainCircuit } from "react-icons/lu";
 import { ImProfile } from "react-icons/im";
-
+import { SiCircuitverse } from "react-icons/si";
 import { MdReviews } from "react-icons/md";
-
+import { SiAmazoncloudwatch } from "react-icons/si";
 import PHPIcon from "../../assets/images/php.png";
 import MySqlIcon from "../../assets/images/mysql.png";
 import JavaIcon from "../../assets/images/java.png";
@@ -25,6 +25,7 @@ import MongoDBIcon from "../../assets/images/mongodb.png";
 
 import ServicesCarousel from "./ServicesCarousel";
 import TestimonialCarousel from "./TestimonialCarousel";
+import { Link } from "react-router-dom";
 
 function UserPage() {
   return (
@@ -101,6 +102,83 @@ function UserPage() {
       </div>
       <div />
       <Container>
+        <Row className="feature-area feature-minus">
+
+          <Container>
+            <div className="feature-wpr grid-3">
+
+              <div className="feature-box">
+                <div className="feature-icon">
+                  <i class="flaticon-cloud"><LuBrainCircuit /></i>
+
+
+
+                </div>
+                <div className="flaticon-cloud">
+
+
+                </div>
+                <div className="feature-desc">   <h4>It Solution</h4>
+                  <p>
+                    It Solution
+                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
+
+                  <Link to="/service-single" className="feature-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </Link>
+                </div>
+              </div>
+              <div className="feature-box">
+                <div className="feature-icon">
+                  <i class="flaticon-cloud"><SiCircuitverse /></i>
+
+
+
+                </div>
+                <div className="flaticon-cloud">
+
+
+                </div>
+                <div className="feature-desc">   <h4>
+                  It Management</h4>
+                  <p>
+                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
+
+                  <Link to="/service-single" className="feature-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </Link>
+                </div>
+              </div>
+              <div className="feature-box">
+                <div className="feature-icon">
+                  <i class="flaticon-cloud"><SiAmazoncloudwatch /></i>
+
+
+
+                </div>
+                <div className="flaticon-cloud">
+
+
+                </div>
+                <div className="feature-desc">   <h4>
+                  It Consultancy</h4>
+                  <p>
+                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
+
+                  <Link to="/service-single" className="feature-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+          </Container>
+        </Row>
+
+
         <Row className="mt-3">
           <Col lg={6} md={6} sm={12}>
             <div className="resorce-sub-list">

@@ -39,6 +39,8 @@ body {
   --br-br-dark-bg: #00553c;
   --br-gradient: transparent linear-gradient(180deg, #1973D8 0%, #0B488F 100%);
 
+  --br-org: #ffaa18;
+
   /* custom padding abr margin*/
   --br-space-0: 0px;
   --br-space-25: 1px;
