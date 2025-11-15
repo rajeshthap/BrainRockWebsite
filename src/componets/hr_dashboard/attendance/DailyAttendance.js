@@ -3,12 +3,18 @@ import { Container, Row, Col, Card, Badge, Form, Button } from "react-bootstrap"
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
 import "../../../assets/css/attendance.css";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const DailyAttendance = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
+  
   const [weekData, setWeekData] = useState([
     { day: "Sun", date: "14", status: "Weekend", timeIn: "", timeOut: "", hours: "00:00" },
     { day: "Mon", date: "15", status: "Present", timeIn: "09:00 AM", timeOut: "06:00 PM", hours: "09:00" },
@@ -22,7 +28,14 @@ const DailyAttendance = () => {
     "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
     "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM"
   ];
+const CustomDatePickerInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
+<div className="input-group">
 
+<span className="input-group-text" onClick={onClick}>
+<i className="bi bi-calendar3"></i>
+</span>
+</div>
+  ));
   const calculateHours = (timeIn, timeOut) => {
     if (!timeIn || !timeOut) return "00:00";
     const start = new Date(`1970-01-01 ${timeIn}`);
@@ -69,24 +82,47 @@ const DailyAttendance = () => {
 
         <Container fluid className="dashboard-body">
           <Card className="p-3 shadow-sm br-attendance-card">
+         <div className="d-flex  justify-content-center date-select text-center">
+
+                          
+                         <IoIosArrowBack /> <DatePicker
+                            
+                           
+                            dateFormat="yyyy-MM-dd"
+                            placeholderText="Select Date of Birth"
+                            customInput={<CustomDatePickerInput placeholder="Select Date of Birth" />}
+                            maxDate={new Date(new Date().setFullYear(new Date().getFullYear() - 18))}
+                            showYearDropdown
+                            scrollableYearDropdown className="br-att-date-p"
+                            yearDropdownItemNumber={100}
+                          /> <IoIosArrowForward />
+                          
+                     
+      <div className="d-flex  justify-content-center calendar-input-icon">
+  <p>10-May-2025 to 17-May-2025</p>
+  </div>
+</div>
+
+ 
+
 
             {weekData.map((item, index) => (
               <div key={index}>
                 {/* ================= MAIN ROW ================= */}
-                <Row className="align-items-center br-att-row mb-3">
+                <Row className="align-items-center br-att-row mt-3 mb-3">
 
-                  <Col xs={2} sm={2} md={2} lg={1} className="br-day-col">
+                  <Col xs={6} sm={6} md={4} lg={1} className="br-day-col">
                     <div className="br-day-text">{item.day}</div>
                     <div className="br-date-text">{item.date}</div>
                   </Col>
 
                   {/* TIME-IN */}
-                  <Col xs={6} sm={4} md={3} lg={2}>
+                  <Col xs={6} sm={6} md={2} lg={2}>
                     <div className="br-time-label">{item.timeIn || "-"}</div>
                   </Col>
 
                   {/* TIMELINE */}
-                  <Col xs={3} sm={3} md={4} lg={3}>
+                  <Col xs={12} sm={12} md={6} lg={3}>
                     <div className="br-timeline">
                       <span className="dot start"></span>
                       <div
@@ -115,18 +151,18 @@ const DailyAttendance = () => {
                   </Col>
 
                   {/* TIME-OUT */}
-                  <Col xs={2} sm={2} md={2} lg={2}>
+                  <Col xs={12} sm={12} md={3} lg={2}>
                     <div className="br-time-label">{item.timeOut || "-"}</div>
                   </Col>
 
                   {/* HOURS WORKED */}
-                  <Col xs={3} sm={3} md={2} lg={2}>
+                  <Col xs={6} sm={6} md={4} lg={2}>
                     <div className="br-hours-text">{item.hours}</div>
-                    <small className="text-muted">Hrs worked</small>
+                    <small className="text-muted br-att-hrs">Hrs worked</small>
                   </Col>
 
                   {/* EDIT BUTTON */}
-                  <Col xs={3} sm={3} md={2} lg={2}>
+                  <Col xs={6} sm={6} md={2} lg={2}>
                     <div
                       className="text-primary br-edit-btn"
                       style={{ cursor: "pointer" }}
@@ -140,8 +176,8 @@ const DailyAttendance = () => {
                 {/* =============== EDIT ROW BELOW =============== */}
                 {editingIndex === index && (
                   <Row className="p-3 br-edit-row bg-light rounded mb-3">
-                    <Col md={3}>
-                      <Form.Label><b>Time In</b></Form.Label>
+                    <Col md={3} lg={3} sm={12}>
+                      <Form.Label className="att-label">Time In</Form.Label>
                       <Form.Select className="att-time-set"
                         value={editData.timeIn}
                         onChange={(e) => setEditData({ ...editData, timeIn: e.target.value })}
@@ -153,8 +189,8 @@ const DailyAttendance = () => {
                       </Form.Select>
                     </Col>
 
-                    <Col md={3}>
-                      <Form.Label><b>Time Out</b></Form.Label>
+                    <Col md={6} lg={3} sm={12} xs={12} className="att-mob-out">
+                      <Form.Label className="att-label att-mt-mob">Time Out</Form.Label>
                       <Form.Select className="att-time-set"
                         value={editData.timeOut}
                         onChange={(e) => setEditData({ ...editData, timeOut: e.target.value })}
@@ -166,14 +202,14 @@ const DailyAttendance = () => {
                       </Form.Select>
                     </Col>
 
-                    <Col md={3} className="d-flex align-items-end">
+                    <Col md={3} lg={2}  sm={6} xs={6} className="d-flex align-items-end">
                       <Button variant="success" className="att-upt-btn" onClick={() => handleUpdate(index)}>
                         Update
                       </Button>
                     </Col>
 
-                    <Col md={3} className="d-flex align-items-end">
-                      <Button variant="secondary" onClick={() => setEditingIndex(null)}>
+                    <Col md={3} lg={2}  sm={6} xs={6} className="d-flex align-items-end">
+                      <Button variant="secondary" className ="att-cancle"onClick={() => setEditingIndex(null)}>
                         Cancel
                       </Button>
                     </Col>
@@ -181,8 +217,14 @@ const DailyAttendance = () => {
                 )}
               </div>
             ))}
+<Row>
+  <Col lg={12}  md={12} sm={12} className="text-end br-total-hrs">
+    <h2>Total Work Hours</h2>
+  </Col>
+</Row>
 
           </Card>
+          
         </Container>
       </div>
     </div>

@@ -74,7 +74,10 @@
 .line-yellow {
   background: #ffcc00;
 }
-
+.att-label{
+    font-size: 12px;
+    font-weight: 600;
+}
 .br-status-badge {
   position: absolute;
   top: -12px;
@@ -84,9 +87,64 @@
   border-radius: 8px;
 }
 .br-edit-btn{
-    font-size: 12px;
+    font-size:var(--br-space-300);
+}
+.att-cancle{
+    font-size:var(--br-space-300);
+}
+.br-att-hrs{
+    font-size:var(--br-space-300);
+}
+.br-total-hrs h2{
+    font-size: var(--br-space-300);
+    font-weight: 600;
 }
 /* Responsive Fixes */
+.date-select {
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  position: relative;
+}
+
+.date-select svg {
+  font-size: 12px;
+  cursor: pointer;
+  color: #000;
+}
+
+.br-att-date-p{
+    position:absolute !important;
+}
+.calendar-input-icon {
+ 
+  text-align: center;
+}
+
+.calendar-input-icon p {
+  font-size: var(--br-space-300);
+  font-weight: 500;
+  margin: 0;
+  color: #444;
+}
+
+/* Custom Input Styling */
+.custom-date-picker-input {
+  width: 170px;
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #fff;
+  text-align: center;
+}
+
+.custom-date-picker-input:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+}
 
 @media (max-width: 768px) {
   .br-att-row {
@@ -96,4 +154,13 @@
     margin-top: 8px;
     margin-bottom: 8px;
   }
+ .att-cancle{
+    margin-top: 12px;
+ }
+ .att-upt-btn{
+    margin-top: 12px;
+ }
+ .att-mob-out{
+    margin-top: 12px;
+ }
 }

@@ -12,7 +12,6 @@ const HrProfile = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
 
-
   return (
     <div className="dashboard-container">
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
