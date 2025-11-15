@@ -25,7 +25,7 @@ const ForgotPassword = () => {
   const [apiError, setApiError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
-  const [otpSent, setOtpSent] = useState(false);
+  const [, setOtpSent] = useState(false);
 
   const maskPhoneNumber = (phoneNumber) => {
     if (!phoneNumber || phoneNumber.length < 4) return phoneNumber;
