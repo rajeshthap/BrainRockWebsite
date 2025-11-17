@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Nav, Offcanvas, Collapse } from "react-bootstrap";
 import {
   FaTachometerAlt,
@@ -8,6 +8,8 @@ import {
   FaChartLine,
   FaUserCheck,
 } from "react-icons/fa";
+import axios from "axios";
+
 import "../../assets/css/emp_dashboard.css";
 import { Link } from "react-router-dom";
 import { PiPaypalLogo, PiUserListBold, PiUsersThreeBold } from "react-icons/pi";
@@ -26,23 +28,35 @@ import { AuthContext } from "../context/AuthContext";
 
 const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     const { logout } = useContext(AuthContext);
+    const {user_id} = useContext(AuthContext)
+    const [userRole, setUserRole] = useState(null);
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const toggleSubmenu = (index) => {
     setOpenSubmenu(openSubmenu === index ? null : index);
   };
   
-  const menuItems = [
+  useEffect(() => {
+    axios
+      .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${user_id}`)
+      .then((res) => {
+        const role = res.data?.role || res.data?.employee_role || null;
+        setUserRole(role);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
+const menuItems = [
     {
       icon: <FaTachometerAlt />,
       label: "Dashboard",
       path: "/HrDashBoard",
       active: true,
     },
-
+ 
     {
       icon: <PiUserListBold />,
       label: "Employee Management",
-
+ 
       submenu: [
         {
           label: "Employee Directory",
@@ -76,11 +90,10 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
         },
       ],
     },
-    
   {
       icon: <ImProfile />,
       label: "Employee Profile",
-
+ 
       submenu: [
         {
           label: "Personal Information",
@@ -92,7 +105,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-
+ 
          {
           label: "Job Info.(Designation, Department, Joining Date)",
           path: "/EmployeeManagement",
@@ -121,55 +134,11 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
        
       ],
     },
-
-     {
-      icon: <ImProfile />,
-      label: "Employee Profile",
-
-      submenu: [
-        {
-          label: "Personal Information",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-         {
-          label: "Contact Details",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-
-         {
-          label: "Job Info.(Designation, Department, Joining Date)",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Salary Details",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Documents & ID Proofs",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Emergency Contact",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Bank Details",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-       
-      ],
-    },
+ 
      {
       icon: <FaUserCheck />,
       label: "Attendance",
-
+ 
       submenu: [
         {
           label: "Daily Attendance",
@@ -204,7 +173,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
  {
       icon: <FaChartLine />,
       label: " Leave Management",
-
+ 
       submenu: [
         {
           label: "Apply Leave",
@@ -239,11 +208,11 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
        
       ],
     },
-  
+ 
  {
       icon: <PiPaypalLogo />,
       label: "Payroll",
-
+ 
       submenu: [
         {
           label: "Salary Structure",
@@ -283,11 +252,11 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
        
       ],
     },
-
+ 
      {
       icon: <PiUsersThreeBold />,
       label: "Departments",
-
+ 
       submenu: [
         {
           label: "Department List",
@@ -314,17 +283,17 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        
+       
        
        
       ],
     },
    
-
+ 
     {
       icon: <TbDeviceDesktopSearch />,
       label: "Recruitment",
-
+ 
       submenu: [
         {
           label: "Job Openings",
@@ -356,7 +325,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        
+       
        
        
       ],
@@ -364,7 +333,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
    {
       icon: <GrDocumentPerformance />,
       label: "Performance",
-
+ 
       submenu: [
         {
           label: "Performance Goals / KPIs",
@@ -396,7 +365,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        
+       
        
        
       ],
@@ -404,7 +373,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     {
       icon: <IoDocumentsOutline />,
       label: "Documents",
-
+ 
       submenu: [
         {
           label: "Employee Documents",
@@ -426,9 +395,9 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        
        
-        
+       
+       
        
        
       ],
@@ -436,7 +405,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
    {
       icon: <IoIosNotifications />,
       label: "Notifications",
-
+ 
       submenu: [
         {
           label: "Leave / Attendance Alerts",
@@ -458,18 +427,18 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        
        
-        
+       
+       
        
        
       ],
     },
-
+ 
      {
       icon: <AiOutlineFile />,
       label: "Reports",
-
+ 
       submenu: [
         {
           label: "Attendance Reports",
@@ -501,9 +470,9 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        
        
-        
+       
+       
        
        
       ],
@@ -511,7 +480,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
       {
       icon: <RiSettings2Line />,
       label: "Settings",
-
+ 
       submenu: [
         {
           label: "Company Profile",
@@ -543,18 +512,18 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        
        
-        
+       
+       
        
        
       ],
     },
-
+ 
        {
       icon: <CgProfile />,
       label: " Profile (User’s Own)",
-
+ 
       submenu: [
         {
           label: "View / Edit Profile",
@@ -582,6 +551,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     },
   ];
 
+
   
   
 
@@ -604,57 +574,57 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
         </div>
 
         <Nav className="sidebar-nav flex-column">
-          {menuItems.map((item, index) => (
-            <div key={index}>
-              {/*  Wrap with Link if no submenu */}
-              {item.submenu ? (
-                <Nav.Link
-                  className={`nav-item ${item.active ? "active" : ""}`}
-                  onClick={() => toggleSubmenu(index)}
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  <span className="nav-text ">{item.label}</span>
-                  <span className="submenu-arrow">
-                    {openSubmenu === index ? (
-                      <FaChevronDown />
-                    ) : (
-                      <FaChevronRight />
-                    )}
-                  </span>
-                </Nav.Link>
-              ) : (
-                <Link
-                  to={item.path}
-                  className={`nav-item nav-link ${item.active ? "active" : ""}`}
-                  onClick={() => setSidebarOpen(false)} // close on click (for UX)
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  <span className="nav-text">{item.label}</span>
-                </Link>
-              )}
+          
+        {menuItems
+  .filter(item =>
+    item.allowedRoles ? item.allowedRoles.includes(userRole) : true
+  )
+  .map((item, index) => (
+    <div key={index}>
+      {/* If submenu exists */}
+      {item.submenu ? (
+        <Nav.Link
+          className={`nav-item ${item.active ? "active" : ""}`}
+          onClick={() => toggleSubmenu(index)}
+        >
+          <span className="nav-icon">{item.icon}</span>
+          <span className="nav-text">{item.label}</span>
+          <span className="submenu-arrow">
+            {openSubmenu === index ? <FaChevronDown /> : <FaChevronRight />}
+          </span>
+        </Nav.Link>
+      ) : (
+        <Link
+          to={item.path}
+          className={`nav-item nav-link ${item.active ? "active" : ""}`}
+          onClick={() => setSidebarOpen(false)}
+        >
+          <span className="nav-icon">{item.icon}</span>
+          <span className="nav-text">{item.label}</span>
+        </Link>
+      )}
 
-              {/*  Submenu */}
-              {item.submenu && (
-                <Collapse in={openSubmenu === index}>
-                  <div className="submenu-container">
-                    {item.submenu.map((subItem, subIndex) => (
-                      <Link
-                        key={subIndex}
-                        to={subItem.path}
-                        className="submenu-item nav-link"
-                        onClick={() => setSidebarOpen(false)}
-                      >
-                        <span className="submenu-icon">{subItem.icon}</span>
-                        <span className="nav-text br-text-sub">
-                          {subItem.label}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </Collapse>
-              )}
-            </div>
-          ))}
+      {/* Submenu */}
+      {item.submenu && (
+        <Collapse in={openSubmenu === index}>
+          <div className="submenu-container">
+            {item.submenu.map((subItem, subIndex) => (
+              <Link
+                key={subIndex}
+                to={subItem.path}
+                className="submenu-item nav-link"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <span className="submenu-icon">{subItem.icon}</span>
+                <span className="nav-text br-text-sub">{subItem.label}</span>
+              </Link>
+            ))}
+          </div>
+        </Collapse>
+      )}
+    </div>
+  ))}
+
         </Nav>
 
         <div className="sidebar-footer">

@@ -10,6 +10,7 @@ import HrHeader from "../hr_dashboard/HrHeader";
 import ModifyAlert from "../alerts/ModifyAlert";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import LocationState from "../location_state/LocationState";
 
 const EmployeeRegistration = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -37,6 +38,10 @@ const EmployeeRegistration = () => {
     </div>
   ));
 
+   const handleInputChangeCity = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value); 
+  };
   // Add state to track drag over status for each upload area
   const [dragOverStates, setDragOverStates] = useState({
     photo: false,
@@ -52,6 +57,9 @@ const EmployeeRegistration = () => {
     first_name: useRef(null),
     last_name: useRef(null),
     gender: useRef(null),
+    country: useRef(null),
+    state: useRef(null),
+    city: useRef(null),
     date_of_birth: useRef(null),
     photo: useRef(null),
     email: useRef(null),
@@ -60,6 +68,7 @@ const EmployeeRegistration = () => {
     address: useRef(null),
     emergency_contact_name: useRef(null),
     emergency_contact_number: useRef(null),
+    branch_name: useRef(null),
     department: useRef(null),
     designation: useRef(null),
     employment_type: useRef(null),
@@ -90,6 +99,10 @@ const EmployeeRegistration = () => {
     address: "",
     emergency_contact_name: "",
     emergency_contact_number: "",
+    branch_name: "",
+    country: "",
+    state: "",
+    city: "",
     department: "",
     designation: "",
     employment_type: "",
@@ -247,6 +260,10 @@ const EmployeeRegistration = () => {
       case "last_name":
       case "gender":
       case "address":
+      case "country":
+      case "state":
+      case "city":
+      case "branch_name":
       case "department":
       case "designation":
       case "bank_name":
@@ -490,8 +507,12 @@ const EmployeeRegistration = () => {
       phone: "",
       alternate_phone: "",
       address: "",
+      country: "",
+      state: "",
+      city: "",
       emergency_contact_name: "",
       emergency_contact_number: "",
+      branch_name: "",
       department: "",
       designation: "",
       employment_type: "",
@@ -640,12 +661,16 @@ const EmployeeRegistration = () => {
     payload.append("phone", formData.phone);
     payload.append("alternate_phone", formData.alternate_phone);
     payload.append("address", formData.address);
+    payload.append("country", formData.country);
+    payload.append("state", formData.state);
+    payload.append("city", formData.city);
     payload.append("emergency_contact_name", formData.emergency_contact_name);
     payload.append(
       "emergency_contact_number",
       formData.emergency_contact_number
     );
     payload.append("department", formData.department);
+    payload.append("branch_name", formData.branch_name);
     payload.append("designation", formData.designation);
     payload.append("employment_type", formData.employment_type);
     payload.append("joining_date", formData.joining_date);
@@ -673,7 +698,7 @@ const EmployeeRegistration = () => {
 
     try {
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/hr-register/",
+        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-register/",
         {
           method: "POST",
           body: payload,
@@ -1101,6 +1126,11 @@ const EmployeeRegistration = () => {
                 </Col>
 
                 {/* Address */}
+                <LocationState
+                          formData={formData}
+                          handleInputChange={handleInputChangeCity}
+                          formErrors={errors} 
+                        />
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3" controlId="address">
                     <Form.Label className="br-label">
@@ -1123,6 +1153,7 @@ const EmployeeRegistration = () => {
                     </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
+                
 
                 {/* Emergency Contact Name */}
                 <Col lg={4} md={6} sm={12}>
@@ -1179,6 +1210,27 @@ const EmployeeRegistration = () => {
                   <h1>3. Job Details</h1>
                 </div>
 
+<Col lg={4} md={6} sm={12}>
+                        <Form.Group className="mb-3" controlId="lastName">
+                          <Form.Label className="br-label">
+                            Branch Name <span className="br-span-star">*</span>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            placeholder="Enter Branch Name"
+                            className="br-form-control"
+                            name="branch_name"
+                            value={formData.branch_name}
+                            onChange={handleInputChange}
+                            isInvalid={!!errors.branch_name}
+                            required
+                            ref={formRefs.branch_name}
+                          />
+                          <Form.Control.Feedback type="br-alert">
+                            {errors.branch_name}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
                 {/* Department */}
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3" controlId="department">
