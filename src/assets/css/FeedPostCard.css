@@ -27,16 +27,17 @@
 }
  
 .author-name {
-  font-size: 1.1rem;
+  font-size: 16px;
   font-weight: 600;
 }
  
 .author-info {
-  font-size: 0.9rem;
+  font-size: 14px;
+  margin-top: 2px;
 }
  
 .post-time {
-  font-size: 0.8rem;
+  font-size: 12px;
   margin-top: 0.2rem;
 }
  

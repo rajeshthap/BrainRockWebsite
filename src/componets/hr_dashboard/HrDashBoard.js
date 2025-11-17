@@ -12,6 +12,7 @@ import {
   FaUsers,
   FaPlus,
   FaGift,
+  FaUserCheck,
 } from "react-icons/fa";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { Tooltip, ResponsiveContainer } from "recharts";
@@ -24,6 +25,9 @@ import { useNavigate } from "react-router-dom";
 import TeamMember from "./hr_iinerpage/TeamMember";
 import HrHeader from "./HrHeader";
 import LeaveBalance from "./hr_iinerpage/LeaveBalance";
+import { BsFillFilePostFill } from "react-icons/bs";
+import { GiImpactPoint } from "react-icons/gi";
+import { LuFileBadge2 } from "react-icons/lu";
 
 const HrDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -134,19 +138,19 @@ const HrDashBoard = () => {
               className="d-flex gap-2 br-post-top-btn align-items-center"
             >
               <span>
-                <CiEdit className="br-post-top-icon" />
+                <BsFillFilePostFill className="br-post-top-icon" />
                 Post
               </span>
               <span className="border-start ps-2">
-                <CiEdit className="br-post-top-icon" />
+                <LuFileBadge2 className="br-post-top-icon" />
                 Badge
               </span>
               <span className="border-start ps-2">
-                <CiEdit className="br-post-top-icon" />
+                <GiImpactPoint className="br-post-top-icon" />
                 Reward Point
               </span>
               <span className="border-start ps-2">
-                <CiEdit className="br-post-top-icon" />
+                <FaUserCheck className="br-post-top-icon" />
                 Endorse
               </span>
             </Col>

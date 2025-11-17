@@ -24,6 +24,17 @@ import ForgotPassword from './componets/all_login/ForgotPassword';
 
 
 
+//Hr Payroll
+import AddEmployeeForm from './componets/Payroll_dashboard/AddEmployeeForm';
+import EmployeeList from './componets/Payroll_dashboard/EmployeeList';
+import { PayrollCalculations, calculateTotals } from "./utils/PayrollCalculations";
+
+
+import PayrollCharts from './componets/Payroll_dashboard/PayrollCharts';
+import PayDashBoard from './componets/Payroll_dashboard/PayDashBoard';
+
+
+
 function AppContent() {
   const location = useLocation();
 
@@ -33,11 +44,18 @@ function AppContent() {
     "/EmployeeRegistration",
     "/HrRegistration",
     "/DailyAttendance",
-    "/HrProfile"
+    "/HrProfile",
+    "/AddEmployeeForm",
+    "/EmployeeList",
+    "/PayrollCalculations",
+    "/MockData",
+    "/PayrollCharts",
+    "/PayDashBoard"
+
   ]);
 
   const hiddenFooter1 = new Set([
-    "/",
+    "",
   ]);
 
   const shouldHideNavbar = hiddenPaths.has(location.pathname);
@@ -55,6 +73,15 @@ function AppContent() {
         {/* <Route path="/HrDashBoard" element={<HrDashBoard />} /> */}
         <Route path="/DailyAttendance" element={<DailyAttendance />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
+
+      {/* Hr  Payroll */}
+        <Route path="/AddEmployeeForm" element={<AddEmployeeForm />} />
+        <Route path="/PayrollCalculations" element={<PayrollCalculations />} />
+        <Route path="/EmployeeList" element={<EmployeeList />} />
+        {/* <Route path="/MockData" element={<MockData />} /> */}
+        <Route path="/EmployeeList" element={<EmployeeList />} />
+        <Route path="/PayrollCharts" element={<PayrollCharts />} />
+        <Route path="/PayDashBoard" element={<PayDashBoard />} />
 
         {/* Protected Routes */}
         { <Route 

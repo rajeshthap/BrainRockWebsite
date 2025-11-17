@@ -416,6 +416,9 @@
     font-weight: 600;
     border: #278557 1px solid !important;
 }
+.br-stat-btn :hover{
+border: none !important;
+}
 
 .btn-br-dgr {
     background-color: #ff0000 !important;
