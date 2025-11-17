@@ -179,36 +179,65 @@ function UserPage() {
         </Row>
 
 
-        <Row className="mt-3">
-          <Col lg={6} md={6} sm={12}>
-            <div className="resorce-sub-list">
-              <h1>
-                About <br></br>
-                <span className="resorce-about-list">Brainrock Experience</span>
-              </h1>
-              <p>
-                Brainrock Consulting Services is one of the most trusted website
-                development and industrial internship providers in Dehradun,
-                Uttarakhand. We deliver highly efficient web solutions that
-                excel in quality, performance, and value. Backed by a qualified,
-                dedicated, and enthusiastic team, our work stands out with a
-                distinct edge over others in the industry.
-              </p>
-            </div>
-          </Col>
-          <Col lg={6} md={6} sm={12}>
-            <div className="br-img">
-              <i>
-                <img
-                  src={PoorImg}
-                  alt="groupimage"
-                  className="img-fluid br-img"
-                ></img>
-              </i>
-            </div>
-          </Col>
-        </Row>
+
       </Container>
+      <Container fluid>
+
+        <div className="about-wpr my-5">
+          <Row>
+            <Col lg={6} md={6} sm={12} className="about-box p-2">
+              <div className="about-left-content">
+                <div className="about-phase-1">
+                  <i>
+                    <img
+                      src={PoorImg}
+                      alt="groupimage"
+                      className="img-fluid  about-1 mt-30"
+                    ></img>
+                  </i>
+
+                  <i>
+                    <img
+                      src={PoorImg}
+                      alt="groupimage"
+                      className="img-fluid  about-2"
+                    ></img>
+                  </i>
+                </div>
+                <div className="about-pic-content">
+                  <i>
+                    <img
+                      src={PoorImg}
+                      alt="groupimage"
+                      className="img-fluid about-3"
+                    ></img>
+                  </i>
+                  <div className="about-yr-exp"><p>18</p>
+                    <h5>
+                      <span>Year</span> Experience
+                    </h5></div>
+                </div>
+
+              </div>
+
+            </Col>
+            <Col lg={6} md={6} sm={12} className="about-right pl-30 d-flex flex-column justify-content-center p-5">
+
+              <span className="hero-sub-title">About Us</span>
+              <h2 className="heading-1">Why Choose Brainrock Consulting Services?</h2>
+              <p> </p>
+              <ul className="about-list">
+                <li>Experienced Professionals: Our team comprises skilled experts with extensive experience in web development and IT solutions.</li>
+                <li>Customized Solutions: We tailor our services to meet the unique needs of each client, ensuring optimal results.</li>
+                <li>Quality Assurance: We prioritize quality in every project, adhering to industry standards and best practices.</li>
+                <li>Customer-Centric Approach: Client satisfaction is at the core of our business, and we strive to exceed expectations.</li>
+                <li>Innovative Technologies: We leverage the latest technologies to deliver cutting-edge solutions that drive business growth.</li>
+              </ul>
+            </Col>
+          </Row>
+        </div>
+      </Container>
+
       <ServicesCarousel />
 
       <Container>
