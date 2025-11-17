@@ -431,8 +431,122 @@ a:hover {
 
 /* end feature Styles */
 
+/* about us section start */
+.grid-2 {
+    display: grid;
+    grid-gap: 3rem;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.about-left-content {
+    position: relative;
+    z-index: 1;
+}
 
 
+.about-phase-1 {
+    display: grid;
+    grid-template-columns: 610px 1fr;
+    grid-gap: 10px;
+}
+
+.mt-30 {
+    margin-top: 3rem;
+}
+
+.img,
+img {
+    max-width: 100%;
+    -webkit-transition: all 0.3s ease-out 0s;
+    -moz-transition: all 0.3s ease-out 0s;
+    -ms-transition: all 0.3s ease-out 0s;
+    -o-transition: all 0.3s ease-out 0s;
+    transition: all 0.3s ease-out 0s;
+    height: auto;
+}
+
+.about-pic-content {
+    position: absolute;
+    bottom: -70px;
+    left: 300px;
+}
+
+.about-pic-content .about-yr-exp {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    width: 200px;
+    height: 170px;
+    text-align: center;
+    background-color: var(--br-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-pic-content .about-yr-exp p {
+    -webkit-text-fill-color: #ECEEFD;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: var(--br-black);
+    font-size: 90px;
+    line-height: 1;
+    font-weight: 900;
+    margin-bottom: 0;
+}
+
+.about-pic-content .about-yr-exp h5 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--br-black);
+    margin-bottom: 0;
+}
+
+.hero-sub-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    display: inline-block;
+    color: #1973d8;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.heading-1 {
+    font-size: 42px;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+/* about us section End */
+@media only screen and (max-width: 767px) {
+    .about-1 {
+        margin-top: 0;
+        width: 100%;
+    }
+
+    .about-2 {
+        display: none;
+    }
+
+    .about-pic-content {
+        position: inherit;
+        bottom: 0;
+        left: 0;
+    }
+
+    .about-3 {
+        display: none;
+    }
+
+    .about-phase-1 {
+        grid-template-columns: 1fr;
+    }
+
+    .about-pic-content .about-yr-exp {
+        display: none;
+    }
+}
 
 @media (max-width: 1180px) {}
 
@@ -465,4 +579,12 @@ a:hover {
         margin-bottom: var(--br-space-400);
     }
 
+}
+
+@media only screen and (max-width: 568px) {
+
+    .grid-3 {
+
+        grid-template-columns: 1fr;
+    }
 }
