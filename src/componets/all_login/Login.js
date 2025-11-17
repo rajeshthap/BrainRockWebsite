@@ -3,10 +3,6 @@ import { Button, Col, Container, Row, Form } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
 import ModifyAlert from "../alerts/ModifyAlert";
 import DevoteeImg from "../../assets/images/women.jpg";
-import PanditImg from "../../assets/images/women.jpg";
-import TempleImg from "../../assets/images/women.jpg";
-import AdminImg from "../../assets/images/women.jpg";
-import DefaultImg from "../../assets/images/women.jpg";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
@@ -15,22 +11,12 @@ export default function Login() {
   const location = useLocation();
 
   const [formData, setFormData] = useState({
-    role: "admin",
     email_or_phone: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showModifyAlert, setShowModifyAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-
-  const roleImages = {
-    admin: AdminImg,
-    hr: PanditImg,
-    employe: DevoteeImg,
-    client: TempleImg,
-    administrator: AdminImg,
-    manager: DefaultImg,
-  };
 
   // Function to clear all cookies
   const clearAllCookies = () => {
@@ -111,120 +97,87 @@ export default function Login() {
     }
   };
 
-  const roleHeading = formData.role
-    ? `${formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} Login`
-    : "Login";
-
-  const roleImage = roleImages[formData.role] || DefaultImg;
-
   return (
     <>
-     
-          
-                
-           
       <Container fluid className="dashboard-body">
-           <div className="br-box-container">
-        <div className="br-registration-heading">
-          <h1>{roleHeading}</h1>
-          <Form onSubmit={handleSubmit}>
-            <Row className="mt-3">
-              <Col lg={6} md={6} sm={12}>
-                {/* Role Selection */}
-                <Form.Group className="mb-3">
-                  <Form.Label className="br-label">
-                    Login As <span className="br-span-star">*</span>
-                  </Form.Label>
-                  <Form.Select
-                    name="role"
-                    className="br-form-control"
-                    value={formData.role}
-                    onChange={handleChange}
-                    disabled={authLoading}
-                  >
-                    <option value="admin">Admin</option>
-                    <option value="hr">HR</option>
-                    <option value="employe">Employee</option>
-                    <option value="client">Client</option>
-                    <option value="administrator">Administrator</option>
-                    <option value="manager">Manager</option>
-                  </Form.Select>
-                </Form.Group>
-
-                {/* Email / Mobile */}
-                <Form.Group className="mb-3">
-                  <Form.Label className="br-label">
-                    Email or Mobile Number{" "}
-                    <span className="br-span-star">*</span>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="email_or_phone"
-                    value={formData.email_or_phone}
-                    onChange={handleChange}
-                    placeholder="Registered Mobile No. / Email"
-                    className="br-form-control"
-                    disabled={authLoading}
-                  />
-                </Form.Group>
-
-                {/* Password */}
-                <Form.Group className="mb-3">
-                  <Form.Label className="br-label">
-                    Password <span className="br-span-star">*</span>
-                  </Form.Label>
-                  <div className="password-wrapper" style={{ position: "relative" }}>
+        <div className="br-box-container">
+          <div className="br-registration-heading">
+            <h1>Login</h1>
+            <Form onSubmit={handleSubmit}>
+              <Row className="mt-3">
+                <Col lg={6} md={6} sm={12}>
+                  {/* Email / Mobile */}
+                  <Form.Group className="mb-3">
+                    <Form.Label className="br-label">
+                      Email or Mobile Number{" "}
+                      <span className="br-span-star">*</span>
+                    </Form.Label>
                     <Form.Control
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
+                      type="text"
+                      name="email_or_phone"
+                      value={formData.email_or_phone}
                       onChange={handleChange}
-                      placeholder="Your Password"
+                      placeholder="Registered Mobile No. / Email"
                       className="br-form-control"
                       disabled={authLoading}
                     />
-                    <i
-                      className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"} toggle-password`}
-                      onClick={() => !authLoading && setShowPassword(!showPassword)}
-                      style={{
-                        position: "absolute",
-                        right: "10px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: authLoading ? "not-allowed" : "pointer",
-                      }}
-                    ></i>
+                  </Form.Group>
+
+                  {/* Password */}
+                  <Form.Group className="mb-3">
+                    <Form.Label className="br-label">
+                      Password <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <div className="password-wrapper" style={{ position: "relative" }}>
+                      <Form.Control
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Your Password"
+                        className="br-form-control"
+                        disabled={authLoading}
+                      />
+                      <i
+                        className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"} toggle-password`}
+                        onClick={() => !authLoading && setShowPassword(!showPassword)}
+                        style={{
+                          position: "absolute",
+                          right: "10px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          cursor: authLoading ? "not-allowed" : "pointer",
+                        }}
+                      ></i>
+                    </div>
+                  </Form.Group>
+
+                  {/* Buttons */}
+                  <div className="gap-3 d-flex justify-content-between br-btn-submit text-center mt-3">
+                    <Button
+                      type="submit"
+                      disabled={authLoading}
+                      className="w-20 br-submit-btn"
+                    >
+                      {authLoading ? "Logging in..." : "Login"}
+                    </Button>
+                    <span
+                      className="forgot-btn mx-3"
+                      type="button"
+                      onClick={() => navigate("/ForgotPassword")}
+                      disabled={authLoading}
+                    >
+                      Forgot Password ?
+                    </span>
                   </div>
-                </Form.Group>
+                </Col>
 
-                {/* Buttons */}
-                <div className="gap-3 d-flex justify-content-between br-btn-submit text-center mt-3">
-                  <Button
-                 
-                    type="submit"
-                    disabled={authLoading}
-                     className="w- 20 br-submit-btn"
-                  >
-                    {authLoading ? "Logging in..." : "Login"}
-                  </Button>
-                  <span
-                    
-                    className="forgot-btn mx-3 "
-                    type="button"
-                    onClick={() => navigate("/ForgotPassword")}
-                    disabled={authLoading}
-                  >
-                    Forgot Password ?
-                  </span>
-                </div>
-              </Col>
-
-              <Col lg={6} md={6} sm={12} className="d-flex justify-content-center align-items-center">
-                <img src={roleImage} className="img-fluid" alt={`${formData.role} Login`} />
-              </Col>
-            </Row>
-          </Form>
-        </div>
+                <Col lg={6} md={6} sm={12} className="d-flex justify-content-center align-items-center">
+                  <img src={DevoteeImg} className="img-fluid" alt="Login" />
+                </Col>
+              </Row>
+            </Form>
+          </div>
         </div>
       </Container>
 
