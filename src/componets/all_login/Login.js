@@ -118,13 +118,18 @@ export default function Login() {
   const roleImage = roleImages[formData.role] || DefaultImg;
 
   return (
-    <div className="br-donate">
-      <Container className="br-container">
+    <>
+     
+          
+                
+           
+      <Container fluid className="dashboard-body">
+           <div className="br-box-container">
         <div className="br-registration-heading">
           <h1>{roleHeading}</h1>
           <Form onSubmit={handleSubmit}>
             <Row className="mt-3">
-              <Col lg={6} md={6}>
+              <Col lg={6} md={6} sm={12}>
                 {/* Role Selection */}
                 <Form.Group className="mb-3">
                   <Form.Label className="br-label">
@@ -132,7 +137,7 @@ export default function Login() {
                   </Form.Label>
                   <Form.Select
                     name="role"
-                    className="br-form-control-option-bg"
+                    className="br-form-control"
                     value={formData.role}
                     onChange={handleChange}
                     disabled={authLoading}
@@ -158,7 +163,7 @@ export default function Login() {
                     value={formData.email_or_phone}
                     onChange={handleChange}
                     placeholder="Registered Mobile No. / Email"
-                    className="br-form-control-bg"
+                    className="br-form-control"
                     disabled={authLoading}
                   />
                 </Form.Group>
@@ -175,7 +180,7 @@ export default function Login() {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Your Password"
-                      className="br-form-control-bg"
+                      className="br-form-control"
                       disabled={authLoading}
                     />
                     <i
@@ -193,24 +198,24 @@ export default function Login() {
                 </Form.Group>
 
                 {/* Buttons */}
-                <div className="d-grid gap-3 text-center mt-3">
+                <div className="gap-3 d-flex justify-content-between br-btn-submit text-center mt-3">
                   <Button
-                    variant="danger"
+                 
                     type="submit"
                     disabled={authLoading}
-                    className="br-submit-btn"
+                     className="w- 20 br-submit-btn"
                   >
                     {authLoading ? "Logging in..." : "Login"}
                   </Button>
-                  <Button
-                    variant="danger"
-                    className="br-submit-btn-login"
+                  <span
+                    
+                    className="forgot-btn mx-3 "
                     type="button"
                     onClick={() => navigate("/ForgotPassword")}
                     disabled={authLoading}
                   >
                     Forgot Password ?
-                  </Button>
+                  </span>
                 </div>
               </Col>
 
@@ -220,6 +225,7 @@ export default function Login() {
             </Row>
           </Form>
         </div>
+        </div>
       </Container>
 
       <ModifyAlert
@@ -227,6 +233,6 @@ export default function Login() {
         show={showModifyAlert}
         setShow={setShowModifyAlert}
       />
-    </div>
+    </>
   );
 }

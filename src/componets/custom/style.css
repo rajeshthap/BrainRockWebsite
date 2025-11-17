@@ -139,7 +139,20 @@ body {
   text-align: center;
   margin-top: 12px;
 }
-
+.br-registration-heading h1{
+  font-size: 18px;
+  font-weight: 600;
+  
+}
+.react-datepicker-wrapper{
+  width: 100%;
+}
+.forgot-btn{
+font-size: 12px;
+}
+.forgot-btn:hover{
+color: #ffaa18;
+}
 @media only screen and (max-width: 568px) {
   .br-login {
     margin: var(--br-space-200) var(--br-space-0) var(--br-space-0) var(--br-space-0) !important;

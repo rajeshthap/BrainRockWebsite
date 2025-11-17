@@ -131,11 +131,7 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
           path: "/DailyAttendance",
           icon: <FaChartLine />,
         },
-        {
-          label: "Manual Attendance Entry",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+       
         {
           label: "Attendance Regularization",
           path: "/EmployeeManagement",
