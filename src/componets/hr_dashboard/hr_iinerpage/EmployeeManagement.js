@@ -13,13 +13,11 @@ import {
   FaBars,
   FaBell,
   FaUserCircle,
-  FaTachometerAlt,
-  FaChartLine,
-  FaUsers,
+ 
   FaCog,
   FaSignOutAlt,
   FaSearch,
-  FaShoppingCart,
+ 
 
 } from "react-icons/fa";
 
@@ -82,54 +80,9 @@ const EmployeeManagement = () => {
     setUnreadCount((prev) => prev - 1);
   };
 
-  const statsData = [
-    {
-      title: "Total Revenue",
-      value: "$45,231",
-      change: "+12.5%",
-      icon: <FaChartLine />,
-    },
-    { title: "New Users", value: "2,350", change: "+8.2%", icon: <FaUsers /> },
-    {
-      title: "Orders",
-      value: "1,234",
-      change: "+5.7%",
-      icon: <FaShoppingCart />,
-    },
-    {
-      title: "Conversion Rate",
-      value: "3.24%",
-      change: "+1.2%",
-      icon: <FaTachometerAlt />,
-    },
-  ];
+ 
 
-  const recentOrders = [
-    {
-      id: "#12345",
-      customer: "John Doe",
-      amount: "$125.00",
-      status: "Delivered",
-    },
-    {
-      id: "#12346",
-      customer: "Jane Smith",
-      amount: "$89.50",
-      status: "Processing",
-    },
-    {
-      id: "#12347",
-      customer: "Bob Johnson",
-      amount: "$210.00",
-      status: "Shipped",
-    },
-    {
-      id: "#12348",
-      customer: "Alice Brown",
-      amount: "$75.25",
-      status: "Pending",
-    },
-  ];
+ 
   
   return (
     <div className="dashboard-container">

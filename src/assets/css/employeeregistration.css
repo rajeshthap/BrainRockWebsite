@@ -53,6 +53,9 @@ span.br-span-star {
 .upload-browse:hover {
   color: #d96d2a;
 }
+.br-delete-file{
+  margin-top: 12px;
+}
 .progress{
   height: 12px !important;
 }

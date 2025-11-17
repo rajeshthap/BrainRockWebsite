@@ -1523,7 +1523,7 @@ const EmployeeRegistration = () => {
                               </span>
                             </div>
                             <div>
-                              {resume.fileURL && (
+                              {/* {resume.fileURL && (
                                 <Button
                                   variant="success"
                                   size="sm"
@@ -1533,14 +1533,14 @@ const EmployeeRegistration = () => {
                                 >
                                   <i className="bi bi-eye"></i>
                                 </Button>
-                              )}
+                              )} */}
                               <Button
                                 variant="danger"
                                 size="sm"
                                 onClick={() =>
                                   handleDelete(resume, setResume, "resumeFile")
                                 }
-                                title="Delete File"
+                                title="Delete File" className="br-delete-file"
                               >
                                 <FaTrash />
                               </Button>
@@ -1631,7 +1631,7 @@ const EmployeeRegistration = () => {
                               </span>
                             </div>
                             <div>
-                              {aadhar.fileURL && (
+                              {/* {aadhar.fileURL && (
                                 <Button
                                   variant="success"
                                   size="sm"
@@ -1641,14 +1641,14 @@ const EmployeeRegistration = () => {
                                 >
                                   <i className="bi bi-eye"></i>
                                 </Button>
-                              )}
+                              )} */}
                               <Button
                                 variant="danger"
                                 size="sm"
                                 onClick={() =>
                                   handleDelete(aadhar, setAadhar, "aadharFile")
                                 }
-                                title="Delete File"
+                                title="Delete File" className="br-delete-file"
                               >
                                 <FaTrash />
                               </Button>
@@ -1739,7 +1739,7 @@ const EmployeeRegistration = () => {
                               </span>
                             </div>
                             <div>
-                              {offerLetter.fileURL && (
+                              {/* {offerLetter.fileURL && (
                                 <Button
                                   variant="success"
                                   size="sm"
@@ -1749,7 +1749,7 @@ const EmployeeRegistration = () => {
                                 >
                                   <i className="bi bi-eye"></i>
                                 </Button>
-                              )}
+                              )} */}
                               <Button
                                 variant="danger"
                                 size="sm"
@@ -1760,7 +1760,7 @@ const EmployeeRegistration = () => {
                                     "offerLetterFile"
                                   )
                                 }
-                                title="Delete File"
+                                title="Delete File" className="br-delete-file"
                               >
                                 <FaTrash />
                               </Button>
@@ -1849,7 +1849,7 @@ const EmployeeRegistration = () => {
                               </span>
                             </div>
                             <div>
-                              {panCard.fileURL && (
+                              {/* {panCard.fileURL && (
                                 <Button
                                   variant="success"
                                   size="sm"
@@ -1859,14 +1859,14 @@ const EmployeeRegistration = () => {
                                 >
                                   <i className="bi bi-eye"></i>
                                 </Button>
-                              )}
+                              )} */}
                               <Button
                                 variant="danger"
                                 size="sm"
                                 onClick={() =>
                                   handleDelete(panCard, setPanCard, "panCardFile")
                                 }
-                                title="Delete File"
+                                title="Delete File" className="br-delete-file"
                               >
                                 <FaTrash />
                               </Button>
@@ -1983,7 +1983,7 @@ const EmployeeRegistration = () => {
                                       </span>
                                     </div>
                                     <div>
-                                      {file.fileURL && (
+                                      {/* {file.fileURL && (
                                         <Button
                                           variant="success"
                                           size="sm"
@@ -1993,12 +1993,12 @@ const EmployeeRegistration = () => {
                                         >
                                           <i className="bi bi-eye"></i>
                                         </Button>
-                                      )}
+                                      )} */}
                                       <Button
                                         variant="danger"
                                         size="sm"
                                         onClick={() => handleDeleteFile(index)}
-                                        title="Delete File"
+                                        title="Delete File" className="br-delete-file"
                                       >
                                         <FaTrash />
                                       </Button>
@@ -2007,7 +2007,7 @@ const EmployeeRegistration = () => {
 
                                   <div
                                     className="progress mt-2"
-                                    style={{ height: "6px" }}
+                                   
                                   >
                                     <div
                                       className="progress-bar"
