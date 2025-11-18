@@ -8,18 +8,22 @@
   padding: 14px;
   border-radius: 12px;
   margin-bottom: 12px;
-  box-shadow: 0px 1px 3px rgba(0,0,0,0.06);
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.06);
 }
-.att-time-set{
-    font-size: 12px;
+
+.att-time-set {
+  font-size: 12px;
 }
-.att-upt-btn{
-    font-size: 10px;
+
+.att-upt-btn {
+  font-size: 10px;
 }
+
 .br-day-text {
   font-size: var(--br-space-300);
   font-weight: 600;
 }
+
 .br-time-dropdown {
   padding: 6px 10px;
   border-radius: 8px;
@@ -74,10 +78,12 @@
 .line-yellow {
   background: #ffcc00;
 }
-.att-label{
-    font-size: 12px;
-    font-weight: 600;
+
+.att-label {
+  font-size: 12px;
+  font-weight: 600;
 }
+
 .br-status-badge {
   position: absolute;
   top: -12px;
@@ -86,19 +92,24 @@
   font-size: 10px;
   border-radius: 8px;
 }
-.br-edit-btn{
-    font-size:var(--br-space-300);
+
+.br-edit-btn {
+  font-size: var(--br-space-300);
 }
-.att-cancle{
-    font-size:var(--br-space-300);
+
+.att-cancle {
+  font-size: var(--br-space-300);
 }
-.br-att-hrs{
-    font-size:var(--br-space-300);
+
+.br-att-hrs {
+  font-size: var(--br-space-300);
 }
-.br-total-hrs h2{
-    font-size: var(--br-space-300);
-    font-weight: 600;
+
+.br-total-hrs h2 {
+  font-size: var(--br-space-300);
+  font-weight: 600;
 }
+
 /* Responsive Fixes */
 .date-select {
   align-items: center;
@@ -113,11 +124,12 @@
   color: #000;
 }
 
-.br-att-date-p{
-    position:absolute !important;
+.br-att-date-p {
+  position: absolute !important;
 }
+
 .calendar-input-icon {
- 
+
   text-align: center;
 }
 
@@ -146,21 +158,27 @@
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
 }
 
+
+
 @media (max-width: 768px) {
   .br-att-row {
     text-align: center;
   }
+
   .br-timeline {
     margin-top: 8px;
     margin-bottom: 8px;
   }
- .att-cancle{
+
+  .att-cancle {
     margin-top: 12px;
- }
- .att-upt-btn{
+  }
+
+  .att-upt-btn {
     margin-top: 12px;
- }
- .att-mob-out{
+  }
+
+  .att-mob-out {
     margin-top: 12px;
- }
+  }
 }

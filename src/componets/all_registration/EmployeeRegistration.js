@@ -902,7 +902,7 @@ const EmployeeRegistration = () => {
 
                 <Row>
                   {/* ========= LEFT SIDE: Basic Fields ========= */}
-                  <Col lg={10} md={6} sm={12}>
+                  <Col lg={9} md={6} sm={12}>
                     <Row>
                       {/* First Name */}
                       <Col lg={6} md={6} sm={12}>
@@ -1021,7 +1021,7 @@ const EmployeeRegistration = () => {
                   </Col>
 
                   {/* ========= RIGHT SIDE: Photo Upload ========= */}
-                  <Col lg={2} md={6} sm={12}>
+                  <Col lg={3} md={6} sm={12}>
                     <Form.Group className="mb-3" ref={formRefs.photo}>
                       <Form.Label className="br-label">
                         Photo / Profile Picture{" "}
