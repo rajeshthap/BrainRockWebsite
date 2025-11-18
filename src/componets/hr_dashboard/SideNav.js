@@ -28,22 +28,27 @@ import { AuthContext } from "../context/AuthContext";
 
 const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     const { logout } = useContext(AuthContext);
-    const {user_id} = useContext(AuthContext)
+    const { user } = useContext(AuthContext);
+const emp_id = user?.unique_id;  // This is the correct value
+
     const [userRole, setUserRole] = useState(null);
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const toggleSubmenu = (index) => {
     setOpenSubmenu(openSubmenu === index ? null : index);
   };
   
-  useEffect(() => {
-    axios
-      .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${user_id}`)
-      .then((res) => {
-        const role = res.data?.role || res.data?.employee_role || null;
-        setUserRole(role);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+ useEffect(() => {
+  if (!emp_id) return;  // prevent calling undefined
+
+  axios
+    .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${emp_id}`)
+    .then((res) => {
+      const role = res.data?.role || res.data?.employee_role || null;
+      setUserRole(role);
+    })
+    .catch((err) => console.log("SideNav Error:", err));
+}, [emp_id]);
+
 
 const menuItems = [
     {

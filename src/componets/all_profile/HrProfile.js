@@ -3,60 +3,82 @@ import { Container, Row, Col, Form, Button, Image } from "react-bootstrap";
 import "../../assets/css/Profile.css";
 import SideNav from "../hr_dashboard/SideNav";
 import HrHeader from "../hr_dashboard/HrHeader";
-import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { FaCamera } from "react-icons/fa";
+import axios from "axios";
+
+import { FaRegFile, FaIdCard } from "react-icons/fa";
+import { GrDocumentText } from "react-icons/gr";
+import { PiCertificate } from "react-icons/pi";
+
 
 const HrProfile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const { user } = useContext(AuthContext); // contains emp_id
-  const [empId, setEmpId] = useState(null);
+  const { user } = useContext(AuthContext);
   const fileInputRef = useRef(null);
 
   const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+
   const [data, setData] = useState({});
+  const [empId, setEmpId] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [profilePreview, setProfilePreview] = useState(null);
 
-  useEffect(() => {
-    if (!user?.unique_id) return;
+  //  FIXED axios instance – must send cookies
+  const axiosInstance = axios.create({
+    baseURL: `${BASE_URL}/api/`,
+    withCredentials: true,
+  });
 
-    axios
-      .get(
-        `${BASE_URL}/api/employee-details/?emp_id=${user.unique_id}`
-      )
+
+  // FETCH EMPLOYEE DETAILS
+
+  useEffect(() => {
+    if (!user || !user.unique_id) {
+      console.log(" user.unique_id not available yet");
+      return;
+    }
+
+    console.log(" Fetching with emp_id:", user.unique_id);
+
+    axiosInstance
+      .get(`employee-details/?emp_id=${user.unique_id}`) //  FIXED
       .then((res) => {
-        console.log("EMPLOYEE PROFILE API RESPONSE:", res.data);
+        console.log(" EMPLOYEE PROFILE RESPONSE:", res.data);
 
         const empData = res.data;
         setData(empData);
 
-        // Store emp_id
-        setEmpId(empData.emp_id);
+        setEmpId(empData.emp_id); // needed for PATCH
 
         if (empData.profile_photo) {
           setProfilePreview(getFullUrl(empData.profile_photo));
         }
       })
-      .catch((err) => console.error("Error fetching EMPLOYEE details:", err));
+      .catch((err) => {
+        console.error("❌ Error fetching EMPLOYEE details:", err);
+      });
   }, [user]);
 
-  // Convert relative URL → Full
+
+  // Convert relative → full URL
   const getFullUrl = (path) => {
     if (!path) return null;
     if (path.startsWith("http")) return path;
     return `${BASE_URL}${path}`;
   };
 
-  // Handle Input Change
+
+  // Input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle Profile Photo Upload
+
+  // Photo upload
   const handlePhoto = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -65,7 +87,8 @@ const HrProfile = () => {
     }
   };
 
-  // Save Data (PATCH)
+  // PATCH UPDATE
+
   const handleSave = async () => {
     try {
       const formData = new FormData();
@@ -80,21 +103,17 @@ const HrProfile = () => {
       ];
 
       editableFields.forEach((field) => {
-        if (data[field]) {
-          formData.append(field, data[field]);
-        }
+        if (data[field]) formData.append(field, data[field]);
       });
 
-      await axios.patch(
-        `${BASE_URL}/api/employee-details/`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axiosInstance.patch(`employee-details/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       alert("Profile updated successfully!");
       setEditMode(false);
     } catch (error) {
-      console.error("Update error:", error);
+      console.error("❌ Update error:", error);
       alert("Failed to update profile.");
     }
   };
@@ -110,13 +129,12 @@ const HrProfile = () => {
     return !editable.includes(fieldName) || !editMode;
   };
 
-  const toCamelLabel = (str) => {
-    return str
-      .replace(/_/g, " ")
-      .toLowerCase()
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-  };
+  const toCamelLabel = (str) =>
+    str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
+  // ==============================
+  // UI
+  // ==============================
   return (
     <div className="dashboard-container">
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -129,7 +147,7 @@ const HrProfile = () => {
 
             <Form>
               <Row>
-                {/* LEFT PHOTO */}
+                {/* LEFT SIDE PHOTO */}
                 <Col md={3} className="mb-3">
                   <Form.Label>Profile Photo</Form.Label>
 
@@ -139,7 +157,6 @@ const HrProfile = () => {
                       position: "relative",
                       width: "150px",
                       height: "150px",
-                      cursor: disableField("profile_photo") ? "not-allowed" : "pointer",
                     }}
                     onClick={() => {
                       if (!disableField("profile_photo")) {
@@ -174,7 +191,7 @@ const HrProfile = () => {
                   </div>
                 </Col>
 
-                {/* RIGHT FORM */}
+                {/* RIGHT SIDE FORM */}
                 <Col md={9}>
                   <Row>
                     {/* EDIT BUTTONS */}
@@ -183,10 +200,17 @@ const HrProfile = () => {
                         <Button onClick={() => setEditMode(true)}>Edit</Button>
                       ) : (
                         <>
-                          <Button variant="success" onClick={handleSave} className="me-2">
+                          <Button
+                            variant="success"
+                            onClick={handleSave}
+                            className="me-2"
+                          >
                             Update
                           </Button>
-                          <Button variant="secondary" onClick={() => setEditMode(false)}>
+                          <Button
+                            variant="secondary"
+                            onClick={() => setEditMode(false)}
+                          >
                             Cancel
                           </Button>
                         </>
@@ -218,10 +242,12 @@ const HrProfile = () => {
                       "username",
                       "branch_name",
                     ].map((field) => (
-                      <Col lg={6} key={field}>
+                      <Col lg={6} md={6} sm={12} key={field}>
                         <Form.Group className="mb-3">
-                          <Form.Label>{toCamelLabel(field)}</Form.Label>
-                          <Form.Control value={data[field] || ""} disabled />
+                          <Form.Label className="br-label">{toCamelLabel(field)}</Form.Label>
+                          <Form.Control 
+                          className="br-form-control"
+                          value={data[field] || ""} disabled />
                         </Form.Group>
                       </Col>
                     ))}
@@ -233,10 +259,11 @@ const HrProfile = () => {
                       "emergency_contact_name",
                       "emergency_contact_number",
                     ].map((field) => (
-                      <Col lg={6} key={field}>
+                      <Col lg={6} md={6} sm={12} key={field}>
                         <Form.Group className="mb-3">
-                          <Form.Label>{toCamelLabel(field)}</Form.Label>
+                          <Form.Label className="br-label">{toCamelLabel(field)}</Form.Label>
                           <Form.Control
+                          className="br-form-control"
                             name={field}
                             value={data[field] || ""}
                             disabled={disableField(field)}
@@ -246,16 +273,19 @@ const HrProfile = () => {
                       </Col>
                     ))}
 
-                    {/* DOCUMENT VIEW BOXES */}
+                    {/* DOCUMENTS */}
                     {[
-                      { label: "Resume", key: "resume_document" },
-                      { label: "PAN Card Document", key: "pan_card_document" },
-                      { label: "ID Proof Document", key: "id_proof_document" },
-                      { label: "Offer Letter", key: "offer_letter" },
+                      { label: "Resume", key: "resume_document", icon: <FaRegFile size={40} /> },
+                      { label: "Aadhar Card", key: "id_proof_document", icon: <FaIdCard size={40} /> },
+                      { label: "PAN Card", key: "pan_card_document", icon: <FaIdCard size={40} /> },
+                      { label: "Offer Letter", key: "offer_letter", icon: <GrDocumentText size={40} /> },
                     ].map((doc) => (
-                      <Col lg={6} key={doc.key}>
+                      <Col lg={6} md={6} sm={12} key={doc.key}>
                         <div className="br-doc-box text-center p-3">
-                          <i className="bi bi-file-earmark-person fs-1 mb-2"></i>
+
+                          {/* ICON */}
+                          <div className="mb-2">{doc.icon}</div>
+
                           <h6 className="fw-bold">{doc.label}</h6>
 
                           <p className="small text-muted">
@@ -274,6 +304,42 @@ const HrProfile = () => {
                         </div>
                       </Col>
                     ))}
+
+
+                    {/* EXPERIENCE CERTIFICATES */}
+                    <Col lg={12} className="mt-4">
+                      <h5 className="fw-bold">Experience Certificates</h5>
+                    </Col>
+
+                    {data.experience_certificates && data.experience_certificates.length > 0 ? (
+                      data.experience_certificates.map((file, index) => (
+                        <Col lg={6} key={index}>
+                          <div className="br-doc-box text-center p-3">
+
+                            {/* EXPERIENCE ICON */}
+                            <PiCertificate size={40} className="mb-2" />
+
+                            <h6 className="fw-bold">Certificate {index + 1}</h6>
+
+                            <p className="small text-muted">{file.split("/").pop()}</p>
+
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => window.open(getFullUrl(file), "_blank")}
+                            >
+                              View
+                            </Button>
+                          </div>
+                        </Col>
+                      ))
+                    ) : (
+                      <Col lg={12}>
+                        <p className="text-muted">No Experience Certificates Uploaded</p>
+                      </Col>
+                    )}
+
+
                   </Row>
                 </Col>
               </Row>
