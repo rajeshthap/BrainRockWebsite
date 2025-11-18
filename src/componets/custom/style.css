@@ -139,24 +139,39 @@ body {
   text-align: center;
   margin-top: 12px;
 }
-.br-registration-heading h1{
+
+.br-registration-heading h1 {
   font-size: 18px;
   font-weight: 600;
-  
+
 }
-/* .react-datepicker-wrapper{
-  width: 100%;
-} */
-.forgot-btn{
-font-size: 12px;
+
+
+.forgot-btn {
+  font-size: 12px;
 }
-.forgot-btn:hover{
-color: #ffaa18;
+.progress-filename {
+  display: inline-block;
+  max-width: 120px;      
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
 }
-.doc-kb{
+
+.forgot-btn:hover {
+  color: #ffaa18;
+}
+
+.doc-kb {
   font-size: var(--br-space-300);
   font-weight: 600;
 }
+
+.react-datepicker-wrapper {
+  display: flex !important;
+}
+
 @media only screen and (max-width: 568px) {
   .br-login {
     margin: var(--br-space-200) var(--br-space-0) var(--br-space-0) var(--br-space-0) !important;
