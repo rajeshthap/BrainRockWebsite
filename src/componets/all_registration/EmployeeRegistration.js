@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Container, Row, Col, Button, Form, Card, Alert } from "react-bootstrap";
-import { FaBars, FaSearch, FaTrash, FaCheckCircle, FaRegFile, FaIdCard } from "react-icons/fa";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Form,
+  Card,
+  Alert,
+} from "react-bootstrap";
+import {
+  FaTrash,
+  FaCheckCircle,
+  FaRegFile,
+  FaIdCard,
+} from "react-icons/fa";
 import "../../assets/css/employeeregistration.css";
 import { RiFolderImageLine } from "react-icons/ri";
 import { GrDocumentText } from "react-icons/gr";
@@ -8,12 +21,16 @@ import { PiCertificate } from "react-icons/pi";
 import SideNav from "../hr_dashboard/SideNav";
 import HrHeader from "../hr_dashboard/HrHeader";
 import ModifyAlert from "../alerts/ModifyAlert";
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import LocationState from "../location_state/LocationState";
+import axios from "axios";
 
 const EmployeeRegistration = () => {
+  const [departments, setDepartments] = useState([]);
+  const [designations, setDesignations] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [, setLoading] = useState(false);
   const [isMobile] = useState(false);
   const [isTablet] = useState(false);
   const [showModifyAlert, setShowModifyAlert] = useState(false);
@@ -22,25 +39,27 @@ const EmployeeRegistration = () => {
   const [bankDetailsFetched, setBankDetailsFetched] = useState(false);
 
   // Custom DatePicker Input Component
-  const CustomDatePickerInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
-    <div className="input-group">
-      <Form.Control
-        ref={ref}
-        onClick={onClick}
-        value={value}
-        placeholder={placeholder}
-        className="br-date-picker"
-        readOnly
-      />
-      <span className="input-group-text" onClick={onClick}>
-        <i className="bi bi-calendar3"></i>
-      </span>
-    </div>
-  ));
+  const CustomDatePickerInput = React.forwardRef(
+    ({ value, onClick, placeholder }, ref) => (
+      <div className="input-group">
+        <Form.Control
+          ref={ref}
+          onClick={onClick}
+          value={value}
+          placeholder={placeholder}
+          className="br-date-picker"
+          readOnly
+        />
+        <span className="input-group-text" onClick={onClick}>
+          <i className="bi bi-calendar3"></i>
+        </span>
+      </div>
+    )
+  );
 
-   const handleInputChangeCity = (name, value) => {
+  const handleInputChangeCity = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-    validateField(name, value); 
+    validateField(name, value);
   };
   // Add state to track drag over status for each upload area
   const [dragOverStates, setDragOverStates] = useState({
@@ -116,7 +135,45 @@ const EmployeeRegistration = () => {
     pan_number: "",
     username: "",
     password: "",
+    experience_certificates: [],
   });
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(
+          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/roles-list/"
+        );
+        if (res.data.success && Array.isArray(res.data.roles)) {
+          setDepartments(res.data.roles);
+        }
+      } catch (err) {
+        console.error("Error fetching departments:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDepartments();
+  }, []);
+  useEffect(() => {
+    if (!formData.department) {
+      setDesignations([]);
+      return;
+    }
+
+    const selectedDepartment = departments.find(
+      (d) =>
+        d.category === formData.department ||
+        d.id === parseInt(formData.department)
+    );
+
+    if (selectedDepartment && Array.isArray(selectedDepartment.roles)) {
+      setDesignations(selectedDepartment.roles);
+    } else {
+      setDesignations([]);
+    }
+  }, [formData.department, departments]);
 
   const [errors, setErrors] = useState({});
   const [fileErrors, setFileErrors] = useState({});
@@ -234,24 +291,24 @@ const EmployeeRegistration = () => {
   };
 
   const handleInputChange = (e) => {
-  const { name, value } = e.target;
-  
-  let formattedValue = value;
-  if (value instanceof Date) {
-    const year = value.getFullYear();
-    const month = String(value.getMonth() + 1).padStart(2, '0');
-    const day = String(value.getDate()).padStart(2, '0');
-    formattedValue = `${year}-${month}-${day}`;
-  }
-  
-  if (name === "bank_name" && bankDetailsFetched) {
-    return;
-  }
-  setFormData((prev) => ({ ...prev, [name]: formattedValue }));
+    const { name, value } = e.target;
 
-  const errorMessage = validateField(name, formattedValue);
-  setErrors((prev) => ({ ...prev, [name]: errorMessage }));
-};
+    let formattedValue = value;
+    if (value instanceof Date) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, "0");
+      const day = String(value.getDate()).padStart(2, "0");
+      formattedValue = `${year}-${month}-${day}`;
+    }
+
+    if (name === "bank_name" && bankDetailsFetched) {
+      return;
+    }
+    setFormData((prev) => ({ ...prev, [name]: formattedValue }));
+
+    const errorMessage = validateField(name, formattedValue);
+    setErrors((prev) => ({ ...prev, [name]: errorMessage }));
+  };
 
   // Validation function
   const validateField = (name, value) => {
@@ -461,9 +518,9 @@ const EmployeeRegistration = () => {
   };
 
   // Preview handler
-  const handlePreview = (fileData) => {
-    if (fileData.fileURL) window.open(fileData.fileURL, "_blank");
-  };
+  // const handlePreview = (fileData) => {
+  //   if (fileData.fileURL) window.open(fileData.fileURL, "_blank");
+  // };
 
   // Multiple file upload handler
   const handleMultipleFileUpload = (e) => {
@@ -583,211 +640,212 @@ const EmployeeRegistration = () => {
 
   // Form submission handler
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setValidated(true);
-    setSubmitStatus({ loading: true, success: null, error: null });
+  e.preventDefault();
+  setValidated(true);
+  setSubmitStatus({ loading: true, success: null, error: null });
 
-    // Validate all text fields
-    const newErrors = {};
-    Object.keys(formData).forEach((key) => {
-      const errorMessage = validateField(key, formData[key]);
-      if (errorMessage) {
-        newErrors[key] = errorMessage;
-      }
+  // Validate all text fields
+  const newErrors = {};
+  Object.keys(formData).forEach((key) => {
+    const errorMessage = validateField(key, formData[key]);
+    if (errorMessage) {
+      newErrors[key] = errorMessage;
+    }
+  });
+  setErrors(newErrors);
+
+  const newFileErrors = {};
+
+  if (!photo.fileSelected) {
+    newFileErrors.photo = "Profile photo is required";
+  }
+  if (!resume.fileSelected) {
+    newFileErrors.resume = "Resume is required";
+  }
+  if (!aadhar.fileSelected) {
+    newFileErrors.aadhar = "Aadhar card is required";
+  }
+  if (!panCard.fileSelected) {
+    newFileErrors.panCard = "PAN card is required";
+  }
+  if (!offerLetter.fileSelected) {
+    newFileErrors.offer_letter = "Offer letter is required";
+  }
+
+  setFileErrors(newFileErrors);
+
+  if (
+    Object.keys(newErrors).length > 0 ||
+    Object.keys(newFileErrors).length > 0
+  ) {
+    setSubmitStatus({
+      loading: false,
+      success: null,
+      error: "Please fix errors in the form.",
     });
-    setErrors(newErrors);
 
-    const newFileErrors = {};
+    let firstErrorField = Object.keys(newErrors)[0];
 
-    if (!photo.fileSelected) {
-      newFileErrors.photo = "Profile photo is required";
+    if (!firstErrorField) {
+      firstErrorField = Object.keys(newFileErrors)[0];
     }
-    if (!resume.fileSelected) {
-      newFileErrors.resume = "Resume is required";
-    }
-    if (!aadhar.fileSelected) {
-      newFileErrors.aadhar = "Aadhar card is required";
-    }
-    if (!panCard.fileSelected) {
-      newFileErrors.panCard = "PAN card is required";
-    }
-    if (!offerLetter.fileSelected) {
-      newFileErrors.offer_letter = "Offer letter is required";
-    }
-
-    setFileErrors(newFileErrors);
 
     if (
-      Object.keys(newErrors).length > 0 ||
-      Object.keys(newFileErrors).length > 0
+      firstErrorField &&
+      formRefs[firstErrorField] &&
+      formRefs[firstErrorField].current
     ) {
-      setSubmitStatus({
-        loading: false,
-        success: null,
-        error: "Please fix errors in the form.",
+      formRefs[firstErrorField].current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
       });
 
-      let firstErrorField = Object.keys(newErrors)[0];
+      setTimeout(() => {
+        formRefs[firstErrorField].current.focus();
+      }, 500);
+    }
 
-      if (!firstErrorField) {
-        firstErrorField = Object.keys(newFileErrors)[0];
+    return;
+  }
+
+  const payload = new FormData();
+
+  payload.append("first_name", formData.first_name);
+  payload.append("last_name", formData.last_name);
+  payload.append("gender", formData.gender);
+  payload.append("date_of_birth", formData.date_of_birth);
+  payload.append("email", formData.email);
+  payload.append("phone", formData.phone);
+  payload.append("alternate_phone", formData.alternate_phone);
+  payload.append("address", formData.address);
+  payload.append("country", formData.country);
+  payload.append("state", formData.state);
+  payload.append("city", formData.city);
+  payload.append("emergency_contact_name", formData.emergency_contact_name);
+  payload.append(
+    "emergency_contact_number",
+    formData.emergency_contact_number
+  );
+  payload.append("department", formData.department);
+  payload.append("branch_name", formData.branch_name);
+  payload.append("designation", formData.designation);
+  payload.append("employment_type", formData.employment_type);
+  payload.append("joining_date", formData.joining_date);
+  payload.append("reporting_manager", formData.reporting_manager);
+  payload.append("work_location", formData.work_location);
+  payload.append("salary", formData.salary);
+  payload.append("bank_name", formData.bank_name);
+  payload.append("account_number", formData.account_number);
+  payload.append("ifsc_code", formData.ifsc_code);
+  payload.append("pan_number", formData.pan_number);
+  payload.append("username", formData.username);
+  payload.append("password", formData.password);
+
+  if (photo.file) payload.append("profile_photo", photo.file);
+  if (resume.file) payload.append("resume_document", resume.file);
+  if (panCard.file) payload.append("pan_card_document", panCard.file);
+  if (aadhar.file) payload.append("aadhar_document", aadhar.file);
+  if (offerLetter.file) payload.append("offer_letter", offerLetter.file);
+
+  experienceFiles.forEach((fileObj) => {
+    if (fileObj.file) {
+      payload.append("experience_certificates", fileObj.file);
+    }
+  });
+
+  try {
+    const response = await fetch(
+      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-register/",
+      {
+        method: "POST",
+        body: payload,
+        credentials: 'include', 
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Server response:", errorText);
+
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        setSubmitStatus({
+          loading: false,
+          success: null,
+          error: "Server error. Please try again.",
+        });
+        return;
       }
 
-      if (
-        firstErrorField &&
-        formRefs[firstErrorField] &&
-        formRefs[firstErrorField].current
-      ) {
-        formRefs[firstErrorField].current.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
+      if (errorData && errorData.errors) {
+        const fieldErrors = {};
+
+        Object.keys(errorData.errors).forEach((field) => {
+          let frontendField = field;
+
+          if (errorData.errors[field] && errorData.errors[field].length > 0) {
+            fieldErrors[frontendField] = errorData.errors[field][0];
+          }
         });
 
-        setTimeout(() => {
-          formRefs[firstErrorField].current.focus();
-        }, 500);
+        setErrors((prevErrors) => ({ ...prevErrors, ...fieldErrors }));
+
+        const firstErrorField = Object.keys(fieldErrors)[0];
+        if (
+          firstErrorField &&
+          formRefs[firstErrorField] &&
+          formRefs[firstErrorField].current
+        ) {
+          formRefs[firstErrorField].current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          setTimeout(() => {
+            formRefs[firstErrorField].current.focus();
+          }, 500);
+        }
+
+        setSubmitStatus({
+          loading: false,
+          success: null,
+          error: "Please fix the highlighted errors in the form.",
+        });
+      } else {
+        setSubmitStatus({
+          loading: false,
+          success: null,
+          error:
+            errorData.message ||
+            errorData.error ||
+            "Server error. Please try again.",
+        });
       }
 
       return;
     }
 
-    const payload = new FormData();
-
-    payload.append("first_name", formData.first_name);
-    payload.append("last_name", formData.last_name);
-    payload.append("gender", formData.gender);
-    payload.append("date_of_birth", formData.date_of_birth);
-    payload.append("email", formData.email);
-    payload.append("phone", formData.phone);
-    payload.append("alternate_phone", formData.alternate_phone);
-    payload.append("address", formData.address);
-    payload.append("country", formData.country);
-    payload.append("state", formData.state);
-    payload.append("city", formData.city);
-    payload.append("emergency_contact_name", formData.emergency_contact_name);
-    payload.append(
-      "emergency_contact_number",
-      formData.emergency_contact_number
-    );
-    payload.append("department", formData.department);
-    payload.append("branch_name", formData.branch_name);
-    payload.append("designation", formData.designation);
-    payload.append("employment_type", formData.employment_type);
-    payload.append("joining_date", formData.joining_date);
-    payload.append("reporting_manager", formData.reporting_manager);
-    payload.append("work_location", formData.work_location);
-    payload.append("salary", formData.salary);
-    payload.append("bank_name", formData.bank_name);
-    payload.append("account_number", formData.account_number);
-    payload.append("ifsc_code", formData.ifsc_code);
-    payload.append("pan_number", formData.pan_number);
-    payload.append("username", formData.username);
-    payload.append("password", formData.password);
-
-    if (photo.file) payload.append("profile_photo", photo.file);
-    if (resume.file) payload.append("resume_document", resume.file);
-    if (panCard.file) payload.append("pan_card_document", panCard.file);
-    if (aadhar.file) payload.append("aadhar_document", aadhar.file);
-    if (offerLetter.file) payload.append("offer_letter", offerLetter.file);
-
-    experienceFiles.forEach((fileObj) => {
-      if (fileObj.file) {
-        payload.append("experience_certificates", fileObj.file);
-      }
+    setSubmitStatus({
+      loading: false,
+      success: "Employee registered successfully!",
+      error: null,
     });
 
-    try {
-      const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-register/",
-        {
-          method: "POST",
-          body: payload,
-        }
-      );
+    setAlertMessage("Employee registered successfully!");
+    setShowModifyAlert(true);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Server response:", errorText);
-
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          setSubmitStatus({
-            loading: false,
-            success: null,
-            error: "Server error. Please try again.",
-          });
-          return;
-        }
-
-        if (errorData && errorData.errors) {
-          const fieldErrors = {};
-
-          Object.keys(errorData.errors).forEach((field) => {
-            let frontendField = field;
-
-            if (errorData.errors[field] && errorData.errors[field].length > 0) {
-              fieldErrors[frontendField] = errorData.errors[field][0];
-            }
-          });
-
-          setErrors((prevErrors) => ({ ...prevErrors, ...fieldErrors }));
-
-          const firstErrorField = Object.keys(fieldErrors)[0];
-          if (
-            firstErrorField &&
-            formRefs[firstErrorField] &&
-            formRefs[firstErrorField].current
-          ) {
-            formRefs[firstErrorField].current.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-            });
-
-            setTimeout(() => {
-              formRefs[firstErrorField].current.focus();
-            }, 500);
-          }
-
-          setSubmitStatus({
-            loading: false,
-            success: null,
-            error: "Please fix the highlighted errors in the form.",
-          });
-        } else {
-          setSubmitStatus({
-            loading: false,
-            success: null,
-            error:
-              errorData.message ||
-              errorData.error ||
-              "Server error. Please try again.",
-          });
-        }
-
-        return;
-      }
-
-      setSubmitStatus({
-        loading: false,
-        success: "Employee registered successfully!",
-        error: null,
-      });
-
-      setAlertMessage("Employee registered successfully!");
-      setShowModifyAlert(true);
-
-      resetForm();
-    } catch (err) {
-      console.error("Network error:", err);
-      setSubmitStatus({
-        loading: false,
-        success: null,
-        error: "Network error. Please try again.",
-      });
-    }
-  };
+    resetForm();
+  } catch (err) {
+    console.error("Network error:", err);
+    setSubmitStatus({
+      loading: false,
+      success: null,
+      error: "Network error. Please try again.",
+    });
+  }
+};
 
   useEffect(() => {
     return () => {
@@ -845,7 +903,7 @@ const EmployeeRegistration = () => {
                 <Row>
                   {/* ========= LEFT SIDE: Basic Fields ========= */}
                   <Col lg={10} md={6} sm={12}>
-                    <Row>               
+                    <Row>
                       {/* First Name */}
                       <Col lg={6} md={6} sm={12}>
                         <Form.Group className="mb-3" controlId="firstName">
@@ -922,15 +980,32 @@ const EmployeeRegistration = () => {
                       <Col lg={6} md={6} sm={12}>
                         <Form.Group className="mb-3" controlId="dateOfBirth">
                           <Form.Label className="br-label">
-                            Date of Birth <span className="br-span-star">*</span>
+                            Date of Birth{" "}
+                            <span className="br-span-star">*</span>
                           </Form.Label>
                           <DatePicker
-                            selected={formData.date_of_birth ? new Date(formData.date_of_birth) : null}
-                            onChange={(date) => handleInputChange({ target: { name: 'date_of_birth', value: date } })}
+                            selected={
+                              formData.date_of_birth
+                                ? new Date(formData.date_of_birth)
+                                : null
+                            }
+                            onChange={(date) =>
+                              handleInputChange({
+                                target: { name: "date_of_birth", value: date },
+                              })
+                            }
                             dateFormat="yyyy-MM-dd"
                             placeholderText="Select Date of Birth"
-                            customInput={<CustomDatePickerInput placeholder="Select Date of Birth" />}
-                            maxDate={new Date(new Date().setFullYear(new Date().getFullYear() - 18))}
+                            customInput={
+                              <CustomDatePickerInput placeholder="Select Date of Birth" />
+                            }
+                            maxDate={
+                              new Date(
+                                new Date().setFullYear(
+                                  new Date().getFullYear() - 18
+                                )
+                              )
+                            }
                             showYearDropdown
                             scrollableYearDropdown
                             yearDropdownItemNumber={100}
@@ -949,7 +1024,8 @@ const EmployeeRegistration = () => {
                   <Col lg={2} md={6} sm={12}>
                     <Form.Group className="mb-3" ref={formRefs.photo}>
                       <Form.Label className="br-label">
-                        Photo / Profile Picture <span className="br-span-star">*</span>
+                        Photo / Profile Picture{" "}
+                        <span className="br-span-star">*</span>
                       </Form.Label>
 
                       <div
@@ -959,9 +1035,7 @@ const EmployeeRegistration = () => {
                         onDragEnter={(e) => handleDragEnter(e, "photo")}
                         onDragOver={(e) => handleDragOver(e, "photo")}
                         onDragLeave={(e) => handleDragLeave(e, "photo")}
-                        onDrop={(e) =>
-                          handleDrop(e, "photo", setPhoto)
-                        }
+                        onDrop={(e) => handleDrop(e, "photo", setPhoto)}
                       >
                         {!photo.fileSelected ? (
                           <>
@@ -1017,11 +1091,7 @@ const EmployeeRegistration = () => {
                                 variant="danger"
                                 size="sm"
                                 onClick={() =>
-                                  handleDelete(
-                                    photo,
-                                    setPhoto,
-                                    "photoInput"
-                                  )
+                                  handleDelete(photo, setPhoto, "photoInput")
                                 }
                                 className="ms-2 br-btn-delete"
                                 title="Delete File"
@@ -1107,7 +1177,9 @@ const EmployeeRegistration = () => {
                 {/* Alternate Phone */}
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3" controlId="alternatePhone">
-                    <Form.Label className="br-label">Alternate Phone</Form.Label>
+                    <Form.Label className="br-label">
+                      Alternate Phone
+                    </Form.Label>
                     <Form.Control
                       type="number"
                       placeholder="Enter Alternate Phone"
@@ -1127,10 +1199,10 @@ const EmployeeRegistration = () => {
 
                 {/* Address */}
                 <LocationState
-                          formData={formData}
-                          handleInputChange={handleInputChangeCity}
-                          formErrors={errors} 
-                        />
+                  formData={formData}
+                  handleInputChange={handleInputChangeCity}
+                  formErrors={errors}
+                />
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3" controlId="address">
                     <Form.Label className="br-label">
@@ -1153,13 +1225,16 @@ const EmployeeRegistration = () => {
                     </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
-                
 
                 {/* Emergency Contact Name */}
                 <Col lg={4} md={6} sm={12}>
-                  <Form.Group className="mb-3" controlId="emergencyRelationship">
+                  <Form.Group
+                    className="mb-3"
+                    controlId="emergencyRelationship"
+                  >
                     <Form.Label className="br-label">
-                      Emergency Contact Name <span className="br-span-star">*</span>
+                      Emergency Contact Name{" "}
+                      <span className="br-span-star">*</span>
                     </Form.Label>
                     <Form.Select
                       className="br-form-control"
@@ -1186,7 +1261,8 @@ const EmployeeRegistration = () => {
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3" controlId="emergencyNumber">
                     <Form.Label className="br-label">
-                      Emergency Contact Number <span className="br-span-star">*</span>
+                      Emergency Contact Number{" "}
+                      <span className="br-span-star">*</span>
                     </Form.Label>
                     <Form.Control
                       type="number"
@@ -1210,27 +1286,27 @@ const EmployeeRegistration = () => {
                   <h1>3. Job Details</h1>
                 </div>
 
-<Col lg={4} md={6} sm={12}>
-                        <Form.Group className="mb-3" controlId="lastName">
-                          <Form.Label className="br-label">
-                            Branch Name <span className="br-span-star">*</span>
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            placeholder="Enter Branch Name"
-                            className="br-form-control"
-                            name="branch_name"
-                            value={formData.branch_name}
-                            onChange={handleInputChange}
-                            isInvalid={!!errors.branch_name}
-                            required
-                            ref={formRefs.branch_name}
-                          />
-                          <Form.Control.Feedback type="br-alert">
-                            {errors.branch_name}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
+                <Col lg={4} md={6} sm={12}>
+                  <Form.Group className="mb-3" controlId="lastName">
+                    <Form.Label className="br-label">
+                      Branch Name <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter Branch Name"
+                      className="br-form-control"
+                      name="branch_name"
+                      value={formData.branch_name}
+                      onChange={handleInputChange}
+                      isInvalid={!!errors.branch_name}
+                      required
+                      ref={formRefs.branch_name}
+                    />
+                    <Form.Control.Feedback type="br-alert">
+                      {errors.branch_name}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
                 {/* Department */}
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3" controlId="department">
@@ -1239,20 +1315,19 @@ const EmployeeRegistration = () => {
                     </Form.Label>
                     <Form.Select
                       className="br-form-control"
-                      name="department"
-                      value={formData.department}
-                      onChange={handleInputChange}
-                      isInvalid={!!errors.department}
+                      value={formData.department || ""}
                       required
+                      onChange={handleInputChange}
+                      name="department"
+                      isInvalid={!!errors.department}
                       ref={formRefs.department}
                     >
                       <option value="">Select Department</option>
-                      <option value="HR">HR</option>
-                      <option value="IT">IT</option>
-                      <option value="Finance">Finance</option>
-                      <option value="Sales">Sales</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="Operations">Operations</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.category}>
+                          {d.category}
+                        </option>
+                      ))}
                     </Form.Select>
                     <Form.Control.Feedback type="br-alert">
                       {errors.department}
@@ -1262,21 +1337,26 @@ const EmployeeRegistration = () => {
 
                 {/* Designation / Job Title */}
                 <Col lg={4} md={6} sm={12}>
-                  <Form.Group className="mb-3" controlId="designation">
+                  <Form.Group className="mb-3" controlId="designationSelect">
                     <Form.Label className="br-label">
-                      Designation / Job Title <span className="br-span-star">*</span>
+                      Designation <span className="br-span-star">*</span>
                     </Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter job title"
+                    <Form.Select
                       className="br-form-control"
-                      name="designation"
-                      value={formData.designation}
-                      onChange={handleInputChange}
-                      isInvalid={!!errors.designation}
                       required
+                      value={formData.designation || ""}
+                      onChange={handleInputChange}
+                      name="designation"
+                      isInvalid={!!errors.designation}
                       ref={formRefs.designation}
-                    />
+                    >
+                      <option value="">Select Designation</option>
+                      {designations.map((des, index) => (
+                        <option key={index} value={des}>
+                          {des}
+                        </option>
+                      ))}
+                    </Form.Select>
                     <Form.Control.Feedback type="br-alert">
                       {errors.designation}
                     </Form.Control.Feedback>
@@ -1317,11 +1397,21 @@ const EmployeeRegistration = () => {
                       Joining Date <span className="br-span-star">*</span>
                     </Form.Label>
                     <DatePicker
-                      selected={formData.joining_date ? new Date(formData.joining_date) : null}
-                      onChange={(date) => handleInputChange({ target: { name: 'joining_date', value: date } })}
+                      selected={
+                        formData.joining_date
+                          ? new Date(formData.joining_date)
+                          : null
+                      }
+                      onChange={(date) =>
+                        handleInputChange({
+                          target: { name: "joining_date", value: date },
+                        })
+                      }
                       dateFormat="yyyy-MM-dd"
                       placeholderText="Select Joining Date"
-                      customInput={<CustomDatePickerInput placeholder="Select Joining Date" />}
+                      customInput={
+                        <CustomDatePickerInput placeholder="Select Joining Date" />
+                      }
                       minDate={new Date()}
                       showYearDropdown
                       scrollableYearDropdown
@@ -1396,7 +1486,8 @@ const EmployeeRegistration = () => {
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3" controlId="salary">
                     <Form.Label className="br-label">
-                      Salary (Monthly / Annual) <span className="br-span-star">*</span>
+                      Salary (Monthly / Annual){" "}
+                      <span className="br-span-star">*</span>
                     </Form.Label>
                     <Form.Control
                       type="number"
@@ -1592,7 +1683,8 @@ const EmployeeRegistration = () => {
                                 onClick={() =>
                                   handleDelete(resume, setResume, "resumeFile")
                                 }
-                                title="Delete File" className="br-delete-file"
+                                title="Delete File"
+                                className="br-delete-file"
                               >
                                 <FaTrash />
                               </Button>
@@ -1645,7 +1737,9 @@ const EmployeeRegistration = () => {
                           <div className="upload-icon">
                             <FaIdCard />
                           </div>
-                          <p className="doc-text">Drag your Aadhar card file here</p>
+                          <p className="doc-text">
+                            Drag your Aadhar card file here
+                          </p>
                           <p className="upload-or">or</p>
                           <Form.Label
                             htmlFor="aadharFile"
@@ -1700,7 +1794,8 @@ const EmployeeRegistration = () => {
                                 onClick={() =>
                                   handleDelete(aadhar, setAadhar, "aadharFile")
                                 }
-                                title="Delete File" className="br-delete-file"
+                                title="Delete File"
+                                className="br-delete-file"
                               >
                                 <FaTrash />
                               </Button>
@@ -1746,14 +1841,18 @@ const EmployeeRegistration = () => {
                       onDragEnter={(e) => handleDragEnter(e, "offerLetter")}
                       onDragOver={(e) => handleDragOver(e, "offerLetter")}
                       onDragLeave={(e) => handleDragLeave(e, "offerLetter")}
-                      onDrop={(e) => handleDrop(e, "offerLetter", setOfferLetter)}
+                      onDrop={(e) =>
+                        handleDrop(e, "offerLetter", setOfferLetter)
+                      }
                     >
                       {!offerLetter.fileSelected ? (
                         <>
                           <div className="upload-icon">
                             <GrDocumentText />
                           </div>
-                          <p className="doc-text">Drag your Offer Letter here</p>
+                          <p className="doc-text">
+                            Drag your Offer Letter here
+                          </p>
                           <p className="upload-or">or</p>
                           <Form.Label
                             htmlFor="offerLetterFile"
@@ -1812,7 +1911,8 @@ const EmployeeRegistration = () => {
                                     "offerLetterFile"
                                   )
                                 }
-                                title="Delete File" className="br-delete-file"
+                                title="Delete File"
+                                className="br-delete-file"
                               >
                                 <FaTrash />
                               </Button>
@@ -1823,7 +1923,9 @@ const EmployeeRegistration = () => {
                             <div
                               className="progress-bar"
                               role="progressbar"
-                              style={{ width: `${offerLetter.uploadProgress}%` }}
+                              style={{
+                                width: `${offerLetter.uploadProgress}%`,
+                              }}
                             ></div>
                           </div>
 
@@ -1916,9 +2018,14 @@ const EmployeeRegistration = () => {
                                 variant="danger"
                                 size="sm"
                                 onClick={() =>
-                                  handleDelete(panCard, setPanCard, "panCardFile")
+                                  handleDelete(
+                                    panCard,
+                                    setPanCard,
+                                    "panCardFile"
+                                  )
                                 }
-                                title="Delete File" className="br-delete-file"
+                                title="Delete File"
+                                className="br-delete-file"
                               >
                                 <FaTrash />
                               </Button>
@@ -2050,21 +2157,21 @@ const EmployeeRegistration = () => {
                                         variant="danger"
                                         size="sm"
                                         onClick={() => handleDeleteFile(index)}
-                                        title="Delete File" className="br-delete-file"
+                                        title="Delete File"
+                                        className="br-delete-file"
                                       >
                                         <FaTrash />
                                       </Button>
                                     </div>
                                   </div>
 
-                                  <div
-                                    className="progress mt-2"
-                                   
-                                  >
+                                  <div className="progress mt-2">
                                     <div
                                       className="progress-bar"
                                       role="progressbar"
-                                      style={{ width: `${file.uploadProgress}%` }}
+                                      style={{
+                                        width: `${file.uploadProgress}%`,
+                                      }}
                                     ></div>
                                   </div>
 
@@ -2144,7 +2251,9 @@ const EmployeeRegistration = () => {
                     className="br-submit-btn"
                     disabled={submitStatus.loading}
                   >
-                    {submitStatus.loading ? "Submitting..." : "Register Employee"}
+                    {submitStatus.loading
+                      ? "Submitting..."
+                      : "Register Employee"}
                   </Button>
                 </div>
               </Row>
