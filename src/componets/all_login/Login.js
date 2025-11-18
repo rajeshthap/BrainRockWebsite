@@ -9,7 +9,6 @@ export default function Login() {
   const { login, loading: authLoading, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-
   const [formData, setFormData] = useState({
     email_or_phone: "",
     password: "",
