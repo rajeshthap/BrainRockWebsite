@@ -35,15 +35,15 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     setOpenSubmenu(openSubmenu === index ? null : index);
   };
   
-  useEffect(() => {
-    axios
-      .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${user_id}`)
-      .then((res) => {
-        const role = res.data?.role || res.data?.employee_role || null;
-        setUserRole(role);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${user_id}`)
+  //     .then((res) => {
+  //       const role = res.data?.role || res.data?.employee_role || null;
+  //       setUserRole(role);
+  //     })
+  //     .catch((err) => console.log(err));
+  // }, []);
 
 const menuItems = [
     {

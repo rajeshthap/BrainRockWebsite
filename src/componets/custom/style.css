@@ -159,6 +159,20 @@ body {
   vertical-align: middle;
 }
 
+.accept-btn{
+  font-size: 12px;
+  background-color: #00553c;
+  border :none;
+}
+.reject-btn{
+  font-size: 12px;
+  background-color: #ff0000;
+}
+.cancel-btn{
+  font-size: 12px;
+  background-color: #808090;
+}
+
 .forgot-btn:hover {
   color: #ffaa18;
 }
