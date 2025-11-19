@@ -157,7 +157,114 @@
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
 }
-
+.temp-rwd-table {
+    width: 100%;
+    margin: auto;
+    border-collapse: collapse;
+    border-radius: .4em;
+    overflow: hidden;
+    color: #333;
+}
+ 
+/* Header Row */
+.temp-rwd-table tr:first-child {
+    background-color: blue;
+    color: #fff;
+}
+ 
+/* General Row Style */
+.temp-rwd-table tr {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    background-color: #f5f9fc;
+}
+ 
+/* Odd Rows */
+.temp-rwd-table tr:nth-child(odd):not(:first-child) {
+    background-color: #ebf3f9;
+}
+ 
+/* Hide table header on mobile */
+.temp-rwd-table th {
+    display: none;
+}
+ 
+/* Make each column block on mobile */
+.temp-rwd-table td {
+    display: block;
+    padding: 0.5em 1em;
+}
+ 
+/* Spacing */
+.temp-rwd-table td:first-child {
+    margin-top: 0.5em;
+}
+ 
+.temp-rwd-table td:last-child {
+    margin-bottom: 0.5em;
+}
+ 
+/* Label for mobile view */
+.temp-rwd-table td:before {
+    content: attr(data-th) ": ";
+    width: 120px;
+    display: inline-block;
+    font-weight: 600;
+    color: #000;
+}
+ 
+/* Hover Effect for Desktop */
+@media screen and (min-width: 600px) {
+    .temp-rwd-table tr:hover:not(:first-child) {
+        background-color: #d8e7f3;
+    }
+ 
+    /* Show TH & TD normally on desktop */
+    .temp-rwd-table th,
+    .temp-rwd-table td {
+        display: table-cell;
+        padding: 1em !important;
+        text-align: left;
+        font-size: var(--br-space-300);
+    }
+ 
+    .temp-rwd-table td:before {
+        display: none;
+    }
+ 
+    .temp-rwd-table th:first-child,
+    .temp-rwd-table td:first-child {
+        padding-left: 0;
+    }
+ 
+    .temp-rwd-table th:last-child,
+    .temp-rwd-table td:last-child {
+        padding-right: 0;
+    }
+}
+ 
+/* Mobile Fix for Row Border */
+@media screen and (max-width: 601px) {
+    .temp-rwd-table tr:nth-child(2) {
+        border-top: none;
+    }
+}
+ 
+/* --------------------------
+   Action Button Style
+--------------------------- */
+.event-click-btn {
+    padding: 6px 12px;
+    background: blue;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+ 
+.event-click-btn:hover {
+    opacity: 0.8;
+}
 
 
 @media (max-width: 768px) {

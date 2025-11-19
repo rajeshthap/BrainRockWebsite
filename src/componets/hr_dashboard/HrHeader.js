@@ -19,9 +19,11 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "../context/AuthContext";
-function HrHeader({ toggleSidebar }) {
+
+// 1. Accept searchTerm and setSearchTerm as props
+function HrHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const { logout } = useContext(AuthContext);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([
     {
@@ -70,10 +72,13 @@ const navigate = useNavigate();
           <Col>
             <div className="search-bar">
               <FaSearch className="search-icon" />
+              {/* 2. Add value and onChange to the existing input. No other changes here. */}
               <input
                 type="text"
                 className="search-input"
-                placeholder="Search..."
+                placeholder="Search by Name, ID, Email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </Col>
