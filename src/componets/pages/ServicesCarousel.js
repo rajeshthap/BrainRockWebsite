@@ -1,83 +1,83 @@
-import React from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Carousel, Row, Col } from "react-bootstrap";
-import Slider1 from "../../assets/images/slider1.png";
-import Slider2 from "../../assets/images/slider2.png";
-import Slider3 from "../../assets/images/slider1.png"
+import React from 'react';
 import "../../assets/css/section.css";
-
+import DevelopmentIcon from '../../assets/images/Development-icon.png';
+import CloudIcon from '../../assets/images/cloud-icon.png'
+import StrategyIcon from '../../assets/images/Strategy-icon.png'
+import MobileIcon from '../../assets/images/mobile-icon.png'
+import UIUXIcon from '../../assets/images/ui-icon.png'
+import CybersecurityIcon from '../../assets/images/Cybersecurity-icon.png'
+import InfrastructureIcon from '../../assets/images/IT-icon.png'
+import DataServicesIcon from '../../assets/images/DataServices-icon.png'
 const ServicesCarousel = () => {
-  const slides = [
-    [
-      {
-        img: Slider1,
-        title: "Mobile App Development",
-        desc: `We design and build high-performing, user-friendly mobile apps tailored to your business needs, ensuring seamless experiences across Android and iOS platforms.`
-      },
-      {
-        img: Slider2,
-        title: "Web Design & Development",
-        desc: `We craft visually stunning, responsive, and user-friendly websites that drive engagement and deliver seamless digital experiences.`
-      },
-      {
-        img: Slider3,
-        title: "Software Testing Service",
-        desc: `We ensure your software is bug-free, reliable, and high-performing with our comprehensive testing services.`
-      }
-    ],
-    [
-      {
-        img: Slider1,
-        title: "Mobile App Development",
-        desc: `We design and build high-performing, user-friendly mobile apps tailored to your business needs, ensuring seamless experiences across Android and iOS platforms.`
-      },
-      {
-        img: Slider2,
-        title: "Web Design & Development",
-        desc: `We craft visually stunning, responsive, and user-friendly websites that drive engagement and deliver seamless digital experiences.`
-      },
-      {
-        img: Slider3,
-        title: "Software Testing Service",
-        desc: `We ensure your software is bug-free, reliable, and high-performing with our comprehensive testing services.`
-      }
-    ]
+  const industries = [
+    {
+      name: "Software Development Services",
+      icon: <img src={DevelopmentIcon} alt="DevelopmentIcon" className="img-fluid" />
+    },
+
+    {
+      name: "Cloud Services",
+      icon: <img src={CloudIcon} alt="CloudIcon" className="img-fluid" />
+    },
+
+    {
+      name: "IT Consulting & Strategy",
+      icon: <img src={StrategyIcon} alt="StrategyIcon" className="img-fluid" />
+    },
+    {
+      name: "Mobile App Development",
+      icon: <img src={MobileIcon} alt="MobileIcon" className="img-fluid" />
+    },
+
+    {
+      name: "Website & UI/UX Services",
+      icon: <img src={UIUXIcon} alt="UIUXIcon" className="img-fluid" />
+    },
+
+    {
+      name: "Cybersecurity Services",
+      icon: <img src={CybersecurityIcon} alt="CybersecurityIcon" className="img-fluid" />
+    },
+
+    {
+      name: "IT Infrastructure Management",
+      icon: <img src={InfrastructureIcon} alt="InfrastructureIcon" className="img-fluid" />
+    },
+
+    {
+      name: "Data & Analytics Services",
+      icon: <img src={DataServicesIcon} alt="DataServicesIcon" className="img-fluid" />
+    },
+
+    
+
+
+
   ];
 
   return (
-    <div className="container-fluid br-head-box py-5">
-      <h1 className="text-center mb-4">Services we offer</h1>
-      <Carousel
-        indicators={false}
-        controls={true}
-        interval={3000}
-        pause={false}
-      >
-        {slides.map((slide, idx) => (
-          <Carousel.Item key={idx}>
-            <Row className="justify-content-center d-flex">
-              {slide.map((card, i) => (
-                <Col
-                  md={4}
-                  sm={12}
-                  key={i}
-                  className="mb-3 d-flex"
-                >
-                  <div className="service-card p-3 border rounded shadow-sm flex-fill text-center">
-                    <img
-                      src={card.img}
-                      alt={card.title}
-                      className="img-fluid mobile-app-img mb-3"
-                    />
-                    <h4>{card.title}</h4>
-                    <p>{card.desc}</p>
-                  </div>
-                </Col>
-              ))}
-            </Row>
-          </Carousel.Item>
-        ))}
-      </Carousel>
+    <div className="sme-container">
+      <h2 className="sme-title">Built for SMEs in India</h2>
+
+      <div className="scroll-container">
+        <div className="scroll-track">
+          {/* First set of industries */}
+          {industries.map((industry, index) => (
+            <div key={index} className="industry-box">
+              <div className="industry-icon">{industry.icon}</div>
+              <span>{industry.name}</span>
+            </div>
+          ))}
+
+          {/* Duplicate set for seamless looping */}
+          {industries.map((industry, index) => (
+            <div key={`duplicate-${index}`} className="industry-box">
+              <div className="industry-icon">{industry.icon}</div>
+              <span>{industry.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
