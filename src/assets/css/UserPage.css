@@ -441,6 +441,7 @@ a:hover {
 .about-left-content {
     position: relative;
     z-index: 1;
+    margin-bottom: 32px;
 }
 
 

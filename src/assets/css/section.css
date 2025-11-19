@@ -100,7 +100,7 @@
 
 /* Text becomes bolder on hover */
 .industry-box:hover span {
-  font-weight: 700;
+  font-weight: 500;
   color: #4285f4;
 }
 

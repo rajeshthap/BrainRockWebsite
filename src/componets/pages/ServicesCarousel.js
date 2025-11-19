@@ -8,6 +8,11 @@ import UIUXIcon from '../../assets/images/ui-icon.png'
 import CybersecurityIcon from '../../assets/images/Cybersecurity-icon.png'
 import InfrastructureIcon from '../../assets/images/IT-icon.png'
 import DataServicesIcon from '../../assets/images/DataServices-icon.png'
+import DigitalMarketingsIcon from '../../assets/images/DigitalMarketing-icon.png'
+import ManagedITServicesIcon from '../../assets/images/ManagedITServicesIcon-icon.png'
+import TestingIcon from '../../assets/images/qa-icon.png'
+import ITTraningIcon from '../../assets/images/traning-icon.png'
+import { Container } from 'react-bootstrap';
 const ServicesCarousel = () => {
   const industries = [
     {
@@ -49,36 +54,59 @@ const ServicesCarousel = () => {
       icon: <img src={DataServicesIcon} alt="DataServicesIcon" className="img-fluid" />
     },
 
-    
+    {
+      name: "Digital Marketing Services",
+      icon: <img src={DigitalMarketingsIcon} alt="DigitalMarketingsIcon" className="img-fluid" />
+    },
+    {
+      name: "Managed IT Services",
+      icon: <img src={ManagedITServicesIcon} alt="ManagedITServicesIcon" className="img-fluid" />
+    },
+
+    {
+      name: "QA & Testing Services",
+      icon: <img src={TestingIcon} alt="TestingIcon" className="img-fluid" />
+    },
+    {
+      name: "IT Software Training & Development",
+      icon: <img src={ITTraningIcon} alt="ITTraningIcon" className="img-fluid" />
+    },
 
 
 
   ];
 
   return (
-    <div className="sme-container">
-      <h2 className="sme-title">Built for SMEs in India</h2>
 
-      <div className="scroll-container">
-        <div className="scroll-track">
-          {/* First set of industries */}
-          {industries.map((industry, index) => (
-            <div key={index} className="industry-box">
-              <div className="industry-icon">{industry.icon}</div>
-              <span>{industry.name}</span>
-            </div>
-          ))}
-
-          {/* Duplicate set for seamless looping */}
-          {industries.map((industry, index) => (
-            <div key={`duplicate-${index}`} className="industry-box">
-              <div className="industry-icon">{industry.icon}</div>
-              <span>{industry.name}</span>
-            </div>
-          ))}
+    <Container fluid className='mt-4'>
+      <div className="sme-container mt-4 mb-5 pt-3">
+        <div className="text-center">
+          <h1 className=" hero-sub-title">
+            Innovative <br></br>
+            <span className="br-span-list mt-3">Service Offerings</span>
+          </h1>
         </div>
-      </div>
-    </div>
+
+        <div className="scroll-container">
+          <div className="scroll-track">
+            {/* First set of industries */}
+            {industries.map((industry, index) => (
+              <div key={index} className="industry-box">
+                <div className="industry-icon">{industry.icon}</div>
+                <span>{industry.name}</span>
+              </div>
+            ))}
+
+            {/* Duplicate set for seamless looping */}
+            {industries.map((industry, index) => (
+              <div key={`duplicate-${index}`} className="industry-box">
+                <div className="industry-icon">{industry.icon}</div>
+                <span>{industry.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div></Container>
   );
 };
 
