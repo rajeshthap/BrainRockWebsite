@@ -5,221 +5,64 @@ import "../../assets/css/section.css";
 import Customer1 from "../../assets/images/women.jpg";
 import { FaStar } from "react-icons/fa";
 
+const testimonials = [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      role: "Marketing Director",
+      company: "TechCorp Inc.",
+      text: "This service transformed our workflow. The team's attention to detail and innovative solutions exceeded our expectations.",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+    },
+    {
+      id: 2,
+      name: "Michael Chen",
+      role: "Product Manager",
+      company: "InnovateLab",
+      text: "Outstanding results from day one. The intuitive interface and powerful features helped us launch 3 months ahead of schedule.",
+      avatar: "https://randomuser.me/api/portraits/men/32.jpg"
+    },
+    {
+      id: 3,
+      name: "Emma Rodriguez",
+      role: "CEO",
+      company: "StartupHub",
+      text: "The perfect solution for our growing business. Scalable, reliable, and backed by exceptional customer support.",
+      avatar: "https://randomuser.me/api/portraits/women/68.jpg"
+    }
+  ];
+
+
 const TestimonialCarousel = () => {
   return (
     <>
-      <section className="testimonial_section">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-7">
-              <div className="about_content">
-                <div className="background_layer"></div>
-                <div className="layer_content">
-                  <div className="section_title">
-                    <h2>
-                      Why customers love<strong>Cworking with us</strong>
-                    </h2>
-                    <div className="heading_line">
-                      <span></span>
-                    </div>
-                    <p>
-                      Without any doubt I recommend Alcaline Solutions as one of
-                      the best web design and digital marketing agencies. One of
-                      the best agencies I’ve came across so far. Wouldn’t be
-                      hesitated to introduce their work to someone else.
-                    </p>
-                  </div>
+      <section className="testimonial-section">
+      <div className="container">
+        <h2 className="section-title">What Our Clients Say</h2>
+        <div className="testimonial-grid">
+          {testimonials.map((testimonial) => (
+            <div key={testimonial.id} className="testimonial-card">
+              <div className="testimonial-content">
+                <div className="quote-icon">❝</div>
+                <p className="testimonial-text">{testimonial.text}</p>
+              </div>
+              <div className="testimonial-author">
+                <img 
+                  src={testimonial.avatar} 
+                  alt={testimonial.name} 
+                  className="author-avatar"
+                />
+                <div className="author-info">
+                  <h4 className="author-name">{testimonial.name}</h4>
+                  <p className="author-role">{testimonial.role}</p>
+                  <p className="author-company">{testimonial.company}</p>
                 </div>
               </div>
             </div>
-
-            <div className="col-lg-5">
-              <div className="testimonial_box">
-                <div className="testimonial_container">
-                  <div className="background_layer"></div>
-                  <div className="layer_content">
-                    {/* React-Bootstrap Carousel */}
-                    <Carousel
-                      indicators={false}
-                      controls={true}
-                      interval={3000}
-                      className="testimonial_owlCarousel owl-carousel"
-                    >
-                      <Carousel.Item>
-                        <div className="testimonials">
-                          <div className="testimonial_content">
-                            <div className="testimonial_caption">
-                              <div className="star-rating">
-                                {[...Array(5)].map((_, index) => (
-                                  <FaStar
-                                    key={index}
-                                    className="star-rating-icon"
-                                  />
-                                ))}
-                              </div>
-                              <h6>Imran Khan</h6>
-                              <span>Software Engineer</span>
-                            </div>
-                            <p>
-                              The team at Tectxon industry is very talented,
-                              dedicated, well organized and knowledgeable. I was
-                              most satisfied with the quality of the
-                              workmanship. They did excellent work.
-                            </p>
-                          </div>
-                          <div className="images_box">
-                            <div className="testimonial_img">
-                              <img
-                                className="img-center"
-                                src={Customer1}
-                                alt="images not found"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </Carousel.Item>
-
-                      <Carousel.Item>
-                        <div className="testimonials">
-                          <div className="testimonial_content">
-                            <div className="testimonial_caption">
-                              <div className="star-rating">
-                                {[...Array(5)].map((_, index) => (
-                                  <FaStar
-                                    key={index}
-                                    className="customer-icon"
-                                  />
-                                ))}
-                              </div>
-                              <h6>Robert Clarkson</h6>
-                              <span>Web Devloper</span>
-                            </div>
-                            <p>
-                              The team at Tectxon industry is very talented,
-                              dedicated, well organized and knowledgeable. I was
-                              most satisfied with the quality of the
-                              workmanship. They did excellent work.
-                            </p>
-                          </div>
-                          <div className="images_box">
-                            <div className="testimonial_img">
-                              <img
-                                className="img-center img-fluid"
-                                src={Customer1}
-                                alt="images not found"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </Carousel.Item>
-
-                      <Carousel.Item>
-                        <div className="testimonials">
-                          <div className="testimonial_content">
-                            <div className="testimonial_caption">
-                              <div className="star-rating">
-                                {[...Array(5)].map((_, index) => (
-                                  <FaStar
-                                    key={index}
-                                    className="customer-icon"
-                                  />
-                                ))}
-                              </div>
-                              <h6>Robert Clarkson</h6>
-                            <span>Front End Devloper</span>
-                            </div>
-                            <p>
-                              The team at Tectxon industry is very talented,
-                              dedicated, well organized and knowledgeable. I was
-                              most satisfied with the quality of the
-                              workmanship. They did excellent work.
-                            </p>
-                          </div>
-                          <div className="images_box">
-                            <div className="testimonial_img">
-                              <img
-                                className="img-center img-fluid"
-                                src={Customer1}
-                                alt="images not found"
-                              />
-                            </div>
-                          </div>
-                        </div>  
-                      </Carousel.Item>
-                      <Carousel.Item>
-                        <div className="testimonials">
-                          <div className="testimonial_content">
-                            <div className="testimonial_caption">
-                              <div className="star-rating">
-                                {[...Array(5)].map((_, index) => (
-                                  <FaStar
-                                    key={index}
-                                    className="customer-icon"
-                                  />
-                                ))}
-                              </div>
-                              <h6>Robert Clarkson</h6>
-                              <span>CEO, Axura</span>
-                            </div>
-                            <p>
-                              The team at Tectxon industry is very talented,
-                              dedicated, well organized and knowledgeable. I was
-                              most satisfied with the quality of the
-                              workmanship. They did excellent work.
-                            </p>
-                          </div>
-                          <div className="images_box">
-                            <div className="testimonial_img">
-                              <img
-                                className="img-center img-fluid"
-                                src={Customer1}
-                                alt="images not found"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </Carousel.Item>
-                      <Carousel.Item>
-                        <div className="testimonials">
-                          <div className="testimonial_content">
-                            <div className="testimonial_caption">
-                              <div className="star-rating">
-                                {[...Array(5)].map((_, index) => (
-                                  <FaStar
-                                    key={index}
-                                    className="customer-icon"
-                                  />
-                                ))}
-                              </div>
-                              <h6>Robert Clarkson</h6>
-                              <span>CEO, Axura</span>
-                            </div>
-                            <p>
-                              The team at Tectxon industry is very talented,
-                              dedicated, well organized and knowledgeable. I was
-                              most satisfied with the quality of the
-                              workmanship. They did excellent work.
-                            </p>
-                          </div>
-                          <div className="images_box">
-                            <div className="testimonial_img">
-                              <img
-                                className="img-center img-fluid"
-                                src={Customer1}
-                                alt="images not found"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </Carousel.Item>
-                    </Carousel>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* -------- Second Section (with Row/Col) -------- */}
     </>

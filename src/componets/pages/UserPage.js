@@ -253,7 +253,7 @@ function UserPage() {
 
 
             <Row>
-              <Col lg={3} md={3} sm={12} >
+              <Col lg={3} md={3} sm={12} className="box-info" >
                 <div className="service-box">
                   <div className="service-icon">
                     <i className="flaticon-cloud-service"><MdEngineering /></i>
@@ -273,7 +273,7 @@ function UserPage() {
                 </div>
 
               </Col>
-              <Col lg={3} md={3} sm={12} >
+              <Col lg={3} md={3} sm={12} className="box-info" >
                 <div className="service-box">
                   <div className="service-icon">
                     <i className="flaticon-cloud-service"><GoCodeReview /></i>
@@ -293,7 +293,7 @@ function UserPage() {
                 </div>
 
               </Col>
-              <Col lg={3} md={3} sm={12} >
+              <Col lg={3} md={3} sm={12} className="box-info" >
                 <div className="service-box">
                   <div className="service-icon">
                     <i className="flaticon-cloud-service"><TbSettingsCode /></i>
@@ -313,7 +313,7 @@ function UserPage() {
                 </div>
 
               </Col>
-              <Col lg={3} md={3} sm={12} >
+              <Col lg={3} md={3} sm={12} className="box-info" >
                 <div className="service-box">
                   <div className="service-icon">
                     <i className="flaticon-cloud-service"><GrShieldSecurity /></i>
@@ -334,7 +334,7 @@ function UserPage() {
 
               </Col>
 
-              <Col lg={3} md={3} sm={12} className="mt-4" >
+              <Col lg={3} md={3} sm={12} className="mt-4 box-info" >
                 <div className="service-box">
                   <div className="service-icon">
                     <i className="flaticon-cloud-service"><LuSearchCode /></i>
@@ -347,14 +347,14 @@ function UserPage() {
                     </p>
                     <button className="service-btn">
                       Read More
-                      <i className="ti-arrow-right"><LuSearchCode /></i>
+                      <i className="ti-arrow-right"><FaArrowRight /></i>
                     </button>
                   </div>
 
                 </div>
 
               </Col>
-              <Col lg={3} md={3} sm={12} className="mt-4" >
+              <Col lg={3} md={3} sm={12} className="mt-4 box-info" >
                 <div className="service-box">
                   <div className="service-icon">
                     <i className="flaticon-cloud-service"><AiOutlineFileDone /></i>
@@ -367,7 +367,7 @@ function UserPage() {
                     </p>
                     <button className="service-btn">
                       Read More
-                      <i className="ti-arrow-right"><LuSearchCode /></i>
+                      <i className="ti-arrow-right"><FaArrowRight /></i>
                     </button>
                   </div>
 

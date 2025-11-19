@@ -644,6 +644,17 @@ i[class*=" flaticon-"]:before {
 
 
 /* development approach End*/
+
+
+.box-info {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: stretch;
+    align-items: stretch;
+    -webkit-justify-content: stretch;
+    justify-content: stretch;
+}
+
 @media only screen and (max-width: 767px) {
     .about-1 {
         margin-top: 0;
