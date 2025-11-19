@@ -34,6 +34,7 @@ import { PayrollCalculations, calculateTotals } from "./utils/PayrollCalculation
 
 import PayrollCharts from './componets/Payroll_dashboard/PayrollCharts';
 import PayDashBoard from './componets/Payroll_dashboard/PayDashBoard';
+import LeaveCalendar from "./componets/hr_dashboard/hr_iinerpage/LeaveCalendar";
 
 
 
@@ -121,6 +122,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <HrProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/LeaveCalendar"
+          element={
+            <ProtectedRoute>
+              <LeaveCalendar />
             </ProtectedRoute>
           }
         />

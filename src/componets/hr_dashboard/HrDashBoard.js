@@ -147,7 +147,7 @@ const HrDashBoard = () => {
               </span>
               <span className="border-start ps-2">
                 <GiImpactPoint className="br-post-top-icon" />
-                Reward Point
+              Reward points
               </span>
               <span className="border-start ps-2">
                 <FaUserCheck className="br-post-top-icon" />
@@ -256,121 +256,12 @@ const HrDashBoard = () => {
 
           <Row>
             {/* Pie Chart */}
-            <Col lg={8} md={8} sm={12}>
-              {/*  Attendance Summary Pie Chart */}
-
-              {/*  Attendance Line Chart */}
-              <Card className="shadow-sm mb-4">
-                <Card.Header>
-                  <h5 className="card-title mb-0">Attendance (Last 6 Days)</h5>
-                </Card.Header>
-                <Card.Body style={{ height: 300 }}>
-                  <ResponsiveContainer>
-                    <LineChart
-                      data={[
-                        { day: "Mon", present: 50, absent: 10 },
-                        { day: "Tue", present: 45, absent: 15 },
-                        { day: "Wed", present: 48, absent: 12 },
-                        { day: "Thu", present: 52, absent: 8 },
-                        { day: "Fri", present: 46, absent: 14 },
-                        { day: "Sat", present: 40, absent: 20 },
-                      ]}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="present"
-                        stroke="#0d6efd"
-                        name="Present"
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="absent"
-                        stroke="#dc3545"
-                        name="Absent"
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Card.Body>
-              </Card>
-
-              {/*  Recent Joinees Table */}
-              <Card className="shadow-sm">
-                <Card.Header>
-                  <h5 className="card-title mb-0">Recent Joinees</h5>
-                </Card.Header>
-                <Table hover responsive>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Department</th>
-                      <th>Role</th>
-                      <th>Joined</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      {
-                        name: "Amit Sharma",
-                        dept: "HR",
-                        role: "Manager",
-                        joined: "Nov 1",
-                      },
-                      {
-                        name: "Sneha Patel",
-                        dept: "Tech",
-                        role: "Developer",
-                        joined: "Nov 3",
-                      },
-                      {
-                        name: "Raj Mehta",
-                        dept: "Sales",
-                        role: "Executive",
-                        joined: "Nov 5",
-                      },
-                    ].map((j, i) => (
-                      <tr key={i}>
-                        <td>{j.name}</td>
-                        <td>{j.dept}</td>
-                        <td>{j.role}</td>
-                        <td>{j.joined}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Card>
-            </Col>
+        
 
             {/* Leave Announcements */}
 
             <Col lg={4} md={12} sm={12}>
-              <Row>
-                <Col lg={12} md={12} sm={12}>
-                  <Card className="quick-actions-card">
-                    <Card.Header>
-                      <h5 className="card-title">Quick Actions</h5>
-                    </Card.Header>
-                    <Card.Body>
-                      <div className="quick-actions">
-                        <Button
-                          variant="outline-primary"
-                          className="w-100 mb-2"
-                        >
-                          <FaUsers className="me-2" /> Applay Leave
-                        </Button>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
+             
             </Col>
           </Row>
 

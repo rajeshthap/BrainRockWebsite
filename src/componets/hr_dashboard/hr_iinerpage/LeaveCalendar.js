@@ -1,107 +1,195 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import React, { useState, useRef, useEffect, useContext } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import "../../../assets/css/LeaveCalendar.css";
+import axios from "axios";
+import { AuthContext } from "../../context/AuthContext";
+import { Button } from "react-bootstrap";
 
 function LeaveCalendar() {
   const [selectedDates, setSelectedDates] = useState([]);
-  const [leaveType, setLeaveType] = useState('annual');
-  const [reason, setReason] = useState('');
+  const [leaveType, setLeaveType] = useState("CL");
+  const [reason, setReason] = useState("");
   const [submittedRequests, setSubmittedRequests] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
   const [showTooltip, setShowTooltip] = useState(false);
+
   const tooltipRef = useRef(null);
 
-  // Handle date selection
+  // -----------------------------
+  //  Get user info from context
+  // -----------------------------
+  const { user } = useContext(AuthContext);
+  const employee_id = user?.unique_id;
+  const role = user?.role;
+
+  // --------------------------------------------------
+  //  Select Dates
+  // --------------------------------------------------
   const handleDateChange = (dates) => {
     setSelectedDates(dates);
   };
 
-  // Submit leave request
+  // --------------------------------------------------
+  //  Alerts
+  // --------------------------------------------------
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification({ show: false, message: "", type: "" }), 3000);
+  };
+
+  // --------------------------------------------------
+  //  Submit Leave POST API
+  // --------------------------------------------------
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
 
-    if (selectedDates.length === 0) {
-      showNotification('Please select at least one date', 'error');
+    if (!selectedDates || selectedDates.length === 0) {
+      showNotification("Please select at least one date", "error");
       return;
     }
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const formattedDates = selectedDates.map((d) =>
+        d.toISOString().split("T")[0]
+      );
+
+      const payload = {
+        employee_id: employee_id,
+        role: role,
+        leave_type: leaveType,
+        dates: formattedDates,
+        reason: reason,
+      };
+
+      console.log("Sending Payload:", payload);
+
+      await axios.post(
+        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-apply/",
+        payload,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Add to UI list
       const newRequest = {
-        id: Date.now(),
-        dates: [...selectedDates],
-        type: leaveType,
+        id: Date.now(), // local temp ID
+        employee_id,
+        role,
+        leave_type: leaveType,
+        dates: formattedDates,
         reason,
-        status: 'pending',
-        submittedAt: new Date()
+        status: "pending",
+        submittedAt: new Date(),
       };
 
       setSubmittedRequests([...submittedRequests, newRequest]);
+
+      // Reset Fields
       setSelectedDates([]);
-      setReason('');
-      setIsSubmitting(false);
+      setReason("");
       setShowTooltip(false);
-      showNotification('Leave request submitted successfully!', 'success');
-    }, 1000);
+      setIsSubmitting(false);
+
+      showNotification("Leave Request Submitted!", "success");
+    } catch (err) {
+      console.error("Submit Error:", err);
+      setIsSubmitting(false);
+      showNotification("Failed to submit", "error");
+    }
   };
 
-  // Show notification
-  const showNotification = (message, type) => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => {
-      setNotification({ show: false, message: '', type: '' });
-    }, 3000);
-  };
-
-  // Close tooltip when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (tooltipRef.current && !tooltipRef.current.contains(event.target)) {
-        setShowTooltip(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Format date range for display
-  const formatDateRange = (dates) => {
-    if (dates.length === 0) return 'No dates selected';
-
-    const sortedDates = [...dates].sort((a, b) => a - b);
-    const startDate = sortedDates[0].toLocaleDateString();
-    const endDate = sortedDates[sortedDates.length - 1].toLocaleDateString();
-
-    return startDate === endDate
-      ? startDate
-      : `${startDate} - ${endDate}`;
-  };
-
-  // Format date for display in requests list
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+  // --------------------------------------------------
+  //  Format date
+  // --------------------------------------------------
+  const formatDate = (d) => {
+    return new Date(d).toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
+  // --------------------------------------------------
+  //  Accept / Reject / Cancel (Local only)
+  // --------------------------------------------------
+  const updateStatus = (id, status) => {
+    setSubmittedRequests((prev) =>
+      prev.map((req) =>
+        req.id === id ? { ...req, status: status } : req
+      )
+    );
+  };
+useEffect(() => {
+  if (!employee_id) return;
+
+  axios
+    .get(
+      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-apply/?employee_id=${employee_id}`,
+      { withCredentials: true }
+    )
+    .then((res) => {
+      console.log("Previous Leave Requests:", res.data);
+
+      let dataArray = Array.isArray(res.data) ? res.data : [res.data];
+
+      const formattedRequests = dataArray.map((item) => ({
+        id: item.id,
+        employee_id: item.employee_id,
+        role: item.role,
+
+        // FIX: Convert string dates → DATE OBJECTS
+        dates: (item.dates || []).map(d => new Date(d)),
+
+        leave_type: item.leave_type,
+        reason: item.reason || "",
+        status: item.status || "pending",
+
+        submittedAt: item.created_at ? new Date(item.created_at) : new Date(),
+      }));
+
+      setSubmittedRequests(formattedRequests);
+    })
+    .catch((err) => console.log("Previous Request GET Error:", err));
+}, [employee_id]);
+
+
+
+
+
+  // --------------------------------------------------
+  //  Close tooltip on outside click
+  // --------------------------------------------------
+  useEffect(() => {
+    const handler = (e) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(e.target)) {
+        setShowTooltip(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   return (
     <div className="leave-calendar-container mt-3">
-      <div className='dot-popup leave-clender-heading'>
+      {/* Popup Button */}
+      <div className="dot-popup leave-clender-heading">
         <div className="tooltip-container" ref={tooltipRef}>
           <button
             className="tooltip-trigger"
             onClick={() => setShowTooltip(!showTooltip)}
-            aria-label="Submit leave request"
           >
             <span className="dot"></span>
             <span className="dot"></span>
@@ -115,7 +203,6 @@ function LeaveCalendar() {
                 <button
                   className="close-tooltip"
                   onClick={() => setShowTooltip(false)}
-                  aria-label="Close"
                 >
                   ×
                 </button>
@@ -123,28 +210,27 @@ function LeaveCalendar() {
 
               <form onSubmit={handleSubmitRequest}>
                 <div className="form-group">
-                  <label htmlFor="leaveType">Leave Type</label>
+                  <label>Leave Type</label>
                   <select
-                    id="leaveType"
                     value={leaveType}
                     onChange={(e) => setLeaveType(e.target.value)}
                   >
-                    <option value="annual">Annual Leave</option>
-                    <option value="sick">Sick Leave</option>
-                    <option value="personal">Personal Leave</option>
+                    <option value="CL">Casual Leave (CL)</option>
+                    <option value="EL">Earned Leave (EL)</option>
+                    <option value="PL">Paid Leave (PL)</option>
                     <option value="maternity">Maternity Leave</option>
-                    <option value="paternity">Paternity Leave</option>
+                    <option value="halfday">Half-Day Leave</option>
+                    <option value="SL">Short Leave (SL)</option>
+                    <option value="WOP">Without Pay (WOP)</option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="reason">Reason (Optional)</label>
+                  <label>Reason (Optional)</label>
                   <textarea
-                    id="reason"
+                    rows={3}
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
-                    rows={3}
-                    placeholder="Please provide a reason for your leave request..."
                   />
                 </div>
 
@@ -153,79 +239,121 @@ function LeaveCalendar() {
                   className="submit-btn"
                   disabled={isSubmitting || selectedDates.length === 0}
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                  {isSubmitting ? "Submitting..." : "Submit Request"}
                 </button>
               </form>
             </div>
           )}
-        </div> <h1>Leave Request Calendar</h1>
+        </div>
+
+        <h1>Leave Request Calendar</h1>
       </div>
 
+      {/* Alerts */}
       {notification.show && (
         <div className={`notification ${notification.type}`}>
           {notification.message}
         </div>
       )}
 
+      {/* Calendar */}
       <div className="calendar-section">
         <div className="calendar-container">
           <h2>Select Dates</h2>
+
           <Calendar
             onChange={handleDateChange}
             value={selectedDates}
             selectRange={true}
             minDate={new Date()}
-            tileClassName={({ date, view }) =>
-              view === 'month' && selectedDates.some(d =>
-                d.toDateString() === date.toDateString()
-              ) ? 'selected-date' : null
+            tileClassName={({ date }) =>
+              selectedDates.some(
+                (d) => new Date(d).toDateString() === date.toDateString()
+              )
+                ? "selected-date"
+                : null
             }
           />
-          <div className="selected-dates">
-            <strong>Selected Dates:</strong> {formatDateRange(selectedDates)}
-          </div>
-
-
         </div>
       </div>
 
-      <div className="previous-requests">
-        <h2>Previous Requests</h2>
-        {submittedRequests.length === 0 ? (
-          <p>No leave requests submitted yet.</p>
-        ) : (
-          <div className="requests-list">
-            {submittedRequests.map(request => (
-              <div key={request.id} className="request-item">
-                <div className="request-header">
-                  <span className={`status ${request.status}`}>{request.status}</span>
-                  <span className="leave-type">{request.type}</span>
-                </div>
-                <div className="request-dates">
-                  {request.dates.length === 1 ? (
-                    <span>{formatDate(request.dates[0])}</span>
-                  ) : (
-                    <span>
-                      {formatDate(request.dates[0])} - {formatDate(request.dates[request.dates.length - 1])}
-                    </span>
-                  )}
-                  <span className="date-count">
-                    ({request.dates.length} day{request.dates.length > 1 ? 's' : ''})
-                  </span>
-                </div>
-                {request.reason && (
-                  <div className="request-reason">
-                    <strong>Reason:</strong> {request.reason}
-                  </div>
-                )}
-                <div className="request-submitted">
-                  Submitted: {request.submittedAt.toLocaleDateString()}
-                </div>
-              </div>
-            ))}
+      {/* Requests List */}
+   <div className="previous-requests">
+  <h2>Previous Requests</h2>
+
+  {submittedRequests.length === 0 ? (
+    <p>No leave requests submitted yet.</p>
+  ) : (
+    <div className="requests-list">
+      {submittedRequests.map((req) => (
+        <div key={req.id} className="request-item">
+
+          {/* Header */}
+          <div className="request-header">
+            <span className={`status ${req.status || "pending"}`}>
+              {req.status || "pending"}
+            </span>
+
+            <span className="leave-type">
+              {req.leave_type || req.type}
+            </span>
           </div>
-        )}
-      </div>
+
+          {/* Dates */}
+          <div className="request-dates">
+            {req.dates.length === 1 ? (
+              <span>{formatDate(req.dates[0])}</span>
+            ) : (
+              <span>
+                {formatDate(req.dates[0])} —{" "}
+                {formatDate(req.dates[req.dates.length - 1])}
+              </span>
+            )}
+          </div>
+
+          {/* Reason */}
+          {req.reason && (
+            <div className="request-reason">
+              <strong>Reason:</strong> {req.reason}
+            </div>
+          )}
+
+          {/* Submitted At */}
+          <div className="request-submitted">
+            Submitted: {req.submittedAt.toLocaleDateString()}
+          </div>
+
+          {/* ACTION BUTTONS — SHOW ONLY IF DATA EXISTS */}
+          {req.id && (
+            <div className="request-actions">
+              <Button
+                onClick={() => updateStatus(req.id, "accepted")}
+                className="accept-btn"
+              >
+                Accept
+              </Button>
+
+              <Button
+                onClick={() => updateStatus(req.id, "rejected")}
+                className="reject-btn mx-3"
+              >
+                Reject
+              </Button>
+
+              <Button
+                onClick={() => updateStatus(req.id, "cancelled")}
+                className="cancel-btn"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
     </div>
   );
 }
