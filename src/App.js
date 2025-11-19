@@ -35,6 +35,8 @@ import { PayrollCalculations, calculateTotals } from "./utils/PayrollCalculation
 import PayrollCharts from './componets/Payroll_dashboard/PayrollCharts';
 import PayDashBoard from './componets/Payroll_dashboard/PayDashBoard';
 import LeaveCalendar from "./componets/hr_dashboard/hr_iinerpage/LeaveCalendar";
+import EmpList from "./componets/hr_dashboard/pay_roll/EmpList";
+import SalaryCalculation from "./componets/hr_dashboard/pay_roll/SalaryCalculation";
 
 
 
@@ -53,7 +55,9 @@ function AppContent() {
     "/PayrollCalculations",
     "/MockData",
     "/PayrollCharts",
-    "/PayDashBoard"
+    "/PayDashBoard",
+    "/SalaryCalculation",
+    "/EmpList"
 
   ]);
 
@@ -101,6 +105,7 @@ function AppContent() {
             }
           />
         }
+
         <Route
           path="/EmployeeRegistration"
           element={
@@ -130,6 +135,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <LeaveCalendar />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/SalaryCalculation"
+          element={
+            <ProtectedRoute>
+              <SalaryCalculation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/EmpList"
+          element={
+            <ProtectedRoute>
+              <EmpList />
             </ProtectedRoute>
           }
         />

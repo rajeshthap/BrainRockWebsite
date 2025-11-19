@@ -21,31 +21,22 @@ function LeaveCalendar() {
 
   const tooltipRef = useRef(null);
 
-  // -----------------------------
-  //  Get user info from context
-  // -----------------------------
   const { user } = useContext(AuthContext);
   const employee_id = user?.unique_id;
   const role = user?.role;
 
-  // --------------------------------------------------
-  //  Select Dates
-  // --------------------------------------------------
+  // Select Dates
   const handleDateChange = (dates) => {
     setSelectedDates(dates);
   };
 
-  // --------------------------------------------------
-  //  Alerts
-  // --------------------------------------------------
+  // Alerts
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
     setTimeout(() => setNotification({ show: false, message: "", type: "" }), 3000);
   };
 
-  // --------------------------------------------------
-  //  Submit Leave POST API
-  // --------------------------------------------------
+  // Submit Leave API
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
 
@@ -62,14 +53,12 @@ function LeaveCalendar() {
       );
 
       const payload = {
-        employee_id: employee_id,
-        role: role,
+        employee_id,
+        role,
         leave_type: leaveType,
         dates: formattedDates,
         reason: reason,
       };
-
-      console.log("Sending Payload:", payload);
 
       await axios.post(
         "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-apply/",
@@ -82,13 +71,13 @@ function LeaveCalendar() {
         }
       );
 
-      // Add to UI list
+      // UI addition after submit
       const newRequest = {
-        id: Date.now(), // local temp ID
+        id: Date.now(),
         employee_id,
         role,
         leave_type: leaveType,
-        dates: formattedDates,
+        dates: formattedDates, // **KEEP STRING FORMAT**
         reason,
         status: "pending",
         submittedAt: new Date(),
@@ -96,7 +85,6 @@ function LeaveCalendar() {
 
       setSubmittedRequests([...submittedRequests, newRequest]);
 
-      // Reset Fields
       setSelectedDates([]);
       setReason("");
       setShowTooltip(false);
@@ -110,9 +98,7 @@ function LeaveCalendar() {
     }
   };
 
-  // --------------------------------------------------
-  //  Format date
-  // --------------------------------------------------
+  // Date formatting for UI display
   const formatDate = (d) => {
     return new Date(d).toLocaleDateString("en-US", {
       weekday: "short",
@@ -122,56 +108,48 @@ function LeaveCalendar() {
     });
   };
 
-  // --------------------------------------------------
-  //  Accept / Reject / Cancel (Local only)
-  // --------------------------------------------------
+  // Local Accept / Reject / Cancel
   const updateStatus = (id, status) => {
     setSubmittedRequests((prev) =>
-      prev.map((req) =>
-        req.id === id ? { ...req, status: status } : req
-      )
+      prev.map((req) => (req.id === id ? { ...req, status: status } : req))
     );
   };
-useEffect(() => {
-  if (!employee_id) return;
 
-  axios
-    .get(
-      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-apply/?employee_id=${employee_id}`,
-      { withCredentials: true }
-    )
-    .then((res) => {
-      console.log("Previous Leave Requests:", res.data);
+  // GET API — FIXED (dates remain STRING format)
+  useEffect(() => {
+    if (!employee_id) return;
 
-      let dataArray = Array.isArray(res.data) ? res.data : [res.data];
+    axios
+      .get(
+        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-apply/?employee_id=${employee_id}`,
+        { withCredentials: true }
+      )
+      .then((res) => {
+        console.log("Previous Leave Requests:", res.data);
 
-      const formattedRequests = dataArray.map((item) => ({
-        id: item.id,
-        employee_id: item.employee_id,
-        role: item.role,
+        let dataArray = Array.isArray(res.data) ? res.data : [res.data];
 
-        // FIX: Convert string dates → DATE OBJECTS
-        dates: (item.dates || []).map(d => new Date(d)),
+        const formattedRequests = dataArray.map((item) => ({
+          id: item.id,
+          employee_id: item.employee_id,
+          role: item.role,
 
-        leave_type: item.leave_type,
-        reason: item.reason || "",
-        status: item.status || "pending",
+          // KEEP DATES AS STRING ARRAY
+          dates: item.dates || [],
 
-        submittedAt: item.created_at ? new Date(item.created_at) : new Date(),
-      }));
+          leave_type: item.leave_type,
+          reason: item.reason || "",
+          status: item.status || "pending",
 
-      setSubmittedRequests(formattedRequests);
-    })
-    .catch((err) => console.log("Previous Request GET Error:", err));
-}, [employee_id]);
+          submittedAt: item.created_at ? new Date(item.created_at) : new Date(),
+        }));
 
+        setSubmittedRequests(formattedRequests);
+      })
+      .catch((err) => console.log("Previous Request GET Error:", err));
+  }, [employee_id]);
 
-
-
-
-  // --------------------------------------------------
-  //  Close tooltip on outside click
-  // --------------------------------------------------
+  // Tooltip outside click close
   useEffect(() => {
     const handler = (e) => {
       if (tooltipRef.current && !tooltipRef.current.contains(e.target)) {
@@ -268,7 +246,8 @@ useEffect(() => {
             minDate={new Date()}
             tileClassName={({ date }) =>
               selectedDates.some(
-                (d) => new Date(d).toDateString() === date.toDateString()
+                (d) =>
+                  new Date(d).toDateString() === date.toDateString()
               )
                 ? "selected-date"
                 : null
@@ -278,82 +257,75 @@ useEffect(() => {
       </div>
 
       {/* Requests List */}
-   <div className="previous-requests">
-  <h2>Previous Requests</h2>
+      <div className="previous-requests">
+        <h2>Previous Requests</h2>
 
-  {submittedRequests.length === 0 ? (
-    <p>No leave requests submitted yet.</p>
-  ) : (
-    <div className="requests-list">
-      {submittedRequests.map((req) => (
-        <div key={req.id} className="request-item">
+        {submittedRequests.length === 0 ? (
+          <p>No leave requests submitted yet.</p>
+        ) : (
+          <div className="requests-list">
+            {submittedRequests.map((req) => (
+              <div key={req.id} className="request-item">
+                <div className="request-header">
+                  <span className={`status ${req.status || "pending"}`}>
+                    {req.status || "pending"}
+                  </span>
 
-          {/* Header */}
-          <div className="request-header">
-            <span className={`status ${req.status || "pending"}`}>
-              {req.status || "pending"}
-            </span>
+                  <span className="leave-type">
+                    {req.leave_type}
+                  </span>
+                </div>
 
-            <span className="leave-type">
-              {req.leave_type || req.type}
-            </span>
+                <div className="request-dates">
+                  {req.dates.length === 1 ? (
+                    <span>{formatDate(req.dates[0])}</span>
+                  ) : (
+                    <span>
+                      {formatDate(req.dates[0])} —{" "}
+                      {formatDate(req.dates[req.dates.length - 1])}
+                    </span>
+                  )}
+                </div>
+
+                {req.reason && (
+                  <div className="request-reason">
+                    <strong>Reason:</strong> {req.reason}
+                  </div>
+                )}
+
+                <div className="request-submitted">
+                  Submitted: {req.submittedAt.toLocaleDateString()}
+                </div>
+
+                {req.id && (
+                  <div className="request-actions">
+                    <Button
+                      onClick={() => updateStatus(req.id, "accepted")}
+                      className="accept-btn"
+                    >
+                      Accept
+                    </Button>
+
+                    <Button
+                      onClick={() => updateStatus(req.id, "rejected")}
+                      className="reject-btn mx-3"
+                    >
+                      Reject
+                    </Button>
+
+                    <Button
+                      onClick={() => updateStatus(req.id, "cancelled")}
+                      className="cancel-btn"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-
-          {/* Dates */}
-          <div className="request-dates">
-            {req.dates.length === 1 ? (
-              <span>{formatDate(req.dates[0])}</span>
-            ) : (
-              <span>
-                {formatDate(req.dates[0])} —{" "}
-                {formatDate(req.dates[req.dates.length - 1])}
-              </span>
-            )}
-          </div>
-
-          {/* Reason */}
-          {req.reason && (
-            <div className="request-reason">
-              <strong>Reason:</strong> {req.reason}
-            </div>
-          )}
-
-          {/* Submitted At */}
-          <div className="request-submitted">
-            Submitted: {req.submittedAt.toLocaleDateString()}
-          </div>
-
-          {/* ACTION BUTTONS — SHOW ONLY IF DATA EXISTS */}
-          {req.id && (
-            <div className="request-actions">
-              <Button
-                onClick={() => updateStatus(req.id, "accepted")}
-                className="accept-btn"
-              >
-                Accept
-              </Button>
-
-              <Button
-                onClick={() => updateStatus(req.id, "rejected")}
-                className="reject-btn mx-3"
-              >
-                Reject
-              </Button>
-
-              <Button
-                onClick={() => updateStatus(req.id, "cancelled")}
-                className="cancel-btn"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  )}
-</div>
-
+        )}
+      </div>
     </div>
   );
 }
