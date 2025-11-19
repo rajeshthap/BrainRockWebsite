@@ -54,7 +54,7 @@ img.logo-wecd {
 .nav-link {
     color: var(--br-black);
     font-weight: var(--br-space-800) !important;
-    font-size: var(--br-space-300);
+    font-size: var(--br-space-350);
 }
 
 .nav-link:hover {

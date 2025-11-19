@@ -244,213 +244,215 @@ function UserPage() {
       </Container>
 
       <ServicesCarousel />
-
-      <Container>
-        <div className="resorce-sub-list-design">
-
-
-          <div class="text-center"><h1 class=" hero-sub-title">Our design and  <br></br><span class="br-span-list mt-3">development approach</span></h1></div>
+      <div className="resorce-main-section py-5">
+        <Container>
+          <div className="resorce-sub-list-design">
 
 
-          <Row>
-            <Col lg={3} md={3} sm={12} >
-              <div className="service-box">
-                <div className="service-icon">
-                  <i className="flaticon-cloud-service"><MdEngineering /></i>
-                </div>
-                <div className="service-desc">
+            <div class="text-center"><h1 class=" hero-sub-title">Our design and  <br></br><span class="br-span-list mt-3">development approach</span></h1></div>
 
-                  <h4 className="heading-5">UX Driven Engineering</h4>
-                  <p>
-                    We combine user-centric design with robust engineering to build digital solutions that are intuitive, engaging, and highly functional. Our process ensures that every line of code serves the user experience, delivering products that people love to us
-                  </p>
-                  <button className="service-btn">
-                    Read More
-                    <i className="ti-arrow-right"><FaArrowRight /></i>
-                  </button>
-                </div>
 
-              </div>
+            <Row>
+              <Col lg={3} md={3} sm={12} >
+                <div className="service-box">
+                  <div className="service-icon">
+                    <i className="flaticon-cloud-service"><MdEngineering /></i>
+                  </div>
+                  <div className="service-desc">
 
-            </Col>
-            <Col lg={3} md={3} sm={12} >
-              <div className="service-box">
-                <div className="service-icon">
-                  <i className="flaticon-cloud-service"><GoCodeReview /></i>
-                </div>
-                <div className="service-desc">
+                    <h4 className="heading-5">UX Driven Engineering</h4>
+                    <p>
+                      We combine user-centric design with robust engineering to build digital solutions that are intuitive, engaging, and highly functional. Our process ensures that every line of code serves the user experience, delivering products that people love to us
+                    </p>
+                    <button className="service-btn">
+                      Read More
+                      <i className="ti-arrow-right"><FaArrowRight /></i>
+                    </button>
+                  </div>
 
-                  <h4 className="heading-5">Developing Shared Understanding</h4>
-                  <p>
-                    We bridge the gap between teams and stakeholders to create a clear, common vision. By fostering collaboration and aligning goals, we ensure seamless communication and
-                  </p>
-                  <button className="service-btn">
-                    Read More
-                    <i className="ti-arrow-right"><FaArrowRight /></i>
-                  </button>
                 </div>
 
-              </div>
+              </Col>
+              <Col lg={3} md={3} sm={12} >
+                <div className="service-box">
+                  <div className="service-icon">
+                    <i className="flaticon-cloud-service"><GoCodeReview /></i>
+                  </div>
+                  <div className="service-desc">
 
-            </Col>
-            <Col lg={3} md={3} sm={12} >
-              <div className="service-box">
-                <div className="service-icon">
-                  <i className="flaticon-cloud-service"><TbSettingsCode /></i>
-                </div>
-                <div className="service-desc">
+                    <h4 className="heading-5">Developing Shared Understanding</h4>
+                    <p>
+                      We bridge the gap between teams and stakeholders to create a clear, common vision. By fostering collaboration and aligning goals, we ensure seamless communication and
+                    </p>
+                    <button className="service-btn">
+                      Read More
+                      <i className="ti-arrow-right"><FaArrowRight /></i>
+                    </button>
+                  </div>
 
-                  <h4 className="heading-5">Proven Experience and Expertise</h4>
-                  <p>
-                    With years of industry experience and a team of skilled professionals, we deliver reliable solutions that drive innovation and business growth.
-                  </p>
-                  <button className="service-btn">
-                    Read More
-                    <i className="ti-arrow-right"><FaArrowRight /></i>
-                  </button>
-                </div>
-
-              </div>
-
-            </Col>
-            <Col lg={3} md={3} sm={12} >
-              <div className="service-box">
-                <div className="service-icon">
-                  <i className="flaticon-cloud-service"><GrShieldSecurity /></i>
-                </div>
-                <div className="service-desc">
-
-                  <h4 className="heading-5">Security & Intellectual Property (IP)</h4>
-                  <p>
-                    We prioritize data security and safeguard your intellectual property with strict confidentiality, robust systems, and compliance with global standards.
-                  </p>
-                  <button className="service-btn">
-                    Read More
-                    <i className="ti-arrow-right"><FaArrowRight /></i>
-                  </button>
                 </div>
 
-              </div>
+              </Col>
+              <Col lg={3} md={3} sm={12} >
+                <div className="service-box">
+                  <div className="service-icon">
+                    <i className="flaticon-cloud-service"><TbSettingsCode /></i>
+                  </div>
+                  <div className="service-desc">
 
-            </Col>
+                    <h4 className="heading-5">Proven Experience and Expertise</h4>
+                    <p>
+                      With years of industry experience and a team of skilled professionals, we deliver reliable solutions that drive innovation and business growth.
+                    </p>
+                    <button className="service-btn">
+                      Read More
+                      <i className="ti-arrow-right"><FaArrowRight /></i>
+                    </button>
+                  </div>
 
-            <Col lg={3} md={3} sm={12} className="mt-4" >
-              <div className="service-box">
-                <div className="service-icon">
-                  <i className="flaticon-cloud-service"><LuSearchCode /></i>
-                </div>
-                <div className="service-desc">
-
-                  <h4 className="heading-5">Code Review</h4>
-                  <p>
-                    We ensure clean, efficient, and secure code through rigorous reviews, fostering high-quality software and seamless collaboration.
-                  </p>
-                  <button className="service-btn">
-                    Read More
-                    <i className="ti-arrow-right"><LuSearchCode /></i>
-                  </button>
-                </div>
-
-              </div>
-
-            </Col>
-            <Col lg={3} md={3} sm={12} className="mt-4" >
-              <div className="service-box">
-                <div className="service-icon">
-                  <i className="flaticon-cloud-service"><AiOutlineFileDone /></i>
-                </div>
-                <div className="service-desc">
-
-                  <h4 className="heading-5">Quality Assurance & Testing</h4>
-                  <p>
-                    We deliver flawless digital solutions through rigorous QA processes and comprehensive testing to ensure performance, reliability, and user satisfaction.
-                  </p>
-                  <button className="service-btn">
-                    Read More
-                    <i className="ti-arrow-right"><LuSearchCode /></i>
-                  </button>
                 </div>
 
-              </div>
+              </Col>
+              <Col lg={3} md={3} sm={12} >
+                <div className="service-box">
+                  <div className="service-icon">
+                    <i className="flaticon-cloud-service"><GrShieldSecurity /></i>
+                  </div>
+                  <div className="service-desc">
 
-            </Col>
-          </Row>
+                    <h4 className="heading-5">Security & Intellectual Property (IP)</h4>
+                    <p>
+                      We prioritize data security and safeguard your intellectual property with strict confidentiality, robust systems, and compliance with global standards.
+                    </p>
+                    <button className="service-btn">
+                      Read More
+                      <i className="ti-arrow-right"><FaArrowRight /></i>
+                    </button>
+                  </div>
+
+                </div>
+
+              </Col>
+
+              <Col lg={3} md={3} sm={12} className="mt-4" >
+                <div className="service-box">
+                  <div className="service-icon">
+                    <i className="flaticon-cloud-service"><LuSearchCode /></i>
+                  </div>
+                  <div className="service-desc">
+
+                    <h4 className="heading-5">Code Review</h4>
+                    <p>
+                      We ensure clean, efficient, and secure code through rigorous reviews, fostering high-quality software and seamless collaboration.
+                    </p>
+                    <button className="service-btn">
+                      Read More
+                      <i className="ti-arrow-right"><LuSearchCode /></i>
+                    </button>
+                  </div>
+
+                </div>
+
+              </Col>
+              <Col lg={3} md={3} sm={12} className="mt-4" >
+                <div className="service-box">
+                  <div className="service-icon">
+                    <i className="flaticon-cloud-service"><AiOutlineFileDone /></i>
+                  </div>
+                  <div className="service-desc">
+
+                    <h4 className="heading-5">Quality Assurance & Testing</h4>
+                    <p>
+                      We deliver flawless digital solutions through rigorous QA processes and comprehensive testing to ensure performance, reliability, and user satisfaction.
+                    </p>
+                    <button className="service-btn">
+                      Read More
+                      <i className="ti-arrow-right"><LuSearchCode /></i>
+                    </button>
+                  </div>
+
+                </div>
+
+              </Col>
+            </Row>
 
 
 
 
-        </div>
-        <div className="resorce-sub-list">
-          <h1 className="text-center mt-3">
-            Our <br></br>
-            <span className="resorce-about-list">Tech Stack</span>
-          </h1>
-        </div>
-        <div>
-          <Row className="d-flex justify-content-center br-tech-stack">
-            <Col lg={2} md={2} sm={6} className="mb-3">
-              <div>
-                <img
-                  src={PHPIcon}
-                  alt="node-img"
-                  className="img-fluid mt-3"
-                ></img>
-              </div>
-            </Col>
+          </div>
+          <div className="resorce-sub-list">
+            <h1 className="text-center mt-3">
+              Our <br></br>
+              <span className="resorce-about-list">Tech Stack</span>
+            </h1>
+          </div>
+          <div>
+            <Row className="d-flex justify-content-center br-tech-stack">
+              <Col lg={2} md={2} sm={6} className="mb-3">
+                <div>
+                  <img
+                    src={PHPIcon}
+                    alt="node-img"
+                    className="img-fluid mt-3"
+                  ></img>
+                </div>
+              </Col>
 
-            <Col lg={2} md={2} sm={6} className="mb-3">
-              <div>
-                <img src={PHPIcon} alt="php-img"></img>
-              </div>
-            </Col>
-            <Col lg={2} md={2} sm={6} className="mb-3">
-              <div>
-                <img src={MySqlIcon} alt="MySql-img"></img>
-              </div>
-            </Col>
-            <Col lg={2} md={2} sm={6} className="mb-3">
-              <div>
-                <img src={JavaIcon} alt="Java-img"></img>
-              </div>
-            </Col>
-            <Col lg={2} md={2} sm={6} className="mb-3">
-              <div>
-                <img src={DoutNetIcon} alt=".Net-img"></img>
-              </div>
-            </Col>
-            <Col lg={2} md={2} sm={6} className="mt-3">
-              <div>
-                <img
-                  src={PythonIcon}
-                  alt="Python-img"
-                  className="img-fluid br-tech-img"
-                ></img>
-              </div>
-            </Col>
+              <Col lg={2} md={2} sm={6} className="mb-3">
+                <div>
+                  <img src={PHPIcon} alt="php-img"></img>
+                </div>
+              </Col>
+              <Col lg={2} md={2} sm={6} className="mb-3">
+                <div>
+                  <img src={MySqlIcon} alt="MySql-img"></img>
+                </div>
+              </Col>
+              <Col lg={2} md={2} sm={6} className="mb-3">
+                <div>
+                  <img src={JavaIcon} alt="Java-img"></img>
+                </div>
+              </Col>
+              <Col lg={2} md={2} sm={6} className="mb-3">
+                <div>
+                  <img src={DoutNetIcon} alt=".Net-img"></img>
+                </div>
+              </Col>
+              <Col lg={2} md={2} sm={6} className="mt-3">
+                <div>
+                  <img
+                    src={PythonIcon}
+                    alt="Python-img"
+                    className="img-fluid br-tech-img"
+                  ></img>
+                </div>
+              </Col>
 
-            <Col lg={3} md={3} sm={6} className="mt-3">
-              <div>
-                <img
-                  src={RailsIcon}
-                  alt="Rails-img"
-                  className="img-fluid "
-                ></img>
-              </div>
-            </Col>
-            <Col lg={3} md={3} sm={6}>
-              <div>
-                <img src={ReactIcon} alt="react-img"></img>
-              </div>
-            </Col>
+              <Col lg={3} md={3} sm={6} className="mt-3">
+                <div>
+                  <img
+                    src={RailsIcon}
+                    alt="Rails-img"
+                    className="img-fluid "
+                  ></img>
+                </div>
+              </Col>
+              <Col lg={3} md={3} sm={6}>
+                <div>
+                  <img src={ReactIcon} alt="react-img"></img>
+                </div>
+              </Col>
 
-            <Col lg={3} md={3} sm={6} className="mt-3">
-              <div>
-                <img src={MongoDBIcon} alt="MongoDB-img"></img>
-              </div>
-            </Col>
-          </Row>
-        </div>
-      </Container>
+              <Col lg={3} md={3} sm={6} className="mt-3">
+                <div>
+                  <img src={MongoDBIcon} alt="MongoDB-img"></img>
+                </div>
+              </Col>
+            </Row>
+          </div>
+        </Container>
+
+      </div>
       <div className="testimonial-section resorce-sub-list-design py-5">
         {/* <h1 className="text-center">
             Why customers love <br></br>
