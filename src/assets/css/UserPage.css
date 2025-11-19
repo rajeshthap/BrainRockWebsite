@@ -58,8 +58,13 @@
 }
 
 .resorce-sub-list-design h1 {
-    color: var(--br-primary) !important;
-    font-size: var(--br-space-700);
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    display: inline-block;
+    color: #1973d8;
+    text-transform: uppercase;
+    margin-bottom: 15px;
 }
 
 .resorce-sub-list-design p {
@@ -520,6 +525,120 @@ img {
 }
 
 /* about us section End */
+
+
+/* development approach start*/
+.service-box {
+    background-color: var(--br-white);
+    box-shadow: 0px 10px 32px #00000012;
+    border-radius: 10px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    padding: 2rem 2rem;
+}
+
+.service-box:hover::before {
+    height: 100%;
+}
+
+.service-box::before {
+    position: absolute;
+    content: '';
+    height: 0%;
+    width: 100%;
+    z-index: -1;
+    background: var(--br-primary);
+    opacity: 1;
+    top: 0;
+    left: 0;
+    transition: all .5s ease;
+}
+
+.service-box .service-desc h4 {
+    color: #1973d8;
+}
+
+.service-box:hover .service-desc h4 {
+    color: var(--br-white);
+}
+
+.service-box:hover .service-desc p {
+    color: var(--br-white);
+}
+
+.service-box .service-icon {
+    margin-bottom: 6px;
+    line-height: 1;
+}
+
+.service-box .service-icon i {
+    font-size: 4rem;
+    position: relative;
+    z-index: 1;
+    color: #1973d8;
+    display: inline-block;
+    line-height: 10px;
+}
+
+i[class^="flaticon-"]:before,
+i[class*=" flaticon-"]:before {
+    font-family: flaticon !important;
+    font-style: normal;
+    font-weight: normal !important;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.service-box .service-icon i::after {
+    position: absolute;
+    content: '';
+    height: 40px;
+    width: 40px;
+    z-index: -1;
+    background: var(--br-org);
+    opacity: 0.3;
+    top: 0;
+    left: 0;
+    border-radius: 0 50% 50%;
+}
+
+.service-box .service-desc h5 {
+    font-size: 2rem;
+}
+
+.heading-5 {
+    font-size: 20px;
+    line-height: 32px;
+    font-weight: 800;
+}
+
+.service-btn {
+    background-color: #1973d8;
+    color: var(--br-white);
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.service-btn:hover {
+    background: var(--br-white);
+    color: #1973d8;
+
+}
+
+.service-box:hover .service-icon i {
+    color: var(--br-white);
+}
+
+
+
+/* development approach End*/
 @media only screen and (max-width: 767px) {
     .about-1 {
         margin-top: 0;

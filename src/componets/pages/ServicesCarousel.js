@@ -78,10 +78,10 @@ const ServicesCarousel = () => {
 
   return (
 
-    <Container fluid className='mt-4'>
+    <Container fluid className='mt-4 Service-bg-img'>
       <div className="sme-container mt-4 mb-5 pt-3">
         <div className="text-center">
-          <h1 className=" hero-sub-title">
+          <h1 className=" hero-sub-title1 ">
             Innovative <br></br>
             <span className="br-span-list mt-3">Service Offerings</span>
           </h1>

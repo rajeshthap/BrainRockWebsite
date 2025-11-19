@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, Col, Container, Row } from "react-bootstrap";
+import { Button, Col, Container, Row } from "react-bootstrap";
 import "../../assets/css/UserPage.css"
 import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
@@ -10,9 +10,9 @@ import Banner1 from "../../assets/images/banner-1.png";
 
 import "../../assets/css/slider.css"
 import { LuBrainCircuit } from "react-icons/lu";
-import { ImProfile } from "react-icons/im";
+
 import { SiCircuitverse } from "react-icons/si";
-import { MdReviews } from "react-icons/md";
+
 import { SiAmazoncloudwatch } from "react-icons/si";
 import PHPIcon from "../../assets/images/php.png";
 import MySqlIcon from "../../assets/images/mysql.png";
@@ -22,9 +22,14 @@ import PythonIcon from "../../assets/images/python.png";
 import RailsIcon from "../../assets/images/rails.png";
 import ReactIcon from "../../assets/images/reacticon.png";
 import MongoDBIcon from "../../assets/images/mongodb.png";
-
+import { TbSettingsCode } from "react-icons/tb";
+import { GrShieldSecurity } from "react-icons/gr";
+import { LuSearchCode } from "react-icons/lu";
+import { AiOutlineFileDone } from "react-icons/ai";
 import ServicesCarousel from "./ServicesCarousel";
 import TestimonialCarousel from "./TestimonialCarousel";
+import { GoCodeReview } from "react-icons/go";
+import { MdEngineering } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 function UserPage() {
@@ -242,130 +247,138 @@ function UserPage() {
 
       <Container>
         <div className="resorce-sub-list-design">
-          <h1 className="text-center">
-            Our design and <br></br>
-            <span className="br-span-list mt-3">development approach</span>
-          </h1>
-          <Row className="mt-3">
-            <Col lg={6} md={6} sm={12} className="mb-3 d-flex">
-              <Card className="p-3 card-box-details flex-fill">
-                <Row>
-                  <Col lg={2} md={2} sm={12}>
-                    <div className="card-box-image">
-                      <ImProfile className="design-icon" />
-                    </div>
-                  </Col>
-                  <Col lg={10} md={10} sm={12} className="services-design-head">
-                    <h2>UX Driven Engineering</h2>
-                    <p>
-                      We combine user-centric design with robust engineering to
-                      build digital solutions that are intuitive, engaging, and
-                      highly functional. Our process ensures that every line of
-                      code serves the user experience, delivering products that
-                      people love to us
-                    </p>
-                  </Col>
-                </Row>
-              </Card>
+
+
+          <div class="text-center"><h1 class=" hero-sub-title">Our design and  <br></br><span class="br-span-list mt-3">development approach</span></h1></div>
+
+
+          <Row>
+            <Col lg={3} md={3} sm={12} >
+              <div className="service-box">
+                <div className="service-icon">
+                  <i className="flaticon-cloud-service"><MdEngineering /></i>
+                </div>
+                <div className="service-desc">
+
+                  <h4 className="heading-5">UX Driven Engineering</h4>
+                  <p>
+                    We combine user-centric design with robust engineering to build digital solutions that are intuitive, engaging, and highly functional. Our process ensures that every line of code serves the user experience, delivering products that people love to us
+                  </p>
+                  <button className="service-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </button>
+                </div>
+
+              </div>
+
+            </Col>
+            <Col lg={3} md={3} sm={12} >
+              <div className="service-box">
+                <div className="service-icon">
+                  <i className="flaticon-cloud-service"><GoCodeReview /></i>
+                </div>
+                <div className="service-desc">
+
+                  <h4 className="heading-5">Developing Shared Understanding</h4>
+                  <p>
+                    We bridge the gap between teams and stakeholders to create a clear, common vision. By fostering collaboration and aligning goals, we ensure seamless communication and
+                  </p>
+                  <button className="service-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </button>
+                </div>
+
+              </div>
+
+            </Col>
+            <Col lg={3} md={3} sm={12} >
+              <div className="service-box">
+                <div className="service-icon">
+                  <i className="flaticon-cloud-service"><TbSettingsCode /></i>
+                </div>
+                <div className="service-desc">
+
+                  <h4 className="heading-5">Proven Experience and Expertise</h4>
+                  <p>
+                    With years of industry experience and a team of skilled professionals, we deliver reliable solutions that drive innovation and business growth.
+                  </p>
+                  <button className="service-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </button>
+                </div>
+
+              </div>
+
+            </Col>
+            <Col lg={3} md={3} sm={12} >
+              <div className="service-box">
+                <div className="service-icon">
+                  <i className="flaticon-cloud-service"><GrShieldSecurity /></i>
+                </div>
+                <div className="service-desc">
+
+                  <h4 className="heading-5">Security & Intellectual Property (IP)</h4>
+                  <p>
+                    We prioritize data security and safeguard your intellectual property with strict confidentiality, robust systems, and compliance with global standards.
+                  </p>
+                  <button className="service-btn">
+                    Read More
+                    <i className="ti-arrow-right"><FaArrowRight /></i>
+                  </button>
+                </div>
+
+              </div>
+
             </Col>
 
-            <Col lg={6} md={6} sm={12} className="mb-3 d-flex">
-              <Card className="p-3 card-box-details flex-fill">
-                <Row>
-                  <Col lg={2} md={2} sm={12}>
-                    <div className="card-box-image">
-                      <ImProfile className="design-icon" />
-                    </div>
-                  </Col>
-                  <Col lg={10} md={10} sm={12} className="services-design-head">
-                    <h2>Developing Shared Understanding</h2>
-                    <p>
-                      We bridge the gap between teams and stakeholders to create
-                      a clear, common vision. By fostering collaboration and
-                      aligning goals, we ensure seamless communication and
-                      successful project outcomes.
-                    </p>
-                  </Col>
-                </Row>
-              </Card>
+            <Col lg={3} md={3} sm={12} className="mt-4" >
+              <div className="service-box">
+                <div className="service-icon">
+                  <i className="flaticon-cloud-service"><LuSearchCode /></i>
+                </div>
+                <div className="service-desc">
+
+                  <h4 className="heading-5">Code Review</h4>
+                  <p>
+                    We ensure clean, efficient, and secure code through rigorous reviews, fostering high-quality software and seamless collaboration.
+                  </p>
+                  <button className="service-btn">
+                    Read More
+                    <i className="ti-arrow-right"><LuSearchCode /></i>
+                  </button>
+                </div>
+
+              </div>
+
             </Col>
-            <Col lg={6} md={6} sm={12} className="mb-3 d-flex">
-              <Card className="p-3 card-box-details flex-fill">
-                <Row>
-                  <Col lg={2} md={2} sm={12}>
-                    <div className="card-box-image">
-                      <ImProfile className="design-icon" />
-                    </div>
-                  </Col>
-                  <Col lg={10} md={10} sm={12} className="services-design-head">
-                    <h2>Proven Experience and Expertise</h2>
-                    <p>
-                      With years of industry experience and a team of skilled
-                      professionals, we deliver reliable solutions that drive
-                      innovation and business growth.
-                    </p>
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-            <Col lg={6} md={6} sm={12} className="mb-3 d-flex">
-              <Card className="p-3 card-box-details flex-fill">
-                <Row>
-                  <Col lg={2} md={2} sm={12}>
-                    <div className="card-box-image">
-                      <ImProfile className="design-icon" />
-                    </div>
-                  </Col>
-                  <Col lg={10} md={10} sm={12} className="services-design-head">
-                    <h2>Security & Intellectual Property (IP)</h2>
-                    <p>
-                      We prioritize data security and safeguard your
-                      intellectual property with strict confidentiality, robust
-                      systems, and compliance with global standards.
-                    </p>
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-            <Col lg={6} md={6} sm={12} className="mb-3 d-flex">
-              <Card className="p-3 card-box-details flex-fill">
-                <Row>
-                  <Col lg={2} md={2} sm={12}>
-                    <div className="card-box-image">
-                      <MdReviews className="design-icon" />
-                    </div>
-                  </Col>
-                  <Col lg={10} md={10} sm={12} className="services-design-head">
-                    <h2>Code Reviews</h2>
-                    <p>
-                      We ensure clean, efficient, and secure code through
-                      rigorous reviews, fostering high-quality software and
-                      seamless collaboration.
-                    </p>
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-            <Col lg={6} md={6} sm={12} className="mb-3 d-flex">
-              <Card className="p-3 card-box-details flex-fill">
-                <Row>
-                  <Col lg={2} md={2} sm={12}>
-                    <div className="card-box-image">
-                      <ImProfile className="design-icon" />
-                    </div>
-                  </Col>
-                  <Col lg={10} md={10} sm={12} className="services-design-head">
-                    <h2>Quality Assurance & Testing</h2>
-                    <p>
-                      We deliver flawless digital solutions through rigorous QA
-                      processes and comprehensive testing to ensure performance,
-                      reliability, and user satisfaction.
-                    </p>
-                  </Col>
-                </Row>
-              </Card>
+            <Col lg={3} md={3} sm={12} className="mt-4" >
+              <div className="service-box">
+                <div className="service-icon">
+                  <i className="flaticon-cloud-service"><AiOutlineFileDone /></i>
+                </div>
+                <div className="service-desc">
+
+                  <h4 className="heading-5">Quality Assurance & Testing</h4>
+                  <p>
+                    We deliver flawless digital solutions through rigorous QA processes and comprehensive testing to ensure performance, reliability, and user satisfaction.
+                  </p>
+                  <button className="service-btn">
+                    Read More
+                    <i className="ti-arrow-right"><LuSearchCode /></i>
+                  </button>
+                </div>
+
+              </div>
+
             </Col>
           </Row>
+
+
+
+
         </div>
         <div className="resorce-sub-list">
           <h1 className="text-center mt-3">
