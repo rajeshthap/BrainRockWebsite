@@ -343,7 +343,7 @@ const DailyAttendance = () => {
     setMessage({ type: "", text: "" });
 
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee/check-out', {
+      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee/check-out/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -398,7 +398,7 @@ const DailyAttendance = () => {
     if (!hasCheckedIn || hasCheckedOut) return;
 
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee/check-out', {
+      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee/check-out/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
