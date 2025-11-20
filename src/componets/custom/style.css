@@ -162,16 +162,20 @@ body {
 .accept-btn{
   font-size: 12px;
   background-color: #00553c;
-  border :none;
+ border: none !important;
 }
 .reject-btn{
   font-size: 12px;
   background-color: #ff0000;
+   border: none !important;
+  
 }
 .cancel-btn{
   font-size: 12px;
   background-color: #808090;
+   border: none !important;
 }
+
 
 .forgot-btn:hover {
   color: #ffaa18;
