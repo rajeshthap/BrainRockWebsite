@@ -127,7 +127,7 @@ const SalaryCalculation = ({ employee }) => {
   // Calculate salary deduction for unpaid leaves (using regular salary)
   const unpaidLeaveDeduction = unpaidLeaveDays * perDaySalaryRegular;
   
-  // Calculate maternity and paternity leave deductions (only approved)
+  // Calculate maternity leave deductions (only approved)
   const maternityLeaveDays = leaveHistory.reduce((total, leave) => {
     if (leave.leave_type === 'maternity_leave' && leave.status === 'approved') {
       return total + (leave.leave_days || 0);
@@ -135,6 +135,7 @@ const SalaryCalculation = ({ employee }) => {
     return total;
   }, 0);
   
+  // Calculate paternity leave days (only approved)
   const paternityLeaveDays = leaveHistory.reduce((total, leave) => {
     if (leave.leave_type === 'paternity_leave' && leave.status === 'approved') {
       return total + (leave.leave_days || 0);
@@ -145,14 +146,14 @@ const SalaryCalculation = ({ employee }) => {
   // Maternity leave deduction uses basic salary
   const maternityLeaveDeduction = maternityLeaveDays * perDaySalaryForSpecialLeaves;
   
-  // Paternity leave deduction uses regular salary (employee's actual salary)
-  const paternityLeaveDeduction = paternityLeaveDays * perDaySalaryRegular;
+  // Paternity leave is now a paid leave - NO DEDUCTION
+  const paternityLeaveDeduction = 0;
   
   // Calculate earned leave (will be added in December)
   const earnedLeave = leaveBalance ? leaveBalance.earned_leave : 0;
   
-  // Calculate total deductions (excluding earned leaves)
-  const totalDeductions = unpaidLeaveDeduction + maternityLeaveDeduction + paternityLeaveDeduction;
+  // Calculate total deductions (excluding earned leaves and paternity leave)
+  const totalDeductions = unpaidLeaveDeduction + maternityLeaveDeduction;
   
   // NEW LOGIC: Calculate prorated salary for new employees
   let proratedSalary = monthlySalary;
@@ -213,7 +214,6 @@ const SalaryCalculation = ({ employee }) => {
       value: (
         <div>
           <div>Without Pay: ₹{monthlySalary ? monthlySalary.toFixed(2) : 'N/A'}</div>
-          <div>Paternity Leave: ₹{monthlySalary ? monthlySalary.toFixed(2) : 'N/A'}</div>
           <div>Maternity/EL: ₹{basicSalaryForSpecialLeaves.toFixed(2)}</div>
         </div>
       )
@@ -252,9 +252,9 @@ const SalaryCalculation = ({ employee }) => {
     ...(gender === 'Female' ? [
       { label: "Maternity Leave Deduction", value: `-₹${maternityLeaveDeduction.toFixed(2)}`, calculation: `${maternityLeaveDays} × ₹${perDaySalaryForSpecialLeaves.toFixed(2)} (Basic Salary)`, danger: true }
     ] : []),
-    // Only show paternity leave deduction if gender is male
+    // Only show paternity leave row if gender is male (but with no deduction)
     ...(gender === 'Male' ? [
-      { label: "Paternity Leave Deduction", value: `-₹${paternityLeaveDeduction.toFixed(2)}`, calculation: `${paternityLeaveDays} × ₹${perDaySalaryRegular.toFixed(2)} (Actual Salary)`, danger: true }
+      { label: "Paternity Leave", value: `${paternityLeaveDays} days`, calculation: "Paid leave - no salary deduction", success: true }
     ] : []),
     { label: "Total Deductions", value: `-₹${totalDeductions.toFixed(2)}`, calculation: "Sum of all deductions", info: true },
     // Add prorated salary calculation if applicable
@@ -415,25 +415,25 @@ const SalaryCalculation = ({ employee }) => {
                 <p>
                   <strong>Active Employees:</strong> Receive full monthly salary from 1st to last day of month.<br/>
                   <strong>New Employees:</strong> Receive prorated salary based on joining date. For example, if you joined on the 15th of the month, your salary will be calculated for the remaining days of that month.<br/>
-                  <strong>Inactive Employees:</strong> Receive prorated salary from 1st of the month to their last working day.
+                  <strong>Inactive Employees:</strong> Receive prorated salary from the 1st of the month to their last working day.
                 </p>
                 <h5>2. Without Pay Leave</h5>
                 <p>
                   <strong>Identification:</strong> Any leave with type <Badge bg="danger">without pay</Badge>.<br/>
                   <strong>Salary Impact:</strong> The salary for these days is <strong>deducted</strong> from your monthly salary. The deduction is calculated based on your actual monthly salary.<br/>
-                  <strong>Display:</strong> These leaves are marked as <Badge bg="danger">Yes</Badge> in "Without Pay" column.
+                  <strong>Display:</strong> These leaves are marked as <Badge bg="danger">Yes</Badge> in the "Without Pay" column.
                 </p>
                 <h5>3. Earned Leave (EL)</h5>
                 <p>
                   <strong>Identification:</strong> Any leave with type <Badge bg="dark">earned leave</Badge>.<br/>
                   <strong>Salary Impact:</strong> These leaves are <strong>not deducted</strong> from your monthly salary. They are paid leaves.<br/>
                   <strong>Year-End Encashment:</strong> At the end of the financial year (in December), the monetary value of your <strong>remaining EL balance</strong> is added to your salary. This value is calculated using a fixed basic salary of ₹25,000.<br/>
-                  <strong>Display:</strong> These leaves are marked as <Badge bg="success">No</Badge> in "Without Pay" column.
+                  <strong>Display:</strong> These leaves are marked as <Badge bg="success">No</Badge> in the "Without Pay" column.
                 </p>
                  <h5>4. Other Leaves (Maternity, Paternity, etc.)</h5>
                 <p>
                   <strong>Maternity Leave:</strong> Calculated based on a fixed basic salary of ₹25,000.<br/>
-                  <strong>Paternity Leave:</strong> Calculated based on your actual monthly salary.<br/>
+                  <strong>Paternity Leave:</strong> This is a <strong>fully paid leave</strong> with <strong>no salary deduction</strong>.<br/>
                   Other leaves are handled as per company policy.
                 </p>
               </Alert>
