@@ -182,34 +182,30 @@ const menuItems = [
    
  {
       icon: <FaChartLine />,
-      label: " Leave Management",
+      label: " Leave",
  
       submenu: [
         {
-          label: "Apply Leave",
-          path: "/EmployeeManagement",
+          label: "Leave Management",
+          path: "/LeaveManagement",
           icon: <FaChartLine />,
         },
-        {
-          label: "Leave Approval",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Leave Balance",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+        // {
+        //   label: "Leave Approval",
+        //   path: "/EmployeeManagement",
+        //   icon: <FaChartLine />,
+        // },
+        // {
+        //   label: "Leave Balance",
+        //   path: "/EmployeeManagement",
+        //   icon: <FaChartLine />,
+        // },
         {
           label: "Leave Calendar",
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        {
-          label: "Leave Policy Setup",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+       
         {
           label: "Leave History",
           path: "/EmployeeManagement",
