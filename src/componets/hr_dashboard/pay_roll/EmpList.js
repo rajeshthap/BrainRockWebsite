@@ -8,13 +8,15 @@ import {
   Spinner,
   Image,
   Button, 
-  Pagination 
+  Pagination,
+  Form
 } from "react-bootstrap";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
 import "../../../assets/css/attendance.css"; // Make sure your CSS for .temp-rwd-table is here
 import { AiFillEdit } from "react-icons/ai";
 import { AuthContext } from "../../context/AuthContext";
+import SalaryCalculation from "./SalaryCalculation"; // Import the SalaryCalculation component
 
 const EmpList = () => {
   const { user } = useContext(AuthContext);
@@ -27,12 +29,17 @@ const EmpList = () => {
   
   // State for search and pagination
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all'); // State for status filter
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); 
+  
+  // State for selected employee and salary view
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showSalaryView, setShowSalaryView] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Fetch data from API (no changes needed here)
+  // Fetch data from API
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -52,7 +59,7 @@ const EmpList = () => {
         } else if (data && Array.isArray(data.results)) {
             setEmployees(data.results);
         } else {
-            setError("Received unexpected data format from the server.");
+            setError("Received unexpected data format from server.");
         }
         
       } catch (e) {
@@ -66,38 +73,90 @@ const EmpList = () => {
     fetchEmployees();
   }, []);
 
-  // Filter employees based on search term (no changes needed here)
+  // Function to handle viewing salary
+  const handleViewSalary = (employee) => {
+    setSelectedEmployee(employee);
+    setShowSalaryView(true);
+  };
+  
+  // Function to go back to employee list
+  const handleBackToList = () => {
+    setSelectedEmployee(null);
+    setShowSalaryView(false);
+  };
+
+  // Filter employees based on search term and status
   const allFilteredEmployees = useMemo(() => {
-    if (!searchTerm) {
-      return employees;
+    let filtered = employees;
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(emp => {
+        if (statusFilter === 'active') {
+          return emp.is_active === true;
+        } else if (statusFilter === 'inactive') {
+          return emp.is_active === false;
+        }
+        return true;
+      });
     }
+    
+    // Apply search filter
+    if (!searchTerm) {
+      return filtered;
+    }
+    
     const lowercasedSearchTerm = searchTerm.toLowerCase();
-    return employees.filter(emp =>
+    return filtered.filter(emp =>
       emp.first_name?.toLowerCase().includes(lowercasedSearchTerm) ||
       emp.last_name?.toLowerCase().includes(lowercasedSearchTerm) ||
       emp.email?.toLowerCase().includes(lowercasedSearchTerm) ||
       emp.emp_id?.toLowerCase().includes(lowercasedSearchTerm) ||
       emp.phone?.toLowerCase().includes(lowercasedSearchTerm)
     );
-  }, [employees, searchTerm]);
+  }, [employees, searchTerm, statusFilter]);
 
-  // Reset page on search (no changes needed here)
+  // Reset page on search or status filter change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, statusFilter]);
 
-  // Get the current page's employees (no changes needed here)
+  // Get current page's employees
   const paginatedEmployees = useMemo(() => {
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     return allFilteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
   }, [allFilteredEmployees, currentPage, itemsPerPage]);
 
-  // Calculate total pages (no changes needed here)
+  // Calculate total pages
   const totalPages = Math.ceil(allFilteredEmployees.length / itemsPerPage);
 
   const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
+  // If showing salary view, render the SalaryCalculation component
+  if (showSalaryView && selectedEmployee) {
+    return (
+      <div className="dashboard-container">
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="main-content">
+          <HrHeader toggleSidebar={toggleSidebar} />
+          
+          <Container fluid className="dashboard-body p-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Salary Details</h2>
+              <Button variant="secondary" onClick={handleBackToList}>
+                Back to Employee List
+              </Button>
+            </div>
+            
+            <SalaryCalculation employee={selectedEmployee} />
+          </Container>
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise, render the employee list
   return (
     <div className="dashboard-container">
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -105,7 +164,24 @@ const EmpList = () => {
         <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         
         <Container fluid className="dashboard-body p-4">
-          <h2 className="mb-4">Employee List</h2>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="mb-0">Employee List</h2>
+            
+            {/* Status Filter Dropdown */}
+            <div className="d-flex align-items-center">
+              <span className="me-2">Filter by Status:</span>
+              <Form.Select 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="form-select"
+                style={{ width: '150px' }}
+              >
+                <option value="all">All Employees</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </Form.Select>
+            </div>
+          </div>
           
           {loading && <div className="d-flex justify-content-center"><Spinner animation="border" /></div>}
           {error && <Alert variant="danger">Failed to load employees: {error}</Alert>}
@@ -155,7 +231,11 @@ const EmpList = () => {
                               </Badge>
                             </td>
                             <td data-th="Action">
-                              <Button variant="primary" size="sm">
+                              <Button 
+                                variant="primary" 
+                                size="sm"
+                                onClick={() => handleViewSalary(emp)}
+                              >
                                 <AiFillEdit /> View Salary
                               </Button>
                             </td>
@@ -173,7 +253,7 @@ const EmpList = () => {
                 </div>
               </Row>
               
-              {/* --- Pagination Controls (no changes needed here) --- */}
+              {/* --- Pagination Controls --- */}
               {allFilteredEmployees.length > itemsPerPage && (
                  <div className="d-flex justify-content-center mt-4">
                     <Pagination>
