@@ -244,12 +244,12 @@ function UserPage() {
       </Container>
 
       <ServicesCarousel />
-      <div className="resorce-main-section py-5">
+      <div className="resorce-main-section ">
         <Container>
           <div className="resorce-sub-list-design">
 
 
-            <div class="text-center"><h1 class=" hero-sub-title">Our design and  <br></br><span class="br-span-list mt-3">development approach</span></h1></div>
+            <div class="text-center"><h1 class=" hero-sub-title">Our design and  <br></br><span class="br-span-list1 mt-3">development approach</span></h1></div>
 
 
             <Row>
@@ -380,80 +380,86 @@ function UserPage() {
 
 
           </div>
-          <div className="resorce-sub-list">
-            <h1 className="text-center mt-3">
-              Our <br></br>
-              <span className="resorce-about-list">Tech Stack</span>
-            </h1>
-          </div>
-          <div>
-            <Row className="d-flex justify-content-center br-tech-stack">
-              <Col lg={2} md={2} sm={6} className="mb-3">
-                <div>
-                  <img
-                    src={PHPIcon}
-                    alt="node-img"
-                    className="img-fluid mt-3"
-                  ></img>
-                </div>
-              </Col>
 
-              <Col lg={2} md={2} sm={6} className="mb-3">
-                <div>
-                  <img src={PHPIcon} alt="php-img"></img>
-                </div>
-              </Col>
-              <Col lg={2} md={2} sm={6} className="mb-3">
-                <div>
-                  <img src={MySqlIcon} alt="MySql-img"></img>
-                </div>
-              </Col>
-              <Col lg={2} md={2} sm={6} className="mb-3">
-                <div>
-                  <img src={JavaIcon} alt="Java-img"></img>
-                </div>
-              </Col>
-              <Col lg={2} md={2} sm={6} className="mb-3">
-                <div>
-                  <img src={DoutNetIcon} alt=".Net-img"></img>
-                </div>
-              </Col>
-              <Col lg={2} md={2} sm={6} className="mt-3">
-                <div>
-                  <img
-                    src={PythonIcon}
-                    alt="Python-img"
-                    className="img-fluid br-tech-img"
-                  ></img>
-                </div>
-              </Col>
-
-              <Col lg={3} md={3} sm={6} className="mt-3">
-                <div>
-                  <img
-                    src={RailsIcon}
-                    alt="Rails-img"
-                    className="img-fluid "
-                  ></img>
-                </div>
-              </Col>
-              <Col lg={3} md={3} sm={6}>
-                <div>
-                  <img src={ReactIcon} alt="react-img"></img>
-                </div>
-              </Col>
-
-              <Col lg={3} md={3} sm={6} className="mt-3">
-                <div>
-                  <img src={MongoDBIcon} alt="MongoDB-img"></img>
-                </div>
-              </Col>
-            </Row>
-          </div>
         </Container>
 
+
       </div>
-      <div className="testimonial-section resorce-sub-list-design py-5">
+      <div>
+        <Container fluid className="testimonial-bg">
+
+          <Container>
+
+            <div className="resorce-sub-list text-center">
+              <h1 className="text-center mt-3">
+                Our <br></br>
+                <span className="resorce-about-list">Tech Stack</span>
+              </h1>
+            </div>
+            <div>
+              <Row className="d-flex justify-content-center br-tech-stack">
+                <Col lg={2} md={2} sm={6} className="mb-3">
+                  <div>
+                    <img
+                      src={PHPIcon}
+                      alt="node-img"
+                      className="img-fluid mt-3"
+                    ></img>
+                  </div>
+                </Col>
+
+
+                <Col lg={2} md={2} sm={6} className="mb-3">
+                  <div>
+                    <img src={MySqlIcon} alt="MySql-img"></img>
+                  </div>
+                </Col>
+                <Col lg={2} md={2} sm={6} className="mb-3">
+                  <div>
+                    <img src={JavaIcon} alt="Java-img"></img>
+                  </div>
+                </Col>
+                <Col lg={2} md={2} sm={6} className="mb-3">
+                  <div>
+                    <img src={DoutNetIcon} alt=".Net-img"></img>
+                  </div>
+                </Col>
+                <Col lg={2} md={2} sm={6} className="mt-3">
+                  <div>
+                    <img
+                      src={PythonIcon}
+                      alt="Python-img"
+                      className="img-fluid br-tech-img"
+                    ></img>
+                  </div>
+                </Col>
+
+                <Col lg={3} md={3} sm={6} className="mt-3">
+                  <div>
+                    <img
+                      src={RailsIcon}
+                      alt="Rails-img"
+                      className="img-fluid "
+                    ></img>
+                  </div>
+                </Col>
+                <Col lg={3} md={3} sm={6}>
+                  <div>
+                    <img src={ReactIcon} alt="react-img"></img>
+                  </div>
+                </Col>
+
+                <Col lg={3} md={3} sm={6} className="mt-3">
+                  <div>
+                    <img src={MongoDBIcon} alt="MongoDB-img"></img>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+          </Container>
+        </Container>
+      </div>
+      <div className="testimonial-section  py-5">
         {/* <h1 className="text-center">
             Why customers love <br></br>
             <span className="br-span-list mt-3">working with us</span>
