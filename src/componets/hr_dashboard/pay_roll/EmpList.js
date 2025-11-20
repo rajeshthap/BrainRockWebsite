@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Row,
-  Col,
   Badge,
   Alert,
   Spinner,
@@ -13,13 +12,11 @@ import {
 } from "react-bootstrap";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
-import "../../../assets/css/attendance.css"; // Make sure your CSS for .temp-rwd-table is here
+import "../../../assets/css/attendance.css";
 import { AiFillEdit } from "react-icons/ai";
-import { AuthContext } from "../../context/AuthContext";
-import SalaryCalculation from "./SalaryCalculation"; // Import the SalaryCalculation component
+import SalaryCalculation from "./SalaryCalculation"; 
 
 const EmpList = () => {
-  const { user } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // State for API data
@@ -29,7 +26,7 @@ const EmpList = () => {
   
   // State for search and pagination
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // State for status filter
+  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); 
   

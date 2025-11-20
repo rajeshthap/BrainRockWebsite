@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Row,
@@ -8,17 +8,13 @@ import {
   Badge,
   Spinner,
   Alert,
-  Form,
-  Button
 } from "react-bootstrap";
-import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
 
 const SalaryCalculation = ({ employee }) => {
-  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [salaryData, setSalaryData] = useState(null);
+  const [, setSalaryData] = useState(null);
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [leaveHistory, setLeaveHistory] = useState([]);
   const [gender, setGender] = useState(null);
@@ -33,7 +29,7 @@ const SalaryCalculation = ({ employee }) => {
     withCredentials: true,
   });
 
-  // HELPER FUNCTION: MOVED TO THE TOP TO BE DECLARED BEFORE USE
+  
   // Function to determine if a leave is without pay
   const isWithoutPay = (leave) => {
     // Check if leave type is 'without pay' or 'without_pay'
