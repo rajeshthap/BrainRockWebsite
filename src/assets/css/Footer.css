@@ -17,21 +17,25 @@
 
 
 
-.br-footer-box{
-    background-color: #F9F9FF;;
-}
+/* .br-footer-box{
+    background-color: #F9F9FF;
+} */
 .br-footer-heading h4{
-    color: var(--br-primary);
+    color: #1973d8;
     margin-left: var(--br-space-700);
+    font-weight: 600;
     
 }
 .br-footer-details p{
-    font-size: var(--br-space-400);
+    font-size: var(--br-space-350);
     padding: var(--br-space-200);
     line-height: 24px;
 }
 .google-img{
     max-width: 100px;
+}
+.footer-li ul li{
+    font-size: var(--br-space-350);
 }
 .footer-icon{
  

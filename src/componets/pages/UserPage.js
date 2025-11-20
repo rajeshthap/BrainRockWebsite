@@ -26,6 +26,7 @@ import TestimonialCarousel from "./TestimonialCarousel";
 import { GoCodeReview } from "react-icons/go";
 import { MdEngineering } from "react-icons/md";
 import { Link } from "react-router-dom";
+import FooterPage from "../footer/FooterPage";
 
 function UserPage() {
   return (
@@ -424,7 +425,7 @@ function UserPage() {
       </div>
 
       <Container>
-        sdsd
+        <FooterPage />
       </Container>
     </div>
   );
