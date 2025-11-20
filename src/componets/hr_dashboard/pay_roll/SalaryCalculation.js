@@ -14,12 +14,13 @@ import axios from "axios";
 const SalaryCalculation = ({ employee }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [, setSalaryData] = useState(null);
+  const [salaryData, setSalaryData] = useState(null);
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [leaveHistory, setLeaveHistory] = useState([]);
   const [gender, setGender] = useState(null);
   const [apiSalary, setApiSalary] = useState(null);
   const [monthlySalary, setMonthlySalary] = useState(null);
+  const [joiningDate, setJoiningDate] = useState(null);
   
   const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
   
@@ -52,6 +53,7 @@ const SalaryCalculation = ({ employee }) => {
           setSalaryData(salaryResponse.data.data);
           setGender(salaryResponse.data.data.gender);
           setApiSalary(salaryResponse.data.data.salary);
+          setJoiningDate(salaryResponse.data.data.created_at);
           
           // Calculate monthly Salary from API salary (assuming annual salary)
           const annualSalary = salaryResponse.data.data.salary || 0;
@@ -140,8 +142,11 @@ const SalaryCalculation = ({ employee }) => {
     return total;
   }, 0);
   
+  // Maternity leave deduction uses basic salary
   const maternityLeaveDeduction = maternityLeaveDays * perDaySalaryForSpecialLeaves;
-  const paternityLeaveDeduction = paternityLeaveDays * perDaySalaryForSpecialLeaves;
+  
+  // Paternity leave deduction uses regular salary (employee's actual salary)
+  const paternityLeaveDeduction = paternityLeaveDays * perDaySalaryRegular;
   
   // Calculate earned leave (will be added in December)
   const earnedLeave = leaveBalance ? leaveBalance.earned_leave : 0;
@@ -149,18 +154,45 @@ const SalaryCalculation = ({ employee }) => {
   // Calculate total deductions (excluding earned leaves)
   const totalDeductions = unpaidLeaveDeduction + maternityLeaveDeduction + paternityLeaveDeduction;
   
-  // Calculate net salary
-  const netSalary = monthlySalary - totalDeductions;
+  // NEW LOGIC: Calculate prorated salary for new employees
+  let proratedSalary = monthlySalary;
+  let proratedDays = 0;
+  let isProrated = false;
+  let proratedExplanation = "Full month salary";
+  
+  if (joiningDate) {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    
+    // Parse joining date from created_at field
+    const joinDate = new Date(joiningDate);
+    const joinYear = joinDate.getFullYear();
+    const joinMonth = joinDate.getMonth();
+    const joinDay = joinDate.getDate();
+    
+    // If employee joined in current month
+    if (joinYear === currentYear && joinMonth === currentMonth) {
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      proratedDays = daysInMonth - joinDay + 1;
+      proratedSalary = (monthlySalary / daysInMonth) * proratedDays;
+      isProrated = true;
+      proratedExplanation = `Prorated salary for ${proratedDays} days (joined on ${joinDate.toLocaleDateString()})`;
+    }
+  }
+  
+  // Calculate net salary (use prorated salary if applicable)
+  const netSalary = proratedSalary - totalDeductions;
   
   // Calculate days worked in current month
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-  const daysWorked = daysInMonth - totalLeaveDays;
+  const daysWorked = isProrated ? proratedDays - totalLeaveDays : daysInMonth - totalLeaveDays;
 
   // Get current month to check if it's December (when EL is added)
   const currentMonth = new Date().getMonth();
   const isDecember = currentMonth === 11; // 0-indexed, so 11 = December
   
-  // Calculate EL value to be added at the end of financial year
+  // Calculate EL value to be added at the end of the financial year
   const elValueAtYearEnd = earnedLeave * perDaySalaryForSpecialLeaves;
   
   // Calculate total salary including EL at year end (only in December)
@@ -173,6 +205,7 @@ const SalaryCalculation = ({ employee }) => {
     { label: "Gender", value: gender || 'N/A' },
     { label: "Department", value: employee.department },
     { label: "Designation", value: employee.designation },
+    { label: "Joining Date", value: joiningDate ? new Date(joiningDate).toLocaleDateString() : 'N/A' },
     { label: "Annual Salary", value: `₹${apiSalary ? apiSalary.toFixed(2) : 'N/A'}` },
     { label: "Monthly Salary", value: `₹${monthlySalary ? monthlySalary.toFixed(2) : 'N/A'}` },
     { 
@@ -180,7 +213,8 @@ const SalaryCalculation = ({ employee }) => {
       value: (
         <div>
           <div>Without Pay: ₹{monthlySalary ? monthlySalary.toFixed(2) : 'N/A'}</div>
-          <div>Special (EL/Mat/Pat): ₹{basicSalaryForSpecialLeaves.toFixed(2)}</div>
+          <div>Paternity Leave: ₹{monthlySalary ? monthlySalary.toFixed(2) : 'N/A'}</div>
+          <div>Maternity/EL: ₹{basicSalaryForSpecialLeaves.toFixed(2)}</div>
         </div>
       )
     }
@@ -214,9 +248,19 @@ const SalaryCalculation = ({ employee }) => {
     { label: "Earned Leave Days Taken", value: earnedLeaveDaysTaken, calculation: "Count of 'earned leave' taken" },
     { label: "Without Pay Leave Deduction", value: `-₹${unpaidLeaveDeduction.toFixed(2)}`, calculation: `${unpaidLeaveDays} × ₹${perDaySalaryRegular.toFixed(2)}`, danger: true },
     { label: "Earned Leave Deduction", value: "No", calculation: "Earned leaves are not deducted from salary", success: true },
-    ...(gender === 'Female' ? [{ label: "Maternity Leave Deduction", value: `-₹${maternityLeaveDeduction.toFixed(2)}`, calculation: `${maternityLeaveDays} × ₹${perDaySalaryForSpecialLeaves.toFixed(2)}`, danger: true }] : []),
-    ...(gender === 'Male' ? [{ label: "Paternity Leave Deduction", value: `-₹${paternityLeaveDeduction.toFixed(2)}`, calculation: `${paternityLeaveDays} × ₹${perDaySalaryForSpecialLeaves.toFixed(2)}`, danger: true }] : []),
+    // Only show maternity leave deduction if gender is female
+    ...(gender === 'Female' ? [
+      { label: "Maternity Leave Deduction", value: `-₹${maternityLeaveDeduction.toFixed(2)}`, calculation: `${maternityLeaveDays} × ₹${perDaySalaryForSpecialLeaves.toFixed(2)} (Basic Salary)`, danger: true }
+    ] : []),
+    // Only show paternity leave deduction if gender is male
+    ...(gender === 'Male' ? [
+      { label: "Paternity Leave Deduction", value: `-₹${paternityLeaveDeduction.toFixed(2)}`, calculation: `${paternityLeaveDays} × ₹${perDaySalaryRegular.toFixed(2)} (Actual Salary)`, danger: true }
+    ] : []),
     { label: "Total Deductions", value: `-₹${totalDeductions.toFixed(2)}`, calculation: "Sum of all deductions", info: true },
+    // Add prorated salary calculation if applicable
+    ...(isProrated ? [
+      { label: "Prorated Salary", value: `₹${proratedSalary.toFixed(2)}`, calculation: proratedExplanation, warning: true }
+    ] : []),
     { label: "Net Salary", value: `₹${netSalary.toFixed(2)}`, calculation: `Monthly Salary - Total Deductions`, success: true },
     { label: "Earned Leave (EL) Balance", value: earnedLeave, calculation: "From leave balance", info: true },
     { label: "EL Value (at year-end)", value: `₹${elValueAtYearEnd.toFixed(2)}`, calculation: `${earnedLeave} EL × ₹${perDaySalaryForSpecialLeaves.toFixed(2)}/day`, info: true },
@@ -282,7 +326,7 @@ const SalaryCalculation = ({ employee }) => {
                   </thead>
                   <tbody>
                     {salaryCalculationRows.map((row, index) => (
-                      <tr key={index} className={row.danger ? "table-danger" : row.info ? "table-info" : row.success ? "table-success" : ""}>
+                      <tr key={index} className={row.danger ? "table-danger" : row.info ? "table-info" : row.success ? "table-success" : row.warning ? "table-warning" : ""}>
                         <td>{row.label}</td>
                         <td>{row.value}</td>
                         <td>{row.calculation}</td>
@@ -367,22 +411,30 @@ const SalaryCalculation = ({ employee }) => {
                   This section explains how different types of leaves affect your salary.
                 </p>
                 <hr />
-                <h5>1. Without Pay Leave</h5>
+                <h5>1. Employee Status & Salary Calculation</h5>
                 <p>
-                  <strong>Identification:</strong> Any leave with the type <Badge bg="danger">without pay</Badge>.<br/>
-                  <strong>Salary Impact:</strong> The salary for these days is <strong>deducted</strong> from your monthly salary. The deduction is calculated based on your actual monthly salary.<br/>
-                  <strong>Display:</strong> These leaves are marked as <Badge bg="danger">Yes</Badge> in the "Without Pay" column.
+                  <strong>Active Employees:</strong> Receive full monthly salary from 1st to last day of month.<br/>
+                  <strong>New Employees:</strong> Receive prorated salary based on joining date. For example, if you joined on the 15th of the month, your salary will be calculated for the remaining days of that month.<br/>
+                  <strong>Inactive Employees:</strong> Receive prorated salary from 1st of the month to their last working day.
                 </p>
-                <h5>2. Earned Leave (EL)</h5>
+                <h5>2. Without Pay Leave</h5>
                 <p>
-                  <strong>Identification:</strong> Any leave with the type <Badge bg="dark">earned leave</Badge>.<br/>
+                  <strong>Identification:</strong> Any leave with type <Badge bg="danger">without pay</Badge>.<br/>
+                  <strong>Salary Impact:</strong> The salary for these days is <strong>deducted</strong> from your monthly salary. The deduction is calculated based on your actual monthly salary.<br/>
+                  <strong>Display:</strong> These leaves are marked as <Badge bg="danger">Yes</Badge> in "Without Pay" column.
+                </p>
+                <h5>3. Earned Leave (EL)</h5>
+                <p>
+                  <strong>Identification:</strong> Any leave with type <Badge bg="dark">earned leave</Badge>.<br/>
                   <strong>Salary Impact:</strong> These leaves are <strong>not deducted</strong> from your monthly salary. They are paid leaves.<br/>
                   <strong>Year-End Encashment:</strong> At the end of the financial year (in December), the monetary value of your <strong>remaining EL balance</strong> is added to your salary. This value is calculated using a fixed basic salary of ₹25,000.<br/>
-                  <strong>Display:</strong> These leaves are marked as <Badge bg="success">No</Badge> in the "Without Pay" column.
+                  <strong>Display:</strong> These leaves are marked as <Badge bg="success">No</Badge> in "Without Pay" column.
                 </p>
-                 <h5>3. Other Leaves (Maternity, Paternity, etc.)</h5>
+                 <h5>4. Other Leaves (Maternity, Paternity, etc.)</h5>
                 <p>
-                  These leaves are handled as per company policy, and their deductions (if any) are calculated based on the fixed basic salary of ₹25,000.
+                  <strong>Maternity Leave:</strong> Calculated based on a fixed basic salary of ₹25,000.<br/>
+                  <strong>Paternity Leave:</strong> Calculated based on your actual monthly salary.<br/>
+                  Other leaves are handled as per company policy.
                 </p>
               </Alert>
             </Col>
