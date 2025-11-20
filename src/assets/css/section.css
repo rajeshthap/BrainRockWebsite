@@ -122,7 +122,13 @@
   padding: var(--br-space-700);
 }
 
-
+.bg-footer-img {
+  background-image: url('../../assets/images/bg-footer.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: var(--br-space-700);
+}
 .testimonial-bg {
   background-image: url('../../assets/images/testimonial-bg.png');
   background-size: cover;

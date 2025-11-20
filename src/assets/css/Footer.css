@@ -17,28 +17,37 @@
 
 
 
-/* .br-footer-box{
-    background-color: #F9F9FF;
-} */
-.br-footer-heading h4{
+.br-footer-box {
+    background-image: url('../../assets/images/bg-footer.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: var(--br-space-700);
+}
+
+.br-footer-heading h4 {
     color: #1973d8;
     margin-left: var(--br-space-700);
     font-weight: 600;
-    
+
 }
-.br-footer-details p{
+
+.br-footer-details p {
     font-size: var(--br-space-350);
     padding: var(--br-space-200);
     line-height: 24px;
 }
-.google-img{
+
+.google-img {
     max-width: 100px;
 }
-.footer-li ul li{
+
+.footer-li ul li {
     font-size: var(--br-space-350);
 }
-.footer-icon{
- 
+
+.footer-icon {
+
     margin-left: var(--br-space-300);
     font-size: 36px;
     border-radius: 30px;

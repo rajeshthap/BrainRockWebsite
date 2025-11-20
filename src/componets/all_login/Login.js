@@ -31,7 +31,7 @@ export default function Login() {
   // This effect runs when the component mounts to clear cookies
   useEffect(() => {
     clearAllCookies();
-    
+
     // If there's a logout function in AuthContext, call it
     if (logout) {
       logout();

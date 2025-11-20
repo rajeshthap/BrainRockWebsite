@@ -424,8 +424,9 @@ function UserPage() {
         <TestimonialCarousel />
       </div>
 
-      <Container>
-        <FooterPage />
+      <Container fluid className="br-footer-box">
+        <Container>
+          <FooterPage /></Container>
       </Container>
     </div>
   );
