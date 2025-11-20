@@ -139,7 +139,7 @@
 
 /* TestimonialSection.css */
 .testimonial-section {
-  padding: 80px 20px;
+  padding: 56px 20px;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
 }
 
@@ -370,7 +370,7 @@
 }
 
 .testimonial-nav:hover {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(17, 131, 238, 0.33);
 }
 
 .testimonial-nav.prev {

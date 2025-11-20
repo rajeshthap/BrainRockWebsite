@@ -14,14 +14,9 @@ import { LuBrainCircuit } from "react-icons/lu";
 import { SiCircuitverse } from "react-icons/si";
 
 import { SiAmazoncloudwatch } from "react-icons/si";
-import PHPIcon from "../../assets/images/php.png";
-import MySqlIcon from "../../assets/images/mysql.png";
-import JavaIcon from "../../assets/images/java.png";
-import DoutNetIcon from "../../assets/images/doutNet.png";
-import PythonIcon from "../../assets/images/python.png";
-import RailsIcon from "../../assets/images/rails.png";
-import ReactIcon from "../../assets/images/reacticon.png";
-import MongoDBIcon from "../../assets/images/mongodb.png";
+
+
+import TechImg from "../../assets/images/shield-bg.png"
 import { TbSettingsCode } from "react-icons/tb";
 import { GrShieldSecurity } from "react-icons/gr";
 import { LuSearchCode } from "react-icons/lu";
@@ -249,7 +244,7 @@ function UserPage() {
           <div className="resorce-sub-list-design">
 
 
-            <div class="text-center"><h1 class=" hero-sub-title">Our design and  <br></br><span class="br-span-list1 mt-3">development approach</span></h1></div>
+            <div class="text-center"><h1 class=" hero-sub-title">Our design and  <span class="br-span-list1 mt-3">development approach</span></h1></div>
 
 
             <Row>
@@ -392,69 +387,30 @@ function UserPage() {
 
             <div className="resorce-sub-list text-center">
               <h1 className="text-center mt-3">
-                Our <br></br>
+                Our
                 <span className="resorce-about-list">Tech Stack</span>
               </h1>
             </div>
             <div>
+
               <Row className="d-flex justify-content-center br-tech-stack">
-                <Col lg={2} md={2} sm={6} className="mb-3">
-                  <div>
-                    <img
-                      src={PHPIcon}
-                      alt="node-img"
-                      className="img-fluid mt-3"
-                    ></img>
-                  </div>
-                </Col>
+
+                <Col lg={6} md={6} sm={12} className="mb-3"><h3><b>Brainrock Consulting – Technologies We Use as a Top Application Development Company</b></h3>
 
 
-                <Col lg={2} md={2} sm={6} className="mb-3">
-                  <div>
-                    <img src={MySqlIcon} alt="MySql-img"></img>
-                  </div>
-                </Col>
-                <Col lg={2} md={2} sm={6} className="mb-3">
-                  <div>
-                    <img src={JavaIcon} alt="Java-img"></img>
-                  </div>
-                </Col>
-                <Col lg={2} md={2} sm={6} className="mb-3">
-                  <div>
-                    <img src={DoutNetIcon} alt=".Net-img"></img>
-                  </div>
-                </Col>
-                <Col lg={2} md={2} sm={6} className="mt-3">
-                  <div>
-                    <img
-                      src={PythonIcon}
-                      alt="Python-img"
-                      className="img-fluid br-tech-img"
-                    ></img>
-                  </div>
-                </Col>
+                  <p>At <b>Brainrock Consulting,</b> we leverage the most advanced and reliable technologies to deliver high-performance <b>Application Development and mobile applications.</b> As a top application development company, we follow agile methodologies to ensure smooth project execution—from initial ideation and UI/UX design to development, testing, deployment, and long-term maintenance.</p>
+                  <p>Our expert developers work with a powerful and future-ready tech stack, including <b> React Native, Flutter, Kotlin, Swift, React.js, Next.js, Node.js, Laravel, </b> and other industry-leading tools. This enables us to build scalable, secure, and feature-rich applications tailored to your business needs.</p>
 
-                <Col lg={3} md={3} sm={6} className="mt-3">
-                  <div>
-                    <img
-                      src={RailsIcon}
-                      alt="Rails-img"
-                      className="img-fluid "
-                    ></img>
-                  </div>
                 </Col>
-                <Col lg={3} md={3} sm={6}>
-                  <div>
-                    <img src={ReactIcon} alt="react-img"></img>
-                  </div>
-                </Col>
-
-                <Col lg={3} md={3} sm={6} className="mt-3">
-                  <div>
-                    <img src={MongoDBIcon} alt="MongoDB-img"></img>
-                  </div>
-                </Col>
+                <Col lg={6} md={6} sm={12} className="mb-3 text-center"> <div>
+                  <img
+                    src={TechImg}
+                    alt="TechImg"
+                    className="img-fluid mt-3"
+                  ></img>
+                </div></Col>
               </Row>
+
             </div>
           </Container>
         </Container>
@@ -468,26 +424,7 @@ function UserPage() {
       </div>
 
       <Container>
-        <div className="br-card-bg">
-          <Row>
-            <Col lg={12} md={12} sm={12} className="">
-              {" "}
-              <h3>
-                <span className="br-card-span-text">
-                  Hire the best developers and
-                </span>{" "}
-                <br></br>
-                <span>designers around!</span>
-              </h3>
-            </Col>
-            <Col lg={6} md={6} sm={12}>
-              {" "}
-              <Button variant="" className="hire-btn text-end">
-                Hire Top Developers
-              </Button>
-            </Col>
-          </Row>
-        </div>
+        sdsd
       </Container>
     </div>
   );
