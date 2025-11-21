@@ -7,6 +7,7 @@ import { FaArrowRight } from "react-icons/fa6";
 // Component
 
 import Banner1 from "../../assets/images/banner-1.png";
+import Banner2 from "../../assets/images/banner-2.png"
 
 import "../../assets/css/slider.css"
 import { LuBrainCircuit } from "react-icons/lu";
@@ -88,8 +89,8 @@ function UserPage() {
                 <div>
                   <i>
                     <img
-                      src={Banner1}
-                      alt="groupimage"
+                      src={Banner2}
+                      alt="Banner2"
                       className="img-fluid"
                     ></img>
                   </i>
