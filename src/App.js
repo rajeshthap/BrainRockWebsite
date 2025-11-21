@@ -38,6 +38,9 @@ import LeaveCalendar from "./componets/hr_dashboard/hr_iinerpage/LeaveCalendar";
 import EmpList from "./componets/hr_dashboard/pay_roll/EmpList";
 import SalaryCalculation from "./componets/hr_dashboard/pay_roll/SalaryCalculation";
 import LeaveManagement from "./componets/hr_dashboard/Leave/LeaveManagement";
+import CompanyProfile from "./componets/pages/aboutus/CompanyProfile";
+import OurTeam from "./componets/pages/aboutus/OurTeam";
+import Careers from "./componets/pages/aboutus/Careers";
 
 
 
@@ -95,6 +98,9 @@ function AppContent() {
         <Route path="/EmployeeList" element={<EmployeeList />} />
         <Route path="/PayrollCharts" element={<PayrollCharts />} />
         <Route path="/PayDashBoard" element={<PayDashBoard />} />
+        <Route path="/CompanyProfile" element={<CompanyProfile />} />
+        <Route path="/OurTeam" element={<OurTeam />} />
+        <Route path="/Careers" element={<Careers />} />
 
         {/* Protected Routes */}
         {
