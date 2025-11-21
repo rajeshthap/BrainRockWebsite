@@ -168,7 +168,7 @@
  
 /* Header Row */
 .temp-rwd-table tr:first-child {
-    background-color: blue;
+    background-color: #0080ff;
     color: #fff;
 }
  
@@ -178,7 +178,66 @@
     border-bottom: 1px solid #ddd;
     background-color: #f5f9fc;
 }
- 
+ .leave-card {
+  border-radius: 12px;
+  transition: 0.3s ease-in-out;
+}
+
+.leave-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.leave-icon {
+  
+    font-size: 30px;
+    opacity: 0.8;
+    background-color: #e3e4e9;
+    border-radius: 16px;
+    padding: 5px;
+}
+.leave-heading h5{
+  font-size: var(--br-space-350);
+}
+.leave-heading h2{
+font-size: var(--br-space-350);
+font-weight: 600;
+}
+.leave-his h4{
+  font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+.leave-app span {
+  font-size: 10px !important;
+  border: none !important;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.leave-app .approved {
+  background-color: #4caf50 !important; /* green */
+  color: #fff !important;
+}
+
+.leave-app .pending {
+  background-color: #ffcc00 !important; /* yellow */
+}
+
+.leave-app .rejected {
+  background-color: #ff4d4d !important; /* red (optional) */
+  color: #fff !important;
+}
+
+
+.status-badge {
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
 /* Odd Rows */
 .temp-rwd-table tr:nth-child(odd):not(:first-child) {
     background-color: #ebf3f9;
@@ -288,4 +347,7 @@
   .att-mob-out {
     margin-top: 12px;
   }
+  .leave-mob{
+  margin-top: 12px;
+}
 }

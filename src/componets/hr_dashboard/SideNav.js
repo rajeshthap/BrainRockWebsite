@@ -37,17 +37,17 @@ const emp_id = user?.unique_id;  // This is the correct value
     setOpenSubmenu(openSubmenu === index ? null : index);
   };
   
- useEffect(() => {
-  if (!emp_id) return;  // prevent calling undefined
+//  useEffect(() => {
+//   if (!emp_id) return;  // prevent calling undefined
 
-  axios
-    .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${emp_id}`)
-    .then((res) => {
-      const role = res.data?.role || res.data?.employee_role || null;
-      setUserRole(role);
-    })
-    .catch((err) => console.log("SideNav Error:", err));
-}, [emp_id]);
+//   axios
+//     .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${emp_id}`)
+//     .then((res) => {
+//       const role = res.data?.role || res.data?.employee_role || null;
+//       setUserRole(role);
+//     })
+//     .catch((err) => console.log("SideNav Error:", err));
+// }, [emp_id]);
 
 
 const menuItems = [

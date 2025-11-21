@@ -20,9 +20,14 @@ function LeaveCalendar() {
     message: "",
     type: "",
   });
+  const [userGender, setUserGender] = useState("");
+const [isLeavePending, setIsLeavePending] = useState(false);
+const [hasPending, setHasPending] = useState(false);
+
+
   const [showTooltip, setShowTooltip] = useState(false);
   const [showAllRequests, setShowAllRequests] = useState(false);
-  const [gender, setGender] = useState("");
+  
   const [options, setOptions] = useState([]);
   const [leaveBalance, setLeaveBalance] = useState(null);
   
@@ -49,47 +54,53 @@ function LeaveCalendar() {
     }
   }, [leaveType]);
 
-  // Fetch user data including gender and set options
-  useEffect(() => {
-    if (!employee_id) return;
-    
-    axios.get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`)
-      .then((res) => {
-        console.log("Gender API Response:", res.data);
-        const userGender = res.data.gender;
-        setGender(userGender);
+ useEffect(() => {
+  if (!employee_id) return;
 
-        // Base leave options using VALID_LEAVE_TYPES
-        let leaveOptions = [
-          { value: "casual_leave", label: "Casual Leave (CL)" },
-          { value: "without_pay", label: "Without Pay (WOP)" },
-          { value: "earned_leave", label: "Earned Leave (EL)" },
-          { value: "paid_leave", label: "Paid Leave (PL)" },
-        ];
+  axios
+    .get(
+      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`
+    )
+    .then((res) => {
+      const gender = String(res.data.gender).trim().toLowerCase();
+      setUserGender(gender); // save gender
 
-        // Add maternity option only for female users
-        if (userGender === "Female") {
-          leaveOptions.push({ value: "maternity_leave", label: "Maternity Leave (ML)" });
-        }
+      // base leave options
+      let leaveOptions = [
+        { value: "casual_leave", label: "Casual Leave (CL)" },
+        { value: "without_pay", label: "Without Pay (WOP)" },
+        { value: "earned_leave", label: "Earned Leave (EL)" },
+        { value: "paid_leave", label: "Paid Leave (PL)" },
+        { value: "paternity_leave", label: "Paternity Leave (PTL)" },
+      ];
 
-        setOptions(leaveOptions);
-      })
-      .catch((err) => {
-        console.error("Error fetching gender/options:", err);
-        // Even if API fails, we'll set default options after a timeout
-        setTimeout(() => {
-          let defaultOptions = [
-            { value: "casual_leave", label: "Casual Leave (CL)" },
-             { value: "without_pay", label: "Without Pay (WOP)" },
-              { value: "earned_leave", label: "Earned Leave (EL)" },
-              { value: "paid_leave", label: "Paid Leave (PL)" },
-            { value: "short_leave", label: "Short Leave (SL)" },
-           
-          ];
-          setOptions(defaultOptions);
-        }, 1000);
-      });
-  }, [employee_id]);
+      // add ML only for female
+      if (gender === "female") {
+        leaveOptions.push({
+          value: "maternity_leave",
+          label: "Maternity Leave (ML)",
+        });
+      }
+
+      setOptions(leaveOptions);
+    })
+    .catch(() => {
+      // fallback default
+      setOptions([
+        { value: "casual_leave", label: "Casual Leave (CL)" },
+        { value: "without_pay", label: "Without Pay (WOP)" },
+        { value: "earned_leave", label: "Earned Leave (EL)" },
+        { value: "paid_leave", label: "Paid Leave (PL)" },
+        { value: "paternity_leave", label: "Paternity Leave (PTL)" },
+      ]);
+    });
+}, [employee_id]);
+
+
+
+
+
+
 
   // Fetch leave balance data
   useEffect(() => {
@@ -102,9 +113,7 @@ function LeaveCalendar() {
           setLeaveBalance(res.data.leave_balance);
         }
       })
-      .catch((err) => {
-        console.error("Error fetching leave balance:", err);
-      });
+     
   }, [employee_id]);
 
   // Submit leave request
@@ -165,15 +174,29 @@ function LeaveCalendar() {
       showNotification("Leave Request Submitted!", "success");
       
       // Refresh leave balance after successful submission
-      axios.get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`)
-        .then((res) => {
-          if (res.data.leave_balance) {
-            setLeaveBalance(res.data.leave_balance);
-          }
-        })
-        .catch((err) => {
-          console.error("Error refreshing leave balance:", err);
-        });
+     axios
+  .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`)
+  .then((res) => {
+
+    // 1️⃣ Set leave balance
+    if (res.data.leave_balance) {
+      setLeaveBalance(res.data.leave_balance);
+    }
+
+    // 2️⃣ Get leave history list
+    const history = res.data.leave_history || [];
+
+    // 3️⃣ Check if any leave is still pending
+    const hasPending = history.some((item) =>
+      item.status?.toLowerCase() === "pending"
+    );
+
+    setIsLeavePending(hasPending); // Save final result
+  })
+  .catch((err) => {
+    console.error("Error refreshing leave balance:", err);
+  });
+
     } catch (err) {
       console.error("SUBMIT ERROR ===>", err.response || err);
 
@@ -309,20 +332,30 @@ function LeaveCalendar() {
 
               <form onSubmit={handleSubmitRequest}>
                 {/* Leave Type */}
-                <div>
-                  <label>Leave Type</label>
-                  <select 
-                    value={leaveType} 
-                    onChange={(e) => setLeaveType(e.target.value)} 
-                    className="form-control"
-                  >
-                    {options.map((opt, idx) => (
-                      <option key={idx} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+   <div>
+  <label>Leave Type</label>
+
+  <select
+    value={leaveType}
+    onChange={(e) => setLeaveType(e.target.value)}
+    className="form-control"
+    disabled={isLeavePending}   // 🔥 disable when pending
+  >
+    {options.map((opt, idx) => (
+      <option key={idx} value={opt.value}>
+        {opt.label}
+      </option>
+    ))}
+  </select>
+
+  {isLeavePending && (
+    <p style={{ color: "red", marginTop: "5px" }}>
+      You already have a leave request pending approval.
+    </p>
+  )}
+</div>
+
+
 
                 {/* Duration - ONLY FOR CASUAL LEAVE */}
                 {leaveType === "casual_leave" && (
@@ -350,13 +383,22 @@ function LeaveCalendar() {
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={isSubmitting || selectedDates.length === 0}
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Request"}
-                </button>
+              <button
+  type="submit"
+  className="submit-btn"
+  disabled={
+    isSubmitting || 
+    selectedDates.length === 0 || 
+    hasPending
+  }
+>
+  {hasPending 
+    ? "Pending Leave Exists" 
+    : isSubmitting 
+      ? "Submitting..." 
+      : "Submit Request"}
+</button>
+
               </form>
             </div>
           )}
