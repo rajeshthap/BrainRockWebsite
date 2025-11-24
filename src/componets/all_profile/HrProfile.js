@@ -6,11 +6,9 @@ import HrHeader from "../hr_dashboard/HrHeader";
 import { AuthContext } from "../context/AuthContext";
 import { FaCamera } from "react-icons/fa";
 import axios from "axios";
-
 import { FaRegFile, FaIdCard } from "react-icons/fa";
 import { GrDocumentText } from "react-icons/gr";
 import { PiCertificate } from "react-icons/pi";
-
 
 const HrProfile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -25,43 +23,47 @@ const HrProfile = () => {
   const [empId, setEmpId] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [profilePreview, setProfilePreview] = useState(null);
+  const [newCertificates, setNewCertificates] = useState([]);
+  const [deletedCertificates, setDeletedCertificates] = useState([]);
+  const [replacedCertificates, setReplacedCertificates] = useState({});
 
-  //  FIXED axios instance – must send cookies
+  // FIXED axios instance – must send cookies
   const axiosInstance = axios.create({
     baseURL: `${BASE_URL}/api/`,
     withCredentials: true,
   });
 
-
   // FETCH EMPLOYEE DETAILS
-
   useEffect(() => {
     if (!user || !user.unique_id) {
-      console.log(" user.unique_id not available yet");
+      console.log("user.unique_id not available yet");
       return;
     }
 
-    console.log(" Fetching with emp_id:", user.unique_id);
+    console.log("Fetching with emp_id:", user.unique_id);
 
     axiosInstance
-      .get(`employee-details/?emp_id=${user.unique_id}`) //  FIXED
+      .get(`employee-details/?emp_id=${user.unique_id}`)
       .then((res) => {
-        console.log(" EMPLOYEE PROFILE RESPONSE:", res.data);
+        console.log("EMPLOYEE PROFILE RESPONSE:", res.data);
 
         const empData = res.data;
-        setData(empData);
+        setData({
+          ...empData,
+          experience_certificates: normalizeCertificates(empData.experience_certificates),
+          originalExperience: empData.experience_certificates || [],
+        });
 
-        setEmpId(empData.emp_id); // needed for PATCH
+        setEmpId(empData.emp_id);
 
         if (empData.profile_photo) {
           setProfilePreview(getFullUrl(empData.profile_photo));
         }
       })
       .catch((err) => {
-        console.error("❌ Error fetching EMPLOYEE details:", err);
+        console.error("Error fetching EMPLOYEE details:", err);
       });
   }, [user]);
-
 
   // Convert relative → full URL
   const getFullUrl = (path) => {
@@ -70,13 +72,11 @@ const HrProfile = () => {
     return `${BASE_URL}${path}`;
   };
 
-
   // Input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prev) => ({ ...prev, [name]: value }));
   };
-
 
   // Photo upload
   const handlePhoto = (e) => {
@@ -87,34 +87,171 @@ const HrProfile = () => {
     }
   };
 
-  // PATCH UPDATE
+  const handleExperienceUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setNewCertificates((prev) => [...prev, ...files]);
+  };
+
+  const normalizeCertificates = (certs) => {
+    if (!certs) return [];
+    return certs.map((item) => {
+      if (!item) return null;
+      if (typeof item === "string") return item;
+      if (item?.file instanceof File) return item.file;
+      if (item?.fileURL) return item.fileURL;
+      return null;
+    }).filter(Boolean);
+  };
+
+  const deleteCertificate = (index, isNew = false) => {
+    if (isNew) {
+      setNewCertificates((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      const certToDelete = data.experience_certificates[index];
+      
+      // Add to deleted list if it's a string (existing certificate)
+      if (typeof certToDelete === "string") {
+        setDeletedCertificates((prev) => [...prev, certToDelete]);
+      }
+      
+      // Update the data state
+      const updated = [...data.experience_certificates];
+      updated.splice(index, 1);
+      setData((prev) => ({
+        ...prev,
+        experience_certificates: updated
+      }));
+    }
+  };
+
+  const replaceCertificate = (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const updated = [...data.experience_certificates];
+    const originalPath = updated[index];
+    
+    // If replacing an existing certificate (string), add it to deleted list
+    if (typeof originalPath === "string") {
+      setDeletedCertificates((prev) => [...prev, originalPath]);
+    }
+    
+    // Replace with new file
+    updated[index] = file;
+    
+    setData((prev) => ({
+      ...prev,
+      experience_certificates: updated,
+    }));
+  };
 
   const handleSave = async () => {
     try {
       const formData = new FormData();
-      formData.append("emp_id", empId); // IMPORTANT
-
+      
+      // Employee ID
+      formData.append("emp_id", empId);
+      
+      // BASIC FIELDS
       const editableFields = [
         "email",
         "alternate_phone",
         "emergency_contact_name",
         "emergency_contact_number",
-        "profile_photo",
+        "address",
+        "designation",
+        "department",
+        "reporting_manager",
+        "work_location",
+        "salary",
+        "ifsc_code",
+        "bank_name",
+        "account_number",
       ];
-
+      
       editableFields.forEach((field) => {
-        if (data[field]) formData.append(field, data[field]);
+        if (data[field]) {
+          formData.append(field, data[field]);
+        }
       });
-
-      await axiosInstance.patch(`employee-details/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      
+      // PROFILE PHOTO
+      if (data.profile_photo instanceof File) {
+        formData.append("profile_photo", data.profile_photo);
+      }
+      
+      // EXPERIENCE CERTIFICATES
+      
+      // 1. Existing certificates (only the ones that are still strings and not deleted)
+      const existingCerts = data.experience_certificates.filter(
+        (cert) => typeof cert === "string" && !deletedCertificates.includes(cert)
+      );
+      
+      existingCerts.forEach((cert) => {
+        formData.append("existing_experience_certificates[]", cert);
       });
-
-      alert("Profile updated successfully!");
+      
+      // 2. Deleted certificates
+      deletedCertificates.forEach((cert) => {
+        formData.append("deleted_experience_certificates[]", cert);
+      });
+      
+      // 3. New certificates (files that were added)
+      newCertificates.forEach((file) => {
+        formData.append("experience_certificates[]", file);
+      });
+      
+      // 4. Replaced certificates (files that replaced existing ones)
+      data.experience_certificates.forEach((cert) => {
+        if (cert instanceof File) {
+          formData.append("experience_certificates[]", cert);
+        }
+      });
+      
+      console.log("Sending form data:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": ", pair[1]);
+      }
+      
+      const response = await axiosInstance.patch(
+        `employee-details/`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      
+      console.log("Update response:", response.data);
+      
+      alert("Updated successfully!");
+      
+      // REFRESH DATA
+      const refreshed = await axiosInstance.get(
+        `employee-details/?emp_id=${user.unique_id}`
+      );
+      
+      const empData = refreshed.data;
+      
+      setData({
+        ...empData,
+        experience_certificates: normalizeCertificates(empData.experience_certificates),
+        originalExperience: empData.experience_certificates || [],
+      });
+      
+      if (empData.profile_photo) {
+        setProfilePreview(getFullUrl(empData.profile_photo));
+      }
+      
+      // Reset state
+      setNewCertificates([]);
+      setDeletedCertificates([]);
+      setReplacedCertificates({});
       setEditMode(false);
+      
     } catch (error) {
-      console.error(" Update error:", error);
-      alert("Failed to update profile.");
+      console.error("Update error:", error);
+      console.log("SERVER:", error.response?.data);
+      alert("Update failed: " + (error.response?.data?.error || error.message));
     }
   };
 
@@ -132,9 +269,6 @@ const HrProfile = () => {
   const toCamelLabel = (str) =>
     str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
-  // ==============================
-  // UI
-  // ==============================
   return (
     <div className="dashboard-container">
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -245,9 +379,11 @@ const HrProfile = () => {
                       <Col lg={6} md={6} sm={12} key={field}>
                         <Form.Group className="mb-3">
                           <Form.Label className="br-label">{toCamelLabel(field)}</Form.Label>
-                          <Form.Control 
-                          className="br-form-control"
-                          value={data[field] || ""} disabled />
+                          <Form.Control
+                            className="br-form-control"
+                            value={data[field] || ""} 
+                            disabled 
+                          />
                         </Form.Group>
                       </Col>
                     ))}
@@ -263,7 +399,7 @@ const HrProfile = () => {
                         <Form.Group className="mb-3">
                           <Form.Label className="br-label">{toCamelLabel(field)}</Form.Label>
                           <Form.Control
-                          className="br-form-control"
+                            className="br-form-control"
                             name={field}
                             value={data[field] || ""}
                             disabled={disableField(field)}
@@ -282,16 +418,12 @@ const HrProfile = () => {
                     ].map((doc) => (
                       <Col lg={6} md={6} sm={12} key={doc.key}>
                         <div className="br-doc-box text-center p-3">
-
                           {/* ICON */}
                           <div className="mb-2">{doc.icon}</div>
-
                           <h6 className="fw-bold">{doc.label}</h6>
-
                           <p className="small text-muted">
                             {data[doc.key] ? data[doc.key].split("/").pop() : "No file uploaded"}
                           </p>
-
                           {data[doc.key] && (
                             <Button
                               variant="primary"
@@ -305,7 +437,6 @@ const HrProfile = () => {
                       </Col>
                     ))}
 
-
                     {/* EXPERIENCE CERTIFICATES */}
                     <Col lg={12} className="mt-4">
                       <h5 className="fw-bold">Experience Certificates</h5>
@@ -315,21 +446,44 @@ const HrProfile = () => {
                       data.experience_certificates.map((file, index) => (
                         <Col lg={6} key={index}>
                           <div className="br-doc-box text-center p-3">
-
-                            {/* EXPERIENCE ICON */}
                             <PiCertificate size={40} className="mb-2" />
-
                             <h6 className="fw-bold">Certificate {index + 1}</h6>
-
-                            <p className="small text-muted">{file.split("/").pop()}</p>
-
+                            <p className="small text-muted">
+                              {file instanceof File ? file.name : file.split("/").pop()}
+                            </p>
                             <Button
                               variant="primary"
                               size="sm"
-                              onClick={() => window.open(getFullUrl(file), "_blank")}
+                              onClick={() =>
+                                file instanceof File
+                                  ? window.open(URL.createObjectURL(file), "_blank")
+                                  : window.open(getFullUrl(file), "_blank")
+                              }
                             >
                               View
                             </Button>
+                            {editMode && (
+                              <>
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  className="ms-2"
+                                  onClick={() => deleteCertificate(index, false)}
+                                >
+                                  Delete
+                                </Button>
+                                <div className="mt-2">
+                                  <label className="btn btn-sm btn-outline-primary">
+                                    Replace
+                                    <input
+                                      type="file"
+                                      style={{ display: "none" }}
+                                      onChange={(e) => replaceCertificate(e, index)}
+                                    />
+                                  </label>
+                                </div>
+                              </>
+                            )}
                           </div>
                         </Col>
                       ))
@@ -339,7 +493,38 @@ const HrProfile = () => {
                       </Col>
                     )}
 
+                    {/* NEWLY ADDED CERTIFICATES (Preview before Save) */}
+                    {newCertificates.map((file, index) => (
+                      <Col lg={6} key={`new-${index}`}>
+                        <div className="br-doc-box text-center p-3">
+                          <PiCertificate size={40} className="mb-2" />
+                          <h6 className="fw-bold">New Certificate</h6>
+                          <p className="small text-muted">{file.name}</p>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => deleteCertificate(index, true)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </Col>
+                    ))}
 
+                    {/* UPLOAD BUTTON */}
+                    {editMode && (
+                      <Col lg={12} className="mt-3">
+                        <label className="btn btn-outline-primary w-100">
+                          Add New Certificates
+                          <input
+                            type="file"
+                            multiple
+                            style={{ display: "none" }}
+                            onChange={handleExperienceUpload}
+                          />
+                        </label>
+                      </Col>
+                    )}
                   </Row>
                 </Col>
               </Row>
