@@ -12,8 +12,8 @@ function Header() {
   const navigate = useNavigate();
 
   const handleLoginClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    // Just navigate to the Login route. Avoid preventing default or stopping propagation
+    // which can interfere with navigation in some layouts.
     navigate("/Login");
   };
 
@@ -41,6 +41,7 @@ function Header() {
 
             <li className="header-item">
               <button
+                type="button"
                 onClick={handleLoginClick}
                 className="login-button d-flex align-items-center"
 
@@ -68,6 +69,7 @@ function Header() {
 
             <li className="header-item">
               <button
+                type="button"
                 onClick={handleLoginClick}
                 className="login-button d-flex align-items-center"
                 style={{

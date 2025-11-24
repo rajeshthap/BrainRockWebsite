@@ -90,14 +90,47 @@ function AppContent() {
         <Route path="/DailyAttendance" element={<DailyAttendance />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
 
-      {/* Hr  Payroll */}
-        <Route path="/AddEmployeeForm" element={<AddEmployeeForm />} />
-        <Route path="/PayrollCalculations" element={<PayrollCalculations />} />
-        <Route path="/EmployeeList" element={<EmployeeList />} />
-        {/* <Route path="/MockData" element={<MockData />} /> */}
-        <Route path="/EmployeeList" element={<EmployeeList />} />
-        <Route path="/PayrollCharts" element={<PayrollCharts />} />
-        <Route path="/PayDashBoard" element={<PayDashBoard />} />
+        {/* Hr  Payroll (protected) */}
+        <Route
+          path="/AddEmployeeForm"
+          element={
+            <ProtectedRoute>
+              <AddEmployeeForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/PayrollCalculations"
+          element={
+            <ProtectedRoute>
+              <PayrollCalculations />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/EmployeeList"
+          element={
+            <ProtectedRoute>
+              <EmployeeList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/PayrollCharts"
+          element={
+            <ProtectedRoute>
+              <PayrollCharts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/PayDashBoard"
+          element={
+            <ProtectedRoute>
+              <PayDashBoard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/CompanyProfile" element={<CompanyProfile />} />
         <Route path="/OurTeam" element={<OurTeam />} />
         <Route path="/Careers" element={<Careers />} />
@@ -162,7 +195,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/LeaveManagement"
           element={
             <ProtectedRoute>

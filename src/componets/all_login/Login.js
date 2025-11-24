@@ -34,7 +34,8 @@ export default function Login() {
 
     // If there's a logout function in AuthContext, call it
     if (logout) {
-      logout();
+      // When mounting the Login page, clear auth without navigating.
+      logout({ redirect: false });
     }
   }, []);
 
@@ -43,35 +44,14 @@ export default function Login() {
     if (user) {
       const from = location.state?.from?.pathname;
 
+      // If a redirect origin exists, go there; otherwise always send the user to HrDashBoard
       if (from) {
         navigate(from, { state: { unique_id: user.id }, replace: true });
       } else {
-        // Use the role from the 'user' object for secure redirection
-        switch (user.role?.toLowerCase()) {
-          case "admin":
-            navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
-            break;
-          case "hr":
-            navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
-            break;
-          case "employe":
-            navigate("/EmployeeDashboard", { state: { unique_id: user.id }, replace: true });
-            break;
-          case "client":
-            navigate("/ClientDashboard", { state: { unique_id: user.id }, replace: true });
-            break;
-          case "administrator":
-            navigate("/AdministratorDashboard", { state: { unique_id: user.id }, replace: true });
-            break;
-          case "manager":
-            navigate("/ManagerDashboard", { state: { unique_id: user.id }, replace: true });
-            break;
-          default:
-            navigate("/", { replace: true });
-        }
+        navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
       }
     }
-  }, [user, navigate, location.state]);
+  }, [user, navigate, location]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,10 +68,10 @@ export default function Login() {
       return;
     }
 
-    const success = await login(formData.email_or_phone, formData.password);
+    const result = await login(formData.email_or_phone, formData.password);
 
-    if (!success) {
-      setAlertMessage("Login failed. Please check your credentials.");
+    if (!result || !result.success) {
+      setAlertMessage(result?.error?.message || "Login failed. Please check your credentials.");
       setShowModifyAlert(true);
     }
   };
