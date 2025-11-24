@@ -1,0 +1,54 @@
+/* Calendar container */
+.calendar-wrapper {
+  height: 75vh;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* Legend styling */
+.legend-box {
+  background: #f8f9fa;
+  padding: 8px 15px;
+  border-radius: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.legend-color {
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  border-radius: 3px;
+  margin-right: 6px;
+}
+
+/* Leave balance */
+.leave-balance-box {
+  background: #f3f6ff;
+  border-radius: 10px;
+}
+
+/* Calendar center loader */
+.calendar-loading {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.rbc-btn-group{
+font-size: var(--br-space-300) !important;
+}
+.rbc-toolbar-label{
+    font-size: var(--br-space-350) !important;
+}
+.rbc-month-header{
+font-size: var(--br-space-350) !important;
+}
+.rbc-month-row {
+font-size: 12px;
+}

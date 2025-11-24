@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Card,
-  Table,
-} from "react-bootstrap";
+import { Container, Row, Col, Button, Card, Table } from "react-bootstrap";
 import {
   FaTachometerAlt,
   FaUsers,
@@ -93,8 +86,6 @@ const HrDashBoard = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-
-
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -108,9 +99,8 @@ const HrDashBoard = () => {
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
-      
-        <HrHeader toggleSidebar={toggleSidebar} />
 
+        <HrHeader toggleSidebar={toggleSidebar} />
 
         {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
@@ -147,7 +137,7 @@ const HrDashBoard = () => {
               </span>
               <span className="border-start ps-2">
                 <GiImpactPoint className="br-post-top-icon" />
-              Reward points
+                Reward points
               </span>
               <span className="border-start ps-2">
                 <FaUserCheck className="br-post-top-icon" />
@@ -244,25 +234,19 @@ const HrDashBoard = () => {
                   </div>
                 </div>
               </Card>
-          <TeamMember />
+              <TeamMember />
               <LeaveCalendar />
               <LeaveBalance />
             </Col>
-          
-
-            
           </Row>
           {/* Stats Cards */}
 
           <Row>
             {/* Pie Chart */}
-        
 
             {/* Leave Announcements */}
 
-            <Col lg={4} md={12} sm={12}>
-             
-            </Col>
+            <Col lg={4} md={12} sm={12}></Col>
           </Row>
 
           {/* Existing Table + Quick Actions (same layout) */}

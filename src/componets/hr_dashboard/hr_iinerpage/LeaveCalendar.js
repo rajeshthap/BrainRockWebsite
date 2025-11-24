@@ -178,15 +178,15 @@ const [hasPending, setHasPending] = useState(false);
   .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`)
   .then((res) => {
 
-    // 1️⃣ Set leave balance
+    // 1 Set leave balance
     if (res.data.leave_balance) {
       setLeaveBalance(res.data.leave_balance);
     }
 
-    // 2️⃣ Get leave history list
+    // 2 Get leave history list
     const history = res.data.leave_history || [];
 
-    // 3️⃣ Check if any leave is still pending
+    // 3 Check if any leave is still pending
     const hasPending = history.some((item) =>
       item.status?.toLowerCase() === "pending"
     );
@@ -311,8 +311,6 @@ const [hasPending, setHasPending] = useState(false);
   </div>
 </div>
 
-
-
       {/* Popup Button */}
       <div className="dot-popup leave-clender-heading">
         <div className="tooltip-container" ref={tooltipRef}>
@@ -336,10 +334,10 @@ const [hasPending, setHasPending] = useState(false);
   <label>Leave Type</label>
 
   <select
-    value={leaveType}
-    onChange={(e) => setLeaveType(e.target.value)}
-    className="form-control"
-    disabled={isLeavePending}   // 🔥 disable when pending
+     disabled={hasPending}
+  value={leaveType}
+  onChange={(e) => setLeaveType(e.target.value)}
+   className="form-control"
   >
     {options.map((opt, idx) => (
       <option key={idx} value={opt.value}>
@@ -348,11 +346,12 @@ const [hasPending, setHasPending] = useState(false);
     ))}
   </select>
 
-  {isLeavePending && (
-    <p style={{ color: "red", marginTop: "5px" }}>
-      You already have a leave request pending approval.
+ {hasPending && (
+    <p style={{ color: "red" }}>
+        You already have a pending leave request. Wait for approval.
     </p>
-  )}
+)}
+
 </div>
 
 
@@ -386,11 +385,7 @@ const [hasPending, setHasPending] = useState(false);
               <button
   type="submit"
   className="submit-btn"
-  disabled={
-    isSubmitting || 
-    selectedDates.length === 0 || 
-    hasPending
-  }
+  disabled={isSubmitting || selectedDates.length === 0 || hasPending}
 >
   {hasPending 
     ? "Pending Leave Exists" 

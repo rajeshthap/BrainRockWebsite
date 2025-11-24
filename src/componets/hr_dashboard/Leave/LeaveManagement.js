@@ -26,14 +26,21 @@ import {
 const LeaveManagement = () => {
   const { user } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
+   
   const [loading, setLoading] = useState(false);
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [leaveHistory, setLeaveHistory] = useState([]);
  
- 
+ const [employee, setEmployee] = useState({
+  first_name: "",
+  last_name: "",
+  department: "",
+  phone: "",
+});
+
 
   const employee_id = user?.unique_id;
+  const empId = user?.unique_id;
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const API_URL =
@@ -55,6 +62,38 @@ const LeaveManagement = () => {
       setLoading(false);
     }
   };
+useEffect(() => {
+  const fetchEmployeeData = async () => {
+    try {
+      console.log("Fetching employee details for ID:", employee_id);
+
+      const apiURL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${employee_id}`;
+      console.log("API URL:", apiURL);
+
+      const res = await axios.get(apiURL, { withCredentials: true });
+
+      console.log("Full API Response:", res.data);
+
+      // FIXED: API returns fields directly, not inside res.data.employee
+      const extractedEmployee = {
+        first_name: res.data.first_name || "",
+        last_name: res.data.last_name || "",
+        department: res.data.department || "",
+        phone: res.data.phone || "",
+      };
+
+      console.log("Extracted Employee Data:", extractedEmployee);
+
+      setEmployee(extractedEmployee);
+    } catch (error) {
+      console.error("❌ Error fetching employee details:", error);
+    }
+  };
+
+  fetchEmployeeData();
+}, [employee_id]);
+
+
 
   const getStatusBadge = (status) => {
     if (status === "approved")
@@ -186,10 +225,13 @@ const LeaveManagement = () => {
   <div className="col-md-12 leave-his">
     <h4 className="mb-3">Leave History</h4>
 
-    <table className="temp-rwd-table">
+  <table className="temp-rwd-table">
       <tbody>
         <tr>
           <th>S.No</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Phone</th>
           <th>Leave Type</th>
           <th>Dates</th>
           <th>Days</th>
@@ -202,7 +244,21 @@ const LeaveManagement = () => {
         {leaveHistory.length > 0 ? (
           leaveHistory.map((item, index) => (
             <tr key={item.id}>
-              <td data-th="S.No">{index + 1}</td>
+             <td data-th="S.No">{index + 1}</td>
+
+<td data-th="Name">
+  {employee.first_name} {employee.last_name}
+</td>
+
+<td data-th="Department">
+  {employee.department || "N/A"}
+</td>
+
+<td data-th="Phone">
+  {employee.phone || "N/A"}
+</td>
+
+
               <td data-th="Leave Type">
                 {item.leave_type.replace("_", " ").toUpperCase()}
               </td>
@@ -222,7 +278,7 @@ const LeaveManagement = () => {
           ))
         ) : (
           <tr>
-            <td colSpan="8" className="text-center">
+            <td colSpan="11" className="text-center">
               No leave applications found.
             </td>
           </tr>
