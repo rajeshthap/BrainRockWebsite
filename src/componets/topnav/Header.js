@@ -34,10 +34,7 @@ function Header() {
           </div>
 
           <ul className="d-flex mb-0 list-unstyled br-header">
-            <li className="header-item me-3">
-              <RiUser3Fill className="br-header-icon" />
-              Register
-            </li>
+
 
             <li className="header-item">
               <button
