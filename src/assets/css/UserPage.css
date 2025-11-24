@@ -63,7 +63,7 @@
     font-size: 2.2rem;
     line-height: 1;
     display: inline-block;
-    color: #1973d8;
+    color: var(--awc-white);
     margin-bottom: 15px;
     font-weight: 600;
 }
@@ -396,16 +396,24 @@ a:hover {
 }
 
 .feature-btn i {
-    min-height: 20px;
-    min-width: 20px;
-    line-height: 2rem;
+    width: 20px;
+    /* Explicit width */
+    height: 20px;
+    /* Explicit height */
+    line-height: 20px;
+    /* Match height for vertical centering */
     text-align: center;
     font-size: var(--br-space-300);
     background-color: var(--br-org);
     border-radius: 50%;
     color: var(--br-white);
-
     margin-left: 7px;
+    display: inline-flex;
+    /* Better for centering content */
+    align-items: center;
+    /* Vertical centering */
+    justify-content: center;
+    /* Horizontal centering */
 }
 
 
