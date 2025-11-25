@@ -14,7 +14,7 @@ import SideNav from "../SideNav";
 import "../../../assets/css/attendance.css";
 import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
-import { FaUserCheck, FaUserTimes, FaHourglassHalf } from "react-icons/fa";
+import { FaUserCheck, FaUserTimes, FaHourglassHalf, FaTimesCircle, FaCheckCircle } from "react-icons/fa";
 import {
   FaChild,
   FaFemale,
@@ -97,34 +97,37 @@ const LeaveStatus = () => {
 
         setEmployee(extractedEmployee);
       } catch (error) {
-        console.error("❌ Error fetching employee details:", error);
+        console.error("Error fetching employee details:", error);
       }
     };
 
     fetchEmployeeData();
   }, [employee_id]);
 
+  const isHRorManager =
+    user?.role?.toLowerCase() === "hr" ||
+    user?.role?.toLowerCase() === "manager";
+
   const getStatusBadge = (status) => {
-    if (status === "approved")
+    const s = status?.toLowerCase();
+
+    if (s === "approved")
       return (
         <Badge bg="success" className="status-badge">
-          <FaUserCheck className="me-1" />
-          Approved
+          <FaUserCheck className="me-1" /> Approved
         </Badge>
       );
 
-    if (status === "rejected")
+    if (s === "rejected")
       return (
         <Badge bg="danger" className="status-badge">
-          <FaUserTimes className="me-1" />
-          Rejected
+          <FaUserTimes className="me-1" /> Rejected
         </Badge>
       );
 
     return (
       <Badge bg="warning" className="status-badge">
-        <FaHourglassHalf className="me-1" />
-        Pending
+        <FaHourglassHalf className="me-1" /> Pending
       </Badge>
     );
   };
@@ -193,41 +196,42 @@ const LeaveStatus = () => {
   };
 
   const getActionButton = (leave) => {
-    if (leave.status === "pending") {
+    // If the leave is not pending, don't show any action buttons
+    if (leave.status !== "pending") {
+      return <span>-</span>;
+    }
+    
+    // If HR or Manager is logged in, show Accept and Reject buttons
+    if (isHRorManager) {
       return (
         <div className="action-buttons">
           <Button
-            variant="success"
+            variant="success"  className="suc-st-btn me-2"
             size="sm"
             onClick={() => handleAction(leave, "approve")}
-            className="me-2"
+            
           >
-            Accept
+            <FaCheckCircle className="me-1" />  Accept
           </Button>
           <div className="mt-3">
           <Button
-            variant="danger"
+            variant="danger" className="reject-st-btn"
             size="sm"
             onClick={() => handleAction(leave, "reject")}
-            className="me-2"
           >
-            
-            Reject
-          </Button>
-          </div>
-           <div className="mt-3">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => handleAction(leave, "cancel")}
-          >
-            Cancel
+           <FaTimesCircle className="me-1" />  Reject
           </Button>
           </div>
         </div>
       );
     }
-    return <span>-</span>;
+    
+    // If employee is logged in, show "Pending" status
+    return (
+      <Badge bg="warning" className="status-badge leave-app-pending">
+        <FaHourglassHalf className="me-1  " />Pending
+      </Badge>
+    );
   };
 
   return (
@@ -333,7 +337,7 @@ const LeaveStatus = () => {
                 ================================= */}
                 <Row className="mt-5">
                   <div className="col-md-12 leave-his">
-                    <h4 className="mb-3">Leave History</h4>
+                    <h4 className="mb-3">Leave Request History</h4>
 
                     <table className="temp-rwd-table">
                       <tbody>

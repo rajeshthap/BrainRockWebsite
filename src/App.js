@@ -44,6 +44,7 @@ import Careers from "./componets/pages/aboutus/Careers";
 import ApplyLeaveCalendar from "./componets/hr_dashboard/Leave/ApplyLeaveCalendar";
 import LeaveStatus from "./componets/hr_dashboard/Leave/LeaveStatus";
 import SalaryStructure from "./componets/hr_dashboard/pay_roll/SalaryStructure";
+import LeaveHistory from "./componets/hr_dashboard/Leave/LeaveHistory";
 
 
 function AppContent() {
@@ -67,7 +68,8 @@ function AppContent() {
     "/LeaveManagement",
     "/ApplyLeaveCalendar",
     "/LeaveStatus",
-    "/SalaryStructure"
+    "/SalaryStructure",
+    "/LeaveHistory"
 
   ]);
 
@@ -105,6 +107,15 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/LeaveHistory"
+          element={
+            <ProtectedRoute>
+              < LeaveHistory />
+            </ProtectedRoute>
+          }
+        />
+       
          <Route
           path="/AddEmployeeForm"
           element={
