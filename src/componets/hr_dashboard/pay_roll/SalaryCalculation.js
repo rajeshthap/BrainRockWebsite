@@ -79,6 +79,10 @@ const SalaryCalculation = ({ employee }) => {
     }
   }, [employee]);
 
+  // Placeholder for attendance data - would be fetched from attendance API when available
+  // For now, we'll use 0 absent days since we don't have the attendance data
+  const absentDays = 0; // This would be calculated from attendance data when API is available
+  
   // Use basic salary of 25000 for EL, maternity, and paternity leave calculations
   const basicSalaryForSpecialLeaves = 25000;
   
@@ -115,6 +119,9 @@ const SalaryCalculation = ({ employee }) => {
   // Use the without_pay value from leaveBalance as the authoritative source
   const unpaidLeaveDays = leaveBalance ? leaveBalance.without_pay || 0 : 0;
   
+  // Total days without pay = leave days + absent days
+  const totalWithoutPayDays = unpaidLeaveDays + absentDays;
+  
   // Calculate earned leave days taken (only approved earned_leave)
   const earnedLeaveDaysTaken = leaveHistory.reduce((total, leave) => {
     // Only count approved earned leaves
@@ -125,7 +132,7 @@ const SalaryCalculation = ({ employee }) => {
   }, 0);
   
   // Calculate salary deduction for unpaid leaves (using regular salary)
-  const unpaidLeaveDeduction = unpaidLeaveDays * perDaySalaryRegular;
+  const unpaidLeaveDeduction = totalWithoutPayDays * perDaySalaryRegular;
   
   // Calculate maternity leave deductions (only approved)
   const maternityLeaveDays = leaveHistory.reduce((total, leave) => {
@@ -187,7 +194,7 @@ const SalaryCalculation = ({ employee }) => {
   
   // Calculate days worked in current month
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-  const daysWorked = isProrated ? proratedDays - totalLeaveDays : daysInMonth - totalLeaveDays;
+  const daysWorked = isProrated ? proratedDays - totalLeaveDays - absentDays : daysInMonth - totalLeaveDays - absentDays;
 
   // Get current month to check if it's December (when EL is added)
   const currentMonth = new Date().getMonth();
@@ -244,9 +251,11 @@ const SalaryCalculation = ({ employee }) => {
     { label: "Per Day Salary (Regular)", value: `₹${perDaySalaryRegular.toFixed(2)}`, calculation: `Monthly Salary ÷ 26 days` },
     { label: "Days in Current Month", value: daysInMonth, calculation: "Calendar days" },
     { label: "Total Approved Leave Days", value: totalLeaveDays, calculation: "Sum of all approved leaves" },
+    { label: "Absent Days (No Check-in/Check-out)", value: absentDays, calculation: "Days with missing attendance", warning: true },
     { label: "Without Pay Leave Days", value: unpaidLeaveDays, calculation: "From leave balance" },
+    { label: "Total Without Pay Days", value: totalWithoutPayDays, calculation: `${unpaidLeaveDays} (Leave) + ${absentDays} (Absent)`, danger: true },
     { label: "Earned Leave Days Taken", value: earnedLeaveDaysTaken, calculation: "Count of 'earned leave' taken" },
-    { label: "Without Pay Leave Deduction", value: `-₹${unpaidLeaveDeduction.toFixed(2)}`, calculation: `${unpaidLeaveDays} × ₹${perDaySalaryRegular.toFixed(2)}`, danger: true },
+    { label: "Without Pay Leave Deduction", value: `-₹${unpaidLeaveDeduction.toFixed(2)}`, calculation: `${totalWithoutPayDays} × ₹${perDaySalaryRegular.toFixed(2)}`, danger: true },
     { label: "Earned Leave Deduction", value: "No", calculation: "Earned leaves are not deducted from salary", success: true },
     // Only show maternity leave deduction if gender is female
     ...(gender === 'Female' ? [
@@ -417,20 +426,26 @@ const SalaryCalculation = ({ employee }) => {
                   <strong>New Employees:</strong> Receive prorated salary based on joining date. For example, if you joined on the 15th of the month, your salary will be calculated for the remaining days of that month.<br/>
                   <strong>Inactive Employees:</strong> Receive prorated salary from the 1st of the month to their last working day.
                 </p>
-                <h5>2. Without Pay Leave</h5>
+                <h5>2. Attendance Policy (Future Implementation)</h5>
                 <p>
-                  <strong>Identification:</strong> Any leave with type <Badge bg="danger">without pay</Badge>.<br/>
+                  <strong>Absence Detection:</strong> When both check-in and check-out times are missing for a day, the employee will be marked as <Badge bg="danger">Absent</Badge>.<br/>
+                  <strong>Salary Impact:</strong> Absent days will be treated as "without pay" leave and result in salary deduction.<br/>
+                  <strong>Note:</strong> Attendance tracking is currently being implemented. Once available, absent days will be automatically calculated and deducted.
+                </p>
+                <h5>3. Without Pay Leave</h5>
+                <p>
+                  <strong>Identification:</strong> Any leave with type <Badge bg="danger">without pay</Badge> or days marked as absent.<br/>
                   <strong>Salary Impact:</strong> The salary for these days is <strong>deducted</strong> from your monthly salary. The deduction is calculated based on your actual monthly salary.<br/>
                   <strong>Display:</strong> These leaves are marked as <Badge bg="danger">Yes</Badge> in the "Without Pay" column.
                 </p>
-                <h5>3. Earned Leave (EL)</h5>
+                <h5>4. Earned Leave (EL)</h5>
                 <p>
                   <strong>Identification:</strong> Any leave with type <Badge bg="dark">earned leave</Badge>.<br/>
                   <strong>Salary Impact:</strong> These leaves are <strong>not deducted</strong> from your monthly salary. They are paid leaves.<br/>
                   <strong>Year-End Encashment:</strong> At the end of the financial year (in December), the monetary value of your <strong>remaining EL balance</strong> is added to your salary. This value is calculated using a fixed basic salary of ₹25,000.<br/>
                   <strong>Display:</strong> These leaves are marked as <Badge bg="success">No</Badge> in the "Without Pay" column.
                 </p>
-                 <h5>4. Other Leaves (Maternity, Paternity, etc.)</h5>
+                 <h5>5. Other Leaves (Maternity, Paternity, etc.)</h5>
                 <p>
                   <strong>Maternity Leave:</strong> Calculated based on a fixed basic salary of ₹25,000.<br/>
                   <strong>Paternity Leave:</strong> This is a <strong>fully paid leave</strong> with <strong>no salary deduction</strong>.<br/>

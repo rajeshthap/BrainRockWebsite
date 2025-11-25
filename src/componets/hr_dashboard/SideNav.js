@@ -224,7 +224,7 @@ const menuItems = [
       submenu: [
         {
           label: "Salary Structure",
-          path: "/SalaryCalculation",
+          path: "/SalaryStructure",
           icon: <FaChartLine />,
         },
         {
