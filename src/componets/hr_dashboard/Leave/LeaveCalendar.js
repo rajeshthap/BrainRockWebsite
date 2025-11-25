@@ -98,7 +98,7 @@ function LeaveCalendar() {
           { value: "casual_leave", label: "Casual Leave (CL)" },
           { value: "without_pay", label: "Without Pay (WOP)" },
           { value: "earned_leave", label: "Earned Leave (EL)" },
-          { value: "paid_leave", label: "Paid Leave (PL)" },
+          { value: "medical_leave", label: "Medical Leave" },
           { value: "paternity_leave", label: "Paternity Leave (PTL)" },
         ]);
       });
@@ -131,9 +131,7 @@ function LeaveCalendar() {
 
     try {
       const formattedDates = selectedDates.map((date) =>
-        typeof date === "string"
-          ? date
-          : date.toISOString().split("T")[0]
+        typeof date === "string" ? date : date.toISOString().split("T")[0]
       );
 
       const payload = {
@@ -344,9 +342,7 @@ function LeaveCalendar() {
                     <select
                       disabled={isLeavePending}
                       value={leaveType}
-                      onChange={(e) =>
-                        setLeaveType(e.target.value)
-                      }
+                      onChange={(e) => setLeaveType(e.target.value)}
                       className="form-control"
                     >
                       {options.map((opt, idx) => (
@@ -358,8 +354,8 @@ function LeaveCalendar() {
 
                     {isLeavePending && (
                       <p style={{ color: "red" }}>
-                        You already have a pending leave request.
-                        Wait for approval.
+                        You already have a pending leave request. Wait for
+                        approval.
                       </p>
                     )}
                   </div>
@@ -370,9 +366,7 @@ function LeaveCalendar() {
                       <label>Duration</label>
                       <select
                         value={leave_days}
-                        onChange={(e) =>
-                          setLeave_days(Number(e.target.value))
-                        }
+                        onChange={(e) => setLeave_days(Number(e.target.value))}
                         className="form-control"
                       >
                         <option value={1}>Full Day</option>
@@ -387,9 +381,7 @@ function LeaveCalendar() {
                     <textarea
                       rows={3}
                       value={reason}
-                      onChange={(e) =>
-                        setReason(e.target.value)
-                      }
+                      onChange={(e) => setReason(e.target.value)}
                       className="form-control"
                     />
                   </div>
@@ -436,18 +428,14 @@ function LeaveCalendar() {
               onClickDay={(date) => {
                 const d = date.toISOString().split("T")[0];
                 if (selectedDates.includes(d)) {
-                  setSelectedDates(
-                    selectedDates.filter((x) => x !== d)
-                  );
+                  setSelectedDates(selectedDates.filter((x) => x !== d));
                 } else {
                   setSelectedDates([...selectedDates, d]);
                 }
               }}
               tileClassName={({ date }) => {
                 const d = date.toISOString().split("T")[0];
-                return selectedDates.includes(d)
-                  ? "selected-date"
-                  : "";
+                return selectedDates.includes(d) ? "selected-date" : "";
               }}
             />
           </div>
@@ -461,79 +449,54 @@ function LeaveCalendar() {
           ) : (
             <>
               <div
-                className={`requests-list ${
-                  showAllRequests ? "show-all" : ""
-                }`}
+                className={`requests-list ${showAllRequests ? "show-all" : ""}`}
               >
                 {submittedRequests
-                  .slice(
-                    0,
-                    showAllRequests
-                      ? submittedRequests.length
-                      : 1
-                  )
+                  .slice(0, showAllRequests ? submittedRequests.length : 1)
                   .map((req) => (
                     <div key={req.id} className="request-item">
                       <div className="request-header">
-                        <span
-                          className={`status ${
-                            req.status || "pending"
-                          }`}
-                        >
+                        <span className={`status ${req.status || "pending"}`}>
                           {req.status || "pending"}
                         </span>
-                        <span className="leave-type">
-                          {req.leave_type}
-                        </span>
+                        <span className="leave-type">{req.leave_type}</span>
                       </div>
 
                       <div className="request-dates">
                         {req.dates.length === 1
                           ? formatDate(req.dates[0])
-                          : `${formatDate(
-                              req.dates[0]
-                            )} — ${formatDate(
-                              req.dates[
-                                req.dates.length - 1
-                              ]
+                          : `${formatDate(req.dates[0])} — ${formatDate(
+                              req.dates[req.dates.length - 1]
                             )}`}
                       </div>
 
                       {req.reason && (
                         <div className="request-reason">
-                          <strong>Reason:</strong>{" "}
-                          {req.reason}
+                          <strong>Reason:</strong> {req.reason}
                         </div>
                       )}
 
                       <div className="request-submitted">
-                        Submitted:{" "}
-                        {req.submittedAt.toLocaleDateString()}
+                        Submitted: {req.submittedAt.toLocaleDateString()}
                       </div>
 
                       <div className="request-actions">
                         <Button
-                          onClick={() =>
-                            updateStatus(req.id, "accepted")
-                          }
+                          onClick={() => updateStatus(req.id, "accepted")}
                           className="accept-btn"
                         >
                           Accept
                         </Button>
 
                         <Button
-                          onClick={() =>
-                            updateStatus(req.id, "rejected")
-                          }
+                          onClick={() => updateStatus(req.id, "rejected")}
                           className="reject-btn mx-3"
                         >
                           Reject
                         </Button>
 
                         <Button
-                          onClick={() =>
-                            updateStatus(req.id, "cancelled")
-                          }
+                          onClick={() => updateStatus(req.id, "cancelled")}
                           className="cancel-btn"
                         >
                           Cancel
@@ -545,17 +508,14 @@ function LeaveCalendar() {
 
               {submittedRequests.length > 1 && (
                 <div className="text-end">
-                  
-                  {/* ⭐ ONLY CHANGE: Redirect to LeaveStatus page */}
-                 <button
-  type="button"
-  className="see-all-btn"
-  onClick={() => navigate("/LeaveStatus")}
->
-  See All ({submittedRequests.length})
-</button>
-
-
+                  {/* ONLY CHANGE: Redirect to LeaveStatus page */}
+                  <button
+                    type="button"
+                    className="see-all-btn"
+                    onClick={() => navigate("/LeaveManagement")}
+                  >
+                    See All ({submittedRequests.length})
+                  </button>
                 </div>
               )}
             </>
