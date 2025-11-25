@@ -42,6 +42,7 @@ import CompanyProfile from "./componets/pages/aboutus/CompanyProfile";
 import OurTeam from "./componets/pages/aboutus/OurTeam";
 import Careers from "./componets/pages/aboutus/Careers";
 import ApplyLeaveCalendar from "./componets/hr_dashboard/Leave/ApplyLeaveCalendar";
+import LeaveStatus from "./componets/hr_dashboard/Leave/LeaveStatus";
 
 
 
@@ -64,7 +65,8 @@ function AppContent() {
     "/SalaryCalculation",
     "/EmpList",
     "/LeaveManagement",
-    "/ApplyLeaveCalendar"
+    "/ApplyLeaveCalendar",
+    "/LeaveStatus"
 
   ]);
 
@@ -95,6 +97,14 @@ function AppContent() {
 
         {/* Hr  Payroll (protected) */}
         <Route
+          path="/LeaveStatus"
+          element={
+            <ProtectedRoute>
+              <LeaveStatus />
+            </ProtectedRoute>
+          }
+        />
+         <Route
           path="/AddEmployeeForm"
           element={
             <ProtectedRoute>
