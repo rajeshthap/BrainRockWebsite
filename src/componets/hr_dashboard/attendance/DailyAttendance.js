@@ -32,10 +32,11 @@ const DailyAttendance = () => {
   const [hasCheckedOut, setHasCheckedOut] = useState(false);
   const [todayCheckInTime, setTodayCheckInTime] = useState(null);
   const [weekData, setWeekData] = useState([]); // Will be populated from API
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
   // Date picker related states
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState('week'); // 'day', 'week', 'month'
+  const [viewMode, setViewMode] = useState('day'); // 'day', 'week', 'month'
   const [dateRange, setDateRange] = useState({ start: null, end: null });
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -562,6 +563,9 @@ const DailyAttendance = () => {
           setHasCheckedOut(false);
           setTodayCheckInTime(null);
         }
+        
+        // Set initial data loaded flag
+        setInitialDataLoaded(true);
       } else {
         let errorMessage = "Failed to fetch attendance data";
         try {
@@ -795,7 +799,8 @@ const DailyAttendance = () => {
                     loading ||
                     hasCheckedIn ||
                     !withinTimeWindow ||
-                    hasCheckedOut
+                    hasCheckedOut ||
+                    !initialDataLoaded // Disable until initial data is loaded
                   }
                 >
                   {loading ? 'Processing...' : 'Check In'}
@@ -807,7 +812,8 @@ const DailyAttendance = () => {
                     loading ||
                     !hasCheckedIn ||
                     hasCheckedOut ||
-                    !withinTimeWindow
+                    !withinTimeWindow ||
+                    !initialDataLoaded // Disable until initial data is loaded
                   }
                 >
                   {loading ? 'Processing...' : 'Check Out'}
