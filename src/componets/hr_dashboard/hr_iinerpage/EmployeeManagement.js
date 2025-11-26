@@ -16,11 +16,11 @@ import {
   FaBars,
   FaBell,
   FaUserCircle,
- 
+
   FaCog,
   FaSignOutAlt,
   FaSearch,
- 
+
 
 } from "react-icons/fa";
 
@@ -28,12 +28,22 @@ import SideNav from "../SideNav";
 import axios from "axios";
 import { AiFillEdit } from "react-icons/ai";
 import "../../../assets/css/attendance.css";
+import { Toast, ToastContainer } from "react-bootstrap";
+
 
 
 const EmployeeManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState({});
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    bg: "success",
+  });
+
+
 
   const [notifications, setNotifications] = useState([
     { id: 1, text: "New message from John", time: "2 min ago", read: false },
@@ -180,14 +190,6 @@ const EmployeeManagement = () => {
     withCredentials: true,
   });
 
-  const getFullUrl = (path) => {
-    if (!path) return null;
-    if (path.startsWith("http")) return path;
-
-    let cleanPath = path.startsWith("/") ? path : `/${path}`;
-    if (!cleanPath.startsWith("/media")) cleanPath = `/media${cleanPath}`;
-    return `${baseUrl}${cleanPath}`;
-  };
 
   const toCamelLabel = (str) =>
     str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
@@ -316,10 +318,54 @@ const EmployeeManagement = () => {
     }
   };
 
- 
 
- 
-  
+  const updateEmployeeStatus = async (emp, newStatus) => {
+    const empId = emp.emp_id;
+
+    setStatusUpdating(prev => ({ ...prev, [empId]: true }));
+
+    try {
+      await axiosInstance.patch(
+        "change-employee-status/",
+        {
+          emp_id: empId,
+          is_active: newStatus ? 1 : 0,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      setEmployees(prev =>
+        prev.map(e =>
+          e.emp_id === empId ? { ...e, is_active: newStatus ? 1 : 0 } : e
+        )
+      );
+
+      setToast({
+        show: true,
+        message: `Employee status updated to ${newStatus ? "Active" : "Inactive"}`,
+        bg: "success",
+      });
+
+    } catch (err) {
+      console.error("Failed to change status:", err);
+
+      setToast({
+        show: true,
+        message: "Could not update status. Try again.",
+        bg: "danger",
+      });
+    } finally {
+      setStatusUpdating(prev => ({ ...prev, [empId]: false }));
+    }
+  };
+
+
+
+
+
+
+
+
   return (
     <div className="dashboard-container">
       {/* Sidebar - Hidden on mobile and tablet */}
@@ -385,9 +431,8 @@ const EmployeeManagement = () => {
                       {notifications.map((notif) => (
                         <Dropdown.Item
                           key={notif.id}
-                          className={`notification-item ${
-                            !notif.read ? "unread" : ""
-                          }`}
+                          className={`notification-item ${!notif.read ? "unread" : ""
+                            }`}
                           onClick={() => markAsRead(notif.id)}
                         >
                           <div className="notification-content">
@@ -440,7 +485,7 @@ const EmployeeManagement = () => {
 
           {/* If detail view open show details similar to EmpList's behaviour */}
           {showDetailView && selectedEmployee && loadingDetail && (
-            <div className="d-flex justify-content-center align-items-center" style={{height:200}}>
+            <div className="d-flex justify-content-center align-items-center" style={{ height: 200 }}>
               <Spinner animation="border" />
             </div>
           )}
@@ -457,7 +502,7 @@ const EmployeeManagement = () => {
                   {selectedEmployee.profile_photo ? (
                     <Image src={`${baseUrl}${selectedEmployee.profile_photo}`} roundedCircle width={120} height={120} />
                   ) : (
-                    <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{width:120, height:120, color:'white', fontSize:'1.2rem'}}>
+                    <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{ width: 120, height: 120, color: 'white', fontSize: '1.2rem' }}>
                       {selectedEmployee.first_name?.[0]}{selectedEmployee.last_name?.[0]}
                     </div>
                   )}
@@ -475,109 +520,109 @@ const EmployeeManagement = () => {
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('emp_id')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.emp_id || ''} name="emp_id" onChange={(e)=> setEditableEmployee(prev => ({...prev, emp_id: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.emp_id || ''} name="emp_id" onChange={(e) => setEditableEmployee(prev => ({ ...prev, emp_id: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('first_name')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.first_name || ''} name="first_name" onChange={(e)=> setEditableEmployee(prev => ({...prev, first_name: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.first_name || ''} name="first_name" onChange={(e) => setEditableEmployee(prev => ({ ...prev, first_name: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('last_name')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.last_name || ''} name="last_name" onChange={(e)=> setEditableEmployee(prev => ({...prev, last_name: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.last_name || ''} name="last_name" onChange={(e) => setEditableEmployee(prev => ({ ...prev, last_name: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('email')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.email || ''} name="email" onChange={(e)=> setEditableEmployee(prev => ({...prev, email: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.email || ''} name="email" onChange={(e) => setEditableEmployee(prev => ({ ...prev, email: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('phone')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.phone || ''} name="phone" onChange={(e)=> setEditableEmployee(prev => ({...prev, phone: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.phone || ''} name="phone" onChange={(e) => setEditableEmployee(prev => ({ ...prev, phone: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('alternate_phone')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.alternate_phone || ''} name="alternate_phone" onChange={(e)=> setEditableEmployee(prev => ({...prev, alternate_phone: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.alternate_phone || ''} name="alternate_phone" onChange={(e) => setEditableEmployee(prev => ({ ...prev, alternate_phone: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('department')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.department || ''} name="department" onChange={(e)=> setEditableEmployee(prev => ({...prev, department: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.department || ''} name="department" onChange={(e) => setEditableEmployee(prev => ({ ...prev, department: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('designation')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.designation || ''} name="designation" onChange={(e)=> setEditableEmployee(prev => ({...prev, designation: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.designation || ''} name="designation" onChange={(e) => setEditableEmployee(prev => ({ ...prev, designation: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('joining_date')}</Form.Label>
-                            <Form.Control className="br-form-control" type="date" value={editableEmployee.joining_date || ''} name="joining_date" onChange={(e)=> setEditableEmployee(prev => ({...prev, joining_date: e.target.value}))} />
+                            <Form.Control className="br-form-control" type="date" value={editableEmployee.joining_date || ''} name="joining_date" onChange={(e) => setEditableEmployee(prev => ({ ...prev, joining_date: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('reporting_manager')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.reporting_manager || ''} name="reporting_manager" onChange={(e)=> setEditableEmployee(prev => ({...prev, reporting_manager: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.reporting_manager || ''} name="reporting_manager" onChange={(e) => setEditableEmployee(prev => ({ ...prev, reporting_manager: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('work_location')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.work_location || ''} name="work_location" onChange={(e)=> setEditableEmployee(prev => ({...prev, work_location: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.work_location || ''} name="work_location" onChange={(e) => setEditableEmployee(prev => ({ ...prev, work_location: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('salary')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.salary || ''} name="salary" onChange={(e)=> setEditableEmployee(prev => ({...prev, salary: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.salary || ''} name="salary" onChange={(e) => setEditableEmployee(prev => ({ ...prev, salary: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('bank_name')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.bank_name || ''} name="bank_name" onChange={(e)=> setEditableEmployee(prev => ({...prev, bank_name: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.bank_name || ''} name="bank_name" onChange={(e) => setEditableEmployee(prev => ({ ...prev, bank_name: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('account_number')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.account_number || ''} name="account_number" onChange={(e)=> setEditableEmployee(prev => ({...prev, account_number: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.account_number || ''} name="account_number" onChange={(e) => setEditableEmployee(prev => ({ ...prev, account_number: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('ifsc_code')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.ifsc_code || ''} name="ifsc_code" onChange={(e)=> setEditableEmployee(prev => ({...prev, ifsc_code: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.ifsc_code || ''} name="ifsc_code" onChange={(e) => setEditableEmployee(prev => ({ ...prev, ifsc_code: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('tax_id')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.tax_id || ''} name="tax_id" onChange={(e)=> setEditableEmployee(prev => ({...prev, tax_id: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.tax_id || ''} name="tax_id" onChange={(e) => setEditableEmployee(prev => ({ ...prev, tax_id: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('address')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.address || ''} name="address" onChange={(e)=> setEditableEmployee(prev => ({...prev, address: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.address || ''} name="address" onChange={(e) => setEditableEmployee(prev => ({ ...prev, address: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('emergency_contact_name')}</Form.Label>
-                            <Form.Select className="br-form-control" value={editableEmployee.emergency_contact_name || ''} name="emergency_contact_name" onChange={(e)=> setEditableEmployee(prev => ({...prev, emergency_contact_name: e.target.value}))}>
+                            <Form.Select className="br-form-control" value={editableEmployee.emergency_contact_name || ''} name="emergency_contact_name" onChange={(e) => setEditableEmployee(prev => ({ ...prev, emergency_contact_name: e.target.value }))}>
                               <option value="">Select Relationship</option>
                               <option value="Father">Father</option>
                               <option value="Mother">Mother</option>
@@ -589,31 +634,31 @@ const EmployeeManagement = () => {
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('emergency_contact_number')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.emergency_contact_number || ''} name="emergency_contact_number" onChange={(e)=> setEditableEmployee(prev => ({...prev, emergency_contact_number: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.emergency_contact_number || ''} name="emergency_contact_number" onChange={(e) => setEditableEmployee(prev => ({ ...prev, emergency_contact_number: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('country')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.country || ''} name="country" onChange={(e)=> setEditableEmployee(prev => ({...prev, country: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.country || ''} name="country" onChange={(e) => setEditableEmployee(prev => ({ ...prev, country: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('state')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.state || ''} name="state" onChange={(e)=> setEditableEmployee(prev => ({...prev, state: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.state || ''} name="state" onChange={(e) => setEditableEmployee(prev => ({ ...prev, state: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('city')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.city || ''} name="city" onChange={(e)=> setEditableEmployee(prev => ({...prev, city: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.city || ''} name="city" onChange={(e) => setEditableEmployee(prev => ({ ...prev, city: e.target.value }))} />
                           </Form.Group>
                         </Col>
                         <Col md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="br-label">{toCamelLabel('branch_name')}</Form.Label>
-                            <Form.Control className="br-form-control" value={editableEmployee.branch_name || ''} name="branch_name" onChange={(e)=> setEditableEmployee(prev => ({...prev, branch_name: e.target.value}))} />
+                            <Form.Control className="br-form-control" value={editableEmployee.branch_name || ''} name="branch_name" onChange={(e) => setEditableEmployee(prev => ({ ...prev, branch_name: e.target.value }))} />
                           </Form.Group>
                         </Col>
                       </Row>
@@ -682,119 +727,147 @@ const EmployeeManagement = () => {
 
           {(!showDetailView || !selectedEmployee) && (
             <>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="mb-0">Employee Management</h2>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="mb-0">Employee Management</h2>
 
-              <div className="d-flex align-items-center">
-                <span className="me-2">Filter by Status:</span>
-                <Form.Select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="form-select"
-                  style={{ width: '150px' }}
-                >
-                  <option value="all">All Employees</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </Form.Select>
+                <div className="d-flex align-items-center">
+
+   <Form>
+      <Form.Group  controlId="exampleForm.ControlInput1">
+        <Form.Label className="emp-lable">Filter by Status:</Form.Label>
+          <Form.Select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="form-select emp-dropdown"
+                   
+                  >
+                    <option value="all">All Employees</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </Form.Select>
+      </Form.Group>
+     
+    </Form>
+
+
+                
+               
+                </div>
               </div>
-            </div>
 
-            {/* Connect header search input to searchTerm */}
-            <div className="mb-3">
-              <input
-                type="text"
-                placeholder="Search by name, email, id or phone..."
-                className="search-input w-100 p-2"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
 
-            {loading && (
-              <div className="d-flex justify-content-center"><Spinner animation="border" /></div>
-            )}
 
-            {error && <Alert variant="danger">Failed to load employees: {error}</Alert>}
+              {loading && (
+                <div className="d-flex justify-content-center"><Spinner animation="border" /></div>
+              )}
 
-            {!loading && !error && (
-              <>
-                <Row className="mt-3">
-                  <div className="col-md-12">
-                    <table className="temp-rwd-table">
-                      <tbody>
-                        <tr>
-                          <th>S.No</th>
-                          <th>Photo</th>
-                          <th>Employee ID</th>
-                          <th>Employee Name</th>
-                          <th>Department</th>
-                          <th>Designation</th>
-                          <th>Email</th>
-                          <th>Mobile</th>
-                          <th>Status</th>
-                          <th>Action</th>
-                        </tr>
+              {error && <Alert variant="danger">Failed to load employees: {error}</Alert>}
 
-                        {paginatedEmployees.length > 0 ? (
-                          paginatedEmployees.map((emp, index) => (
-                            <tr key={emp.id}>
-                              <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                              <td data-th="Photo">
-                                {emp.profile_photo ? (
-                                  <Image src={`${baseUrl}${emp.profile_photo}`} roundedCircle width={40} height={40} />
-                                ) : (
-                                  <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', color: 'white', fontSize: '0.8rem' }}>
-                                    {emp.first_name?.[0]}{emp.last_name?.[0]}
-                                  </div>
-                                )}
-                              </td>
-                              <td data-th="Employee ID">{emp.emp_id || "N/A"}</td>
-                              <td data-th="Employee Name">{emp.first_name} {emp.last_name}</td>
-                              <td data-th="Department">{emp.department || "N/A"}</td>
-                              <td data-th="Designation">{emp.designation || "N/A"}</td>
-                              <td data-th="Email">{emp.email || "N/A"}</td>
-                              <td data-th="Mobile">{emp.phone || "N/A"}</td>
-                              <td data-th="Status">
-                                <Badge bg={emp.is_active ? "success" : "secondary"}>
-                                  {emp.is_active ? "Active" : "Inactive"}
-                                </Badge>
-                              </td>
-                              <td data-th="Action">
-                                <Button variant="primary" size="sm" onClick={() => handleView(emp)}>
-                                  <AiFillEdit /> View
-                                </Button>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
+              {!loading && !error && (
+                <>
+                  <Row className="mt-3">
+                    <div className="col-md-12">
+                      <table className="temp-rwd-table">
+                        <tbody>
                           <tr>
-                            <td colSpan="11" className="text-center">No employees found matching your search.</td>
+                            <th>S.No</th>
+                            <th>Photo</th>
+                            <th>Employee ID</th>
+                            <th>Employee Name</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Status</th>
+                            <th>Action</th>
                           </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </Row>
 
-                {allFilteredEmployees.length > itemsPerPage && (
-                  <div className="d-flex justify-content-center mt-4">
-                    <Pagination>
-                      <Pagination.Prev onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
-                      {[...Array(totalPages)].map((_, index) => (
-                        <Pagination.Item key={index + 1} active={index + 1 === currentPage} onClick={() => setCurrentPage(index + 1)}>
-                          {index + 1}
-                        </Pagination.Item>
-                      ))}
-                      <Pagination.Next onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            )}
-          </>
+                          {paginatedEmployees.length > 0 ? (
+                            paginatedEmployees.map((emp, index) => (
+                              <tr key={emp.id}>
+                                <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                                <td data-th="Photo">
+                                  {emp.profile_photo ? (
+                                    <Image src={`${baseUrl}${emp.profile_photo}`} roundedCircle width={40} height={40} />
+                                  ) : (
+                                    <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', color: 'white', fontSize: '0.8rem' }}>
+                                      {emp.first_name?.[0]}{emp.last_name?.[0]}
+                                    </div>
+                                  )}
+                                </td>
+                                <td data-th="Employee ID">{emp.emp_id || "N/A"}</td>
+                                <td data-th="Employee Name">{emp.first_name} {emp.last_name}</td>
+                                <td data-th="Department">{emp.department || "N/A"}</td>
+                                <td data-th="Designation">{emp.designation || "N/A"}</td>
+                                <td data-th="Email">{emp.email || "N/A"}</td>
+                                <td data-th="Mobile">{emp.phone || "N/A"}</td>
+                                <td data-th="Status">
+                                  <Form.Check
+                                    type="switch"
+                                    id={`status-switch-${emp.emp_id}`}
+                                    className="big-switch"
+                                    checked={emp.is_active === 1 || emp.is_active === true}
+                                    disabled={statusUpdating[emp.emp_id]}
+                                    onChange={(e) => updateEmployeeStatus(emp, e.target.checked)}
+                                    label={emp.is_active ? "Active" : "Inactive"}
+                                  />
+
+                                  {statusUpdating[emp.emp_id] && (
+                                    <Spinner animation="border" size="sm" className="ms-2" />
+                                  )}
+                                </td>
+
+
+                                <td data-th="Action">
+                                  <Button variant="primary"
+                                    className="big-edit-btn"
+                                    onClick={() => handleView(emp)}>
+                                    <AiFillEdit /> Edit
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="11" className="text-center">No employees found matching your search.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Row>
+
+                  {allFilteredEmployees.length > itemsPerPage && (
+                    <div className="d-flex justify-content-center mt-4">
+                      <Pagination>
+                        <Pagination.Prev onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+                        {[...Array(totalPages)].map((_, index) => (
+                          <Pagination.Item key={index + 1} active={index + 1 === currentPage} onClick={() => setCurrentPage(index + 1)}>
+                            {index + 1}
+                          </Pagination.Item>
+                        ))}
+                        <Pagination.Next onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
+                      </Pagination>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
 
           )}
+
+          <ToastContainer position="bottom-end" className="p-3">
+            <Toast
+              show={toast.show}
+              onClose={() => setToast({ ...toast, show: false })}
+              delay={3000}
+              autohide
+              bg={toast.bg}
+            >
+              <Toast.Body className="text-white">{toast.message}</Toast.Body>
+            </Toast>
+          </ToastContainer>
+
         </Container>
       </div>
 

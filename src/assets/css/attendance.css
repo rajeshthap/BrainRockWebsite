@@ -1,3 +1,49 @@
+.big-switch .form-check-input {
+  width: 30px !important;
+  height: 15px !important;
+}
+
+.big-switch .form-check-input:checked {
+  background-position: 15px center !important;
+}
+
+/* Optional: Make the label bigger */
+.big-switch .form-check-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.big-edit-btn {
+  padding: 6px 12px !important;
+  font-size: 12px !important;       /* Bigger text */
+  border-radius: 8px !important;    /* Smooth rounded button */
+  display: flex;
+  align-items: center;
+  gap: 6px;                         /* Space between icon & text */
+}
+
+/* Optional: Make the button slightly thicker */
+.big-edit-btn svg {
+  font-size: 12px !important;     /* If your button has an icon */
+}
+.emp-dropdown{
+
+    font-size: 11px;
+    max-width: 125px;
+}
+.emp-lable{
+
+
+      padding-bottom: 0px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 2px;
+ 
+}
+
+
+
 .br-attendance-card {
   border-radius: 14px;
   background: #f8faff;

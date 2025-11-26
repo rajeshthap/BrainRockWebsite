@@ -21,7 +21,7 @@ const HrProfile = () => {
 
   const [data, setData] = useState({});
   const [empId, setEmpId] = useState(null);
-  const [editMode, setEditMode] = useState(false);
+  
   const [profilePreview, setProfilePreview] = useState(null);
   // State to track original filenames for better UX
   const [originalCertificateNames, setOriginalCertificateNames] = useState({});
@@ -134,15 +134,7 @@ const normalizeCertificates = (certs) => {
     .filter(Boolean);
 };
 
-  const deleteCertificate = (index) => {
-    const updated = [...data.experience_certificates];
-    updated.splice(index, 1);
-    setData((prev) => ({
-      ...prev,
-      experience_certificates: updated,
-    }));
-  };
-
+  
   const deleteCertificateFromServer = async (index) => {
   try {
     const response = await axiosInstance.delete(
@@ -185,6 +177,17 @@ const normalizeCertificates = (certs) => {
       ...prev,
       experience_certificates: updated,
     }));
+  };
+
+  const disableField = (fieldName) => {
+    const editable = [
+      "email",
+      "alternate_phone",
+      "emergency_contact_name",
+      "emergency_contact_number",
+      "profile_photo",
+    ];
+    return !editable.includes(fieldName); // Only non-editable fields disabled
   };
 
 
@@ -293,7 +296,7 @@ const normalizeCertificates = (certs) => {
     }
     
     
-    setEditMode(false);
+    
 
   } catch (error) {
     console.error("Update error:", error);
@@ -303,16 +306,7 @@ const normalizeCertificates = (certs) => {
 };
 
  
-  const disableField = (fieldName) => {
-    const editable = [
-      "email",
-      "alternate_phone",
-      "emergency_contact_name",
-      "emergency_contact_number",
-      "profile_photo",
-    ];
-    return !editable.includes(fieldName) || !editMode;
-  };
+ 
 
   const toCamelLabel = (str) =>
     str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
@@ -340,11 +334,7 @@ const normalizeCertificates = (certs) => {
                       width: "150px",
                       height: "150px",
                     }}
-                    onClick={() => {
-                      if (!disableField("profile_photo")) {
-                        fileInputRef.current.click();
-                      }
-                    }}
+                    onClick={() => fileInputRef.current.click()}
                   >
                     <Image
                       src={
@@ -357,12 +347,12 @@ const normalizeCertificates = (certs) => {
                       style={{ border: "2px solid #ddd", objectFit: "cover" }}
                     />
 
-                    {!disableField("profile_photo") && (
+                    
                       <div className="profile-photo-overlay">
                         <FaCamera size={24} />
                         <span>Change Photo</span>
                       </div>
-                    )}
+                    
 
                     <input
                       type="file"
@@ -376,27 +366,15 @@ const normalizeCertificates = (certs) => {
                 {/* RIGHT SIDE FORM */}
                 <Col md={9}>
                   <Row>
-                    {/* EDIT BUTTONS */}
+                
                     <Col lg={12} className="text-end my-3">
-                      {!editMode ? (
-                        <Button onClick={() => setEditMode(true)}>Edit</Button>
-                      ) : (
-                        <>
                           <Button
                             variant="success"
                             onClick={handleSave}
                             className="me-2"
                           >
                             Update
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            onClick={() => setEditMode(false)}
-                          >
-                            Cancel
-                          </Button>
-                        </>
-                      )}
+                          </Button> 
                     </Col>
 
                     {/* REVERTED: NON EDITABLE FIELDS */}
@@ -535,8 +513,7 @@ const normalizeCertificates = (certs) => {
                             >
                               View
                             </Button>
-                            {editMode && (
-                              <>
+                          
                                 <Button
                                   variant="danger"
                                   size="sm"
@@ -556,8 +533,8 @@ const normalizeCertificates = (certs) => {
                                     />
                                   </label>
                                 </div>
-                              </>
-                            )}
+                              
+                          
                           </div>
                         </Col>
                       ))
@@ -568,7 +545,7 @@ const normalizeCertificates = (certs) => {
                     )}
 
                     {/* UPLOAD BUTTON */}
-                    {editMode && (
+                  
                       <Col lg={12} className="mt-3">
                         <label className="btn btn-outline-primary w-100">
                           Add New Certificates
@@ -580,7 +557,7 @@ const normalizeCertificates = (certs) => {
                           />
                         </label>
                       </Col>
-                    )}
+                  
                   </Row>
                 </Col>
               </Row>
