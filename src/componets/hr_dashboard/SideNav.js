@@ -160,7 +160,7 @@ const menuItems = [
        
         {
           label: "Attendance Regularization",
-          path: "/EmployeeManagement",
+          path: "/AttendanceRegularization",
           icon: <FaChartLine />,
         },
         {
