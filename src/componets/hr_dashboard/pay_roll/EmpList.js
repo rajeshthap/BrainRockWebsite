@@ -28,7 +28,7 @@ const EmpList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); 
+  const [itemsPerPage] = useState(3); 
   
   // State for selected employee and salary view
   const [selectedEmployee, setSelectedEmployee] = useState(null);

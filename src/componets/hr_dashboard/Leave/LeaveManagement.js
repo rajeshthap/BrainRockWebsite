@@ -72,12 +72,15 @@ const LeaveManagement = () => {
   useEffect(() => {
     // Only fetch data if user is authenticated
     if (user && employee_id) {
-      fetchLeaveData();
-      if (isHRorManager) {
+      if (activeTab === "myLeaves") {
+        fetchLeaveData();
+      }
+      
+      if (isHRorManager && activeTab === "allLeaves") {
         fetchAllLeaveData();
       }
     }
-  }, [user, employee_id]);
+  }, [user, employee_id, activeTab]);
 
   const fetchLeaveData = async () => {
     if (!API_URL) return;
@@ -183,14 +186,14 @@ const LeaveManagement = () => {
     if (s === "approved")
       return (
         <Badge bg="success" className="status-badge">
-          <FaUserCheck className="me-1" /> Approved
+          <FaUserCheck className="" /> Approved
         </Badge>
       );
 
     if (s === "rejected")
       return (
         <Badge bg="danger" className="status-badge">
-          <FaUserTimes className="me-1" /> Rejected
+          <FaUserTimes className="" /> Rejected
         </Badge>
       );
 
@@ -266,7 +269,7 @@ const LeaveManagement = () => {
         setAllLeaveHistory(updatedHistory);
       }
 
-      alert(
+      showNotification(
         `Leave request ${
           actionType === "approve"
             ? "approved"
@@ -282,8 +285,11 @@ const LeaveManagement = () => {
       setActionType("");
 
       // Refresh data
-      fetchLeaveData();
-      if (isHRorManager) {
+      if (activeTab === "myLeaves") {
+        fetchLeaveData();
+      }
+      
+      if (isHRorManager && activeTab === "allLeaves") {
         fetchAllLeaveData();
       }
     } catch (error) {
@@ -295,9 +301,10 @@ const LeaveManagement = () => {
   };
 
   const getActionButton = (leave) => {
-    if (leave.status !== "pending") return <span>-</span>;
+    // Only show action buttons in the "All Leaves" tab for HR/Manager
+    if (leave.status !== "pending" || activeTab !== "allLeaves") return <span>-</span>;
 
-    if (isHRorManager) {
+    if (isHRorManager && activeTab === "allLeaves") {
       return (
         <div className="action-buttons">
           <Button
@@ -306,7 +313,7 @@ const LeaveManagement = () => {
             size="sm"
             onClick={() => handleAction(leave, "approve")}
           >
-            <FaCheckCircle className="me-1" /> Accept
+            <FaCheckCircle className="" /> Accept
           </Button>
 
           <div className="mt-3">
@@ -323,6 +330,7 @@ const LeaveManagement = () => {
       );
     }
 
+    // For "My Leaves" tab, show only the status badge
     return (
       <Badge bg="warning" className="status-badge leave-app-pending">
         <FaHourglassHalf className="me-1" /> Pending
@@ -436,7 +444,7 @@ const LeaveManagement = () => {
                       <Card className="p-3 shadow-sm leave-card">
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="leave-heading">
-                            <h5>Paid Leave</h5>
+                            <h5>Medical Leave</h5>
                             <h2 className="text-warning">{leaveBalance.paid_leave}</h2>
                           </div>
                           <FaChild className="leave-icon text-warning" />
@@ -483,7 +491,7 @@ const LeaveManagement = () => {
                               <th>Employee Name</th>
                               <th>Casual Leave</th>
                               <th>Earned Leave</th>
-                              <th>Paid Leave</th>
+                              <th>Medical Leave</th>
                               <th>Maternity Leave</th>
                               <th>Paternity Leave</th>
                               <th>Without Pay</th>
@@ -586,7 +594,6 @@ const LeaveManagement = () => {
                         )}
                       </tbody>
                     </table>
-
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
                       <div className="mt-4">

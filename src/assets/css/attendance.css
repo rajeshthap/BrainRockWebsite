@@ -265,7 +265,7 @@ font-weight: 600;
  
 /* Label for mobile view */
 .temp-rwd-table td:before {
-    content: attr(data-th) ": ";
+    content: attr(data-th) "";
     width: 120px;
     display: inline-block;
     font-weight: 600;

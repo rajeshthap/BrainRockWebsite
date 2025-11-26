@@ -8,9 +8,17 @@ import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 // Define valid leave types as provided
-const VALID_LEAVE_TYPES = ['casual_leave', 'earned_leave', 'maternity_leave', 'paternity_leave', 'paid_leave'];
+const VALID_LEAVE_TYPES = [
+  "casual_leave",
+  "earned_leave",
+  "maternity_leave",
+  "paternity_leave",
+  "paid_leave",
+];
 
 function LeaveCalendar() {
+  const navigate = useNavigate();
+
   const [selectedDates, setSelectedDates] = useState([]);
   const [leaveType, setLeaveType] = useState("casual_leave");
   const [reason, setReason] = useState("");
@@ -21,18 +29,16 @@ function LeaveCalendar() {
     message: "",
     type: "",
   });
-  const [userGender, setUserGender] = useState("");
-const [isLeavePending, setIsLeavePending] = useState(false);
-const [hasPending, setHasPending] = useState(false);
 
+  const [userGender, setUserGender] = useState("");
+  const [isLeavePending, setIsLeavePending] = useState(false);
+  const [hasPending, setHasPending] = useState(false);
 
   const [showTooltip, setShowTooltip] = useState(false);
   const [showAllRequests, setShowAllRequests] = useState(false);
-  
+
   const [options, setOptions] = useState([]);
   const [leaveBalance, setLeaveBalance] = useState(null);
-  
-  // Initialize leave_days as a NUMBER
   const [leave_days, setLeave_days] = useState(1);
 
   const tooltipRef = useRef(null);
@@ -43,81 +49,88 @@ const [hasPending, setHasPending] = useState(false);
 
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
-    setTimeout(() => setNotification({ show: false, message: "", type: "" }), 3000);
+    setTimeout(
+      () => setNotification({ show: false, message: "", type: "" }),
+      3000
+    );
   };
 
-  // Set leave_days based on selected leave type
   useEffect(() => {
     if (leaveType === "casual_leave") {
-      setLeave_days(1); // Default for Casual Leave
-    } else if (["earned_leave", "maternity_leave", "paid_leave"].includes(leaveType)) {
-      setLeave_days(1); // Default for other full-day leaves
+      setLeave_days(1);
+    } else if (
+      ["earned_leave", "maternity_leave", "paid_leave"].includes(leaveType)
+    ) {
+      setLeave_days(1);
     }
   }, [leaveType]);
 
- useEffect(() => {
-  if (!employee_id) return;
-
-  axios
-    .get(
-      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`
-    )
-    .then((res) => {
-      const gender = String(res.data.gender).trim().toLowerCase();
-      setUserGender(gender); // save gender
-
-      // base leave options
-      let leaveOptions = [
-        { value: "casual_leave", label: "Casual Leave (CL)" },
-        { value: "without_pay", label: "Without Pay (WOP)" },
-        { value: "earned_leave", label: "Earned Leave (EL)" },
-        { value: "paid_leave", label: "Paid Leave (PL)" },
-        { value: "paternity_leave", label: "Paternity Leave (PTL)" },
-      ];
-
-      // add ML only for female
-      if (gender === "female") {
-        leaveOptions.push({
-          value: "maternity_leave",
-          label: "Maternity Leave (ML)",
-        });
-      }
-
-      setOptions(leaveOptions);
-    })
-    .catch(() => {
-      // fallback default
-      setOptions([
-        { value: "casual_leave", label: "Casual Leave (CL)" },
-        { value: "without_pay", label: "Without Pay (WOP)" },
-        { value: "earned_leave", label: "Earned Leave (EL)" },
-        { value: "paid_leave", label: "Paid Leave (PL)" },
-        { value: "paternity_leave", label: "Paternity Leave (PTL)" },
-      ]);
-    });
-}, [employee_id]);
-
- const navigate = useNavigate();
-
-
-
-
-
-  // Fetch leave balance data
   useEffect(() => {
     if (!employee_id) return;
-    
-    axios.get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`)
+
+    axios
+      .get(
+        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`
+      )
       .then((res) => {
-        console.log("Leave Balance Response:", res.data);
-        if (res.data.leave_balance) {
-          setLeaveBalance(res.data.leave_balance);
+        const gender = String(res.data.gender).trim().toLowerCase();
+        setUserGender(gender);
+
+        let leaveOptions = [
+          { value: "casual_leave", label: "Casual Leave (CL)" },
+          { value: "without_pay", label: "Without Pay (WOP)" },
+          { value: "earned_leave", label: "Earned Leave (EL)" },
+          { value: "paid_leave", label: "Medical Leave (ML)" },
+          { value: "paternity_leave", label: "Paternity Leave (PTL)" },
+        ];
+
+        if (gender === "female") {
+          leaveOptions.push({
+            value: "maternity_leave",
+            label: "Maternity Leave (ML)",
+          });
         }
+
+        setOptions(leaveOptions);
       })
-     
+      .catch(() => {
+        setOptions([
+          { value: "casual_leave", label: "Casual Leave (CL)" },
+          { value: "without_pay", label: "Without Pay (WOP)" },
+          { value: "earned_leave", label: "Earned Leave (EL)" },
+          { value: "medical_leave", label: "Medical Leave" },
+          { value: "paternity_leave", label: "Paternity Leave (PTL)" },
+        ]);
+      });
   }, [employee_id]);
 
-  // Submit leave request
+  // Fetch leave balance
+  useEffect(() => {
+    if (!employee_id) return;
+
+    axios
+      .get(
+        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`
+      )
+      .then((res) => {
+        // Find the current employee in the response
+        const currentEmployee = res.data.employees.find(
+          (emp) => emp.employee === employee_id
+        );
+        
+        if (currentEmployee && currentEmployee.leave_balance) {
+          setLeaveBalance(currentEmployee.leave_balance);
+          
+          // Check for pending leaves
+          const history = currentEmployee.leave_history || [];
+          const hasPending = history.some(
+            (item) => item.status?.toLowerCase() === "pending"
+          );
+          setIsLeavePending(hasPending);
+        }
+      });
+  }, [employee_id]);
+
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
 
@@ -129,8 +142,8 @@ const [hasPending, setHasPending] = useState(false);
     setIsSubmitting(true);
 
     try {
-      const formattedDates = selectedDates.map(date =>
-        typeof date === 'string' ? date : date.toISOString().split("T")[0]
+      const formattedDates = selectedDates.map((date) =>
+        typeof date === "string" ? date : date.toISOString().split("T")[0]
       );
 
       const payload = {
@@ -141,8 +154,6 @@ const [hasPending, setHasPending] = useState(false);
         reason,
         leave_days: Number(leave_days),
       };
-
-      console.log("Payload being sent (stringified):", JSON.stringify(payload));
 
       const response = await axios.post(
         "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-apply/",
@@ -166,46 +177,38 @@ const [hasPending, setHasPending] = useState(false);
 
       setSubmittedRequests([...submittedRequests, newReq]);
 
-      // Reset form
       setSelectedDates([]);
       setReason("");
       setLeave_days(1);
       setShowTooltip(false);
 
       showNotification("Leave Request Submitted!", "success");
-      
-      // Refresh leave balance after successful submission
-     axios
-  .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`)
-  .then((res) => {
 
-    // 1 Set leave balance
-    if (res.data.leave_balance) {
-      setLeaveBalance(res.data.leave_balance);
-    }
-
-    // 2 Get leave history list
-    const history = res.data.leave_history || [];
-
-    // 3 Check if any leave is still pending
-    const hasPending = history.some((item) =>
-      item.status?.toLowerCase() === "pending"
-    );
-
-    setIsLeavePending(hasPending); // Save final result
-  })
-  .catch((err) => {
-    console.error("Error refreshing leave balance:", err);
-  });
-
+      // Refresh leave balance after submission
+      axios
+        .get(
+          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`
+        )
+        .then((res) => {
+          const currentEmployee = res.data.employees.find(
+            (emp) => emp.employee === employee_id
+          );
+          
+          if (currentEmployee && currentEmployee.leave_balance) {
+            setLeaveBalance(currentEmployee.leave_balance);
+          }
+        })
+        .catch((err) => {
+          console.error("Error refreshing leave balance:", err);
+        });
     } catch (err) {
       console.error("SUBMIT ERROR ===>", err.response || err);
 
       if (err.response && err.response.data) {
         const errorData = err.response.data;
         let errorMessage = "Submission failed: ";
-        if (typeof errorData === 'object') {
-          Object.keys(errorData).forEach(field => {
+        if (typeof errorData === "object") {
+          Object.keys(errorData).forEach((field) => {
             errorMessage += `${field}: ${errorData[field].join(", ")} `;
           });
         } else {
@@ -229,39 +232,78 @@ const [hasPending, setHasPending] = useState(false);
     });
   };
 
-  const updateStatus = (id, status) => {
-    setSubmittedRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status } : r))
-    );
+  // Function to handle leave approval/rejection
+  const handleLeaveAction = async (leaveId, action) => {
+    if (role !== "HR") {
+      showNotification("You don't have permission to perform this action", "error");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-approve/",
+        {
+          leave_request_id: leaveId.toString(),
+          action: action === "accepted" ? "approve" : "reject"
+        },
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      // Update the local state
+      setSubmittedRequests((prev) =>
+        prev.map((r) => (r.id === parseInt(leaveId) ? { ...r, status: action } : r))
+      );
+
+      showNotification(`Leave request ${action} successfully`, "success");
+      
+      // Refresh the leave requests
+      fetchLeaveRequests();
+    } catch (err) {
+      console.error("ACTION ERROR ===>", err.response || err);
+      showNotification(`Failed to ${action} leave request`, "error");
+    }
   };
 
-  // Fetch leave history
-  useEffect(() => {
+  // Function to fetch all leave requests
+  const fetchLeaveRequests = () => {
     if (!employee_id) return;
 
     axios
       .get(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`,
+        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`,
         { withCredentials: true }
       )
       .then((res) => {
-        const historyArray = res.data?.leave_history;
+        const currentEmployee = res.data.employees.find(
+          (emp) => emp.employee === employee_id
+        );
+        
+        if (currentEmployee) {
+          const historyArray = currentEmployee.leave_history;
 
-        if (Array.isArray(historyArray)) {
-          const formatted = historyArray.map((item) => ({
-            id: item.id,
-            employee_id: item.employee_id,
-            role: item.role,
-            leave_type: item.leave_type,
-            dates: Array.isArray(item.dates) ? item.dates : [],
-            reason: item.reason,
-            submittedAt: new Date(item.created_at),
-          }));
+          if (Array.isArray(historyArray)) {
+            const formatted = historyArray.map((item) => ({
+              id: item.id,
+              employee_id: item.employee_id,
+              role: item.role,
+              leave_type: item.leave_type,
+              dates: Array.isArray(item.dates) ? item.dates : [],
+              reason: item.reason,
+              status: item.status,
+              submittedAt: new Date(item.created_at),
+            }));
 
-          setSubmittedRequests(formatted);
+            setSubmittedRequests(formatted);
+          }
         }
-      })
-      .catch((err) => console.log("GET Error:", err));
+      });
+  };
+
+  useEffect(() => {
+    fetchLeaveRequests();
   }, [employee_id]);
 
   useEffect(() => {
@@ -276,245 +318,253 @@ const [hasPending, setHasPending] = useState(false);
 
   return (
     <>
-    <div className="leave-calendar-container mt-3">
-      {/* Leave Balance Card */}
-   <div>
-  <label>Leave Balance</label>
-  <div className="leave-balance-box">
-    {leaveBalance ? (
-      <>
-        <strong className="leave-item leave-cl">CL:</strong>
-        <span className="leave-value leave-cl">{leaveBalance.casual_leave ?? 0}</span>
-        |&nbsp;
+      <div className="leave-calendar-container mt-3">
+        {/* Leave Balance Card */}
+        <div>
+          <label>Leave Balance</label>
+          <div className="leave-balance-box">
+            {leaveBalance ? (
+              <>
+                <strong className="leave-item leave-cl">CL:</strong>
+                <span className="leave-value leave-cl">
+                  {leaveBalance.casual_leave ?? 0}
+                </span>
+                |&nbsp;
+                <strong className="leave-item leave-el">EL:</strong>
+                <span className="leave-value leave-el">
+                  {leaveBalance.earned_leave ?? 0}
+                </span>
+                |&nbsp;
+                <strong className="leave-item leave-pl">ML:</strong>
+                <span className="leave-value leave-pl">
+                  {leaveBalance.paid_leave ?? 0}
+                </span>
+                |&nbsp;
+                <strong className="leave-item leave-ml">ML:</strong>
+                <span className="leave-value leave-ml">
+                  {leaveBalance.maternity_leave ?? 0}
+                </span>
+                |&nbsp;
+                <strong className="leave-item leave-ptl">PTL:</strong>
+                <span className="leave-value leave-ptl">
+                  {leaveBalance.paternity_leave ?? 0}
+                </span>
+                |&nbsp;
+                <strong className="leave-item leave-wop">WOP:</strong>
+                <span className="leave-value leave-wop">
+                  {leaveBalance.without_pay ?? 0}
+                </span>
+              </>
+            ) : (
+              "No Balance Found"
+            )}
+          </div>
+        </div>
 
-        <strong className="leave-item leave-el">EL:</strong>
-        <span className="leave-value leave-el">{leaveBalance.earned_leave ?? 0}</span>
-        |&nbsp;
+        {/* Popup Button */}
+        <div className="dot-popup leave-clender-heading">
+          <div className="tooltip-container" ref={tooltipRef}>
+            <button
+              className="tooltip-trigger"
+              onClick={() => setShowTooltip(!showTooltip)}
+            >
+              <span className="dot"></span>
+              <span className="dot"></span>
+              <span className="dot"></span>
+            </button>
 
-        <strong className="leave-item leave-pl">PL:</strong>
-        <span className="leave-value leave-pl">{leaveBalance.paid_leave ?? 0}</span>
-        |&nbsp;
-
-        <strong className="leave-item leave-ml">ML:</strong>
-        <span className="leave-value leave-ml">{leaveBalance.maternity_leave ?? 0}</span>
-        |&nbsp;
-
-        <strong className="leave-item leave-ptl">PTL:</strong>
-        <span className="leave-value leave-ptl">{leaveBalance.paternity_leave ?? 0}</span>
-        |&nbsp;
-
-        <strong className="leave-item leave-wop">WOP:</strong>
-        <span className="leave-value leave-wop">{leaveBalance.wop_leave ?? 0}</span>
-      </>
-    ) : (
-      "No Balance Found"
-    )}
-  </div>
-</div>
-
-      {/* Popup Button */}
-      <div className="dot-popup leave-clender-heading">
-        <div className="tooltip-container" ref={tooltipRef}>
-          <button
-            className="tooltip-trigger"
-            onClick={() => setShowTooltip(!showTooltip)}
-          >
-            <span className="dot"></span><span className="dot"></span><span className="dot"></span>
-          </button>
-
-          {showTooltip && (
-            <div className="tooltip">
-              <div className="tooltip-header">
-                <h3>Submit Leave Request</h3>
-                <button className="close-tooltip" onClick={() => setShowTooltip(false)}>×</button>
-              </div>
-
-              <form onSubmit={handleSubmitRequest}>
-                {/* Leave Type */}
-   <div>
-  <label>Leave Type</label>
-
-  <select
-     disabled={hasPending}
-  value={leaveType}
-  onChange={(e) => setLeaveType(e.target.value)}
-   className="form-control"
-  >
-    {options.map((opt, idx) => (
-      <option key={idx} value={opt.value}>
-        {opt.label}
-      </option>
-    ))}
-  </select>
-
- {hasPending && (
-    <p style={{ color: "red" }}>
-        You already have a pending leave request. Wait for approval.
-    </p>
-)}
-
-</div>
-
-
-
-                {/* Duration - ONLY FOR CASUAL LEAVE */}
-                {leaveType === "casual_leave" && (
-                  <div className="form-group">
-                    <label>Duration</label>
-                    <select
-                      value={leave_days}
-                      onChange={(e) => setLeave_days(Number(e.target.value))}
-                      className="form-control"
-                    >
-                      <option value={1}>Full Day</option>
-                      <option value={0.5}>Half Day (HD)</option>
-                      <option value={0.25}>Short Leave (SL)</option>
-                    </select>
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label>Reason (Optional)</label>
-                  <textarea
-                    rows={3}
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    className="form-control"
-                  />
+            {showTooltip && (
+              <div className="tooltip">
+                <div className="tooltip-header">
+                  <h3>Submit Leave Request</h3>
+                  <button
+                    className="close-tooltip"
+                    onClick={() => setShowTooltip(false)}
+                  >
+                    ×
+                  </button>
                 </div>
 
-              <button
-  type="submit"
-  className="submit-btn"
-  disabled={isSubmitting || selectedDates.length === 0 || hasPending}
->
-  {hasPending 
-    ? "Pending Leave Exists" 
-    : isSubmitting 
-      ? "Submitting..." 
-      : "Submit Request"}
-</button>
+                <form onSubmit={handleSubmitRequest}>
+                  {/* Leave Type */}
+                  <div>
+                    <label>Leave Type</label>
 
-              </form>
-            </div>
-          )}
-        </div>
-    
-<div className="">
-      <h6>Leave Request Calendar</h6>
-      </div>
-      </div>
+                    <select
+                      disabled={isLeavePending}
+                      value={leaveType}
+                      onChange={(e) => setLeaveType(e.target.value)}
+                      className="form-control"
+                    >
+                      {options.map((opt, idx) => (
+                        <option key={idx} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
 
-      {notification.show && (
-        <div className={`notification ${notification.type}`}>
-          {notification.message}
-        </div>
-      )}
-
-      <div className="calendar-section">
-        <div className="calendar-container">
-          <h2>Select Dates</h2>
-
-          <Calendar
-            value={null}
-            selectRange={false}
-            minDate={new Date()}
-            onClickDay={(date) => {
-              const d = date.toISOString().split("T")[0];
-              if (selectedDates.includes(d)) {
-                setSelectedDates(selectedDates.filter((x) => x !== d));
-              } else {
-                setSelectedDates([...selectedDates, d]);
-              }
-            }}
-            tileClassName={({ date }) => {
-              const d = date.toISOString().split("T")[0];
-              return selectedDates.includes(d) ? "selected-date" : "";
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="previous-requests">
-        <h2>Previous Requests</h2>
-
-        {submittedRequests.length === 0 ? (
-          <p>No leave requests submitted yet.</p>
-        ) : (
-          <>
-            <div className={`requests-list ${showAllRequests ? "show-all" : ""}`}>
-              {submittedRequests
-                .slice(0, showAllRequests ? submittedRequests.length : 1)
-                .map((req) => (
-                  <div key={req.id} className="request-item">
-                    <div className="request-header">
-                      <span className={`status ${req.status || "pending"}`}>
-                        {req.status || "pending"}
-                      </span>
-                      <span className="leave-type">{req.leave_type}</span>
-                    </div>
-
-                    <div className="request-dates">
-                      {req.dates.length === 1
-                        ? formatDate(req.dates[0])
-                        : `${formatDate(req.dates[0])} — ${formatDate(
-                            req.dates[req.dates.length - 1]
-                          )}`}
-                    </div>
-
-                    {req.reason && (
-                      <div className="request-reason">
-                        <strong>Reason:</strong> {req.reason}
-                      </div>
-                    )}
-
-                    <div className="request-submitted">
-                      Submitted: {req.submittedAt.toLocaleDateString()}
-                    </div>
-
-                    <div className="request-actions">
-                      <Button onClick={() => updateStatus(req.id, "accepted")} className="accept-btn">
-                        Accept
-                      </Button>
-
-                      <Button
-                        onClick={() => updateStatus(req.id, "rejected")}
-                        className="reject-btn mx-3"
-                      >
-                        Reject
-                      </Button>
-
-                      <Button
-                        onClick={() => updateStatus(req.id, "cancelled")}
-                        className="cancel-btn"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
+                   
                   </div>
-                ))}
-            </div>
 
-            {submittedRequests.length > 1 && (
-              <div className="text-end">
-                 <button
-            type="button"
-            className="see-all-btn"
-            onClick={() => navigate("/LeaveStatus")}
-          >
-            See All ({submittedRequests.length})
-          </button>
+                  {/* Duration */}
+                  {leaveType === "casual_leave" && (
+                    <div className="form-group">
+                      <label>Duration</label>
+                      <select
+                        value={leave_days}
+                        onChange={(e) => setLeave_days(Number(e.target.value))}
+                        className="form-control"
+                      >
+                        <option value={1}>Full Day</option>
+                        <option value={0.5}>Half Day (HD)</option>
+                        <option value={0.25}>Short Leave (SL)</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="form-group">
+                    <label>Reason (Optional)</label>
+                    <textarea
+                      rows={3}
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      className="form-control"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={
+                      isSubmitting ||
+                      selectedDates.length === 0 ||
+                      isLeavePending
+                    }
+                  >
+                    {isLeavePending
+                      ? "Pending Leave Exists"
+                      : isSubmitting
+                      ? "Submitting..."
+                      : "Submit Request"}
+                  </button>
+                </form>
               </div>
             )}
-          </>
+          </div>
+
+          <div className="">
+            <h6>Leave Request Calendar</h6>
+          </div>
+        </div>
+
+        {notification.show && (
+          <div className={`notification ${notification.type}`}>
+            {notification.message}
+          </div>
         )}
+
+        <div className="calendar-section">
+          <div className="calendar-container">
+            <h2>Select Dates</h2>
+
+            <Calendar
+              value={null}
+              selectRange={false}
+              minDate={new Date()}
+              onClickDay={(date) => {
+                const d = date.toISOString().split("T")[0];
+                if (selectedDates.includes(d)) {
+                  setSelectedDates(selectedDates.filter((x) => x !== d));
+                } else {
+                  setSelectedDates([...selectedDates, d]);
+                }
+              }}
+              tileClassName={({ date }) => {
+                const d = date.toISOString().split("T")[0];
+                return selectedDates.includes(d) ? "selected-date" : "";
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="previous-requests">
+          <h2>Previous Requests</h2>
+
+          {submittedRequests.length === 0 ? (
+            <p>No leave requests submitted yet.</p>
+          ) : (
+            <>
+              <div
+                className={`requests-list ${showAllRequests ? "show-all" : ""}`}
+              >
+                {submittedRequests
+                  .slice(0, showAllRequests ? submittedRequests.length : 1)
+                  .map((req) => (
+                    <div key={req.id} className="request-item">
+                      <div className="request-header">
+                        <span className={`status ${req.status || "pending"}`}>
+                          {req.status || "pending"}
+                        </span>
+                        <span className="leave-type">{req.leave_type}</span>
+                      </div>
+
+                      <div className="request-dates">
+                        {req.dates.length === 1
+                          ? formatDate(req.dates[0])
+                          : `${formatDate(req.dates[0])} — ${formatDate(
+                              req.dates[req.dates.length - 1]
+                            )}`}
+                      </div>
+
+                      {req.reason && (
+                        <div className="request-reason">
+                          <strong>Reason:</strong> {req.reason}
+                        </div>
+                      )}
+
+                      <div className="request-submitted">
+                        Submitted: {req.submittedAt.toLocaleDateString()}
+                      </div>
+
+                      {/* Only show action buttons for HR users and only for pending requests */}
+                      {role === "HR" && req.status === "pending" && (
+                        <div className="request-actions">
+                          <Button
+                            onClick={() => handleLeaveAction(req.id, "accepted")}
+                            className="accept-btn"
+                          >
+                            Accept
+                          </Button>
+
+                          <Button
+                            onClick={() => handleLeaveAction(req.id, "rejected")}
+                            className="reject-btn mx-3"
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+
+              {submittedRequests.length > 1 && (
+                <div className="text-end">
+                  {/* ONLY CHANGE: Redirect to LeaveStatus page */}
+                  <button
+                    type="button"
+                    className="see-all-btn"
+                    onClick={() => navigate("/LeaveManagement")}
+                  >
+                    See All ({submittedRequests.length})
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
- 
-
-  </div>
-
-
- </>
+    </>
   );
 }
 
