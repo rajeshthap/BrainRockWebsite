@@ -56,6 +56,7 @@ const LeaveManagement = () => {
 
   const API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`;
   const ALL_API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`;
+  const EMPLOYEE_API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${employee_id}`;
 
   // ========================================
   // NOTIFICATION
@@ -69,18 +70,38 @@ const LeaveManagement = () => {
   // FETCH LEAVE DATA
   // ========================================
   useEffect(() => {
-    fetchLeaveData();
-    if (isHRorManager) {
-      fetchAllLeaveData();
+    // Only fetch data if user is authenticated
+    if (user && employee_id) {
+      fetchLeaveData();
+      if (isHRorManager) {
+        fetchAllLeaveData();
+      }
     }
-  }, []);
+  }, [user, employee_id]);
 
   const fetchLeaveData = async () => {
+    if (!API_URL) return;
+    
     try {
       setLoading(true);
       const response = await axios.get(API_URL);
-      setLeaveBalance(response.data.leave_balance);
-      setLeaveHistory(response.data.leave_history);
+      
+      // Handle API response structure for individual employee
+      if (response.data) {
+        // Extract leave balance and history directly from response
+        setLeaveBalance(response.data.leave_balance);
+        setLeaveHistory(response.data.leave_history || []);
+        
+        // Also set employee name from leave_balance data
+        if (response.data.leave_balance && response.data.leave_balance.employee_name) {
+          const nameParts = response.data.leave_balance.employee_name.split(' ');
+          setEmployee(prev => ({
+            ...prev,
+            first_name: nameParts[0] || prev.first_name,
+            last_name: nameParts.slice(1).join(' ') || prev.last_name,
+          }));
+        }
+      }
       setLoading(false);
     } catch (error) {
       console.error("Error fetching leave data:", error);
@@ -93,29 +114,25 @@ const LeaveManagement = () => {
       setLoading(true);
       const response = await axios.get(ALL_API_URL);
       
-      // Process the data to extract all leave balances and histories
-      if (response.data.employees) {
+      // Process data to extract all leave balances and histories
+      if (response.data && response.data.employees) {
         // For all leave balances
-        setAllLeaveBalances(response.data.employees);
+        const balances = response.data.employees.map(emp => emp.leave_balance);
+        setAllLeaveBalances(balances);
         
-        // For all leave histories, we need to fetch each employee's history
+        // For all leave histories
         const histories = [];
-        for (const emp of response.data.employees) {
-          try {
-            const empHistoryResponse = await axios.get(
-              `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${emp.employee_id}`
-            );
-            if (empHistoryResponse.data.leave_history) {
-              histories.push(...empHistoryResponse.data.leave_history.map(item => ({
+        response.data.employees.forEach(emp => {
+          if (emp.leave_history && emp.leave_history.length > 0) {
+            emp.leave_history.forEach(item => {
+              histories.push({
                 ...item,
-                employee_name: emp.employee_name,
-                employee_id: emp.employee_id
-              })));
-            }
-          } catch (err) {
-            console.error(`Error fetching history for ${emp.employee_id}:`, err);
+                employee_name: emp.leave_balance.employee_name,
+                employee_id: emp.employee
+              });
+            });
           }
-        }
+        });
         setAllLeaveHistory(histories);
       }
       setLoading(false);
@@ -129,26 +146,29 @@ const LeaveManagement = () => {
   // FETCH EMPLOYEE DATA
   // ========================================
   useEffect(() => {
-    const fetchEmployeeData = async () => {
-      try {
-        const apiURL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${employee_id}`;
-        const res = await axios.get(apiURL, { withCredentials: true });
+    if (user && employee_id) {
+      fetchEmployeeData();
+    }
+  }, [user, employee_id]);
 
-        const extractedEmployee = {
-          first_name: res.data.first_name || "",
-          last_name: res.data.last_name || "",
-          department: res.data.department || "",
-          phone: res.data.phone || "",
-        };
+  const fetchEmployeeData = async () => {
+    if (!EMPLOYEE_API_URL) return;
+    
+    try {
+      const res = await axios.get(EMPLOYEE_API_URL, { withCredentials: true });
 
-        setEmployee(extractedEmployee);
-      } catch (error) {
-        console.error("Error fetching employee details:", error);
-      }
-    };
+      const extractedEmployee = {
+        first_name: res.data.first_name || "",
+        last_name: res.data.last_name || "",
+        department: res.data.department || "",
+        phone: res.data.phone || "",
+      };
 
-    fetchEmployeeData();
-  }, [employee_id]);
+      setEmployee(extractedEmployee);
+    } catch (error) {
+      console.error("Error fetching employee details:", error);
+    }
+  };
 
   const isHRorManager =
     user?.role?.toLowerCase() === "hr" ||
@@ -196,10 +216,10 @@ const LeaveManagement = () => {
     try {
       setLoading(true);
 
+      // Convert ID to string to match API requirements
       const payload = {
-       leave_request_id: selectedLeave.id,
+        leave_request_id: String(selectedLeave.id),
         action: actionType,
-        
       };
 
       await axios.post(
@@ -246,7 +266,7 @@ const LeaveManagement = () => {
         setAllLeaveHistory(updatedHistory);
       }
 
-      showNotification(
+      alert(
         `Leave request ${
           actionType === "approve"
             ? "approved"
@@ -331,6 +351,25 @@ const LeaveManagement = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab]);
+
+  // If user is not authenticated, show a message
+  if (!user || !employee_id) {
+    return (
+      <div className="dashboard-container">
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="main-content">
+          <HrHeader toggleSidebar={toggleSidebar} />
+          <Container fluid className="dashboard-body">
+            <div className="br-box-container leave-his">
+              <div className="text-center mt-5">
+                <h3>Please log in to view leave management</h3>
+              </div>
+            </div>
+          </Container>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-container">
@@ -442,7 +481,6 @@ const LeaveManagement = () => {
                             <tr>
                               <th>Employee ID</th>
                               <th>Employee Name</th>
-                              <th>Status</th>
                               <th>Casual Leave</th>
                               <th>Earned Leave</th>
                               <th>Paid Leave</th>
@@ -453,22 +491,14 @@ const LeaveManagement = () => {
                             {allLeaveBalances.length > 0 ? (
                               allLeaveBalances.map((item, index) => (
                                 <tr key={item.id || index}>
-                                  <td>{item.employee_id}</td>
-                                  <td>{item.employee_name}</td>
-                                  <td>
-                                    <Badge 
-                                      bg={item.status === "approved" ? "success" : "warning"}
-                                      className="status-badge"
-                                    >
-                                      {item.status.replace("_", " ").toUpperCase()}
-                                    </Badge>
-                                  </td>
-                                  <td>{item.casual_leave}</td>
-                                  <td>{item.earned_leave}</td>
-                                  <td>{item.paid_leave}</td>
-                                  <td>{item.maternity_leave}</td>
-                                  <td>{item.paternity_leave}</td>
-                                  <td>{item.without_pay}</td>
+                                  <td>{item.employee || "N/A"}</td>
+                                  <td>{item.employee_name || "N/A"}</td>
+                                  <td>{item.casual_leave || "N/A"}</td>
+                                  <td>{item.earned_leave || "N/A"}</td>
+                                  <td>{item.paid_leave || "N/A"}</td>
+                                  <td>{item.maternity_leave || "N/A"}</td>
+                                  <td>{item.paternity_leave || "N/A"}</td>
+                                  <td>{item.without_pay || "N/A"}</td>
                                 </tr>
                               ))
                             ) : (
@@ -516,23 +546,23 @@ const LeaveManagement = () => {
                               <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                               
                               {isHRorManager && activeTab === "allLeaves" && (
-                                <td>{item.employee_name}</td>
+                                <td>{item.employee_name || "N/A"}</td>
                               )}
 
                               <td>
                                 {activeTab === "myLeaves" 
-                                  ? `${employee.first_name} ${employee.last_name}`
-                                  : item.employee_name
+                                  ? `${employee.first_name || ""} ${employee.last_name || ""}`.trim() || "N/A"
+                                  : item.employee_name || "N/A"
                                 }
                               </td>
 
                               <td>{employee.department || "N/A"}</td>
                               <td>{employee.phone || "N/A"}</td>
 
-                              <td>{item.leave_type.replace("_", " ").toUpperCase()}</td>
-                              <td>{item.dates.join(", ")}</td>
-                              <td>{item.leave_days}</td>
-                              <td>{item.reason}</td>
+                              <td>{item.leave_type ? item.leave_type.replace(/_/g, " ").toUpperCase() : "N/A"}</td>
+                              <td>{item.dates && Array.isArray(item.dates) ? item.dates.join(", ") : "N/A"}</td>
+                              <td>{item.leave_days || "N/A"}</td>
+                              <td>{item.reason || "N/A"}</td>
 
                               <td>
                                 <div className="leave-app">
@@ -542,7 +572,7 @@ const LeaveManagement = () => {
 
                               <td>{item.approved_by || "—"}</td>
 
-                              <td>{new Date(item.created_at).toLocaleString()}</td>
+                              <td>{item.created_at ? new Date(item.created_at).toLocaleString() : "N/A"}</td>
 
                               <td>{getActionButton(item)}</td>
                             </tr>
