@@ -210,7 +210,7 @@ const menuItems = [
        
         {
           label: "Leave History",
-          path: "/EmployeeManagement",
+          path: "/LeaveHistory",
           icon: <FaChartLine />,
         },
        

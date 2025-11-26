@@ -127,7 +127,32 @@ body {
   padding: var(--br-space-800);
   margin-bottom: var(--br-space-1000);
 }
+.reject-st-btn{
+  font-size: var(--br-space-250);
+}
+.suc-st-btn{
+  font-size: var(--br-space-250);
+}
+.leave-app-pending{
+    font-size: var(--br-space-250);
+}
+.br-page-no {
+  background-color: #f0f0f0;
+  color: black;
+  border: 1px solid #ccc;
+  margin-right: 8px;
+}
 
+.br-page-no-active {
+  background-color: #0d6efd;
+  color: white;
+  border: 1px solid #0d6efd;
+  margin-right: 8px;
+}
+.pagination-title {
+ color:#0b51b7;
+  font-size: 18px;
+}
 .br-submit-btn {
   background-color: #0b51b7;
   color: #fff;

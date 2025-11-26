@@ -23,9 +23,8 @@ const HrProfile = () => {
   const [empId, setEmpId] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [profilePreview, setProfilePreview] = useState(null);
-  const [newCertificates, setNewCertificates] = useState([]);
-  const [deletedCertificates, setDeletedCertificates] = useState([]);
-  const [replacedCertificates, setReplacedCertificates] = useState({});
+  // State to track original filenames for better UX
+  const [originalCertificateNames, setOriginalCertificateNames] = useState({});
 
   // FIXED axios instance – must send cookies
   const axiosInstance = axios.create({
@@ -51,7 +50,6 @@ const HrProfile = () => {
         setData({
           ...empData,
           experience_certificates: normalizeCertificates(empData.experience_certificates),
-          originalExperience: empData.experience_certificates || [],
         });
 
         setEmpId(empData.emp_id);
@@ -65,12 +63,25 @@ const HrProfile = () => {
       });
   }, [user]);
 
-  // Convert relative → full URL
+  // Convert relative → full URL with cache-busting
   const getFullUrl = (path) => {
     if (!path) return null;
     if (path.startsWith("http")) return path;
-    return `${BASE_URL}${path}`;
+
+    // Ensure path starts with slash
+    let cleanPath = path.startsWith("/") ? path : `/${path}`;
+
+    // If server returned a bare filename or a path missing the media prefix,
+    // normalize it to the media folder used by other document URLs.
+    if (!cleanPath.startsWith("/media")) {
+      // Avoid duplicate // when joining
+      cleanPath = `/media${cleanPath}`;
+    }
+
+    // Add cache-buster
+    return `${BASE_URL}${cleanPath}?t=${Date.now()}`;
   };
+
 
   // Input changes
   const handleChange = (e) => {
@@ -89,55 +100,86 @@ const HrProfile = () => {
 
   const handleExperienceUpload = (e) => {
     const files = Array.from(e.target.files);
-    setNewCertificates((prev) => [...prev, ...files]);
+    // Append new files directly to the main experience_certificates array
+    setData((prev) => ({
+      ...prev,
+      experience_certificates: [...(prev.experience_certificates || []), ...files],
+    }));
   };
 
-  const normalizeCertificates = (certs) => {
-    if (!certs) return [];
-    return certs.map((item) => {
+const normalizeCertificates = (certs) => {
+  if (!certs) return [];
+
+  return certs
+    .map((item) => {
       if (!item) return null;
-      if (typeof item === "string") return item;
-      if (item?.file instanceof File) return item.file;
-      if (item?.fileURL) return item.fileURL;
+
+      if (typeof item === "string") {
+        // Ensure leading slash and that the path lives under /media
+        let pathStr = item.startsWith("/") ? item : `/${item}`;
+        if (!pathStr.startsWith("/media")) {
+          pathStr = `/media${pathStr}`;
+        }
+        return pathStr;
+      }
+
+      if (item instanceof File) return item;
+
+      if (item?.fileURL) {
+        return item.fileURL.startsWith("/") ? item.fileURL : `/${item.fileURL}`;
+      }
+
       return null;
-    }).filter(Boolean);
+    })
+    .filter(Boolean);
+};
+
+  const deleteCertificate = (index) => {
+    const updated = [...data.experience_certificates];
+    updated.splice(index, 1);
+    setData((prev) => ({
+      ...prev,
+      experience_certificates: updated,
+    }));
   };
 
-  const deleteCertificate = (index, isNew = false) => {
-    if (isNew) {
-      setNewCertificates((prev) => prev.filter((_, i) => i !== index));
-    } else {
-      const certToDelete = data.experience_certificates[index];
-      
-      // Add to deleted list if it's a string (existing certificate)
-      if (typeof certToDelete === "string") {
-        setDeletedCertificates((prev) => [...prev, certToDelete]);
-      }
-      
-      // Update the data state
-      const updated = [...data.experience_certificates];
-      updated.splice(index, 1);
-      setData((prev) => ({
-        ...prev,
-        experience_certificates: updated
-      }));
-    }
-  };
+  const deleteCertificateFromServer = async (index) => {
+  try {
+    const response = await axiosInstance.delete(
+      `delete-experience-certificate/?emp_id=${empId}&index=${index}`
+    );
+
+    console.log("Delete Response:", response.data);
+
+    // Remove successfully deleted certificate from UI
+    const updated = [...data.experience_certificates];
+    updated.splice(index, 1);
+
+    setData((prev) => ({
+      ...prev,
+      experience_certificates: updated,
+    }));
+
+    alert("Certificate deleted successfully!");
+
+  } catch (error) {
+    console.error("Delete Error:", error);
+    const serverMsg =
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      error.message;
+
+    alert("Failed to delete certificate: " + serverMsg);
+  }
+};
+
 
   const replaceCertificate = (e, index) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const updated = [...data.experience_certificates];
-    const originalPath = updated[index];
-    
-    // If replacing an existing certificate (string), add it to deleted list
-    if (typeof originalPath === "string") {
-      setDeletedCertificates((prev) => [...prev, originalPath]);
-    }
-    
-    // Replace with new file
-    updated[index] = file;
+    updated[index] = file; // Replace the item at the specific index with the new File object
     
     setData((prev) => ({
       ...prev,
@@ -145,116 +187,122 @@ const HrProfile = () => {
     }));
   };
 
-  const handleSave = async () => {
-    try {
-      const formData = new FormData();
-      
-      // Employee ID
-      formData.append("emp_id", empId);
-      
-      // BASIC FIELDS
-      const editableFields = [
-        "email",
-        "alternate_phone",
-        "emergency_contact_name",
-        "emergency_contact_number",
-        "address",
-        "designation",
-        "department",
-        "reporting_manager",
-        "work_location",
-        "salary",
-        "ifsc_code",
-        "bank_name",
-        "account_number",
-      ];
-      
-      editableFields.forEach((field) => {
-        if (data[field]) {
-          formData.append(field, data[field]);
-        }
-      });
-      
-      // PROFILE PHOTO
-      if (data.profile_photo instanceof File) {
-        formData.append("profile_photo", data.profile_photo);
-      }
-      
-      // EXPERIENCE CERTIFICATES
-      
-      // 1. Existing certificates (only the ones that are still strings and not deleted)
-      const existingCerts = data.experience_certificates.filter(
-        (cert) => typeof cert === "string" && !deletedCertificates.includes(cert)
-      );
-      
-      existingCerts.forEach((cert) => {
-        formData.append("existing_experience_certificates[]", cert);
-      });
-      
-      // 2. Deleted certificates
-      deletedCertificates.forEach((cert) => {
-        formData.append("deleted_experience_certificates[]", cert);
-      });
-      
-      // 3. New certificates (files that were added)
-      newCertificates.forEach((file) => {
-        formData.append("experience_certificates[]", file);
-      });
-      
-      // 4. Replaced certificates (files that replaced existing ones)
-      data.experience_certificates.forEach((cert) => {
-        if (cert instanceof File) {
-          formData.append("experience_certificates[]", cert);
-        }
-      });
-      
-      console.log("Sending form data:");
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ": ", pair[1]);
-      }
-      
-      const response = await axiosInstance.patch(
-        `employee-details/`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      
-      console.log("Update response:", response.data);
-      
-      alert("Updated successfully!");
-      
-      // REFRESH DATA
-      const refreshed = await axiosInstance.get(
-        `employee-details/?emp_id=${user.unique_id}`
-      );
-      
-      const empData = refreshed.data;
-      
-      setData({
-        ...empData,
-        experience_certificates: normalizeCertificates(empData.experience_certificates),
-        originalExperience: empData.experience_certificates || [],
-      });
-      
-      if (empData.profile_photo) {
-        setProfilePreview(getFullUrl(empData.profile_photo));
-      }
-      
-      // Reset state
-      setNewCertificates([]);
-      setDeletedCertificates([]);
-      setReplacedCertificates({});
-      setEditMode(false);
-      
-    } catch (error) {
-      console.error("Update error:", error);
-      console.log("SERVER:", error.response?.data);
-      alert("Update failed: " + (error.response?.data?.error || error.message));
-    }
-  };
 
+ const handleSave = async () => {
+  try {
+    const formData = new FormData();
+
+    // 1. Append the required Employee ID
+    if (empId) {
+      formData.append("emp_id", empId);
+    }
+
+    // 2. Define which fields are editable and which are integers
+    const editableFields = [
+      "email",
+      "alternate_phone",
+      "emergency_contact_name",
+      "emergency_contact_number",
+      "address",
+      "designation",
+      "department",
+      "reporting_manager",
+      "work_location",
+      "salary",
+      "ifsc_code",
+      "bank_name",
+      "account_number",
+    ];
+    
+    const integerFields = ["salary", "account_number", "alternate_phone", "emergency_contact_number"];
+
+    
+    editableFields.forEach((field) => {
+      const value = data[field];
+      if (value !== null && value !== undefined && value !== "") {
+        if (integerFields.includes(field)) {
+          if (!isNaN(Number(value))) {
+            formData.append(field, value);
+          }
+        } else {
+          formData.append(field, value);
+        }
+      }
+    });
+
+    
+    if (data.profile_photo instanceof File) {
+      formData.append("profile_photo", data.profile_photo);
+    }
+
+    
+    data.experience_certificates.forEach((cert, index) => {
+      if (cert instanceof File) {
+        formData.append(`experience_certificates[${index}]`, cert);
+      }
+    });
+
+   
+    const response = await axiosInstance.patch(`employee-details/`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    console.log("Update response:", response.data);
+    alert("Updated successfully!");
+
+    
+    const updatedCertificatesFromServer = response.data.experience_certificates || [];
+
+    // Normalize both old and updated paths so comparison & mapping is consistent.
+    const normalizedUpdated = normalizeCertificates(updatedCertificatesFromServer);
+    const normalizedOld = normalizeCertificates(
+      (data.experience_certificates || []).filter((cert) => typeof cert === "string")
+    );
+
+    const newlyAddedPaths = normalizedUpdated.filter((path) => !normalizedOld.includes(path));
+    
+    const newFileMap = {};
+    let newFileIndex = 0;
+    data.experience_certificates.forEach((cert) => {
+      if (cert instanceof File) {
+        const newPath = newlyAddedPaths[newFileIndex];
+        if (newPath) {
+          newFileMap[newPath] = cert.name;
+        }
+        newFileIndex++;
+      }
+    });
+    setOriginalCertificateNames(prev => ({ ...prev, ...newFileMap }));
+
+   
+    setData((prevData) => ({
+      ...prevData,
+      experience_certificates: normalizedUpdated,
+    }));
+
+    
+    if (data.profile_photo instanceof File) {
+    
+      const timestamp = new Date().getTime();
+      const refreshed = await axiosInstance.get(
+        `employee-details/?emp_id=${user.unique_id}&_t=${timestamp}`
+      );
+      if (refreshed.data.profile_photo) {
+        setProfilePreview(getFullUrl(refreshed.data.profile_photo));
+      }
+    }
+    
+    
+    setEditMode(false);
+
+  } catch (error) {
+    console.error("Update error:", error);
+    const serverError = error.response?.data?.error || error.response?.data?.message || error.message;
+    alert("Update failed: " + serverError);
+  }
+};
+
+ 
   const disableField = (fieldName) => {
     const editable = [
       "email",
@@ -351,7 +399,7 @@ const HrProfile = () => {
                       )}
                     </Col>
 
-                    {/* NON EDITABLE FIELDS */}
+                    {/* REVERTED: NON EDITABLE FIELDS */}
                     {[
                       "first_name",
                       "last_name",
@@ -388,11 +436,10 @@ const HrProfile = () => {
                       </Col>
                     ))}
 
-                    {/* EDITABLE FIELDS */}
+                    {/* REVERTED: EDITABLE FIELDS */}
                     {[
                       "email",
                       "alternate_phone",
-                      "emergency_contact_name",
                       "emergency_contact_number",
                     ].map((field) => (
                       <Col lg={6} md={6} sm={12} key={field}>
@@ -407,7 +454,31 @@ const HrProfile = () => {
                           />
                         </Form.Group>
                       </Col>
-                    ))}
+                      
+                    )
+                    )
+                    } <Col lg={6} md={6} sm={12}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="br-label">
+                          Emergency Contact Name{" "}
+                          <span className="br-span-star">*</span>
+                        </Form.Label>
+                        <Form.Select
+                          className="br-form-control"
+                          name="emergency_contact_name"
+                          value={data.emergency_contact_name || ""}
+                          disabled={disableField("emergency_contact_name")}
+                          onChange={handleChange}
+                          required
+                        >
+                          <option value="">Select Relationship</option>
+                          <option value="Father">Father</option>
+                          <option value="Mother">Mother</option>
+                          <option value="Spouse">Spouse</option>
+                          <option value="Cousin">Cousin</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
 
                     {/* DOCUMENTS */}
                     {[
@@ -418,7 +489,6 @@ const HrProfile = () => {
                     ].map((doc) => (
                       <Col lg={6} md={6} sm={12} key={doc.key}>
                         <div className="br-doc-box text-center p-3">
-                          {/* ICON */}
                           <div className="mb-2">{doc.icon}</div>
                           <h6 className="fw-bold">{doc.label}</h6>
                           <p className="small text-muted">
@@ -449,7 +519,10 @@ const HrProfile = () => {
                             <PiCertificate size={40} className="mb-2" />
                             <h6 className="fw-bold">Certificate {index + 1}</h6>
                             <p className="small text-muted">
-                              {file instanceof File ? file.name : file.split("/").pop()}
+                              {file instanceof File 
+                                ? file.name 
+                                : (originalCertificateNames[file] || file.split("/").pop())
+                              }
                             </p>
                             <Button
                               variant="primary"
@@ -468,13 +541,14 @@ const HrProfile = () => {
                                   variant="danger"
                                   size="sm"
                                   className="ms-2"
-                                  onClick={() => deleteCertificate(index, false)}
+                                  onClick={() => deleteCertificateFromServer(index)}
+
                                 >
                                   Delete
                                 </Button>
                                 <div className="mt-2">
                                   <label className="btn btn-sm btn-outline-primary">
-                                    Replace
+                                    Edit
                                     <input
                                       type="file"
                                       style={{ display: "none" }}
@@ -492,24 +566,6 @@ const HrProfile = () => {
                         <p className="text-muted">No Experience Certificates Uploaded</p>
                       </Col>
                     )}
-
-                    {/* NEWLY ADDED CERTIFICATES (Preview before Save) */}
-                    {newCertificates.map((file, index) => (
-                      <Col lg={6} key={`new-${index}`}>
-                        <div className="br-doc-box text-center p-3">
-                          <PiCertificate size={40} className="mb-2" />
-                          <h6 className="fw-bold">New Certificate</h6>
-                          <p className="small text-muted">{file.name}</p>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => deleteCertificate(index, true)}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      </Col>
-                    ))}
 
                     {/* UPLOAD BUTTON */}
                     {editMode && (
