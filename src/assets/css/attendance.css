@@ -29,14 +29,12 @@
 }
 .emp-dropdown{
 
-    font-size: 11px;
+    font-size: 12px !important;
     max-width: 125px;
 }
 .emp-lable{
-
-
       padding-bottom: 0px;
-    font-size: 11px;
+    font-size: 12px !important;
     font-weight: 600;
     margin-bottom: 2px;
  

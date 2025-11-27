@@ -10,13 +10,16 @@ import {
   Modal,
   Tabs,
   Tab,
+  Form,
+  Dropdown,
+  DropdownButton,
 } from "react-bootstrap";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
 import "../../../assets/css/attendance.css";
 import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
-import { FaUserCheck, FaUserTimes, FaHourglassHalf, FaTimesCircle, FaCheckCircle } from "react-icons/fa";
+import { FaUserCheck, FaUserTimes, FaHourglassHalf, FaTimesCircle, FaCheckCircle, FaSearch, FaFilter } from "react-icons/fa";
 import {
   FaChild,
   FaFemale,
@@ -42,6 +45,11 @@ const LeaveManagement = () => {
     type: "",
   });
   const [activeTab, setActiveTab] = useState("myLeaves");
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [timeFilter, setTimeFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [employee, setEmployee] = useState({
     first_name: "",
@@ -176,6 +184,79 @@ const LeaveManagement = () => {
   const isHRorManager =
     user?.role?.toLowerCase() === "hr" ||
     user?.role?.toLowerCase() === "manager";
+
+  // ========================================
+  // FILTERING LOGIC
+  // ========================================
+  const filterLeaveData = (data) => {
+    let filteredData = [...data];
+    
+    // Filter by status
+    if (statusFilter !== "all") {
+      filteredData = filteredData.filter(item => 
+        item.status?.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+    
+    // Filter by time period
+    if (timeFilter !== "all") {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      filteredData = filteredData.filter(item => {
+        if (!item.created_at) return false;
+        
+        const createdDate = new Date(item.created_at);
+        
+        switch (timeFilter) {
+          case "weekly":
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return createdDate >= weekAgo;
+            
+          case "monthly":
+            const monthAgo = new Date(today);
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            return createdDate >= monthAgo;
+            
+          case "yearly":
+            const yearAgo = new Date(today);
+            yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+            return createdDate >= yearAgo;
+            
+          default:
+            return true;
+        }
+      });
+    }
+    
+    // Filter by search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filteredData = filteredData.filter(item => {
+        // Check employee name
+        if (activeTab === "allLeaves" && item.employee_name) {
+          if (item.employee_name.toLowerCase().includes(term)) return true;
+        }
+        
+        // Check leave type
+        if (item.leave_type && item.leave_type.toLowerCase().includes(term)) return true;
+        
+        // Check reason
+        if (item.reason && item.reason.toLowerCase().includes(term)) return true;
+        
+        // Check dates
+        if (item.dates && Array.isArray(item.dates)) {
+          const datesStr = item.dates.join(", ").toLowerCase();
+          if (datesStr.includes(term)) return true;
+        }
+        
+        return false;
+      });
+    }
+    
+    return filteredData;
+  };
 
   // ========================================
   // STATUS BADGE
@@ -347,18 +428,21 @@ const LeaveManagement = () => {
   // Get current data based on active tab
   const currentData = activeTab === "myLeaves" ? leaveHistory : allLeaveHistory;
   
+  // Apply filters to the data
+  const filteredData = filterLeaveData(currentData);
+  
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
-  const currentRows = currentData.slice(indexOfFirst, indexOfLast);
+  const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
-  const totalPages = Math.ceil(currentData.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
   const goToPage = (page) => setCurrentPage(page);
 
-  // Reset pagination when tab changes
+  // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeTab]);
+  }, [activeTab, statusFilter, timeFilter, searchTerm]);
 
   // If user is not authenticated, show a message
   if (!user || !employee_id) {
@@ -526,74 +610,144 @@ const LeaveManagement = () => {
                 {/* HISTORY TABLE */}
                 <Row className="mt-5">
                   <div className="col-md-12 leave-his">
-                    <h4 className="mb-3">
-                      {activeTab === "myLeaves" ? "My Leave Request History" : "All Leave Requests"}
-                    </h4>
+                    <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                      <h4 className="mb-0">
+                        {activeTab === "myLeaves" ? "My Leave Request History" : "All Leave Requests"}
+                      </h4>
+                      <div className="text-muted emp-lable">
+                        Total: <strong>{filteredData.length}</strong> records
+                      </div>
+                    </div>
 
-                    <table className="temp-rwd-table">
-                      <tbody>
-                        <tr>
-                          <th>S.No</th>
-                          {isHRorManager && activeTab === "allLeaves" && <th>Employee Name</th>}
-                          <th>Name</th>
-                          <th>Department</th>
-                          <th>Phone</th>
-                          <th>Leave Type</th>
-                          <th>Dates</th>
-                          <th>Days</th>
-                          <th>Reason</th>
-                          <th>Status</th>
-                          <th>Approved By</th>
-                          <th>Applied On</th>
-                          <th>Actions</th>
-                        </tr>
+                    {/* FILTERS AND SEARCH */}
+                    <div className="row mb-4">
+                     <div className="row ">
 
-                        {currentRows.length > 0 ? (
-                          currentRows.map((item, index) => (
-                            <tr key={item.id}>
-                              <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                              
-                              {isHRorManager && activeTab === "allLeaves" && (
-                                <td>{item.employee_name || "N/A"}</td>
-                              )}
+  <div className=" mb-2 d-flex justify-content-end">
+    <Form.Group>
+      <Form.Label className="d-flex align-items-center emp-lable">
+        <FaFilter className="me-2" /> Status Filter
+      </Form.Label>
+      <Form.Select  
+        value={statusFilter} 
+        className="emp-dropdown me-2"
+        onChange={(e) => setStatusFilter(e.target.value)}
+      >
+        <option value="all">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </Form.Select>
+    </Form.Group>
+    <div className=" mb-2">
+    <Form.Group>
+      <Form.Label className="d-flex align-items-center emp-lable">
+        <FaCalendarCheck className="me-2" /> Time Period
+      </Form.Label>
+      <Form.Select 
+        className="emp-dropdown"
+        value={timeFilter}
+        onChange={(e) => setTimeFilter(e.target.value)}
+      >
+        <option value="all">All Time</option>
+        <option value="weekly">Last Week</option>
+        <option value="monthly">Last Month</option>
+        <option value="yearly">Last Year</option>
+      </Form.Select>
+    </Form.Group>
+  </div>
+    <div className=" mb-2">
+    <Form.Group>
+      <Form.Label className="d-flex align-items-center emp-lable">
+        <FaSearch className="me-2" /> Search
+      </Form.Label>
+      <Form.Control
+        type="text"
+        placeholder="Search by name, type, reason..."
+        value={searchTerm}
+        className="br-form-control"
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+    </Form.Group>
+  </div>
+  </div>
 
-                              <td>
-                                {activeTab === "myLeaves" 
-                                  ? `${employee.first_name || ""} ${employee.last_name || ""}`.trim() || "N/A"
-                                  : item.employee_name || "N/A"
-                                }
-                              </td>
+  
 
-                              <td>{employee.department || "N/A"}</td>
-                              <td>{employee.phone || "N/A"}</td>
 
-                              <td>{item.leave_type ? item.leave_type.replace(/_/g, " ").toUpperCase() : "N/A"}</td>
-                              <td>{item.dates && Array.isArray(item.dates) ? item.dates.join(", ") : "N/A"}</td>
-                              <td>{item.leave_days || "N/A"}</td>
-                              <td>{item.reason || "N/A"}</td>
 
-                              <td>
-                                <div className="leave-app">
-                                  {getStatusBadge(item.status)}
-                                </div>
-                              </td>
+</div>
 
-                              <td>{item.approved_by || "—"}</td>
+                    </div>
 
-                              <td>{item.created_at ? new Date(item.created_at).toLocaleString() : "N/A"}</td>
-
-                              <td>{getActionButton(item)}</td>
-                            </tr>
-                          ))
-                        ) : (
+                    {/* MOBILE RESPONSIVE TABLE */}
+                    <div className="table-responsive">
+                      <table className="temp-rwd-table">
+                        <tbody>
                           <tr>
-                            <td colSpan={isHRorManager && activeTab === "allLeaves" ? "13" : "12"} className="text-center">
-                              No leave applications found.
-                            </td>
+                            <th>S.No</th>
+                            {isHRorManager && activeTab === "allLeaves" && <th>Employee Name</th>}
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Phone</th>
+                            <th>Leave Type</th>
+                            <th>Dates</th>
+                            <th>Days</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Approved By</th>
+                            <th>Applied On</th>
+                            <th>Actions</th>
                           </tr>
-                        )}
-                      </tbody>
-                    </table>
+
+                          {currentRows.length > 0 ? (
+                            currentRows.map((item, index) => (
+                              <tr key={item.id}>
+                                <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                
+                                {isHRorManager && activeTab === "allLeaves" && (
+                                  <td>{item.employee_name || "N/A"}</td>
+                                )}
+
+                                <td>
+                                  {activeTab === "myLeaves" 
+                                    ? `${employee.first_name || ""} ${employee.last_name || ""}`.trim() || "N/A"
+                                    : item.employee_name || "N/A"
+                                  }
+                                </td>
+
+                                <td>{employee.department || "N/A"}</td>
+                                <td>{employee.phone || "N/A"}</td>
+
+                                <td>{item.leave_type ? item.leave_type.replace(/_/g, " ").toUpperCase() : "N/A"}</td>
+                                <td>{item.dates && Array.isArray(item.dates) ? item.dates.join(", ") : "N/A"}</td>
+                                <td>{item.leave_days || "N/A"}</td>
+                                <td>{item.reason || "N/A"}</td>
+
+                                <td>
+                                  <div className="leave-app">
+                                    {getStatusBadge(item.status)}
+                                  </div>
+                                </td>
+
+                                <td>{item.approved_by || "—"}</td>
+
+                                <td>{item.created_at ? new Date(item.created_at).toLocaleString() : "N/A"}</td>
+
+                                <td>{getActionButton(item)}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={isHRorManager && activeTab === "allLeaves" ? "13" : "12"} className="text-center">
+                                No leave applications found matching your criteria.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
                       <div className="mt-4">

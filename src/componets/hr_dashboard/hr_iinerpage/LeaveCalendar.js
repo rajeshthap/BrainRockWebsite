@@ -391,7 +391,7 @@ function LeaveCalendar() {
                     <label>Leave Type</label>
 
                     <select
-                      disabled={isLeavePending}
+                     
                       value={leaveType}
                       onChange={(e) => setLeaveType(e.target.value)}
                       className="form-control"
@@ -437,13 +437,12 @@ function LeaveCalendar() {
                     className="submit-btn"
                     disabled={
                       isSubmitting ||
-                      selectedDates.length === 0 ||
-                      isLeavePending
+                      selectedDates.length === 0 
+                      
                     }
                   >
-                    {isLeavePending
-                      ? "Pending Leave Exists"
-                      : isSubmitting
+                    {
+                       isSubmitting
                       ? "Submitting..."
                       : "Submit Request"}
                   </button>
