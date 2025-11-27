@@ -33,8 +33,63 @@ const EmpList = () => {
   // State for selected employee and salary view
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showSalaryView, setShowSalaryView] = useState(false);
+  
+  // State for salary structure status
+  const [salaryStatuses, setSalaryStatuses] = useState({});
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  // Function to check salary structure status for all employees
+  const checkAllSalaryStatuses = async () => {
+    try {
+      // Create an array of promises to fetch salary status for all employees
+      const statusPromises = employees.map(emp => 
+        fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-structure/?employee_id=${emp.emp_id}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        }).then(data => {
+          if (data.success && data.data && data.data.length > 0) {
+            // Check if any salary structure is confirmed
+            const confirmedStructure = data.data.find(item => item.status === 'confirmed');
+            return {
+              employeeId: emp.emp_id,
+              status: confirmedStructure ? 'confirmed' : 'unconfirmed'
+            };
+          } else {
+            return {
+              employeeId: emp.emp_id,
+              status: 'unconfirmed'
+            };
+          }
+        }).catch(err => {
+          console.error(`Error checking salary status for ${emp.emp_id}:`, err);
+          return {
+            employeeId: emp.emp_id,
+            status: 'unconfirmed'
+          };
+        })
+      );
+      
+      // Wait for all promises to resolve
+      const statusResults = await Promise.all(statusPromises);
+      
+      // Convert array to object for easier lookup
+      const statusMap = statusResults.reduce((acc, result) => {
+        acc[result.employeeId] = result.status;
+        return acc;
+      }, {});
+      
+      setSalaryStatuses(statusMap);
+    } catch (err) {
+      console.error("Failed to fetch salary statuses:", err);
+    }
+  };
 
   // Fetch data from API
   useEffect(() => {
@@ -70,6 +125,13 @@ const EmpList = () => {
     fetchEmployees();
   }, []);
 
+  // Check salary status for all employees when employees data is loaded
+  useEffect(() => {
+    if (employees.length > 0) {
+      checkAllSalaryStatuses();
+    }
+  }, [employees]);
+
   // Function to handle viewing salary
   const handleViewSalary = (employee) => {
     setSelectedEmployee(employee);
@@ -82,7 +144,7 @@ const EmpList = () => {
     setShowSalaryView(false);
   };
 
-  // Filter employees based on search term and status
+  // Filter employees based on search term, status, and ONLY confirmed salary status
   const allFilteredEmployees = useMemo(() => {
     let filtered = employees;
     
@@ -98,6 +160,12 @@ const EmpList = () => {
       });
     }
     
+    // Apply salary status filter - ONLY SHOW CONFIRMED
+    filtered = filtered.filter(emp => {
+      const empSalaryStatus = salaryStatuses[emp.emp_id];
+      return empSalaryStatus === 'confirmed'; // Only show confirmed employees
+    });
+    
     // Apply search filter
     if (!searchTerm) {
       return filtered;
@@ -111,7 +179,7 @@ const EmpList = () => {
       emp.emp_id?.toLowerCase().includes(lowercasedSearchTerm) ||
       emp.phone?.toLowerCase().includes(lowercasedSearchTerm)
     );
-  }, [employees, searchTerm, statusFilter]);
+  }, [employees, searchTerm, statusFilter, salaryStatuses]);
 
   // Reset page on search or status filter change
   useEffect(() => {
@@ -162,9 +230,9 @@ const EmpList = () => {
         
         <Container fluid className="dashboard-body p-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="mb-0">Employee List</h2>
+            <h2 className="mb-0">Employee List (Confirmed Salary Structure Only)</h2>
             
-            {/* Status Filter Dropdown */}
+            {/* Status Filter Dropdown - Only for active/inactive */}
             <div className="d-flex align-items-center">
               <span className="me-2">Filter by Status:</span>
               <Form.Select 
@@ -200,6 +268,7 @@ const EmpList = () => {
                         <th>Email</th>
                         <th>Mobile</th>
                         <th>Status</th>
+                        <th>Salary Status</th>
                         <th>Action</th>
                       </tr>
  
@@ -227,6 +296,11 @@ const EmpList = () => {
                                 {emp.is_active ? "Active" : "Inactive"}
                               </Badge>
                             </td>
+                            <td data-th="Salary Status">
+                              <Badge bg="success">
+                                Confirmed
+                              </Badge>
+                            </td>
                             <td data-th="Action">
                               <Button 
                                 variant="primary" 
@@ -241,7 +315,7 @@ const EmpList = () => {
                       ) : (
                         <tr>
                           <td colSpan="11" className="text-center">
-                            No employees found matching your search.
+                            No employees with confirmed salary structure found matching your search.
                           </td>
                         </tr>
                       )}
@@ -252,26 +326,28 @@ const EmpList = () => {
               
               {/* --- Pagination Controls --- */}
               {allFilteredEmployees.length > itemsPerPage && (
-                 <div className="d-flex justify-content-center mt-4">
-                    <Pagination>
-                        <Pagination.Prev 
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-                            disabled={currentPage === 1}
-                        />
-                        {[...Array(totalPages)].map((_, index) => (
-                            <Pagination.Item 
-                                key={index + 1} 
-                                active={index + 1 === currentPage}
-                                onClick={() => setCurrentPage(index + 1)}
-                            >
-                                {index + 1}
-                            </Pagination.Item>
-                        ))}
-                        <Pagination.Next 
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
-                            disabled={currentPage === totalPages}
-                        />
-                    </Pagination>
+                <div className="d-flex justify-content-center align-items-center mt-4">
+                  <Pagination>
+                    <Pagination.Prev 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                      disabled={currentPage === 1}
+                    />
+                    
+                    {[...Array(totalPages)].map((_, index) => (
+                      <Pagination.Item 
+                        key={index + 1} 
+                        active={index + 1 === currentPage}
+                        onClick={() => setCurrentPage(index + 1)}
+                      >
+                        {index + 1}
+                      </Pagination.Item>
+                    ))}
+                    
+                    <Pagination.Next 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                      disabled={currentPage === totalPages}
+                    />
+                  </Pagination>
                 </div>
               )}
             </>
