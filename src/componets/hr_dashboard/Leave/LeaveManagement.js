@@ -11,8 +11,7 @@ import {
   Tabs,
   Tab,
   Form,
-  Dropdown,
-  DropdownButton,
+  Pagination,
 } from "react-bootstrap";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
@@ -50,7 +49,7 @@ const LeaveManagement = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [itemsPerPage] = useState(3); 
   const [employee, setEmployee] = useState({
     first_name: "",
     last_name: "",
@@ -423,7 +422,7 @@ const LeaveManagement = () => {
   // PAGINATION
   // ========================================
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
+  const rowsPerPage = 3;
 
   // Get current data based on active tab
   const currentData = activeTab === "myLeaves" ? leaveHistory : allLeaveHistory;
@@ -468,11 +467,42 @@ const LeaveManagement = () => {
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <div className="main-content">
-        <HrHeader toggleSidebar={toggleSidebar} />
+        <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-        <Container fluid className="dashboard-body">
+        <Container fluid className="dashboard-body p-4">
           <div className="br-box-container leave-his">
-            <h4>Leave Management</h4>
+            <div className="d-flex justify-content-between align-items-center mb-4 filter-wrapper mb-4">
+              <h4 className="mb-0">Leave Management</h4>
+              
+              {/* Status Filter Dropdown */}
+              <div className="d-flex align-items-center filter-controls">
+                <span className="me-2 br-label-heading">Filter by Status:</span>
+                <Form.Select 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="form-select br-dropdown"
+                  style={{ width: '150px' }}
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </Form.Select>
+                
+                <span className="me-2 br-label-heading ms-3">Time Period:</span>
+                <Form.Select 
+                  value={timeFilter}
+                  onChange={(e) => setTimeFilter(e.target.value)}
+                  className="br-dropdown"
+                  style={{ width: '150px' }}
+                >
+                  <option value="all">All Time</option>
+                  <option value="weekly">Last Week</option>
+                  <option value="monthly">Last Month</option>
+                  <option value="yearly">Last Year</option>
+                </Form.Select>
+              </div>
+            </div>
 
             {loading ? (
               <div className="text-center mt-5">
@@ -583,14 +613,14 @@ const LeaveManagement = () => {
                             {allLeaveBalances.length > 0 ? (
                               allLeaveBalances.map((item, index) => (
                                 <tr key={item.id || index}>
-                                  <td>{item.employee || "N/A"}</td>
-                                  <td>{item.employee_name || "N/A"}</td>
-                                  <td>{item.casual_leave || "N/A"}</td>
-                                  <td>{item.earned_leave || "N/A"}</td>
-                                  <td>{item.paid_leave || "N/A"}</td>
-                                  <td>{item.maternity_leave || "N/A"}</td>
-                                  <td>{item.paternity_leave || "N/A"}</td>
-                                  <td>{item.without_pay || "N/A"}</td>
+                                  <td data-th="Employee ID">{item.employee || "N/A"}</td>
+                                  <td data-th="Employee Name">{item.employee_name || "N/A"}</td>
+                                  <td data-th="Casual Leave">{item.casual_leave || "N/A"}</td>
+                                  <td data-th="Earned Leave">{item.earned_leave || "N/A"}</td>
+                                  <td data-th="Medical Leave">{item.paid_leave || "N/A"}</td>
+                                  <td data-th="Maternity Leave">{item.maternity_leave || "N/A"}</td>
+                                  <td data-th="Paternity Leave">{item.paternity_leave || "N/A"}</td>
+                                  <td data-th="Without Pay">{item.without_pay || "N/A"}</td>
                                 </tr>
                               ))
                             ) : (
@@ -608,163 +638,105 @@ const LeaveManagement = () => {
                 )}
 
                 {/* HISTORY TABLE */}
-                <Row className="mt-5">
-                  <div className="col-md-12 leave-his">
+                <Row className="mt-3">
+                  <div className="col-md-12">
                     <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
                       <h4 className="mb-0">
                         {activeTab === "myLeaves" ? "My Leave Request History" : "All Leave Requests"}
                       </h4>
-                      <div className="text-muted emp-lable">
-                        Total: <strong>{filteredData.length}</strong> records
+                      <div className=" total-records-box">
+                        Total: <span>{filteredData.length} records</span>
                       </div>
                     </div>
 
-                    {/* FILTERS AND SEARCH */}
-                    <div className="row mb-4">
-                     <div className="row ">
+                    {/* TABLE WITH MOBILE RESPONSIVE STRUCTURE */}
+                    <table className="temp-rwd-table">
+                      <tbody>
+                        <tr>
+                          <th>S.No</th>
+                          {isHRorManager && activeTab === "allLeaves" && <th>Employee Name</th>}
+                          <th>Name</th>
+                          <th>Department</th>
+                          <th>Phone</th>
+                          <th>Leave Type</th>
+                          <th>Dates</th>
+                          <th>Days</th>
+                          <th>Reason</th>
+                          <th>Status</th>
+                          <th>Approved By</th>
+                          <th>Applied On</th>
+                          <th>Actions</th>
+                        </tr>
 
-  <div className=" mb-2 d-flex justify-content-end">
-    <Form.Group>
-      <Form.Label className="d-flex align-items-center emp-lable">
-        <FaFilter className="me-2" /> Status Filter
-      </Form.Label>
-      <Form.Select  
-        value={statusFilter} 
-        className="emp-dropdown me-2"
-        onChange={(e) => setStatusFilter(e.target.value)}
-      >
-        <option value="all">All Status</option>
-        <option value="pending">Pending</option>
-        <option value="approved">Approved</option>
-        <option value="rejected">Rejected</option>
-      </Form.Select>
-    </Form.Group>
-    <div className=" mb-2">
-    <Form.Group>
-      <Form.Label className="d-flex align-items-center emp-lable">
-        <FaCalendarCheck className="me-2" /> Time Period
-      </Form.Label>
-      <Form.Select 
-        className="emp-dropdown"
-        value={timeFilter}
-        onChange={(e) => setTimeFilter(e.target.value)}
-      >
-        <option value="all">All Time</option>
-        <option value="weekly">Last Week</option>
-        <option value="monthly">Last Month</option>
-        <option value="yearly">Last Year</option>
-      </Form.Select>
-    </Form.Group>
-  </div>
-    <div className=" mb-2">
-    <Form.Group>
-      <Form.Label className="d-flex align-items-center emp-lable">
-        <FaSearch className="me-2" /> Search
-      </Form.Label>
-      <Form.Control
-        type="text"
-        placeholder="Search by name, type, reason..."
-        value={searchTerm}
-        className="br-form-control"
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-    </Form.Group>
-  </div>
-  </div>
+                        {currentRows.length > 0 ? (
+                          currentRows.map((item, index) => (
+                            <tr key={item.id}>
+                              <td data-th="S.No">{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                              
+                              {isHRorManager && activeTab === "allLeaves" && (
+                                <td data-th="Employee Name">{item.employee_name || "N/A"}</td>
+                              )}
 
-  
-
-
-
-</div>
-
-                    </div>
-
-                    {/* MOBILE RESPONSIVE TABLE */}
-                    <div className="table-responsive">
-                      <table className="temp-rwd-table">
-                        <tbody>
-                          <tr>
-                            <th>S.No</th>
-                            {isHRorManager && activeTab === "allLeaves" && <th>Employee Name</th>}
-                            <th>Name</th>
-                            <th>Department</th>
-                            <th>Phone</th>
-                            <th>Leave Type</th>
-                            <th>Dates</th>
-                            <th>Days</th>
-                            <th>Reason</th>
-                            <th>Status</th>
-                            <th>Approved By</th>
-                            <th>Applied On</th>
-                            <th>Actions</th>
-                          </tr>
-
-                          {currentRows.length > 0 ? (
-                            currentRows.map((item, index) => (
-                              <tr key={item.id}>
-                                <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                
-                                {isHRorManager && activeTab === "allLeaves" && (
-                                  <td>{item.employee_name || "N/A"}</td>
-                                )}
-
-                                <td>
-                                  {activeTab === "myLeaves" 
-                                    ? `${employee.first_name || ""} ${employee.last_name || ""}`.trim() || "N/A"
-                                    : item.employee_name || "N/A"
-                                  }
-                                </td>
-
-                                <td>{employee.department || "N/A"}</td>
-                                <td>{employee.phone || "N/A"}</td>
-
-                                <td>{item.leave_type ? item.leave_type.replace(/_/g, " ").toUpperCase() : "N/A"}</td>
-                                <td>{item.dates && Array.isArray(item.dates) ? item.dates.join(", ") : "N/A"}</td>
-                                <td>{item.leave_days || "N/A"}</td>
-                                <td>{item.reason || "N/A"}</td>
-
-                                <td>
-                                  <div className="leave-app">
-                                    {getStatusBadge(item.status)}
-                                  </div>
-                                </td>
-
-                                <td>{item.approved_by || "—"}</td>
-
-                                <td>{item.created_at ? new Date(item.created_at).toLocaleString() : "N/A"}</td>
-
-                                <td>{getActionButton(item)}</td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan={isHRorManager && activeTab === "allLeaves" ? "13" : "12"} className="text-center">
-                                No leave applications found matching your criteria.
+                              <td data-th="Name">
+                                {activeTab === "myLeaves" 
+                                  ? `${employee.first_name || ""} ${employee.last_name || ""}`.trim() || "N/A"
+                                  : item.employee_name || "N/A"
+                                }
                               </td>
+
+                              <td data-th="Department">{employee.department || "N/A"}</td>
+                              <td data-th="Phone">{employee.phone || "N/A"}</td>
+
+                              <td data-th="Leave Type">{item.leave_type ? item.leave_type.replace(/_/g, " ").toUpperCase() : "N/A"}</td>
+                              <td data-th="Dates">{item.dates && Array.isArray(item.dates) ? item.dates.join(", ") : "N/A"}</td>
+                              <td data-th="Days">{item.leave_days || "N/A"}</td>
+                              <td data-th="Reason">{item.reason || "N/A"}</td>
+
+                              <td data-th="Status">
+                                <div className="leave-app">
+                                  {getStatusBadge(item.status)}
+                                </div>
+                              </td>
+
+                              <td data-th="Approved By">{item.approved_by || "—"}</td>
+
+                              <td data-th="Applied On">{item.created_at ? new Date(item.created_at).toLocaleString() : "N/A"}</td>
+
+                              <td data-th="Actions">{getActionButton(item)}</td>
                             </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={isHRorManager && activeTab === "allLeaves" ? "13" : "12"} className="text-center">
+                              No leave applications found matching your criteria.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                     
-                    {/* Pagination Controls */}
-                    {totalPages > 1 && (
-                      <div className="mt-4">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <h5 className="m-0 pagination-title">Pages</h5>
-                          <div className="pagination-container d-flex justify-content-end">
-                            {[...Array(totalPages)].map((_, i) => (
-                              <Button
-                                key={i}
-                                className={currentPage === i + 1 ? "br-page-no-active" : "br-page-no"}
-                                onClick={() => goToPage(i + 1)}
-                              >
-                                {i + 1}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
+                    {/* PAGINATION CONTROLS - SAME AS EMPLIST */}
+                    {filteredData.length > itemsPerPage && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.Prev 
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                            disabled={currentPage === 1}
+                          />
+                          {[...Array(totalPages)].map((_, index) => (
+                            <Pagination.Item 
+                              key={index + 1} 
+                              active={index + 1 === currentPage}
+                              onClick={() => setCurrentPage(index + 1)}
+                            >
+                              {index + 1}
+                            </Pagination.Item>
+                          ))}
+                          <Pagination.Next 
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                            disabled={currentPage === totalPages}
+                          />
+                        </Pagination>
                       </div>
                     )}
                   </div>

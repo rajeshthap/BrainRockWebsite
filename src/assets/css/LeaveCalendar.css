@@ -202,6 +202,19 @@ h3 {
 .leave-el {
   color: #27ae60;
 }
+.emp-m-left{
+  margin-right: 30px;
+  margin-top: 12px;
+}
+.br-form-control-search {
+    height: 32px;
+    border-radius: var(--br-space-200);
+    border: 1px solid var(--br-search-border);
+    color: #808090;
+    font-size: var(--br-space-300);
+    margin-top: 12px;
+}
+
 
 .leave-pl {
   color: #9b59b6;
