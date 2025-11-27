@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -17,12 +17,13 @@ import {
   FaSearch,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import { AuthContext } from "../context/AuthContext";
 
 // 1. Accept searchTerm and setSearchTerm as props
 function HrHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
-  const { logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([
@@ -47,12 +48,69 @@ function HrHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   ]);
 
   const [unreadCount, setUnreadCount] = useState(2);
+  
+  // State for user details
+  const [userDetails, setUserDetails] = useState({
+    first_name: "",
+    last_name: "",
+    profile_photo: null,
+  });
+
+  // Fetch user details when component mounts or user changes
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (user && user.unique_id) {
+        try {
+          const response = await axios.get(
+            `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${user.unique_id}`,
+            {
+              withCredentials: true,
+              headers: { "Content-Type": "application/json" }
+            }
+          );
+          
+          if (response.data) {
+            setUserDetails({
+              first_name: response.data.first_name || "",
+              last_name: response.data.last_name || "",
+              profile_photo: response.data.profile_photo || null,
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        }
+      }
+    };
+
+    fetchUserDetails();
+  }, [user]);
 
   const markAsRead = (id) => {
     setNotifications(
       notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
     setUnreadCount((prev) => prev - 1);
+  };
+
+  // Get user display name
+  const getDisplayName = () => {
+    if (userDetails.first_name && userDetails.last_name) {
+      return `${userDetails.first_name} ${userDetails.last_name}`;
+    } else if (userDetails.first_name) {
+      return userDetails.first_name;
+    } else if (user && (user.first_name || user.last_name)) {
+      return `${user.first_name || ""} ${user.last_name || ""}`.trim() || "User";
+    }
+    return "User";
+  };
+
+  // Get user photo URL
+  const getUserPhotoUrl = () => {
+    if (userDetails.profile_photo) {
+      return `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${userDetails.profile_photo}`;
+    }
+    // Fallback to a default avatar with user initials
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(getDisplayName())}&background=0d6efd&color=fff&size=40`;
   };
 
   return (
@@ -118,11 +176,15 @@ function HrHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
               <Dropdown align="end">
                 <Dropdown.Toggle variant="light" className="user-profile-btn">
                   <Image
-                    src="https://picsum.photos/seed/user123/40/40.jpg"
+                    src={getUserPhotoUrl()}
                     roundedCircle
                     className="user-avatar"
+                    onError={(e) => {
+                      // Fallback to UI Avatars if image fails to load
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(getDisplayName())}&background=0d6efd&color=fff&size=40`;
+                    }}
                   />
-                  <span className="user-name d-none d-md-inline">John Doe</span>
+                  <span className="user-name d-none d-md-inline">{getDisplayName()}</span>
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
