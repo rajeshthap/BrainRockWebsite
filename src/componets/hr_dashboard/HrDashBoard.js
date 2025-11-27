@@ -106,7 +106,7 @@ const HrDashBoard = () => {
         <Container fluid className="dashboard-body">
           <Row className="align-items-center mb-4">
             <Col lg={6} md={12} sm={12}>
-              <h1 className="page-title">HR Dashboard</h1>
+              <h1 className="page-title">Dashboard</h1>
               <Col lg={4} md={12} sm={12}>
                 <div className="quick-actions">
                   <Button

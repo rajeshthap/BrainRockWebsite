@@ -65,44 +65,50 @@ function LeaveCalendar() {
     }
   }, [leaveType]);
 
-  useEffect(() => {
-    if (!employee_id) return;
-
-    axios
-      .get(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`
-      )
-      .then((res) => {
-        const gender = String(res.data.gender).trim().toLowerCase();
-        setUserGender(gender);
-
-        let leaveOptions = [
-          { value: "casual_leave", label: "Casual Leave (CL)" },
-          { value: "without_pay", label: "Without Pay (WOP)" },
-          { value: "earned_leave", label: "Earned Leave (EL)" },
-          { value: "paid_leave", label: "Medical Leave (ML)" },
-          { value: "paternity_leave", label: "Paternity Leave (PTL)" },
-        ];
-
-        if (gender === "female") {
-          leaveOptions.push({
-            value: "maternity_leave",
-            label: "Maternity Leave (ML)",
-          });
-        }
-
-        setOptions(leaveOptions);
-      })
-      .catch(() => {
-        setOptions([
-          { value: "casual_leave", label: "Casual Leave (CL)" },
-          { value: "without_pay", label: "Without Pay (WOP)" },
-          { value: "earned_leave", label: "Earned Leave (EL)" },
-          { value: "medical_leave", label: "Medical Leave" },
-          { value: "paternity_leave", label: "Paternity Leave (PTL)" },
-        ]);
-      });
-  }, [employee_id]);
+useEffect(() => {
+  if (!employee_id) return;
+ 
+  axios
+    .get(
+      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=$%7Bemployee_id%7D`
+    )
+    .then((res) => {
+      const gender = String(res.data.gender).trim().toLowerCase();
+      setUserGender(gender);
+ 
+      // Base options available to all genders
+      let leaveOptions = [
+        { value: "casual_leave", label: "Casual Leave (CL)" },
+        { value: "without_pay", label: "Without Pay (WOP)" },
+        { value: "earned_leave", label: "Earned Leave (EL)" },
+        { value: "paid_leave", label: "Medical Leave (ML)" },
+      ];
+ 
+      // Add gender-specific options based on employee's gender
+      if (gender === "") {
+        leaveOptions.push({
+          value: "paternity_leave",
+          label: "Paternity Leave (PTL)",
+        });
+      } else if (gender === "female") {
+        leaveOptions.push({
+          value: "maternity_leave",
+          label: "Maternity Leave (ML)",
+        });
+      }
+ 
+      setOptions(leaveOptions);
+    })
+    .catch(() => {
+      // Fallback options when gender can't be determined
+      setOptions([
+        { value: "casual_leave", label: "Casual Leave (CL)" },
+        { value: "without_pay", label: "Without Pay (WOP)" },
+        { value: "earned_leave", label: "Earned Leave (EL)" },
+        { value: "paid_leave", label: "Medical Leave (ML)" },
+      ]);
+    });
+}, [employee_id]);
 
   // Fetch leave balance
   useEffect(() => {
@@ -340,7 +346,7 @@ function LeaveCalendar() {
                   {leaveBalance.paid_leave ?? 0}
                 </span>
                 |&nbsp;
-                <strong className="leave-item leave-ml">ML:</strong>
+                <strong className="leave-item leave-ml">MTL:</strong>
                 <span className="leave-value leave-ml">
                   {leaveBalance.maternity_leave ?? 0}
                 </span>
