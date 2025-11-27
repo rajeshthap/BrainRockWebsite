@@ -25,10 +25,15 @@ import {
 } from "react-icons/fa";
 
 import SideNav from "../SideNav";
+import HrHeader from "../HrHeader";
 import axios from "axios";
 import { AiFillEdit } from "react-icons/ai";
 import "../../../assets/css/attendance.css";
 import { Toast, ToastContainer } from "react-bootstrap";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { FaPrint } from "react-icons/fa6";
+import { FaFileExcel } from "react-icons/fa";
 
 
 
@@ -37,6 +42,7 @@ const EmployeeManagement = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState({});
+  
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -359,6 +365,101 @@ const EmployeeManagement = () => {
     }
   };
 
+  // -------------------- PRINT FUNCTION --------------------
+const handlePrint = () => {
+  const actionColIndex = 9; // "Action" column index (0-based)
+  const table = document.querySelector(".temp-rwd-table").cloneNode(true);
+
+  // Remove Action column
+  table.querySelectorAll("tr").forEach((row) => {
+    const cells = row.querySelectorAll("th, td");
+    if (cells[actionColIndex]) cells[actionColIndex].remove();
+  });
+
+  const newWindow = window.open("", "_blank");
+  newWindow.document.write(`
+      <html>
+      <head>
+        <title>Employee List</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          h2 { text-align: center; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+          th { background-color: #f4f4f4; font-weight: bold; }
+          tr:nth-child(even) { background-color: #fafafa; }
+        </style>
+      </head>
+      <body>
+        <h2>Employee List</h2>
+        ${table.outerHTML}
+      </body>
+      </html>
+    `);
+  newWindow.document.close();
+  newWindow.print();
+};
+
+// -------------------- EXCEL DOWNLOAD FUNCTION --------------------
+const handleDownload = () => {
+  if (allFilteredEmployees.length === 0) {
+    window.alert("No employee records to download!");
+    return;
+  }
+
+  const data = allFilteredEmployees.map((emp, index) => ({
+    "S.No": index + 1,
+    "Employee ID": emp.emp_id,
+    "Employee Name": `${emp.first_name} ${emp.last_name}`,
+    "Department": emp.department,
+    "Designation": emp.designation,
+    "Email": emp.email,
+    "Mobile": emp.phone,
+    "Status": emp.is_active ? "Active" : "Inactive",
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!ws[cellRef]) continue;
+
+    ws[cellRef].s = {
+      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+      fill: { fgColor: { rgb: "2B5797" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "999999" } },
+        bottom: { style: "thin", color: { rgb: "999999" } },
+        left: { style: "thin", color: { rgb: "999999" } },
+        right: { style: "thin", color: { rgb: "999999" } },
+      },
+    };
+  }
+
+  ws["!cols"] = [
+    { wch: 6 },
+    { wch: 15 },
+    { wch: 25 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 28 },
+    { wch: 15 },
+    { wch: 12 },
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Employee List");
+
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  saveAs(
+    new Blob([wbout], { type: "application/octet-stream" }),
+    "Employee_List.xlsx"
+  );
+};
+
+
 
 
 
@@ -379,106 +480,8 @@ const EmployeeManagement = () => {
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
-        <header className="dashboard-header">
-          <Container fluid>
-            <Row className="align-items-center">
-              <Col xs="auto">
-                <Button
-                  variant="light"
-                  className="sidebar-toggle"
-                  onClick={toggleSidebar}
-                >
-                  <FaBars />
-                </Button>
-              </Col>
-
-              <Col>
-                <div className="search-bar">
-                  <FaSearch className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="search-input"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </Col>
-
-              <Col xs="auto">
-                <div className="header-actions">
-                  {/* Notifications */}
-                  <Dropdown align="end">
-                    <Dropdown.Toggle
-                      variant="light"
-                      className="notification-btn"
-                    >
-                      <FaBell />
-                      {unreadCount > 0 && (
-                        <Badge pill bg="danger" className="notification-badge">
-                          {unreadCount}
-                        </Badge>
-                      )}
-                    </Dropdown.Toggle>
-
-                    <Dropdown.Menu className="notification-dropdown">
-                      <div className="notification-header">
-                        <h6>Notifications</h6>
-                        <Button variant="link" size="sm">
-                          Mark all as read
-                        </Button>
-                      </div>
-                      {notifications.map((notif) => (
-                        <Dropdown.Item
-                          key={notif.id}
-                          className={`notification-item ${!notif.read ? "unread" : ""
-                            }`}
-                          onClick={() => markAsRead(notif.id)}
-                        >
-                          <div className="notification-content">
-                            <p>{notif.text}</p>
-                            <small>{notif.time}</small>
-                          </div>
-                          {!notif.read && <div className="unread-dot"></div>}
-                        </Dropdown.Item>
-                      ))}
-                    </Dropdown.Menu>
-                  </Dropdown>
-
-                  {/* User Profile */}
-                  <Dropdown align="end">
-                    <Dropdown.Toggle
-                      variant="light"
-                      className="user-profile-btn"
-                    >
-                      <Image
-                        src="https://picsum.photos/seed/user123/40/40.jpg"
-                        roundedCircle
-                        className="user-avatar"
-                      />
-                      <span className="user-name d-none d-md-inline">
-                        John Doe
-                      </span>
-                    </Dropdown.Toggle>
-
-                    <Dropdown.Menu>
-                      <Dropdown.Item href="#">
-                        <FaUserCircle className="me-2" /> Profile
-                      </Dropdown.Item>
-                      <Dropdown.Item href="#">
-                        <FaCog className="me-2" /> Settings
-                      </Dropdown.Item>
-                      <Dropdown.Divider />
-                      <Dropdown.Item href="#">
-                        <FaSignOutAlt className="me-2" /> Logout
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </header>
+       
+        <HrHeader toggleSidebar={toggleSidebar} />
 
         {/* Dashboard Content */}
         <Container fluid className="dashboard-body p-4">
@@ -731,6 +734,16 @@ const EmployeeManagement = () => {
                 <h2 className="mb-0">Employee Management</h2>
 
                 <div className="d-flex align-items-center">
+              <div className="mt-2 vmb-2 text-end">
+              <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+                <FaPrint /> Print
+              </Button>
+
+              <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+                <FaFileExcel />Download
+              </Button>
+            </div>
+
 
    <Form>
       <Form.Group  controlId="exampleForm.ControlInput1">

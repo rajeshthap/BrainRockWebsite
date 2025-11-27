@@ -266,11 +266,13 @@ const menuItems = [
       label: "Departments",
  
       submenu: [
-        {
-          label: "Department List",
-          path: "/EmployeeManagement",
+
+         {
+          label: "Departmental Hierarchy",
+          path: "/DepartmentHierarchy",
           icon: <FaChartLine />,
         },
+       
         {
           label: "Add / Edit Department",
           path: "/EmployeeManagement",
@@ -281,11 +283,7 @@ const menuItems = [
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        {
-          label: "Departmental Hierarchy",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+       
         {
           label: "Department Performance Overview",
           path: "/EmployeeManagement",
