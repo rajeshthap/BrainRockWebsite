@@ -23,6 +23,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { AiFillEdit } from "react-icons/ai";
 import { AuthContext } from "../../context/AuthContext";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { FaPrint } from "react-icons/fa6";
+import { FaFileExcel } from "react-icons/fa";
 
 const DailyAttendance = () => {
   const { user } = useContext(AuthContext);
@@ -198,6 +202,105 @@ const DailyAttendance = () => {
       hour12: true
     });
   };
+
+const handlePrint = () => {
+  const columnsToRemove = [1, 9]; // REMOVE Photo (1) & Action (10)
+
+  const table = document.querySelector(".temp-rwd-table").cloneNode(true);
+
+  // Remove columns
+  table.querySelectorAll("tr").forEach((row) => {
+    const cells = row.querySelectorAll("th, td");
+
+    // Remove highest index first
+    columnsToRemove.sort((a, b) => b - a).forEach((colIndex) => {
+      if (cells[colIndex]) cells[colIndex].remove();
+    });
+  });
+
+  const newWindow = window.open("", "_blank");
+  newWindow.document.write(`
+    <html>
+    <head>
+      <title>Employee List</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+        th { background-color: #f4f4f4; font-weight: bold; }
+        tr:nth-child(even) { background-color: #fafafa; }
+      </style>
+    </head>
+    <body>
+      <h2>Employee List</h2>
+      ${table.outerHTML}
+    </body>
+    </html>
+  `);
+
+  newWindow.document.close();
+  newWindow.print();
+};
+
+
+const handleDownload = () => {
+  if (allFilteredEmployees.length === 0) {
+    window.alert("No employee records to download!");
+    return;
+  }
+
+  const data = allFilteredEmployees.map((emp, index) => ({
+    "S.No": index + 1,
+    "Employee ID": emp.emp_id || "N/A",
+    "Name": `${emp.first_name} ${emp.last_name}`,
+    "Department": emp.department || "N/A",
+    "Designation": emp.designation || "N/A",
+    "Email": emp.email || "N/A",
+    "Mobile": emp.phone || "N/A",
+    "Status": emp.is_active ? "Active" : "Inactive",
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  // Style Header Row
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!ws[cellRef]) continue;
+
+    ws[cellRef].s = {
+      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+      fill: { fgColor: { rgb: "2B5797" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "999999" } },
+        bottom: { style: "thin", color: { rgb: "999999" } },
+        left: { style: "thin", color: { rgb: "999999" } },
+        right: { style: "thin", color: { rgb: "999999" } },
+      },
+    };
+  }
+
+  ws["!cols"] = [
+    { wch: 6 },
+    { wch: 18 },
+    { wch: 25 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 30 },
+    { wch: 15 },
+    { wch: 12 },
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Employee List");
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+
+  saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Employee_List.xlsx");
+};
+
+
 
   // Format hours from decimal to HH:MM format
   const formatHours = (decimalHours) => {
@@ -898,6 +1001,15 @@ const DailyAttendance = () => {
                 </Form.Select>
               </div>
             </div>
+             <div className="mt-2 vmb-2 text-end">
+                          <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+                            <FaPrint /> Print
+                          </Button>
+            
+                          <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+                            <FaFileExcel />Download
+                          </Button>
+                        </div>
             
             {message.text && (
               <Alert

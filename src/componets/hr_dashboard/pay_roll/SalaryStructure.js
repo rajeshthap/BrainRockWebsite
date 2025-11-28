@@ -23,6 +23,11 @@ import { AiFillEdit } from "react-icons/ai";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext"; // Adjust path as needed
 
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { FaPrint } from "react-icons/fa6";
+import { FaFileExcel } from "react-icons/fa";
+
 // Government salary structure percentages
 const GOVERNMENT_SALARY_STRUCTURE = {
   earnings: {
@@ -371,6 +376,110 @@ const SalaryStructure = () => {
       setSalaryLoading(false);
     }
   };
+
+  const handlePrint = () => {
+  const columnsToRemove = [1, 10]; // REMOVE: Photo (1), Action (7)
+
+  const table = document.querySelector(".temp-rwd-table")?.cloneNode(true);
+  if (!table) {
+    window.alert("Salary table not found!");
+    return;
+  }
+
+  // Remove unwanted columns
+  table.querySelectorAll("tr").forEach((row) => {
+    const cells = row.querySelectorAll("th, td");
+    [...columnsToRemove].sort((a, b) => b - a).forEach((colIndex) => {
+      if (cells[colIndex]) cells[colIndex].remove();
+    });
+  });
+
+  const newWindow = window.open("", "_blank");
+  newWindow.document.write(`
+    <html>
+    <head>
+      <title>Salary Structure</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+        th { background-color: #f4f4f4; font-weight: bold; }
+        tr:nth-child(even) { background-color: #fafafa; }
+      </style>
+    </head>
+    <body>
+      <h2>Employee Salary Structure</h2>
+      ${table.outerHTML}
+    </body>
+    </html>
+  `);
+
+  newWindow.document.close();
+  newWindow.print();
+};
+
+
+const handleDownload = () => {
+  if (allFilteredEmployees.length === 0) {
+    window.alert("No salary structure records found!");
+    return;
+  }
+
+  const data = allFilteredEmployees.map((emp, index) => ({
+    "S.No": index + 1,
+    "Employee ID": emp.emp_id,
+    "Employee Name": `${emp.first_name} ${emp.last_name}`,
+    "Department": emp.department,
+    "Designation": emp.designation,
+    "Email": emp.email || "N/A",
+    "Mobile": emp.phone || "N/A",
+    "Status": emp.is_active ? "Active" : "Inactive",
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  // Header styling (same as EmpList)
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!ws[cellRef]) continue;
+    ws[cellRef].s = {
+      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+      fill: { fgColor: { rgb: "2B5797" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "999999" } },
+        bottom: { style: "thin", color: { rgb: "999999" } },
+        left: { style: "thin", color: { rgb: "999999" } },
+        right: { style: "thin", color: { rgb: "999999" } }
+      }
+    };
+  }
+
+  // Column widths
+  ws["!cols"] = [
+    { wch: 6 },   // S.No
+    { wch: 18 },  // Employee ID
+    { wch: 28 },  // Name
+    { wch: 20 },  // Department
+    { wch: 20 },  // Designation
+    { wch: 15 },  // Basic
+    { wch: 10 },  // HRA
+    { wch: 10 },  // DA
+    { wch: 10 },  // TA
+    { wch: 15 },  // Gross
+    { wch: 15 },  // Net
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Salary Structure");
+
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Salary_Structure.xlsx");
+};
+
 
   // Function to handle setting salary structure
   const handleSetSalaryStructure = (employee) => {
@@ -1106,6 +1215,16 @@ const SalaryStructure = () => {
               </div>
             </div>
           </div>
+
+           <div className="mt-2 vmb-2 text-end">
+                        <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+                          <FaPrint /> Print
+                        </Button>
+          
+                        <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+                          <FaFileExcel />Download
+                        </Button>
+                      </div>
           
           {loading && <div className="d-flex justify-content-center"><Spinner animation="border" /></div>}
           {error && <Alert variant="danger">Failed to load employees: {error}</Alert>}

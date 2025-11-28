@@ -70,10 +70,10 @@ useEffect(() => {
  
   axios
     .get(
-      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=$%7Bemployee_id%7D`
+      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`
     )
     .then((res) => {
-      const gender = String(res.data.gender).trim().toLowerCase();
+      const gender = String(res.data.data.gender).trim().toLowerCase();
       setUserGender(gender);
  
       // Base options available to all genders
@@ -81,16 +81,16 @@ useEffect(() => {
         { value: "casual_leave", label: "Casual Leave (CL)" },
         { value: "without_pay", label: "Without Pay (WOP)" },
         { value: "earned_leave", label: "Earned Leave (EL)" },
-        { value: "paid_leave", label: "Medical Leave (ML)" },
+        { value: "paid_leave", label: "Medical Leave (MDL)" },
       ];
  
       // Add gender-specific options based on employee's gender
-      if (gender === "") {
+      if (gender === "male") {
         leaveOptions.push({
           value: "paternity_leave",
           label: "Paternity Leave (PTL)",
         });
-      } else if (gender === "female") {
+      } else if (gender === "female") {  // Fixed: Changed from "Female" to "female"
         leaveOptions.push({
           value: "maternity_leave",
           label: "Maternity Leave (ML)",
@@ -119,7 +119,7 @@ useEffect(() => {
         `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`
       )
       .then((res) => {
-        // Find the current employee in the response
+        // Find current employee in response
         const currentEmployee = res.data.employees.find(
           (emp) => emp.employee === employee_id
         );
@@ -258,14 +258,14 @@ useEffect(() => {
         }
       );
 
-      // Update the local state
+      // Update local state
       setSubmittedRequests((prev) =>
         prev.map((r) => (r.id === parseInt(leaveId) ? { ...r, status: action } : r))
       );
 
       showNotification(`Leave request ${action} successfully`, "success");
       
-      // Refresh the leave requests
+      // Refresh leave requests
       fetchLeaveRequests();
     } catch (err) {
       console.error("ACTION ERROR ===>", err.response || err);
@@ -346,16 +346,29 @@ useEffect(() => {
                   {leaveBalance.paid_leave ?? 0}
                 </span>
                 |&nbsp;
-                <strong className="leave-item leave-ml">MTL:</strong>
-                <span className="leave-value leave-ml">
-                  {leaveBalance.maternity_leave ?? 0}
-                </span>
-                |&nbsp;
-                <strong className="leave-item leave-ptl">PTL:</strong>
-                <span className="leave-value leave-ptl">
-                  {leaveBalance.paternity_leave ?? 0}
-                </span>
-                |&nbsp;
+                
+                {/* Conditional Maternity Leave - Only show for female employees */}
+                {userGender && userGender.toLowerCase() === "female" && (
+                  <>
+                    <strong className="leave-item leave-ml">MTL:</strong>
+                    <span className="leave-value leave-ml">
+                      {leaveBalance.maternity_leave ?? 0}
+                    </span>
+                    |&nbsp;
+                  </>
+                )}
+                
+                {/* Conditional Paternity Leave - Only show for male employees */}
+                {userGender && userGender.toLowerCase() === "male" && (
+                  <>
+                    <strong className="leave-item leave-ptl">PTL:</strong>
+                    <span className="leave-value leave-ptl">
+                      {leaveBalance.paternity_leave ?? 0}
+                    </span>
+                    |&nbsp;
+                  </>
+                )}
+                
                 <strong className="leave-item leave-wop">WOP:</strong>
                 <span className="leave-value leave-wop">
                   {leaveBalance.without_pay ?? 0}

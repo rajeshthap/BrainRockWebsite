@@ -56,6 +56,9 @@ const LeaveManagement = () => {
     department: "",
     phone: "",
   });
+  
+  // State for employee gender
+  const [employeeGender, setEmployeeGender] = useState("");
 
   const employee_id = user?.unique_id;
   const empId = user?.unique_id;
@@ -64,6 +67,7 @@ const LeaveManagement = () => {
   const API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`;
   const ALL_API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`;
   const EMPLOYEE_API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${employee_id}`;
+  const GENDER_API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`;
 
   // ========================================
   // NOTIFICATION
@@ -74,6 +78,23 @@ const LeaveManagement = () => {
   };
 
   // ========================================
+  // FETCH EMPLOYEE GENDER
+  // ========================================
+  const fetchEmployeeGender = async () => {
+    if (!GENDER_API_URL) return;
+    
+    try {
+      const response = await axios.get(GENDER_API_URL, { withCredentials: true });
+      
+      if (response.data && response.data.data) {
+        setEmployeeGender(response.data.data.gender || "");
+      }
+    } catch (error) {
+      console.error("Error fetching employee gender:", error);
+    }
+  };
+
+  // ========================================
   // FETCH LEAVE DATA
   // ========================================
   useEffect(() => {
@@ -81,6 +102,7 @@ const LeaveManagement = () => {
     if (user && employee_id) {
       if (activeTab === "myLeaves") {
         fetchLeaveData();
+        fetchEmployeeGender(); // Fetch gender data for my leaves tab
       }
       
       if (isHRorManager && activeTab === "allLeaves") {
@@ -566,29 +588,35 @@ const LeaveManagement = () => {
                       </Card>
                     </Col>
 
-                    <Col md={3}>
-                      <Card className="p-3 shadow-sm leave-card">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div className="leave-heading">
-                            <h5>Maternity Leave</h5>
-                            <h2 className="text-danger">{leaveBalance.maternity_leave}</h2>
+                    {/* Conditional Maternity Leave Card - Only show for female employees */}
+                    {employeeGender && employeeGender.toLowerCase() === "female" && (
+                      <Col md={3}>
+                        <Card className="p-3 shadow-sm leave-card">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="leave-heading">
+                              <h5>Maternity Leave</h5>
+                              <h2 className="text-danger">{leaveBalance.maternity_leave}</h2>
+                            </div>
+                            <FaFemale className="leave-icon text-danger" />
                           </div>
-                          <FaFemale className="leave-icon text-danger" />
-                        </div>
-                      </Card>
-                    </Col>
+                        </Card>
+                      </Col>
+                    )}
 
-                    <Col md={3} className="mt-3">
-                      <Card className="p-3 shadow-sm leave-card">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div className="leave-heading">
-                            <h5>Paternity Leave</h5>
-                            <h2 className="text-secondary">{leaveBalance.paternity_leave}</h2>
+                    {/* Conditional Paternity Leave Card - Only show for male employees */}
+                    {employeeGender && employeeGender.toLowerCase() === "male" && (
+                      <Col md={3} className="mt-3">
+                        <Card className="p-3 shadow-sm leave-card">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="leave-heading">
+                              <h5>Paternity Leave</h5>
+                              <h2 className="text-secondary">{leaveBalance.paternity_leave}</h2>
+                            </div>
+                            <FaMale className="leave-icon text-secondary" />
                           </div>
-                          <FaMale className="leave-icon text-secondary" />
-                        </div>
-                      </Card>
-                    </Col>
+                        </Card>
+                      </Col>
+                    )}
                   </Row>
                 )}
 
