@@ -59,6 +59,12 @@ const menuItems = [
       path: "/HrDashBoard",
       active: true,
     },
+     {
+      icon: <FaTachometerAlt />,
+      label: "Team Managment",
+      path: "/TeamManagment",
+      active: true,
+    },
   // {
   //     icon: <FaTachometerAlt />,
   //     label: "Payroll",
@@ -75,16 +81,8 @@ const menuItems = [
           path: "/EmployeeManagement",
           icon: <FaUsersViewfinder />,
         },
-        {
-          label: "Add / Edit Employee",
-          path: "/EmployeeManagement",
-          icon: <RiPlayListAddFill />,
-        },
-        {
-          label: "Employee Status (Active / Inactive)",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+        
+       
         {
           label: "Role & Access Management",
           path: "/EmployeeManagement",
@@ -163,21 +161,9 @@ const menuItems = [
           path: "/AttendanceRegularization",
           icon: <FaChartLine />,
         },
-        {
-          label: "Shift Management",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Late / Early Report",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Monthly Attendance Summary",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+       
+       
+       
        
       ],
     },
