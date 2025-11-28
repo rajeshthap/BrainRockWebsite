@@ -8,7 +8,8 @@ import {
   Image,
   Button, 
   Pagination,
-  Form
+  Form,
+  Card
 } from "react-bootstrap";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
@@ -282,14 +283,17 @@ const EmpList = () => {
           <HrHeader toggleSidebar={toggleSidebar} />
           
           <Container fluid className="dashboard-body p-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="mb-0">Salary Details</h2>
-              <Button variant="secondary" onClick={handleBackToList}>
-                Back to Employee List
-              </Button>
-            </div>
-            
-            <SalaryCalculation employee={selectedEmployee} />
+            <Card className="mb-4">
+              <Card.Header className="d-flex justify-content-between align-items-center">
+                <span className="fw-bold">Salary Details</span>
+                <Button variant="secondary" onClick={handleBackToList}>
+                  Back to Employee List
+                </Button>
+              </Card.Header>
+              <Card.Body>
+                <SalaryCalculation employee={selectedEmployee} />
+              </Card.Body>
+            </Card>
           </Container>
         </div>
       </div>
@@ -308,27 +312,32 @@ const EmpList = () => {
     });
   });
 
-  const newWindow = window.open("", "_blank");
-  newWindow.document.write(`
-    <html>
-    <head>
-      <title>Employee List</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h2 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
-        th { background-color: #f4f4f4; font-weight: bold; }
-        tr:nth-child(even) { background-color: #fafafa; }
-      </style>
-    </head>
-    <body>
-      <h2>Employee List</h2>
-      ${table.outerHTML}
-    </body>
-    </html>
-  `);
+  // Apply print styles directly to the table
+  table.style.width = '100%';
+  table.style.borderCollapse = 'collapse';
+  table.style.marginTop = '20px';
+  
+  // Apply styles to table cells
+  table.querySelectorAll("th, td").forEach(cell => {
+    cell.style.border = '1px solid #ccc';
+    cell.style.padding = '8px';
+    cell.style.textAlign = 'left';
+    cell.style.fontSize = '13px';
+  });
+  
+  // Apply styles to table headers
+  table.querySelectorAll("th").forEach(header => {
+    header.style.backgroundColor = '#f4f4f4';
+    header.style.fontWeight = 'bold';
+  });
+  
+  // Apply alternating row colors
+  table.querySelectorAll("tr:nth-child(even)").forEach(row => {
+    row.style.backgroundColor = '#fafafa';
+  });
 
+  const newWindow = window.open("", "_blank");
+  newWindow.document.write(table.outerHTML);
   newWindow.document.close();
   newWindow.print();
 };
@@ -377,19 +386,8 @@ const handleDownload = () => {
     };
   }
 
-  // Column widths
-  ws["!cols"] = [
-    { wch: 6 },   // S.No
-    { wch: 20 },  // Employee ID
-    { wch: 28 },  // Employee Name
-    { wch: 20 },  // Department
-    { wch: 20 },  // Designation
-    { wch: 30 },  // Email
-    { wch: 15 },  // Mobile
-    { wch: 12 },  // Status
-    { wch: 20 },  // Salary Structure Status
-    { wch: 25 },  // Salary Calculation Status
-  ];
+  // Removed manual column width settings to use table classes instead
+  // ws["!cols"] = [...] has been removed
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Employees");
@@ -400,52 +398,53 @@ const handleDownload = () => {
 
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className="main-content">
+      <div className="main-content" style={{ height: '100%', overflow: 'hidden' }}>
         <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         
-        <Container fluid className="dashboard-body p-4">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="mb-0">Employee List (Confirmed Salary Structure Only)</h2>
-
-            {/* Status Filter Dropdowns */}
-            <div className="d-flex align-items-center">
-              <span className="me-2">Filter by Status:</span>
-              <Form.Select 
-                value={statusFilter} 
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="form-select me-3"
-                style={{ width: '150px' }}
-              >
-                <option value="all">All Employees</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </Form.Select>
-              
-              <span className="me-2">Salary Calculation:</span>
-              <Form.Select 
-                value={salaryCalcFilter} 
-                onChange={(e) => setSalaryCalcFilter(e.target.value)}
-                className="form-select"
-                style={{ width: '150px' }}
-              >
-                <option value="all">All</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="unconfirmed">Unconfirmed</option>
-              </Form.Select>
-            </div>
-          </div>
-
-          <div className="mt-2 mb-2 text-end">
-            <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
-              <FaPrint /> Print
-            </Button>
-  
-            <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
-              <FaFileExcel /> Download
-            </Button>
-          </div>
+        <Container fluid className="dashboard-body p-4" style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
+          {/* Replaced h2 title with Card component */}
+          <Card className="mb-3">
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <span className="fw-bold">Employee List (Confirmed Salary Structure Only)</span>
+              <div className="d-flex align-items-center">
+                <span className="me-2">Filter by Status:</span>
+                <Form.Select 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="form-select me-3"
+                  style={{ width: '150px' }}
+                >
+                  <option value="all">All Employees</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </Form.Select>
+                
+                <span className="me-2">Salary Calculation:</span>
+                <Form.Select 
+                  value={salaryCalcFilter} 
+                  onChange={(e) => setSalaryCalcFilter(e.target.value)}
+                  className="form-select"
+                  style={{ width: '150px' }}
+                >
+                  <option value="all">All</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="unconfirmed">Unconfirmed</option>
+                </Form.Select>
+              </div>
+            </Card.Header>
+            <Card.Body className="pb-2">
+              <div className="text-end mb-2">
+                <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+                  <FaPrint /> Print
+                </Button>
+                <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+                  <FaFileExcel /> Download
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
         
           {loading && <div className="d-flex justify-content-center"><Spinner animation="border" /></div>}
           {error && <Alert variant="danger">Failed to load employees: {error}</Alert>}
@@ -453,89 +452,89 @@ const handleDownload = () => {
           {!loading && !error && (
             <>
               {/* --- YOUR CUSTOM TABLE STRUCTURE --- */}
-              {/* Replaced Row/Col with a responsive table container */}
-              <div className="table-responsive mt-3">
-                <table className="temp-rwd-table table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>S.No</th>
-                      <th>Photo</th>
-                      <th>Employee ID</th>
-                      <th>Employee Name</th>
-                      <th>Department</th>
-                      <th>Designation</th>
-                      <th>Email</th>
-                      <th>Mobile</th>
-                      <th>Status</th>
-                      <th>Salary Structure Status</th>
-                      <th>Salary Calculation Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedEmployees.length > 0 ? (
-                      paginatedEmployees.map((emp, index) => {
-                        const salaryStatus = salaryStatuses[emp.emp_id] || 'unconfirmed';
-                        const salaryCalcStatus = salaryCalculationStatuses[emp.emp_id] || 'unconfirmed';
-                        const isSalaryCalcConfirmed = salaryCalcStatus === 'confirmed';
-                        
-                        return (
-                          <tr key={emp.id}>
-                            <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                            <td data-th="Photo">
-                               {emp.profile_photo ? (
-                                    <Image src={`${baseUrl}${emp.profile_photo}`} roundedCircle width={40} height={40} />
-                                ) : (
-                                    <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{width: '40px', height: '40px', color: 'white', fontSize: '0.8rem'}}>
-                                        {emp.first_name?.[0]}{emp.last_name?.[0]}
-                                    </div>
-                                )}
-                            </td>
-                            <td data-th="Employee ID">{emp.emp_id || "N/A"}</td>
-                            <td data-th="Employee Name">{emp.first_name} {emp.last_name}</td>
-                            <td data-th="Department">{emp.department || "N/A"}</td>
-                            <td data-th="Designation">{emp.designation || "N/A"}</td>
-                            <td data-th="Email" className="text-truncate" style={{maxWidth: '150px'}} title={emp.email}>{emp.email || "N/A"}</td>
-                            <td data-th="Mobile">{emp.phone || "N/A"}</td>
-                            <td data-th="Status">
-                              <Badge bg={emp.is_active ? "success" : "secondary"}>
-                                {emp.is_active ? "Active" : "Inactive"}
-                              </Badge>
-                            </td>
-                            <td data-th="Salary Structure Status">
-                              <Badge bg="success">
-                                Confirmed
-                              </Badge>
-                            </td>
-                            <td data-th="Salary Calculation Status">
-                              <Badge bg={salaryCalcStatus === 'confirmed' ? "success" : "warning"}>
-                                {salaryCalcStatus === 'confirmed' ? 'Confirmed' : 'Unconfirmed'}
-                              </Badge>
-                            </td>
-                            <td data-th="Action">
-                              <Button 
-                                variant="primary" 
-                                size="sm"
-                                onClick={() => handleViewSalary(emp)}
-                                disabled={isSalaryCalcConfirmed}
-                                title={isSalaryCalcConfirmed ? "Salary calculation is already confirmed" : "View salary calculation"}
-                              >
-                                <AiFillEdit /> View Salary
-                              </Button>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
+              <Row className="mt-3">
+                <div className="col-md-12">
+                  <table className="temp-rwd-table">
+                    <tbody>
                       <tr>
-                        <td colSpan="12" className="text-center">
-                          No employees with confirmed salary structure found matching your search.
-                        </td>
+                        <th>S.No</th>
+                        <th>Photo</th>
+                        <th>Employee ID</th>
+                        <th>Employee Name</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                        <th>Status</th>
+                        <th>Salary Structure Status</th>
+                        <th>Salary Calculation Status</th>
+                        <th>Action</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+ 
+                      {paginatedEmployees.length > 0 ? (
+                        paginatedEmployees.map((emp, index) => {
+                          const salaryStatus = salaryStatuses[emp.emp_id] || 'unconfirmed';
+                          const salaryCalcStatus = salaryCalculationStatuses[emp.emp_id] || 'unconfirmed';
+                          const isSalaryCalcConfirmed = salaryCalcStatus === 'confirmed';
+                          
+                          return (
+                            <tr key={emp.id}>
+                              <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                              <td data-th="Photo">
+                                 {emp.profile_photo ? (
+                                      <Image src={`${baseUrl}${emp.profile_photo}`} roundedCircle width={40} height={40} />
+                                  ) : (
+                                      <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{width: '40px', height: '40px', color: 'white', fontSize: '0.8rem'}}>
+                                          {emp.first_name?.[0]}{emp.last_name?.[0]}
+                                      </div>
+                                  )}
+                              </td>
+                              <td data-th="Employee ID">{emp.emp_id || "N/A"}</td>
+                              <td data-th="Employee Name">{emp.first_name} {emp.last_name}</td>
+                              <td data-th="Department">{emp.department || "N/A"}</td>
+                              <td data-th="Designation">{emp.designation || "N/A"}</td>
+                              <td data-th="Email">{emp.email || "N/A"}</td>
+                              <td data-th="Mobile">{emp.phone || "N/A"}</td>
+                              <td data-th="Status">
+                                <Badge bg={emp.is_active ? "success" : "secondary"}>
+                                  {emp.is_active ? "Active" : "Inactive"}
+                                </Badge>
+                              </td>
+                              <td data-th="Salary Structure Status">
+                                <Badge bg="success">
+                                  Confirmed
+                                </Badge>
+                              </td>
+                              <td data-th="Salary Calculation Status">
+                                <Badge bg={salaryCalcStatus === 'confirmed' ? "success" : "warning"}>
+                                  {salaryCalcStatus === 'confirmed' ? 'Confirmed' : 'Unconfirmed'}
+                                </Badge>
+                              </td>
+                              <td data-th="Action">
+                                <Button 
+                                  variant="primary" 
+                                  size="sm"
+                                  onClick={() => handleViewSalary(emp)}
+                                  disabled={isSalaryCalcConfirmed}
+                                  title={isSalaryCalcConfirmed ? "Salary calculation is already confirmed" : "View salary calculation"}
+                                >
+                                  <AiFillEdit /> View Salary
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan="12" className="text-center">
+                            No employees with confirmed salary structure found matching your search.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Row>
               
               {/* --- Pagination Controls --- */}
               {allFilteredEmployees.length > itemsPerPage && (
