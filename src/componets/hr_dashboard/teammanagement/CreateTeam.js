@@ -6,7 +6,7 @@ import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
 import { AuthContext } from "../../context/AuthContext"; // Adjust the import path as needed
 
-const TeamManagement = () => {
+const CreateTeam = () => {
   const { user } = useContext(AuthContext); // Get user from auth context
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
@@ -415,4 +415,4 @@ const TeamManagement = () => {
   );
 };
 
-export default TeamManagement;
+export default CreateTeam;

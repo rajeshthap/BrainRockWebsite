@@ -59,11 +59,26 @@ const menuItems = [
       path: "/HrDashBoard",
       active: true,
     },
+     
      {
-      icon: <FaTachometerAlt />,
+      icon: <PiUserListBold />,
       label: "Team Managment",
-      path: "/TeamManagement",
-      active: true,
+ 
+      submenu: [
+        
+       
+        {
+          label: "Create Team",
+          path: "/CreateTeam",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Manage Team",
+          path: "/ManageTeam",
+          icon: <FaChartLine />,
+        },
+       
+      ],
     },
   // {
   //     icon: <FaTachometerAlt />,
