@@ -15,6 +15,10 @@ import SideNav from "../SideNav";
 import "../../../assets/css/attendance.css";
 import { AiFillEdit } from "react-icons/ai";
 import SalaryCalculation from "./SalaryCalculation"; 
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { FaPrint } from "react-icons/fa6";
+import { FaFileExcel } from "react-icons/fa";
 
 const EmpList = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -221,7 +225,103 @@ const EmpList = () => {
     );
   }
 
-  // Otherwise, render the employee list
+ const handlePrint = () => {
+  const columnsToRemove = [1, 10]; // Photo (1), Action (10)
+  const table = document.querySelector(".temp-rwd-table").cloneNode(true);
+
+  // Remove columns
+  table.querySelectorAll("tr").forEach((row) => {
+    const cells = row.querySelectorAll("th, td");
+    [...columnsToRemove].sort((a, b) => b - a).forEach((colIndex) => {
+      if (cells[colIndex]) cells[colIndex].remove();
+    });
+  });
+
+  const newWindow = window.open("", "_blank");
+  newWindow.document.write(`
+    <html>
+    <head>
+      <title>Employee List</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+        th { background-color: #f4f4f4; font-weight: bold; }
+        tr:nth-child(even) { background-color: #fafafa; }
+      </style>
+    </head>
+    <body>
+      <h2>Employee List</h2>
+      ${table.outerHTML}
+    </body>
+    </html>
+  `);
+
+  newWindow.document.close();
+  newWindow.print();
+};
+
+const handleDownload = () => {
+  if (allFilteredEmployees.length === 0) {
+    window.alert("No employee records to download!");
+    return;
+  }
+
+  const data = allFilteredEmployees.map((emp, index) => ({
+    "S.No": index + 1,
+    "Employee ID": emp.emp_id,
+    "Employee Name": `${emp.first_name} ${emp.last_name}`,
+    "Department": emp.department,
+    "Designation": emp.designation,
+    "Email": emp.email,
+    "Mobile": emp.phone,
+    "Status": emp.is_active ? "Active" : "Inactive",
+    "Salary Status": "Confirmed"
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  // Header styling
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!ws[cellRef]) continue;
+    ws[cellRef].s = {
+      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+      fill: { fgColor: { rgb: "2B5797" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "999999" } },
+        bottom: { style: "thin", color: { rgb: "999999" } },
+        left: { style: "thin", color: { rgb: "999999" } },
+        right: { style: "thin", color: { rgb: "999999" } }
+      }
+    };
+  }
+
+  // Column widths (no photo & no action)
+  ws["!cols"] = [
+    { wch: 6 },   // S.No
+    { wch: 20 },  // Employee ID
+    { wch: 28 },  // Employee Name
+    { wch: 20 },  // Department
+    { wch: 20 },  // Designation
+    { wch: 30 },  // Email
+    { wch: 15 },  // Mobile
+    { wch: 12 },  // Status
+    { wch: 15 },  // Salary Status
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Employees");
+
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Employee_List.xlsx");
+};
+
+
   return (
     <div className="dashboard-container">
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -231,6 +331,8 @@ const EmpList = () => {
         <Container fluid className="dashboard-body p-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="mb-0">Employee List (Confirmed Salary Structure Only)</h2>
+
+           
             
             {/* Status Filter Dropdown - Only for active/inactive */}
             <div className="d-flex align-items-center">
@@ -246,7 +348,18 @@ const EmpList = () => {
                 <option value="inactive">Inactive</option>
               </Form.Select>
             </div>
+             
           </div>
+
+           <div className="mt-2 vmb-2 text-end">
+                          <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+                            <FaPrint /> Print
+                          </Button>
+            
+                          <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+                            <FaFileExcel />Download
+                          </Button>
+                        </div>
           
           {loading && <div className="d-flex justify-content-center"><Spinner animation="border" /></div>}
           {error && <Alert variant="danger">Failed to load employees: {error}</Alert>}
