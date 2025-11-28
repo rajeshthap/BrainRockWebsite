@@ -60,6 +60,20 @@ const DailyAttendance = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  // Check if user is admin or other privileged role
+  const isAdminOrOther = () => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'hr' || userRole === 'manager';
+  };
+
+  // Check if check-in/check-out buttons should be visible
+  const shouldShowCheckInOutButtons = () => {
+    // Show buttons if:
+    // 1. User is admin/other privileged role, OR
+    // 2. User is viewing their own attendance (no selected employee)
+    return isAdminOrOther() || !selectedEmployee;
+  };
+
   // Fetch employees from API
   const fetchEmployees = async () => {
     setEmployeesLoading(true);
@@ -113,7 +127,7 @@ const DailyAttendance = () => {
     // Reset attendance data
     setAttendanceData([]);
     setWeekData([]);
-    // Fetch attendance data for the selected employee
+    // Fetch attendance data for selected employee
     fetchAttendanceData(selectedDate, viewMode, employee.emp_id);
   };
 
@@ -218,27 +232,32 @@ const handlePrint = () => {
     });
   });
 
-  const newWindow = window.open("", "_blank");
-  newWindow.document.write(`
-    <html>
-    <head>
-      <title>Employee List</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h2 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
-        th { background-color: #f4f4f4; font-weight: bold; }
-        tr:nth-child(even) { background-color: #fafafa; }
-      </style>
-    </head>
-    <body>
-      <h2>Employee List</h2>
-      ${table.outerHTML}
-    </body>
-    </html>
-  `);
+  // Apply print styles directly to the table
+  table.style.width = '100%';
+  table.style.borderCollapse = 'collapse';
+  table.style.marginTop = '20px';
+  
+  // Apply styles to table cells
+  table.querySelectorAll("th, td").forEach(cell => {
+    cell.style.border = '1px solid #ccc';
+    cell.style.padding = '8px';
+    cell.style.textAlign = 'left';
+    cell.style.fontSize = '13px';
+  });
+  
+  // Apply styles to table headers
+  table.querySelectorAll("th").forEach(header => {
+    header.style.backgroundColor = '#f4f4f4';
+    header.style.fontWeight = 'bold';
+  });
+  
+  // Apply alternating row colors
+  table.querySelectorAll("tr:nth-child(even)").forEach(row => {
+    row.style.backgroundColor = '#fafafa';
+  });
 
+  const newWindow = window.open("", "_blank");
+  newWindow.document.write(table.outerHTML);
   newWindow.document.close();
   newWindow.print();
 };
@@ -282,16 +301,8 @@ const handleDownload = () => {
     };
   }
 
-  ws["!cols"] = [
-    { wch: 6 },
-    { wch: 18 },
-    { wch: 25 },
-    { wch: 20 },
-    { wch: 20 },
-    { wch: 30 },
-    { wch: 15 },
-    { wch: 12 },
-  ];
+  // Removed manual column width settings to use table classes instead
+  // ws["!cols"] = [...] has been removed
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Employee List");
@@ -330,16 +341,16 @@ const handleDownload = () => {
       const now = new Date();
       const recordDate = new Date(record.date);
       
-      // Define the end of the checkout window (9:00 PM)
+      // Define end of checkout window (9:00 PM)
       const endOfDay = new Date(recordDate);
       endOfDay.setHours(21, 0, 0, 0);
 
-      // If the current time is past the end of the checkout window, it's a missed checkout
+      // If current time is past end of checkout window, it's a missed checkout
       if (now >= endOfDay) {
         return "MissedCheckout";
       }
       
-      // Otherwise, the user is still within the working hours window, so it's considered "Present"
+      // Otherwise, user is still within the working hours window, so it's considered "Present"
       return "Present";
     }
     
@@ -680,7 +691,7 @@ const handleDownload = () => {
         const data = await response.json();
         setAttendanceData(data);
         
-        // For day view, check if the selected date exists in the API response
+        // For day view, check if selected date exists in API response
         if (mode === 'day') {
           const selectedDateString = formatDateLocal(new Date(date));
           const dateExists = data.some(record => {
@@ -689,7 +700,7 @@ const handleDownload = () => {
           });
           
           if (dateExists) {
-            // Find the record for the selected date
+            // Find record for selected date
             const selectedRecord = data.find(record => {
               const recordDate = formatDateLocal(new Date(record.date));
               return recordDate === selectedDateString;
@@ -976,40 +987,43 @@ const handleDownload = () => {
   // Render employee list
   const renderEmployeeList = () => {
     return (
-      <div className="dashboard-container">
+      <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
         <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        <div className="main-content">
+        <div className="main-content" style={{ height: '100%', overflow: 'hidden' }}>
           <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-          <Container fluid className="dashboard-body p-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="mb-0">Employee List</h2>
-              
-              {/* Status Filter Dropdown - Only for active/inactive */}
-              <div className="d-flex align-items-center">
-                <span className="me-2">Filter by Status:</span>
-                <Form.Select 
-                  value={statusFilter} 
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="form-select"
-                  style={{ width: '150px' }}
-                >
-                  <option value="all">All Employees</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </Form.Select>
-              </div>
-            </div>
-             <div className="mt-2 vmb-2 text-end">
-                          <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
-                            <FaPrint /> Print
-                          </Button>
-            
-                          <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
-                            <FaFileExcel />Download
-                          </Button>
-                        </div>
+          <Container fluid className="dashboard-body p-4" style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
+            <Card className="mb-3">
+              <Card.Header className="d-flex justify-content-between align-items-center">
+                <span className="fw-bold">Employee List</span>
+                
+                {/* Status Filter Dropdown - Only for active/inactive */}
+                <div className="d-flex align-items-center">
+                  <span className="me-2">Filter by Status:</span>
+                  <Form.Select 
+                    value={statusFilter} 
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="form-select"
+                    style={{ width: '150px' }}
+                  >
+                    <option value="all">All Employees</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </Form.Select>
+                </div>
+              </Card.Header>
+              <Card.Body className="pb-2">
+                <div className="text-end mb-2">
+                  <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+                    <FaPrint /> Print
+                  </Button>
+                  <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+                    <FaFileExcel /> Download
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
             
             {message.text && (
               <Alert
@@ -1130,47 +1144,46 @@ const handleDownload = () => {
   // Render attendance view for selected employee
   const renderAttendanceView = () => {
     return (
-      <div className="dashboard-container">
+      <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
         <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        <div className="main-content">
+        <div className="main-content" style={{ height: '100%', overflow: 'hidden' }}>
           <HrHeader toggleSidebar={toggleSidebar} />
 
-          <Container fluid className="dashboard-body">
+          <Container fluid className="dashboard-body" style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
             {/* Back button and employee info */}
             <Card className="p-3 shadow-sm mb-3">
               <Row className="align-items-center">
                 <Col>
-                  
                   <h5 className="d-inline-block mb-0">
                     Attendance for: {selectedEmployee ? `${selectedEmployee.first_name} ${selectedEmployee.last_name}` : 'N/A'}
                   </h5>
-                  
                 </Col>
                 <Col xs="auto">
-                <Button 
+                  <Button 
                     variant="outline-secondary" 
                     className="me-3 justify-content-end align-items-end ms-3"
                     onClick={handleBackToEmployeeList}
                   >
                     <IoIosArrowBack /> Back to Employee List
                   </Button>
-                  </Col>
+                </Col>
               </Row>
             </Card>
 
-            {/* Check-in/Check-out buttons section */}
-            <Card className="p-3 shadow-sm mb-3">
-              <Row className="align-items-center">
-                <Col>
-                  <h5 className="mb-0">Today's Attendance</h5>
-                  <p className="text-muted mb-0">
-                    {new Date().toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
+            {/* Check-in/Check-out buttons section - Only show if user is admin or viewing own attendance */}
+            {shouldShowCheckInOutButtons() && (
+              <Card className="p-3 shadow-sm mb-3">
+                <Row className="align-items-center">
+                  <Col>
+                    <h5 className="mb-0">Today's Attendance</h5>
+                    <p className="text-muted mb-0">
+                      {new Date().toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
                     <br />
                     <small className="text-info">
                       Current Time: {currentTime.toLocaleTimeString('en-US', {
@@ -1194,49 +1207,50 @@ const handleDownload = () => {
                       </small>
                     )}
                   </p>
-                </Col>
-                <Col xs="auto">
-                  <Button
-                    variant="success"
-                    className="me-2"
-                    onClick={handleCheckIn}
-                    disabled={
-                      loading ||
-                      hasCheckedIn ||
-                      !withinTimeWindow ||
-                      hasCheckedOut ||
-                      !initialDataLoaded // Disable until initial data is loaded
-                    }
-                  >
-                    {loading ? 'Processing...' : 'Check In'}
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={handleCheckOut}
-                    disabled={
-                      loading ||
-                      !hasCheckedIn ||
-                      hasCheckedOut ||
-                      !withinTimeWindow ||
-                      !initialDataLoaded // Disable until initial data is loaded
-                    }
-                  >
-                    {loading ? 'Processing...' : 'Check Out'}
-                  </Button>
-                </Col>
-              </Row>
+                  </Col>
+                  <Col xs="auto">
+                    <Button
+                      variant="success"
+                      className="me-2"
+                      onClick={handleCheckIn}
+                      disabled={
+                        loading ||
+                        hasCheckedIn ||
+                        !withinTimeWindow ||
+                        hasCheckedOut ||
+                        !initialDataLoaded // Disable until initial data is loaded
+                      }
+                    >
+                      {loading ? 'Processing...' : 'Check In'}
+                    </Button>
+                    <Button
+                      variant="danger"
+                      onClick={handleCheckOut}
+                      disabled={
+                        loading ||
+                        !hasCheckedIn ||
+                        hasCheckedOut ||
+                        !withinTimeWindow ||
+                        !initialDataLoaded // Disable until initial data is loaded
+                      }
+                    >
+                      {loading ? 'Processing...' : 'Check Out'}
+                    </Button>
+                  </Col>
+                </Row>
 
-              {message.text && (
-                <Alert
-                  variant={message.type}
-                  className="mt-3 mb-0"
-                  onClose={() => setMessage({ type: "", text: "" })}
-                  dismissible
-                >
-                  {message.text}
-                </Alert>
-              )}
-            </Card>
+                {message.text && (
+                  <Alert
+                    variant={message.type}
+                    className="mt-3 mb-0"
+                    onClose={() => setMessage({ type: "", text: "" })}
+                    dismissible
+                  >
+                    {message.text}
+                  </Alert>
+                )}
+              </Card>
+            )}
 
             <Card className="p-3 shadow-sm br-attendance-card">
               <Row className="mb-3">
