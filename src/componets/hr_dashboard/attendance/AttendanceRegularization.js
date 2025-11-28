@@ -10,12 +10,16 @@ import {
   Alert,
   Tabs,
   Tab,
+  Spinner,
+  Image,
+  Pagination,
 } from "react-bootstrap";
 import "../../../assets/css/Profile.css";
 import { AuthContext } from "../../context/AuthContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { AiFillEdit } from "react-icons/ai";
 import SideNav from "../SideNav";
 import HrHeader from "../HrHeader";
 
@@ -32,8 +36,140 @@ const AttendanceRegularization = () => {
   const [viewMode, setViewMode] = useState('month');
   const [activeTab, setActiveTab] = useState('regularization');
   const [dateRange, setDateRange] = useState({ start: null, end: null });
+  
+  // New states for employee management (only for admin)
+  const [employees, setEmployees] = useState([]);
+  const [employeesLoading, setEmployeesLoading] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  // Initialize showEmployeeList based on user role
+  const [showEmployeeList, setShowEmployeeList] = useState(user?.role === 'admin' || user?.role === 'Technical Lead'  ? true : false);
+  
+  // State for search and pagination (only for admin)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin' || user?.role === 'Technical Lead' ;
+
+  // Fetch employees from API (only for admin)
+  const fetchEmployees = async () => {
+    if (!isAdmin) return; // Only fetch employees if user is admin
+    
+    setEmployeesLoading(true);
+    try {
+      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setEmployees(data);
+        } else if (data && Array.isArray(data.results)) {
+          setEmployees(data.results);
+        } else {
+          setMessage({
+            type: "danger",
+            text: "Received unexpected data format from server."
+          });
+        }
+      } else {
+        const errorText = await response.text();
+        console.error("Error fetching employees:", errorText);
+        setMessage({
+          type: "danger",
+          text: "Failed to fetch employee list"
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      setMessage({
+        type: "danger",
+        text: "Error fetching employee list. Please try again."
+      });
+    } finally {
+      setEmployeesLoading(false);
+    }
+  };
+
+  // Fetch employees on component mount (only for admin)
+  useEffect(() => {
+    if (isAdmin) {
+      fetchEmployees();
+    }
+  }, []);
+
+  // Function to handle viewing regularization for a specific employee (only for admin)
+  const handleViewRegularization = (employee) => {
+    setSelectedEmployee(employee);
+    setShowEmployeeList(false);
+    // Reset attendance data
+    setAttendanceData([]);
+    setWeekData([]);
+    setRegularizationData([]);
+    // Fetch attendance data for the selected employee
+    fetchAttendanceData(selectedDate, viewMode, employee.emp_id);
+  };
+
+  // Function to go back to employee list (only for admin)
+  const handleBackToEmployeeList = () => {
+    setShowEmployeeList(true);
+    setSelectedEmployee(null);
+  };
+
+  // Filter employees based on search term and status (only for admin)
+  const allFilteredEmployees = React.useMemo(() => {
+    let filtered = employees;
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(emp => {
+        if (statusFilter === 'active') {
+          return emp.is_active === true;
+        } else if (statusFilter === 'inactive') {
+          return emp.is_active === false;
+        }
+        return true;
+      });
+    }
+    
+    // Apply search filter
+    if (!searchTerm) {
+      return filtered;
+    }
+    
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    return filtered.filter(emp =>
+      emp.first_name?.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.last_name?.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.email?.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.emp_id?.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.phone?.toLowerCase().includes(lowercasedSearchTerm)
+    );
+  }, [employees, searchTerm, statusFilter]);
+
+  // Reset page on search or status filter change (only for admin)
+  useEffect(() => {
+    if (isAdmin) {
+      setCurrentPage(1);
+    }
+  }, [searchTerm, statusFilter]);
+
+  // Get current page's employees (only for admin)
+  const paginatedEmployees = React.useMemo(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return allFilteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
+  }, [allFilteredEmployees, currentPage, itemsPerPage]);
+
+  // Calculate total pages (only for admin)
+  const totalPages = Math.ceil(allFilteredEmployees.length / itemsPerPage);
 
   // Helper function to format date to YYYY-MM-DD in local timezone
   const formatDateLocal = (date) => {
@@ -236,16 +372,19 @@ const AttendanceRegularization = () => {
     fetchAttendanceData(newDate, viewMode);
   };
 
-  // Fetch attendance Data from API - using the same approach as DailyAttendance
-  const fetchAttendanceData = async (date = selectedDate, mode = viewMode) => {
-    if (!user?.unique_id) return;
+  // Fetch attendance Data from API
+  const fetchAttendanceData = async (date = selectedDate, mode = viewMode, employeeId) => {
+    // Use the logged-in user's ID for non-admin users
+    const targetEmployeeId = isAdmin ? employeeId : user?.unique_id;
+    
+    if (!targetEmployeeId) return;
 
     setLoading(true);
     setMessage({ type: "", text: "" });
     
     try {
       const { start, end } = getDateRange(date, mode);
-      let apiUrl = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/attendance/report/?employee_id=${user.unique_id}`;
+      let apiUrl = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/attendance/report/?employee_id=${targetEmployeeId}`;
       
       // Add date range parameters based on view mode
       if (mode === 'day') {
@@ -254,7 +393,7 @@ const AttendanceRegularization = () => {
         apiUrl += `&start_date=${start}&end_date=${end}`;
       }
       
-      console.log('Fetching data for:', { mode, start, end });
+      console.log('Fetching data for:', { mode, start, end, employeeId: targetEmployeeId });
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -390,12 +529,17 @@ const AttendanceRegularization = () => {
     }
   };
 
-  // Fetch data on component mount
+  // Fetch data on component mount or when selected employee changes
   useEffect(() => {
-    if (user?.unique_id) {
+    // For non-admin users, fetch their own data immediately
+    if (!isAdmin && user?.unique_id) {
       fetchAttendanceData();
     }
-  }, [user]);
+    // For admin users, fetch data when an employee is selected
+    else if (isAdmin && selectedEmployee?.emp_id) {
+      fetchAttendanceData();
+    }
+  }, [selectedEmployee, user]);
 
   // Get status badge variant
   const getStatusVariant = (status) => {
@@ -418,26 +562,192 @@ const AttendanceRegularization = () => {
     }
   };
 
-  return (
-    <div className="dashboard-container">
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+  const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
-      <div className="main-content">
-        <HrHeader toggleSidebar={toggleSidebar} />
+  // Render employee list (only for admin)
+  const renderEmployeeList = () => {
+    return (
+      <div className="dashboard-container">
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        <Container fluid className="dashboard-body">
-          <div className="br-box-container">
-            <h2>Attendance Regularization</h2>
+        <div className="main-content">
+          <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
+          <Container fluid className="dashboard-body p-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Employee List</h2>
+              
+              {/* Status Filter Dropdown - Only for active/inactive */}
+              <div className="d-flex align-items-center">
+                <span className="me-2">Filter by Status:</span>
+                <Form.Select 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="form-select"
+                  style={{ width: '150px' }}
+                >
+                  <option value="all">All Employees</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </Form.Select>
+              </div>
+            </div>
             
             {message.text && (
               <Alert
                 variant={message.type}
-                className="mt-3 mb-3"
+                className="mb-3"
                 onClose={() => setMessage({ type: "", text: "" })}
                 dismissible
               >
                 {message.text}
               </Alert>
+            )}
+            
+            {employeesLoading ? (
+              <div className="d-flex justify-content-center py-5">
+                <Spinner animation="border" />
+              </div>
+            ) : (
+              <>
+                {/* Employee Table */}
+                <Row className="mt-3">
+                  <div className="col-md-12">
+                    <table className="temp-rwd-table">
+                      <tbody>
+                        <tr>
+                          <th>S.No</th>
+                          <th>Photo</th>
+                          <th>Employee ID</th>
+                          <th>Employee Name</th>
+                          <th>Department</th>
+                          <th>Designation</th>
+                          <th>Email</th>
+                          <th>Mobile</th>
+                          <th>Status</th>
+                          <th>Action</th>
+                        </tr>
+ 
+                        {paginatedEmployees.length > 0 ? (
+                          paginatedEmployees.map((emp, index) => (
+                            <tr key={emp.id}>
+                              <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                              <td data-th="Photo">
+                                {emp.profile_photo ? (
+                                  <Image src={`${baseUrl}${emp.profile_photo}`} roundedCircle width={40} height={40} />
+                                ) : (
+                                  <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{width: '40px', height: '40px', color: 'white', fontSize: '0.8rem'}}>
+                                    {emp.first_name?.[0]}{emp.last_name?.[0]}
+                                  </div>
+                                )}
+                              </td>
+                              <td data-th="Employee ID">{emp.emp_id || "N/A"}</td>
+                              <td data-th="Employee Name">{emp.first_name} {emp.last_name}</td>
+                              <td data-th="Department">{emp.department || "N/A"}</td>
+                              <td data-th="Designation">{emp.designation || "N/A"}</td>
+                              <td data-th="Email">{emp.email || "N/A"}</td>
+                              <td data-th="Mobile">{emp.phone || "N/A"}</td>
+                              <td data-th="Status">
+                                <Badge bg={emp.is_active ? "success" : "secondary"}>
+                                  {emp.is_active ? "Active" : "Inactive"}
+                                </Badge>
+                              </td>
+                              <td data-th="Action">
+                                <Button 
+                                  variant="primary" 
+                                  size="sm"
+                                  onClick={() => handleViewRegularization(emp)}
+                                >
+                                  <AiFillEdit /> View Regularization
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="9" className="text-center">
+                              No employees found matching your search.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </Row>
+                
+                {/* Pagination Controls */}
+                {allFilteredEmployees.length > itemsPerPage && (
+                  <div className="d-flex justify-content-center align-items-center mt-4">
+                    <Pagination>
+                      <Pagination.Prev 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                        disabled={currentPage === 1}
+                      />
+                      
+                      {[...Array(totalPages)].map((_, index) => (
+                        <Pagination.Item 
+                          key={index + 1} 
+                          active={index + 1 === currentPage}
+                          onClick={() => setCurrentPage(index + 1)}
+                        >
+                          {index + 1}
+                        </Pagination.Item>
+                      ))}
+                      
+                      <Pagination.Next 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                        disabled={currentPage === totalPages}
+                      />
+                    </Pagination>
+                  </div>
+                )}
+              </>
+            )}
+          </Container>
+        </div>
+      </div>
+    );
+  };
+
+  // Render regularization view (for both admin and regular users)
+  const renderRegularizationView = () => {
+    const displayName = isAdmin ? 
+      (selectedEmployee ? `${selectedEmployee.first_name} ${selectedEmployee.last_name}` : 'Selected Employee') :
+      (user ? `${user.first_name} ${user.last_name}` : 'Current User');
+    
+    return (
+      <div className="dashboard-container">
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+        <div className="main-content">
+          <HrHeader toggleSidebar={toggleSidebar} />
+
+          <Container fluid className="dashboard-body">
+            {/* Back button (only for admin) and employee info */}
+            {isAdmin && (
+              <Card className="p-3 shadow-sm mb-3">
+                <Row className="align-items-center">
+                  <Col>
+                    <Button 
+                      variant="outline-secondary" 
+                      className="me-3"
+                      onClick={handleBackToEmployeeList}
+                    >
+                      <IoIosArrowBack /> Back to Employee List
+                    </Button>
+                    <h5 className="d-inline-block mb-0">
+                      Regularization for: {displayName}
+                    </h5>
+                    {selectedEmployee && (
+                      <p className="text-muted mb-0 mt-1">
+                        Employee ID: {selectedEmployee.emp_id || 'N/A'} | 
+                        Department: {selectedEmployee.department || 'N/A'} | 
+                        Designation: {selectedEmployee.designation || 'N/A'}
+                      </p>
+                    )}
+                  </Col>
+                </Row>
+              </Card>
             )}
 
             <Card className="p-3 shadow-sm mb-4">
@@ -502,6 +812,19 @@ const AttendanceRegularization = () => {
                 </Col>
               </Row>
 
+              {message.text && (
+                <Alert
+                  variant={message.type}
+                  className="mt-3 mb-0"
+                  onClose={() => setMessage({ type: "", text: "" })}
+                  dismissible
+                >
+                  {message.text}
+                </Alert>
+              )}
+            </Card>
+
+            <Card className="p-3 shadow-sm br-attendance-card">
               <Tabs
                 activeKey={activeTab}
                 onSelect={(k) => setActiveTab(k)}
@@ -611,11 +934,20 @@ const AttendanceRegularization = () => {
                 </Tab>
               </Tabs>
             </Card>
-          </div>
-        </Container>
+          </Container>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  // Main render logic based on user role
+  if (isAdmin) {
+    // Admin flow: Show employee list first, then regularization for selected employee
+    return showEmployeeList ? renderEmployeeList() : renderRegularizationView();
+  } else {
+    // Regular user flow: Skip employee list, directly show their regularization
+    return renderRegularizationView();
+  }
 };
 
 export default AttendanceRegularization;
