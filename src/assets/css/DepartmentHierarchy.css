@@ -1,0 +1,70 @@
+/* Container & basic nodes */
+.dashboard-body { position: relative; min-height: 520px; }
+.connector-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+/* ROOT */
+.root-row { position: relative; z-index: 5; margin-bottom: 26px; }
+.root-box { display: inline-block; padding: 10px 18px; background: #0d6efd; color: #fff; border-radius: 8px; font-weight: 700; box-shadow: 0 6px 20px rgba(13,110,253,0.12); }
+
+/* DEPARTMENTS layout (graph style) */
+.departments-row {
+  display: flex;
+  gap: 22px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 4;
+}
+
+/* Each department block */
+.department-block {
+  min-width: 240px;
+  max-width: 260px;
+  background: transparent;
+  padding: 6px;
+  border-radius: 8px;
+  transition: transform 0.25s ease, box-shadow 0.2s ease;
+}
+
+.department-block.dragging { opacity: 0.6; transform: scale(0.98); }
+
+.dept-header { margin-bottom: 10px; display: flex; gap: 10px; align-items: center; }
+
+/* Department node box */
+.node-box.dept-box { display: block; padding: 10px 12px; border: 1px solid #e7eefb; background: #fff; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(99,123,255,0.03); }
+.dept-sub { font-weight: 600; font-size: 12px; margin-top: 6px; }
+
+.dept-actions button { margin-left: 4px; }
+
+/* Chev */
+.chev { margin-right: 8px; transform: rotate(0deg); transition: transform 0.2s ease; }
+.chev.open { transform: rotate(180deg); }
+
+/* Employees list */
+.dept-employees { margin-top: 6px; padding-left: 6px; }
+.employees-list { transition: all 0.25s ease; }
+
+.employee-items { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.employee-item { padding: 8px 10px; border-radius: 8px; border: 1px solid #e9eefb; background: #fbfdff; box-shadow: 0 4px 12px rgba(13,110,253,0.03); cursor: grab; }
+.employee-item:active { cursor: grabbing; }
+.employee-item .emp-actions button { font-size: 12px; padding: 4px 6px; }
+
+/* Node style for small employee box if we want it visually different */
+.node-box-emp { display: block; }
+
+/* Hover / focus */
+.department-block:hover { transform: translateY(-4px); }
+
+/* Dragging styles */
+.dragging { opacity: 0.6; transform: translateY(-2px) scale(0.98); }
+.dragging-emp { opacity: 0.5; transform: scale(0.98); }
+
+/* Small screens */
+@media (max-width: 768px) {
+  .departments-row { gap: 12px; }
+  .department-block { min-width: 200px; max-width: 220px; }
+}
+
+/* Small utility */
+.small.text-muted { color: #6c757d; }

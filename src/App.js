@@ -46,6 +46,7 @@ import LeaveStatus from "./componets/hr_dashboard/Leave/LeaveStatus";
 import SalaryStructure from "./componets/hr_dashboard/pay_roll/SalaryStructure";
 import LeaveHistory from "./componets/hr_dashboard/Leave/LeaveHistory";
 import AttendanceRegularization from "./componets/hr_dashboard/attendance/AttendanceRegularization";
+import DepartmentHierarchy from "./componets/hr_dashboard/Departments/DepartmentHierarchy";
 
 
 function AppContent() {
@@ -70,7 +71,8 @@ function AppContent() {
     "/ApplyLeaveCalendar",
     "/LeaveStatus",
     "/SalaryStructure",
-    "/LeaveHistory"
+    "/LeaveHistory",
+    "/DepartmentHierarchy"
 
   ]);
 
@@ -226,6 +228,15 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <SalaryCalculation />
+            </ProtectedRoute>
+          }
+        />
+
+          <Route
+          path="/DepartmentHierarchy"
+          element={
+            <ProtectedRoute>
+              <DepartmentHierarchy/>
             </ProtectedRoute>
           }
         />

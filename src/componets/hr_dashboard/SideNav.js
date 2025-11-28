@@ -102,50 +102,50 @@ const menuItems = [
         },
       ],
     },
-  {
-      icon: <ImProfile />,
-      label: "Employee Profile",
+  // {
+  //     icon: <ImProfile />,
+  //     label: "Employee Profile",
  
-      submenu: [
-        {
-          label: "Personal Information",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-         {
-          label: "Contact Details",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+  //     submenu: [
+  //       {
+  //         label: "Personal Information",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //        {
+  //         label: "Contact Details",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
  
-         {
-          label: "Job Info.(Designation, Department, Joining Date)",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Salary Details",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Documents & ID Proofs",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Emergency Contact",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Bank Details",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+  //        {
+  //         label: "Job Info.(Designation, Department, Joining Date)",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Salary Details",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Documents & ID Proofs",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Emergency Contact",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Bank Details",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
        
-      ],
-    },
+  //     ],
+  //   },
  
      {
       icon: <FaUserCheck />,
@@ -266,11 +266,13 @@ const menuItems = [
       label: "Departments",
  
       submenu: [
-        {
-          label: "Department List",
-          path: "/EmployeeManagement",
+
+         {
+          label: "Departmental Hierarchy",
+          path: "/DepartmentHierarchy",
           icon: <FaChartLine />,
         },
+       
         {
           label: "Add / Edit Department",
           path: "/EmployeeManagement",
@@ -281,11 +283,7 @@ const menuItems = [
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        {
-          label: "Departmental Hierarchy",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+       
         {
           label: "Department Performance Overview",
           path: "/EmployeeManagement",
