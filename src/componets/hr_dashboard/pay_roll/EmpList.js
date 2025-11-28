@@ -437,7 +437,7 @@ const handleDownload = () => {
             </div>
           </div>
 
-          <div className="mt-2 vmb-2 text-end">
+          <div className="mt-2 mb-2 text-end">
             <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
               <FaPrint /> Print
             </Button>
@@ -453,89 +453,89 @@ const handleDownload = () => {
           {!loading && !error && (
             <>
               {/* --- YOUR CUSTOM TABLE STRUCTURE --- */}
-              <Row className="mt-3">
-                <div className="col-md-12">
-                  <table className="temp-rwd-table">
-                    <tbody>
+              {/* Replaced Row/Col with a responsive table container */}
+              <div className="table-responsive mt-3">
+                <table className="temp-rwd-table table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>S.No</th>
+                      <th>Photo</th>
+                      <th>Employee ID</th>
+                      <th>Employee Name</th>
+                      <th>Department</th>
+                      <th>Designation</th>
+                      <th>Email</th>
+                      <th>Mobile</th>
+                      <th>Status</th>
+                      <th>Salary Structure Status</th>
+                      <th>Salary Calculation Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedEmployees.length > 0 ? (
+                      paginatedEmployees.map((emp, index) => {
+                        const salaryStatus = salaryStatuses[emp.emp_id] || 'unconfirmed';
+                        const salaryCalcStatus = salaryCalculationStatuses[emp.emp_id] || 'unconfirmed';
+                        const isSalaryCalcConfirmed = salaryCalcStatus === 'confirmed';
+                        
+                        return (
+                          <tr key={emp.id}>
+                            <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                            <td data-th="Photo">
+                               {emp.profile_photo ? (
+                                    <Image src={`${baseUrl}${emp.profile_photo}`} roundedCircle width={40} height={40} />
+                                ) : (
+                                    <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{width: '40px', height: '40px', color: 'white', fontSize: '0.8rem'}}>
+                                        {emp.first_name?.[0]}{emp.last_name?.[0]}
+                                    </div>
+                                )}
+                            </td>
+                            <td data-th="Employee ID">{emp.emp_id || "N/A"}</td>
+                            <td data-th="Employee Name">{emp.first_name} {emp.last_name}</td>
+                            <td data-th="Department">{emp.department || "N/A"}</td>
+                            <td data-th="Designation">{emp.designation || "N/A"}</td>
+                            <td data-th="Email" className="text-truncate" style={{maxWidth: '150px'}} title={emp.email}>{emp.email || "N/A"}</td>
+                            <td data-th="Mobile">{emp.phone || "N/A"}</td>
+                            <td data-th="Status">
+                              <Badge bg={emp.is_active ? "success" : "secondary"}>
+                                {emp.is_active ? "Active" : "Inactive"}
+                              </Badge>
+                            </td>
+                            <td data-th="Salary Structure Status">
+                              <Badge bg="success">
+                                Confirmed
+                              </Badge>
+                            </td>
+                            <td data-th="Salary Calculation Status">
+                              <Badge bg={salaryCalcStatus === 'confirmed' ? "success" : "warning"}>
+                                {salaryCalcStatus === 'confirmed' ? 'Confirmed' : 'Unconfirmed'}
+                              </Badge>
+                            </td>
+                            <td data-th="Action">
+                              <Button 
+                                variant="primary" 
+                                size="sm"
+                                onClick={() => handleViewSalary(emp)}
+                                disabled={isSalaryCalcConfirmed}
+                                title={isSalaryCalcConfirmed ? "Salary calculation is already confirmed" : "View salary calculation"}
+                              >
+                                <AiFillEdit /> View Salary
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
                       <tr>
-                        <th>S.No</th>
-                        <th>Photo</th>
-                        <th>Employee ID</th>
-                        <th>Employee Name</th>
-                        <th>Department</th>
-                        <th>Designation</th>
-                        <th>Email</th>
-                        <th>Mobile</th>
-                        <th>Status</th>
-                        <th>Salary Structure Status</th>
-                        <th>Salary Calculation Status</th>
-                        <th>Action</th>
+                        <td colSpan="12" className="text-center">
+                          No employees with confirmed salary structure found matching your search.
+                        </td>
                       </tr>
- 
-                      {paginatedEmployees.length > 0 ? (
-                        paginatedEmployees.map((emp, index) => {
-                          const salaryStatus = salaryStatuses[emp.emp_id] || 'unconfirmed';
-                          const salaryCalcStatus = salaryCalculationStatuses[emp.emp_id] || 'unconfirmed';
-                          const isSalaryCalcConfirmed = salaryCalcStatus === 'confirmed';
-                          
-                          return (
-                            <tr key={emp.id}>
-                              <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                              <td data-th="Photo">
-                                 {emp.profile_photo ? (
-                                      <Image src={`${baseUrl}${emp.profile_photo}`} roundedCircle width={40} height={40} />
-                                  ) : (
-                                      <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{width: '40px', height: '40px', color: 'white', fontSize: '0.8rem'}}>
-                                          {emp.first_name?.[0]}{emp.last_name?.[0]}
-                                      </div>
-                                  )}
-                              </td>
-                              <td data-th="Employee ID">{emp.emp_id || "N/A"}</td>
-                              <td data-th="Employee Name">{emp.first_name} {emp.last_name}</td>
-                              <td data-th="Department">{emp.department || "N/A"}</td>
-                              <td data-th="Designation">{emp.designation || "N/A"}</td>
-                              <td data-th="Email">{emp.email || "N/A"}</td>
-                              <td data-th="Mobile">{emp.phone || "N/A"}</td>
-                              <td data-th="Status">
-                                <Badge bg={emp.is_active ? "success" : "secondary"}>
-                                  {emp.is_active ? "Active" : "Inactive"}
-                                </Badge>
-                              </td>
-                              <td data-th="Salary Structure Status">
-                                <Badge bg="success">
-                                  Confirmed
-                                </Badge>
-                              </td>
-                              <td data-th="Salary Calculation Status">
-                                <Badge bg={salaryCalcStatus === 'confirmed' ? "success" : "warning"}>
-                                  {salaryCalcStatus === 'confirmed' ? 'Confirmed' : 'Unconfirmed'}
-                                </Badge>
-                              </td>
-                              <td data-th="Action">
-                                <Button 
-                                  variant="primary" 
-                                  size="sm"
-                                  onClick={() => handleViewSalary(emp)}
-                                  disabled={isSalaryCalcConfirmed}
-                                  title={isSalaryCalcConfirmed ? "Salary calculation is already confirmed" : "View salary calculation"}
-                                >
-                                  <AiFillEdit /> View Salary
-                                </Button>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        <tr>
-                          <td colSpan="12" className="text-center">
-                            No employees with confirmed salary structure found matching your search.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </Row>
+                    )}
+                  </tbody>
+                </table>
+              </div>
               
               {/* --- Pagination Controls --- */}
               {allFilteredEmployees.length > itemsPerPage && (
@@ -571,4 +571,4 @@ const handleDownload = () => {
   );
 };
 
-export default EmpList;
+export default EmpList; 
