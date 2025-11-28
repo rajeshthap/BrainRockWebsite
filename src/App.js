@@ -47,6 +47,7 @@ import SalaryStructure from "./componets/hr_dashboard/pay_roll/SalaryStructure";
 import LeaveHistory from "./componets/hr_dashboard/Leave/LeaveHistory";
 import AttendanceRegularization from "./componets/hr_dashboard/attendance/AttendanceRegularization";
 import DepartmentHierarchy from "./componets/hr_dashboard/Departments/DepartmentHierarchy";
+import TeamManagment from "./componets/hr_dashboard/teammanagment/TeamManagment";
 
 
 function AppContent() {
@@ -72,7 +73,8 @@ function AppContent() {
     "/LeaveStatus",
     "/SalaryStructure",
     "/LeaveHistory",
-    "/DepartmentHierarchy"
+    "/DepartmentHierarchy",
+    "/TeamManagment"
 
   ]);
 
@@ -165,6 +167,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <PayDashBoard />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/TeamManagment"
+          element={
+            <ProtectedRoute>
+              <TeamManagment />
             </ProtectedRoute>
           }
         />
