@@ -8,6 +8,9 @@ import {
   Form,
   Button,
   Alert,
+  Spinner,
+  Image,
+  Pagination,
 } from "react-bootstrap";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
@@ -33,13 +36,134 @@ const DailyAttendance = () => {
   const [todayCheckInTime, setTodayCheckInTime] = useState(null);
   const [weekData, setWeekData] = useState([]); // Will be populated from API
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
-
+  
+  // New states for employee management
+  const [employees, setEmployees] = useState([]);
+  const [employeesLoading, setEmployeesLoading] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showEmployeeList, setShowEmployeeList] = useState(true);
+  
+  // State for search and pagination
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(3); 
+  
   // Date picker related states
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('day'); // 'day', 'week', 'month'
   const [dateRange, setDateRange] = useState({ start: null, end: null });
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  // Fetch employees from API
+  const fetchEmployees = async () => {
+    setEmployeesLoading(true);
+    try {
+      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setEmployees(data);
+        } else if (data && Array.isArray(data.results)) {
+          setEmployees(data.results);
+        } else {
+          setMessage({
+            type: "danger",
+            text: "Received unexpected data format from server."
+          });
+        }
+      } else {
+        const errorText = await response.text();
+        console.error("Error fetching employees:", errorText);
+        setMessage({
+          type: "danger",
+          text: "Failed to fetch employee list"
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      setMessage({
+        type: "danger",
+        text: "Error fetching employee list. Please try again."
+      });
+    } finally {
+      setEmployeesLoading(false);
+    }
+  };
+
+  // Fetch employees on component mount
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  // Function to handle viewing attendance for a specific employee
+  const handleViewAttendance = (employee) => {
+    setSelectedEmployee(employee);
+    setShowEmployeeList(false);
+    // Reset attendance data
+    setAttendanceData([]);
+    setWeekData([]);
+    // Fetch attendance data for the selected employee
+    fetchAttendanceData(selectedDate, viewMode, employee.emp_id);
+  };
+
+  // Function to go back to employee list
+  const handleBackToEmployeeList = () => {
+    setShowEmployeeList(true);
+    setSelectedEmployee(null);
+  };
+
+  // Filter employees based on search term and status
+  const allFilteredEmployees = React.useMemo(() => {
+    let filtered = employees;
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(emp => {
+        if (statusFilter === 'active') {
+          return emp.is_active === true;
+        } else if (statusFilter === 'inactive') {
+          return emp.is_active === false;
+        }
+        return true;
+      });
+    }
+    
+    // Apply search filter
+    if (!searchTerm) {
+      return filtered;
+    }
+    
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    return filtered.filter(emp =>
+      emp.first_name?.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.last_name?.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.email?.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.emp_id?.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.phone?.toLowerCase().includes(lowercasedSearchTerm)
+    );
+  }, [employees, searchTerm, statusFilter]);
+
+  // Reset page on search or status filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  // Get current page's employees
+  const paginatedEmployees = React.useMemo(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return allFilteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
+  }, [allFilteredEmployees, currentPage, itemsPerPage]);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(allFilteredEmployees.length / itemsPerPage);
 
   // Helper function to format date to YYYY-MM-DD in local timezone
   const formatDateLocal = (date) => {
@@ -89,7 +213,6 @@ const DailyAttendance = () => {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   };
 
-  // *** MODIFIED FUNCTION ***
   // Determine status based on attendance data and current time
   const getStatus = (record) => {
     if (!record.check_in && !record.check_out) {
@@ -180,7 +303,7 @@ const DailyAttendance = () => {
   // Handle date change from date picker
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    fetchAttendanceData(date, viewMode);
+    fetchAttendanceData(date, viewMode, selectedEmployee?.emp_id);
   };
 
   // Handle view mode change
@@ -198,7 +321,7 @@ const DailyAttendance = () => {
     }
     
     setSelectedDate(newDate);
-    fetchAttendanceData(newDate, mode);
+    fetchAttendanceData(newDate, mode, selectedEmployee?.emp_id);
   };
 
   // Navigate to previous period
@@ -214,7 +337,7 @@ const DailyAttendance = () => {
     }
     
     setSelectedDate(newDate);
-    fetchAttendanceData(newDate, viewMode);
+    fetchAttendanceData(newDate, viewMode, selectedEmployee?.emp_id);
   };
 
   // Navigate to next period
@@ -230,7 +353,7 @@ const DailyAttendance = () => {
     }
     
     setSelectedDate(newDate);
-    fetchAttendanceData(newDate, viewMode);
+    fetchAttendanceData(newDate, viewMode, selectedEmployee?.emp_id);
   };
 
   // Get display text for date range
@@ -287,7 +410,7 @@ const DailyAttendance = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          employee_id: user?.unique_id || '',
+          employee_id: selectedEmployee?.emp_id || user?.unique_id || '',
           check_in: checkInTime
         })
       });
@@ -301,7 +424,7 @@ const DailyAttendance = () => {
         });
 
         // Refresh attendance Data
-        fetchAttendanceData(selectedDate, viewMode);
+        fetchAttendanceData(selectedDate, viewMode, selectedEmployee?.emp_id);
       } else {
         const contentType = response.headers.get("content-type");
         let errorMessage = "Failed to check in";
@@ -352,7 +475,7 @@ const DailyAttendance = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          employee_id: user?.unique_id || '',
+          employee_id: selectedEmployee?.emp_id || user?.unique_id || '',
           check_out: new Date().toISOString()
         })
       });
@@ -365,7 +488,7 @@ const DailyAttendance = () => {
         });
 
         // Refresh attendance Data
-        fetchAttendanceData(selectedDate, viewMode);
+        fetchAttendanceData(selectedDate, viewMode, selectedEmployee?.emp_id);
       } else {
         const contentType = response.headers.get("content-type");
         let errorMessage = "Failed to check out";
@@ -407,7 +530,7 @@ const DailyAttendance = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          employee_id: user?.unique_id || '',
+          employee_id: selectedEmployee?.emp_id || user?.unique_id || '',
           check_out: null // Send null for auto check-out
         })
       });
@@ -420,7 +543,7 @@ const DailyAttendance = () => {
         });
 
         // Refresh attendance Data
-        fetchAttendanceData(selectedDate, viewMode);
+        fetchAttendanceData(selectedDate, viewMode, selectedEmployee?.emp_id);
       }
     } catch (error) {
       console.error("Error in auto check-out:", error);
@@ -428,13 +551,13 @@ const DailyAttendance = () => {
   };
 
   // Fetch attendance Data from API
-  const fetchAttendanceData = async (date = selectedDate, mode = viewMode) => {
-    if (!user?.unique_id) return;
+  const fetchAttendanceData = async (date = selectedDate, mode = viewMode, employeeId = selectedEmployee?.emp_id || user?.unique_id) => {
+    if (!employeeId) return;
 
     setLoading(true);
     try {
       const { start, end } = getDateRange(date, mode);
-      let apiUrl = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/attendance/report/?employee_id=${user.unique_id}`;
+      let apiUrl = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/attendance/report/?employee_id=${employeeId}`;
       
       // Add date range parameters based on view mode
       if (mode === 'day') {
@@ -443,7 +566,7 @@ const DailyAttendance = () => {
         apiUrl += `&start_date=${start}&end_date=${end}`;
       }
       
-      console.log('Fetching data for:', { mode, start, end });
+      console.log('Fetching data for:', { mode, start, end, employeeId });
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -596,12 +719,12 @@ const DailyAttendance = () => {
     }
   };
 
-  // Fetch data on component mount
+  // Fetch data on component mount or when selected employee changes
   useEffect(() => {
-    if (user?.unique_id) {
+    if (selectedEmployee?.emp_id || user?.unique_id) {
       fetchAttendanceData();
     }
-  }, [user]);
+  }, [selectedEmployee, user]);
 
   // Auto check-out when time window is over (after 9 PM)
   useEffect(() => {
@@ -684,7 +807,7 @@ const DailyAttendance = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          employee_id: user?.unique_id || '',
+          employee_id: selectedEmployee?.emp_id || user?.unique_id || '',
           check_in: updatedData[index].timeIn,
           check_out: updatedData[index].timeOut,
           total_hours: updatedHours
@@ -698,7 +821,7 @@ const DailyAttendance = () => {
         });
 
         // Refresh attendance Data
-        fetchAttendanceData(selectedDate, viewMode);
+        fetchAttendanceData(selectedDate, viewMode, selectedEmployee?.emp_id);
       } else {
         const contentType = response.headers.get("content-type");
         let errorMessage = "Failed to update attendance";
@@ -745,323 +868,496 @@ const DailyAttendance = () => {
   };
 
   const withinTimeWindow = isWithinAllowedTime();
+  const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
-  return (
-    <div className="dashboard-container">
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+  // Render employee list
+  const renderEmployeeList = () => {
+    return (
+      <div className="dashboard-container">
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      <div className="main-content">
-        <HrHeader toggleSidebar={toggleSidebar} />
+        <div className="main-content">
+          <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-        <Container fluid className="dashboard-body">
-          {/* Check-in/Check-out buttons section */}
-          <Card className="p-3 shadow-sm mb-3">
-            <Row className="align-items-center">
-              <Col>
-                <h5 className="mb-0">Today's Attendance Hello</h5>
-                <p className="text-muted mb-0">
-                  {new Date().toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                  <br />
-                  <small className="text-info">
-                    Current Time: {currentTime.toLocaleTimeString('en-US', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: true
-                    })}
-                  </small>
-                  {todayCheckInTime && (
-                    <small className="text-success d-block">
-                      Check-in Time: {new Date(todayCheckInTime).toLocaleTimeString('en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                      })}
-                    </small>
-                  )}
-                  {!withinTimeWindow && (
-                    <small className="text-warning d-block">
-                      Attendance can be marked between 8:00 AM and 9:00 PM
-                    </small>
-                  )}
-                </p>
-              </Col>
-              <Col xs="auto">
-                <Button
-                  variant="success"
-                  className="me-2"
-                  onClick={handleCheckIn}
-                  disabled={
-                    loading ||
-                    hasCheckedIn ||
-                    !withinTimeWindow ||
-                    hasCheckedOut ||
-                    !initialDataLoaded // Disable until initial data is loaded
-                  }
+          <Container fluid className="dashboard-body p-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Employee List</h2>
+              
+              {/* Status Filter Dropdown - Only for active/inactive */}
+              <div className="d-flex align-items-center">
+                <span className="me-2">Filter by Status:</span>
+                <Form.Select 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="form-select"
+                  style={{ width: '150px' }}
                 >
-                  {loading ? 'Processing...' : 'Check In'}
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={handleCheckOut}
-                  disabled={
-                    loading ||
-                    !hasCheckedIn ||
-                    hasCheckedOut ||
-                    !withinTimeWindow ||
-                    !initialDataLoaded // Disable until initial data is loaded
-                  }
-                >
-                  {loading ? 'Processing...' : 'Check Out'}
-                </Button>
-              </Col>
-            </Row>
-
+                  <option value="all">All Employees</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </Form.Select>
+              </div>
+            </div>
+            
             {message.text && (
               <Alert
                 variant={message.type}
-                className="mt-3 mb-0"
+                className="mb-3"
                 onClose={() => setMessage({ type: "", text: "" })}
                 dismissible
               >
                 {message.text}
               </Alert>
             )}
-          </Card>
-
-          <Card className="p-3 shadow-sm br-attendance-card">
-            <Row className="mb-3">
-              <Col md={12} className="text-center">
-                <div className="d-flex justify-content-center align-items-center mb-3">
-                  <Form.Check
-                    type="radio"
-                    label="Day View"
-                    name="viewMode"
-                    checked={viewMode === 'day'}
-                    onChange={() => handleViewModeChange('day')}
-                    className="me-3"
-                  />
-                  <Form.Check
-                    type="radio"
-                    label="Week View"
-                    name="viewMode"
-                    checked={viewMode === 'week'}
-                    onChange={() => handleViewModeChange('week')}
-                    className="me-3"
-                  />
-                  <Form.Check
-                    type="radio"
-                    label="Month View"
-                    name="viewMode"
-                    checked={viewMode === 'month'}
-                    onChange={() => handleViewModeChange('month')}
-                  />
-                </div>
-
-                <div className="d-flex justify-content-center align-items-center">
-                  <Button variant="outline-secondary" onClick={handlePrevious}>
-                    <IoIosArrowBack />
-                  </Button>
-                  <div className="mx-3">
-                    {viewMode === 'day' ? (
-                      <DatePicker
-                        selected={selectedDate}
-                        onChange={handleDateChange}
-                        dateFormat="yyyy-MM-dd"
-                        className="form-control"
-                      />
-                    ) : viewMode === 'month' ? (
-                      <DatePicker
-                        selected={selectedDate}
-                        onChange={handleDateChange}
-                        dateFormat="MMMM yyyy"
-                        showMonthYearPicker
-                        className="form-control"
-                      />
-                    ) : (
-                      <div className="form-control">
-                        {getDateRangeDisplay()}
-                      </div>
-                    )}
+            
+            {employeesLoading ? (
+              <div className="d-flex justify-content-center py-5">
+                <Spinner animation="border" />
+              </div>
+            ) : (
+              <>
+                {/* Employee Table */}
+                <Row className="mt-3">
+                  <div className="col-md-12">
+                    <table className="temp-rwd-table">
+                      <tbody>
+                        <tr>
+                          <th>S.No</th>
+                          <th>Photo</th>
+                          <th>Employee ID</th>
+                          <th>Employee Name</th>
+                          <th>Department</th>
+                          <th>Designation</th>
+                          <th>Email</th>
+                          <th>Mobile</th>
+                          <th>Status</th>
+                          <th>Action</th>
+                        </tr>
+ 
+                        {paginatedEmployees.length > 0 ? (
+                          paginatedEmployees.map((emp, index) => (
+                            <tr key={emp.id}>
+                              <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                              <td data-th="Photo">
+                                {emp.profile_photo ? (
+                                  <Image src={`${baseUrl}${emp.profile_photo}`} roundedCircle width={40} height={40} />
+                                ) : (
+                                  <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{width: '40px', height: '40px', color: 'white', fontSize: '0.8rem'}}>
+                                    {emp.first_name?.[0]}{emp.last_name?.[0]}
+                                  </div>
+                                )}
+                              </td>
+                              <td data-th="Employee ID">{emp.emp_id || "N/A"}</td>
+                              <td data-th="Employee Name">{emp.first_name} {emp.last_name}</td>
+                              <td data-th="Department">{emp.department || "N/A"}</td>
+                              <td data-th="Designation">{emp.designation || "N/A"}</td>
+                              <td data-th="Email">{emp.email || "N/A"}</td>
+                              <td data-th="Mobile">{emp.phone || "N/A"}</td>
+                              <td data-th="Status">
+                                <Badge bg={emp.is_active ? "success" : "secondary"}>
+                                  {emp.is_active ? "Active" : "Inactive"}
+                                </Badge>
+                              </td>
+                              <td data-th="Action">
+                                <Button 
+                                  variant="primary" 
+                                  size="sm"
+                                  onClick={() => handleViewAttendance(emp)}
+                                >
+                                  <AiFillEdit /> View Attendance
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="10" className="text-center">
+                              No employees found matching your search.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
-                  <Button variant="outline-secondary" onClick={handleNext}>
-                    <IoIosArrowForward />
+                </Row>
+                
+                {/* Pagination Controls */}
+                {allFilteredEmployees.length > itemsPerPage && (
+                  <div className="d-flex justify-content-center align-items-center mt-4">
+                    <Pagination>
+                      <Pagination.Prev 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                        disabled={currentPage === 1}
+                      />
+                      
+                      {[...Array(totalPages)].map((_, index) => (
+                        <Pagination.Item 
+                          key={index + 1} 
+                          active={index + 1 === currentPage}
+                          onClick={() => setCurrentPage(index + 1)}
+                        >
+                          {index + 1}
+                        </Pagination.Item>
+                      ))}
+                      
+                      <Pagination.Next 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                        disabled={currentPage === totalPages}
+                      />
+                    </Pagination>
+                  </div>
+                )}
+              </>
+            )}
+          </Container>
+        </div>
+      </div>
+    );
+  };
+
+  // Render attendance view for selected employee
+  const renderAttendanceView = () => {
+    return (
+      <div className="dashboard-container">
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+        <div className="main-content">
+          <HrHeader toggleSidebar={toggleSidebar} />
+
+          <Container fluid className="dashboard-body">
+            {/* Back button and employee info */}
+            <Card className="p-3 shadow-sm mb-3">
+              <Row className="align-items-center">
+                <Col>
+                  
+                  <h5 className="d-inline-block mb-0">
+                    Attendance for: {selectedEmployee ? `${selectedEmployee.first_name} ${selectedEmployee.last_name}` : 'N/A'}
+                  </h5>
+                  
+                </Col>
+                <Col xs="auto">
+                <Button 
+                    variant="outline-secondary" 
+                    className="me-3 justify-content-end align-items-end ms-3"
+                    onClick={handleBackToEmployeeList}
+                  >
+                    <IoIosArrowBack /> Back to Employee List
                   </Button>
-                </div>
-              </Col>
-            </Row>
+                  </Col>
+              </Row>
+            </Card>
 
-            {weekData.length > 0 ? (
-              weekData.map((item, index) => (
-                <div key={index}>
-                  {/* ================= MAIN ROW ================= */}
-                  <Row className="align-items-center br-att-row mt-3 mb-3">
-                    <Col xs={6} sm={6} md={4} lg={1} className="br-day-col">
-                      <div className="br-day-text">{item.day}</div>
-                      <div className="br-date-text">{item.date}</div>
-                    </Col>
+            {/* Check-in/Check-out buttons section */}
+            <Card className="p-3 shadow-sm mb-3">
+              <Row className="align-items-center">
+                <Col>
+                  <h5 className="mb-0">Today's Attendance</h5>
+                  <p className="text-muted mb-0">
+                    {new Date().toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                    <br />
+                    <small className="text-info">
+                      Current Time: {currentTime.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })}
+                    </small>
+                    {todayCheckInTime && (
+                      <small className="text-success d-block">
+                        Check-in Time: {new Date(todayCheckInTime).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
+                      </small>
+                    )}
+                    {!withinTimeWindow && (
+                      <small className="text-warning d-block">
+                        Attendance can be marked between 8:00 AM and 9:00 PM
+                      </small>
+                    )}
+                  </p>
+                </Col>
+                <Col xs="auto">
+                  <Button
+                    variant="success"
+                    className="me-2"
+                    onClick={handleCheckIn}
+                    disabled={
+                      loading ||
+                      hasCheckedIn ||
+                      !withinTimeWindow ||
+                      hasCheckedOut ||
+                      !initialDataLoaded // Disable until initial data is loaded
+                    }
+                  >
+                    {loading ? 'Processing...' : 'Check In'}
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={handleCheckOut}
+                    disabled={
+                      loading ||
+                      !hasCheckedIn ||
+                      hasCheckedOut ||
+                      !withinTimeWindow ||
+                      !initialDataLoaded // Disable until initial data is loaded
+                    }
+                  >
+                    {loading ? 'Processing...' : 'Check Out'}
+                  </Button>
+                </Col>
+              </Row>
 
-                    {/* TIME-IN */}
-                    <Col xs={6} sm={6} md={2} lg={2}>
-                      <div className="br-time-label">{item.timeIn || "-"}</div>
-                    </Col>
+              {message.text && (
+                <Alert
+                  variant={message.type}
+                  className="mt-3 mb-0"
+                  onClose={() => setMessage({ type: "", text: "" })}
+                  dismissible
+                >
+                  {message.text}
+                </Alert>
+              )}
+            </Card>
 
-                    {/* TIMELINE */}
-                    <Col xs={12} sm={12} md={6} lg={3}>
-                      <div className="br-timeline">
-                        <span className="dot start"></span>
+            <Card className="p-3 shadow-sm br-attendance-card">
+              <Row className="mb-3">
+                <Col md={12} className="text-center">
+                  <div className="d-flex justify-content-center align-items-center mb-3">
+                    <Form.Check
+                      type="radio"
+                      label="Day View"
+                      name="viewMode"
+                      checked={viewMode === 'day'}
+                      onChange={() => handleViewModeChange('day')}
+                      className="me-3"
+                    />
+                    <Form.Check
+                      type="radio"
+                      label="Week View"
+                      name="viewMode"
+                      checked={viewMode === 'week'}
+                      onChange={() => handleViewModeChange('week')}
+                      className="me-3"
+                    />
+                    <Form.Check
+                      type="radio"
+                      label="Month View"
+                      name="viewMode"
+                      checked={viewMode === 'month'}
+                      onChange={() => handleViewModeChange('month')}
+                    />
+                  </div>
+
+                  <div className="d-flex justify-content-center align-items-center">
+                    <Button variant="outline-secondary" onClick={handlePrevious}>
+                      <IoIosArrowBack />
+                    </Button>
+                    <div className="mx-3">
+                      {viewMode === 'day' ? (
+                        <DatePicker
+                          selected={selectedDate}
+                          onChange={handleDateChange}
+                          dateFormat="yyyy-MM-dd"
+                          className="form-control"
+                        />
+                      ) : viewMode === 'month' ? (
+                        <DatePicker
+                          selected={selectedDate}
+                          onChange={handleDateChange}
+                          dateFormat="MMMM yyyy"
+                          showMonthYearPicker
+                          className="form-control"
+                        />
+                      ) : (
+                        <div className="form-control">
+                          {getDateRangeDisplay()}
+                        </div>
+                      )}
+                    </div>
+                    <Button variant="outline-secondary" onClick={handleNext}>
+                      <IoIosArrowForward />
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+
+              {weekData.length > 0 ? (
+                weekData.map((item, index) => (
+                  <div key={index}>
+                    {/* ================= MAIN ROW ================= */}
+                    <Row className="align-items-center br-att-row mt-3 mb-3">
+                      <Col xs={6} sm={6} md={4} lg={1} className="br-day-col">
+                        <div className="br-day-text">{item.day}</div>
+                        <div className="br-date-text">{item.date}</div>
+                      </Col>
+
+                      {/* TIME-IN */}
+                      <Col xs={6} sm={6} md={2} lg={2}>
+                        <div className="br-time-label">{item.timeIn || "-"}</div>
+                      </Col>
+
+                      {/* TIMELINE */}
+                      <Col xs={12} sm={12} md={6} lg={3}>
+                        <div className="br-timeline">
+                          <span className="dot start"></span>
+                          <div
+                            className={`line ${
+                              item.status === "Absent" || item.status === "MissedCheckout"
+                                ? "line-red"
+                                : item.status === "Weekend"
+                                ? "line-yellow"
+                                : "line-green"
+                            }`}
+                          ></div>
+                          <span className="dot end"></span>
+
+                          {item.status === "Weekend" && (
+                            <Badge
+                              bg="warning"
+                              text="dark"
+                              className="br-status-badge"
+                            >
+                              Weekend
+                            </Badge>
+                          )}
+
+                          {item.status === "Absent" && (
+                            <Badge
+                              bg="light"
+                              text="danger"
+                              className="br-status-badge border border-danger"
+                            >
+                              Absent
+                            </Badge>
+                          )}
+
+                          {item.status === "MissedCheckout" && (
+                            <Badge
+                              bg="danger"
+                              text="white"
+                              className="br-status-badge"
+                            >
+                              Missed Checkout
+                            </Badge>
+                          )}
+                        </div>
+                      </Col>
+
+                      {/* TIME-OUT */}
+                      <Col xs={12} sm={12} md={3} lg={2}>
+                        <div className="br-time-label">{item.timeOut || "-"}</div>
+                      </Col>
+
+                      {/* HOURS WORKED */}
+                      <Col xs={6} sm={6} md={4} lg={2}>
+                        <div className="br-hours-text">{item.hours}</div>
+                        <small className="text-muted br-att-hrs">Hrs worked</small>
+                      </Col>
+
+                      {/* EDIT BUTTON */}
+                      <Col xs={6} sm={6} md={2} lg={2}>
                         <div
-                          className={`line ${
-                            item.status === "Absent" || item.status === "MissedCheckout"
-                              ? "line-red"
-                              : item.status === "Weekend"
-                              ? "line-yellow"
-                              : "line-green"
-                          }`}
-                        ></div>
-                        <span className="dot end"></span>
-
-                        {item.status === "Weekend" && (
-                          <Badge
-                            bg="warning"
-                            text="dark"
-                            className="br-status-badge"
-                          >
-                            Weekend
-                          </Badge>
-                        )}
-
-                        {item.status === "Absent" && (
-                          <Badge
-                            bg="light"
-                            text="danger"
-                            className="br-status-badge border border-danger"
-                          >
-                            Absent
-                          </Badge>
-                        )}
-
-                        {item.status === "MissedCheckout" && (
-                          <Badge
-                            bg="danger"
-                            text="white"
-                            className="br-status-badge"
-                          >
-                            Missed Checkout
-                          </Badge>
-                        )}
-                      </div>
-                    </Col>
-
-                    {/* TIME-OUT */}
-                    <Col xs={12} sm={12} md={3} lg={2}>
-                      <div className="br-time-label">{item.timeOut || "-"}</div>
-                    </Col>
-
-                    {/* HOURS WORKED */}
-                    <Col xs={6} sm={6} md={4} lg={2}>
-                      <div className="br-hours-text">{item.hours}</div>
-                      <small className="text-muted br-att-hrs">Hrs worked</small>
-                    </Col>
-
-                    {/* EDIT BUTTON */}
-                    <Col xs={6} sm={6} md={2} lg={2}>
-                      <div
-                        className="text-primary br-edit-btn"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleEditClick(index)}
-                      >
-                        <AiFillEdit />Edit
-                      </div>
-                    </Col>
-                  </Row>
-
-                  {/* =============== EDIT ROW BELOW =============== */}
-                  {editingIndex === index && (
-                    <Row className="p-3 br-edit-row bg-light rounded mb-3">
-                      <Col md={3} lg={3} sm={12}>
-                        <Form.Label className="att-label">Time In</Form.Label>
-                        <Form.Select
-                          className="att-time-set"
-                          value={editData.timeIn}
-                          onChange={(e) =>
-                            setEditData({ ...editData, timeIn: e.target.value })
-                          }
+                          className="text-primary br-edit-btn"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleEditClick(index)}
                         >
-                          <option value="">Select</option>
-                          {timeSlots.map((t, i) => (
-                            <option key={i}>{t}</option>
-                          ))}
-                        </Form.Select>
-                      </Col>
-
-                      <Col md={6} lg={3} sm={12} xs={12} className="att-mob-out">
-                        <Form.Label className="att-label att-mt-mob">
-                          Time Out
-                        </Form.Label>
-                        <Form.Select
-                          className="att-time-set"
-                          value={editData.timeOut}
-                          onChange={(e) =>
-                            setEditData({ ...editData, timeOut: e.target.value })
-                          }
-                        >
-                          <option value="">Select</option>
-                          {timeSlots.map((t, i) => (
-                            <option key={i}>{t}</option>
-                          ))}
-                        </Form.Select>
-                      </Col>
-
-                      <Col
-                        md={3}
-                        lg={2}
-                        sm={6}
-                        xs={6}
-                        className="d-flex align-items-end"
-                      >
-                        <Button
-                          variant="success"
-                          className="att-upt-btn"
-                          onClick={() => handleUpdate(index)}
-                        >
-                          Update
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          className="att-cancle mx-3"
-                          onClick={() => setEditingIndex(null)}
-                        >
-                          Cancel
-                        </Button>
+                          <AiFillEdit />Edit
+                        </div>
                       </Col>
                     </Row>
-                  )}
+
+                    {/* =============== EDIT ROW BELOW =============== */}
+                    {editingIndex === index && (
+                      <Row className="p-3 br-edit-row bg-light rounded mb-3">
+                        <Col md={3} lg={3} sm={12}>
+                          <Form.Label className="att-label">Time In</Form.Label>
+                          <Form.Select
+                            className="att-time-set"
+                            value={editData.timeIn}
+                            onChange={(e) =>
+                              setEditData({ ...editData, timeIn: e.target.value })
+                            }
+                          >
+                            <option value="">Select</option>
+                            {timeSlots.map((t, i) => (
+                              <option key={i}>{t}</option>
+                            ))}
+                          </Form.Select>
+                        </Col>
+
+                        <Col md={6} lg={3} sm={12} xs={12} className="att-mob-out">
+                          <Form.Label className="att-label att-mt-mob">
+                            Time Out
+                          </Form.Label>
+                          <Form.Select
+                            className="att-time-set"
+                            value={editData.timeOut}
+                            onChange={(e) =>
+                              setEditData({ ...editData, timeOut: e.target.value })
+                            }
+                          >
+                            <option value="">Select</option>
+                            {timeSlots.map((t, i) => (
+                              <option key={i}>{t}</option>
+                            ))}
+                          </Form.Select>
+                        </Col>
+
+                        <Col
+                          md={3}
+                          lg={2}
+                          sm={6}
+                          xs={6}
+                          className="d-flex align-items-end"
+                        >
+                          <Button
+                            variant="success"
+                            className="att-upt-btn"
+                            onClick={() => handleUpdate(index)}
+                          >
+                            Update
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            className="att-cancle mx-3"
+                            onClick={() => setEditingIndex(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </Col>
+                      </Row>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-5">
+                  <i className="bi bi-calendar-x display-1 text-muted"></i>
+                  <h4 className="mt-3 text-muted">No Data Found</h4>
+                  <p className="text-muted">
+                    No attendance records found for the selected period
+                  </p>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-5">
-                <i className="bi bi-calendar-x display-1 text-muted"></i>
-                <h4 className="mt-3 text-muted">No Data Found</h4>
-                <p className="text-muted">
-                  No attendance records found for the selected period
-                </p>
-              </div>
-            )}
-            <Row>
-              <Col lg={12} md={12} sm={12} className="text-end br-total-hrs">
-                <h2>Total Work Hours: {calculateTotalHours()}</h2>
-              </Col>
-            </Row>
-          </Card>
-        </Container>
+              )}
+              <Row>
+                <Col lg={12} md={12} sm={12} className="text-end br-total-hrs">
+                  <h2>Total Work Hours: {calculateTotalHours()}</h2>
+                </Col>
+              </Row>
+            </Card>
+          </Container>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  return showEmployeeList ? renderEmployeeList() : renderAttendanceView();
 };
 
 export default DailyAttendance;
