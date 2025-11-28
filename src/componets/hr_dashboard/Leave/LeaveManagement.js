@@ -26,6 +26,10 @@ import {
   FaWalking,
   FaCalendarCheck,
 } from "react-icons/fa";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { FaPrint } from "react-icons/fa6";
+import { FaFileExcel } from "react-icons/fa";
 
 const LeaveManagement = () => {
   const { user } = useContext(AuthContext);
@@ -402,6 +406,111 @@ const LeaveManagement = () => {
     }
   };
 
+
+  const handlePrint = () => {
+  const actionColIndex = 11; // "Actions" column index (0-based)
+
+  const table = document.querySelector(".temp-rwd-table").cloneNode(true);
+
+  // Remove Action column
+  table.querySelectorAll("tr").forEach((row) => {
+    const cells = row.querySelectorAll("th, td");
+    if (cells[actionColIndex]) cells[actionColIndex].remove();
+  });
+
+  const newWindow = window.open("", "_blank");
+  newWindow.document.write(`
+    <html>
+      <head>
+        <title>Leave Records</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          h2 { text-align: center; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+          th { background-color: #f4f4f4; font-weight: bold; }
+          tr:nth-child(even) { background-color: #fafafa; }
+        </style>
+      </head>
+      <body>
+        <h2>Leave Records</h2>
+        ${table.outerHTML}
+      </body>
+    </html>
+  `);
+
+  newWindow.document.close();
+  newWindow.print();
+};
+
+const handleDownload = () => {
+  if (filteredData.length === 0) {
+    window.alert("No leave records to download!");
+    return;
+  }
+
+  const data = filteredData.map((item, index) => ({
+    "S.No": index + 1,
+    "Employee Name":
+      activeTab === "myLeaves"
+        ? `${employee.first_name} ${employee.last_name}`.trim()
+        : item.employee_name || "N/A",
+    "Department": employee.department || "N/A",
+    "Phone": employee.phone || "N/A",
+    "Leave Type": item.leave_type ? item.leave_type.replace(/_/g, " ").toUpperCase() : "N/A",
+    "Dates": item.dates?.join(", ") || "N/A",
+    "Days": item.leave_days || "N/A",
+    "Reason": item.reason || "N/A",
+    "Status": item.status || "N/A",
+    "Approved By": item.approved_by || "—",
+    "Applied On": item.created_at ? new Date(item.created_at).toLocaleString() : "N/A"
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  // Style header row (same as your original)
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!ws[cellRef]) continue;
+
+    ws[cellRef].s = {
+      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+      fill: { fgColor: { rgb: "2B5797" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "999999" } },
+        bottom: { style: "thin", color: { rgb: "999999" } },
+        left: { style: "thin", color: { rgb: "999999" } },
+        right: { style: "thin", color: { rgb: "999999" } }
+      }
+    };
+  }
+
+  // Column widths
+  ws["!cols"] = [
+    { wch: 6 },   // S.No
+    { wch: 25 },  // Employee Name
+    { wch: 20 },  // Department
+    { wch: 15 },  // Phone
+    { wch: 20 },  // Leave Type
+    { wch: 25 },  // Dates
+    { wch: 8 },   // Days
+    { wch: 30 },  // Reason
+    { wch: 15 },  // Status
+    { wch: 20 },  // Approved By
+    { wch: 22 },  // Applied On
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Leave Records");
+
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Leave_Records.xlsx");
+};
+
+
   const getActionButton = (leave) => {
     // Only show action buttons in the "All Leaves" tab for HR/Manager
     if (leave.status !== "pending" || activeTab !== "allLeaves") return <span>-</span>;
@@ -525,6 +634,15 @@ const LeaveManagement = () => {
                 </Form.Select>
               </div>
             </div>
+               <div className="mt-2 vmb-2 text-end">
+                          <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+                            <FaPrint /> Print
+                          </Button>
+            
+                          <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+                            <FaFileExcel />Download
+                          </Button>
+                        </div>
 
             {loading ? (
               <div className="text-center mt-5">
