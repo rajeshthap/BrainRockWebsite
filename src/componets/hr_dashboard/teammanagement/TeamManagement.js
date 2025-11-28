@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../../assets/css/Profile.css";
-import SideNav from "../hr_dashboard/SideNav";
-import HrHeader from "../hr_dashboard/HrHeader";
+import "../../../assets/css/Profile.css";
+import HrHeader from "../HrHeader";
+import SideNav from "../SideNav";
 
 const TeamManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
