@@ -1086,6 +1086,7 @@ const handleDownload = () => {
                               </td>
                               <td data-th="Action">
                                 <Button 
+                                className="big-edit-btn"
                                   variant="primary" 
                                   size="sm"
                                   onClick={() => handleViewAttendance(emp)}
