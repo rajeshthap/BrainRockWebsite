@@ -59,12 +59,12 @@ const menuItems = [
       path: "/HrDashBoard",
       active: true,
     },
-  {
-      icon: <FaTachometerAlt />,
-      label: "Payroll",
-      path: "/EmpList",
-      active: true,
-    },
+  // {
+  //     icon: <FaTachometerAlt />,
+  //     label: "Payroll",
+  //     path: "/EmpList",
+  //     active: true,
+  //   },
     {
       icon: <PiUserListBold />,
       label: "Employee Management",
@@ -225,6 +225,11 @@ const menuItems = [
         {
           label: "Salary Structure",
           path: "/SalaryStructure",
+          icon: <FaChartLine />,
+        },
+         {
+          label: "Salary Calculation",
+          path: "/EmpList",
           icon: <FaChartLine />,
         },
         {
