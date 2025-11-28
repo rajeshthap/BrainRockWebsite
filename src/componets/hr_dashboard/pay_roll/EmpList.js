@@ -8,8 +8,7 @@ import {
   Image,
   Button, 
   Pagination,
-  Form,
-  Card
+  Form
 } from "react-bootstrap";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
@@ -283,17 +282,14 @@ const EmpList = () => {
           <HrHeader toggleSidebar={toggleSidebar} />
           
           <Container fluid className="dashboard-body p-4">
-            <Card className="mb-4">
-              <Card.Header className="d-flex justify-content-between align-items-center">
-                <span className="fw-bold">Salary Details</span>
-                <Button variant="secondary" onClick={handleBackToList}>
-                  Back to Employee List
-                </Button>
-              </Card.Header>
-              <Card.Body>
-                <SalaryCalculation employee={selectedEmployee} />
-              </Card.Body>
-            </Card>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Salary Details</h2>
+              <Button variant="secondary" onClick={handleBackToList}>
+                Back to Employee List
+              </Button>
+            </div>
+            
+            <SalaryCalculation employee={selectedEmployee} />
           </Container>
         </div>
       </div>
@@ -312,32 +308,27 @@ const EmpList = () => {
     });
   });
 
-  // Apply print styles directly to the table
-  table.style.width = '100%';
-  table.style.borderCollapse = 'collapse';
-  table.style.marginTop = '20px';
-  
-  // Apply styles to table cells
-  table.querySelectorAll("th, td").forEach(cell => {
-    cell.style.border = '1px solid #ccc';
-    cell.style.padding = '8px';
-    cell.style.textAlign = 'left';
-    cell.style.fontSize = '13px';
-  });
-  
-  // Apply styles to table headers
-  table.querySelectorAll("th").forEach(header => {
-    header.style.backgroundColor = '#f4f4f4';
-    header.style.fontWeight = 'bold';
-  });
-  
-  // Apply alternating row colors
-  table.querySelectorAll("tr:nth-child(even)").forEach(row => {
-    row.style.backgroundColor = '#fafafa';
-  });
-
   const newWindow = window.open("", "_blank");
-  newWindow.document.write(table.outerHTML);
+  newWindow.document.write(`
+    <html>
+    <head>
+      <title>Employee List</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+        th { background-color: #f4f4f4; font-weight: bold; }
+        tr:nth-child(even) { background-color: #fafafa; }
+      </style>
+    </head>
+    <body>
+      <h2>Employee List</h2>
+      ${table.outerHTML}
+    </body>
+    </html>
+  `);
+
   newWindow.document.close();
   newWindow.print();
 };
@@ -386,8 +377,19 @@ const handleDownload = () => {
     };
   }
 
-  // Removed manual column width settings to use table classes instead
-  // ws["!cols"] = [...] has been removed
+  // Column widths
+  ws["!cols"] = [
+    { wch: 6 },   // S.No
+    { wch: 20 },  // Employee ID
+    { wch: 28 },  // Employee Name
+    { wch: 20 },  // Department
+    { wch: 20 },  // Designation
+    { wch: 30 },  // Email
+    { wch: 15 },  // Mobile
+    { wch: 12 },  // Status
+    { wch: 20 },  // Salary Structure Status
+    { wch: 25 },  // Salary Calculation Status
+  ];
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Employees");
@@ -398,53 +400,52 @@ const handleDownload = () => {
 
 
   return (
-    <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
+    <div className="dashboard-container">
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className="main-content" style={{ height: '100%', overflow: 'hidden' }}>
+      <div className="main-content">
         <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         
-        <Container fluid className="dashboard-body p-4" style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
-          {/* Replaced h2 title with Card component */}
-          <Card className="mb-3">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <span className="fw-bold">Employee List (Confirmed Salary Structure Only)</span>
-              <div className="d-flex align-items-center">
-                <span className="me-2">Filter by Status:</span>
-                <Form.Select 
-                  value={statusFilter} 
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="form-select me-3"
-                  style={{ width: '150px' }}
-                >
-                  <option value="all">All Employees</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </Form.Select>
-                
-                <span className="me-2">Salary Calculation:</span>
-                <Form.Select 
-                  value={salaryCalcFilter} 
-                  onChange={(e) => setSalaryCalcFilter(e.target.value)}
-                  className="form-select"
-                  style={{ width: '150px' }}
-                >
-                  <option value="all">All</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="unconfirmed">Unconfirmed</option>
-                </Form.Select>
-              </div>
-            </Card.Header>
-            <Card.Body className="pb-2">
-              <div className="text-end mb-2">
-                <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
-                  <FaPrint /> Print
-                </Button>
-                <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
-                  <FaFileExcel /> Download
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
+        <Container fluid className="dashboard-body p-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="mb-0">Employee List (Confirmed Salary Structure Only)</h2>
+
+            {/* Status Filter Dropdowns */}
+            <div className="d-flex align-items-center">
+              <span className="me-2">Filter by Status:</span>
+              <Form.Select 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="form-select me-3"
+                style={{ width: '150px' }}
+              >
+                <option value="all">All Employees</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </Form.Select>
+              
+              <span className="me-2">Salary Calculation:</span>
+              <Form.Select 
+                value={salaryCalcFilter} 
+                onChange={(e) => setSalaryCalcFilter(e.target.value)}
+                className="form-select"
+                style={{ width: '150px' }}
+              >
+                <option value="all">All</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="unconfirmed">Unconfirmed</option>
+              </Form.Select>
+            </div>
+          </div>
+
+          <div className="mt-2 vmb-2 text-end">
+            <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+              <FaPrint /> Print
+            </Button>
+  
+            <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+              <FaFileExcel /> Download
+            </Button>
+          </div>
         
           {loading && <div className="d-flex justify-content-center"><Spinner animation="border" /></div>}
           {error && <Alert variant="danger">Failed to load employees: {error}</Alert>}
@@ -570,4 +571,4 @@ const handleDownload = () => {
   );
 };
 
-export default EmpList; 
+export default EmpList;
