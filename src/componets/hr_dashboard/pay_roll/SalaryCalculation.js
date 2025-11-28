@@ -41,7 +41,7 @@ const SalaryCalculation = ({ employee }) => {
     baseURL: `${BASE_URL}/api/`,
     withCredentials: true,
   }), [BASE_URL]);
-  
+  const isAdmin = user && user.role === 'admin';
   // Function to determine if a leave is without pay
   const isWithoutPay = (leave) => {
     // Check if leave type is 'without pay' or 'without_pay'
@@ -536,20 +536,23 @@ const SalaryCalculation = ({ employee }) => {
               <Card className="p-3">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h5 className="mb-0">Salary Calculation</h5>
-                  <Button 
-                    variant="primary" 
-                    onClick={postSalaryCalculation}
-                    disabled={saveLoading || !salaryCalculations}
-                  >
-                    {saveLoading ? (
-                      <>
-                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                        <span className="ms-2">Saving...</span>
-                      </>
-                    ) : (
-                      "Save Calculation"
-                    )}
-                  </Button>
+                {/* Only show the Save Calculation button to admin users */}
+{isAdmin && (
+  <Button 
+    variant="primary" 
+    onClick={postSalaryCalculation}
+    disabled={saveLoading || !salaryCalculations}
+  >
+    {saveLoading ? (
+      <>
+        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+        <span className="ms-2">Saving...</span>
+      </>
+    ) : (
+      "Save Calculation"
+    )}
+  </Button>
+)}
                 </div>
                 <Table striped bordered hover>
                   <thead>

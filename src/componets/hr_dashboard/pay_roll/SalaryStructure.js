@@ -105,6 +105,9 @@ const SalaryStructure = () => {
   // Get user data from AuthContext
   const { user } = useContext(AuthContext);
   
+  // Check if user is an admin
+  const isAdmin = user && user.role === 'admin';
+  
   // State for API data
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -202,6 +205,35 @@ const SalaryStructure = () => {
 
     fetchEmployees();
   }, []);
+
+  // If user is an employee, find their own data from the employees list
+  const employeeData = useMemo(() => {
+    if (!isAdmin && employees.length > 0) {
+      return employees.find(emp => emp.emp_id === user.unique_id);
+    }
+    return null;
+  }, [isAdmin, employees, user]);
+
+  // If user is an employee, show their salary structure directly
+  useEffect(() => {
+    if (!isAdmin && employeeData) {
+      setSelectedEmployee(employeeData);
+      setShowSalaryForm(true);
+      
+      // Set salary structure type based on employee department
+      const departmentName = employeeData.department?.trim().toLowerCase();
+      const isMarketingOrSales = departmentName === 'sales department' || departmentName === 'marketing department';
+      
+      if (isMarketingOrSales) {
+        setSalaryStructureType('other');
+      } else {
+        setSalaryStructureType('government');
+      }
+      
+      // Fetch employee salary data
+      fetchEmployeeSalary(employeeData.emp_id);
+    }
+  }, [isAdmin, employeeData]);
 
   // Function to check salary structure status for an employee
   const checkSalaryStatus = async (employeeId) => {
@@ -809,9 +841,11 @@ const handleDownload = () => {
           <Container fluid className="dashboard-body p-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="mb-0">View Salary Structure</h2>
-              <Button variant="secondary" onClick={handleBackToList}>
-                Back to Employee List
-              </Button>
+              {isAdmin && (
+                <Button variant="secondary" onClick={handleBackToList}>
+                  Back to Employee List
+                </Button>
+              )}
             </div>
             
             <Card className="p-4">
@@ -857,6 +891,7 @@ const handleDownload = () => {
                                   setTimeout(() => calculateSalaryStructure(annualCTC), 0);
                                 }
                               }}
+                              disabled={!isAdmin}
                             >
                               <option value="government">Government</option>
                               <option value="other">Other</option>
@@ -876,6 +911,7 @@ const handleDownload = () => {
                                   setTimeout(() => calculateSalaryStructure(annualCTC), 0);
                                 }
                               }}
+                             
                             >
                               <option value="metro">Metro City</option>
                               <option value="nonMetro">Non-Metro City</option>
@@ -989,6 +1025,7 @@ const handleDownload = () => {
                                           marketing_perks: value
                                         }));
                                       }}
+                                      disabled={!isAdmin}
                                     />
                                   </InputGroup>
                                 </Form.Group>
@@ -1000,6 +1037,7 @@ const handleDownload = () => {
                                     value={numberOfClients}
                                     onChange={(e) => setNumberOfClients(parseInt(e.target.value) || 0)}
                                     min="0"
+                                    disabled={!isAdmin}
                                   />
                                 </Form.Group>
                                 
@@ -1011,6 +1049,7 @@ const handleDownload = () => {
                                       type="text"
                                       value={perClientBonus}
                                       onChange={(e) => setPerClientBonus(parseFloat(e.target.value) || 0)}
+                                      disabled={!isAdmin}
                                     />
                                   </InputGroup>
                                 </Form.Group>
@@ -1048,6 +1087,7 @@ const handleDownload = () => {
                                       }
                                     }}
                                     placeholder="Enter performance bonus"
+                                    disabled={!isAdmin}
                                   />
                                 </InputGroup>
                               </Form.Group>
@@ -1156,17 +1196,37 @@ const handleDownload = () => {
                 </>
               )}
               
-              <div className="d-flex justify-content-center mt-4">
-                <Button 
-                  variant="primary" 
-                  onClick={handleSaveSalaryStructure}
-                  disabled={salaryLoading || saveLoading || salaryStatuses[selectedEmployee.emp_id] === 'confirmed'}
-                >
-                  {saveLoading ? <Spinner as="span" animation="border" size="sm" /> : null}
-                  {salaryStatuses[selectedEmployee.emp_id] === 'confirmed' ? 'Salary Structure Already Confirmed' : 'Save Salary Structure'}
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="d-flex justify-content-center mt-4">
+                  <Button 
+                    variant="primary" 
+                    onClick={handleSaveSalaryStructure}
+                    disabled={salaryLoading || saveLoading || salaryStatuses[selectedEmployee.emp_id] === 'confirmed'}
+                  >
+                    {saveLoading ? <Spinner as="span" animation="border" size="sm" /> : null}
+                    {salaryStatuses[selectedEmployee.emp_id] === 'confirmed' ? 'Salary Structure Already Confirmed' : 'Save Salary Structure'}
+                  </Button>
+                </div>
+              )}
             </Card>
+          </Container>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is an employee but we don't have their data yet, show loading
+  if (!isAdmin && !employeeData && loading) {
+    return (
+      <div className="dashboard-container">
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="main-content">
+          <HrHeader toggleSidebar={toggleSidebar} />
+          
+          <Container fluid className="dashboard-body p-4">
+            <div className="d-flex justify-content-center">
+              <Spinner animation="border" />
+            </div>
           </Container>
         </div>
       </div>

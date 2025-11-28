@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import {
   Container,
   Row,
@@ -19,8 +19,12 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FaPrint } from "react-icons/fa6";
 import { FaFileExcel } from "react-icons/fa";
+import { AuthContext } from "../../context/AuthContext";
 
 const EmpList = () => {
+  // Get user data from AuthContext
+  const { user } = useContext(AuthContext);
+  
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // State for API data
@@ -273,6 +277,17 @@ const EmpList = () => {
 
   const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
+  // Check if user is an employee (not admin)
+  const isEmployee = user && user.role !== 'admin';
+  
+  // If user is an employee, find their own data from the employees list
+  const employeeData = useMemo(() => {
+    if (isEmployee && employees.length > 0) {
+      return employees.find(emp => emp.emp_id === user.unique_id);
+    }
+    return null;
+  }, [isEmployee, employees, user]);
+
   // If showing salary view, render the SalaryCalculation component
   if (showSalaryView && selectedEmployee) {
     return (
@@ -290,6 +305,41 @@ const EmpList = () => {
             </div>
             
             <SalaryCalculation employee={selectedEmployee} />
+          </Container>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is an employee and we have their data, show only their salary calculation
+  if (isEmployee && employeeData) {
+    return (
+      <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="main-content" style={{ height: '100vh', overflow: 'auto' }}>
+          <HrHeader toggleSidebar={toggleSidebar} />
+          
+          <Container fluid className="dashboard-body p-4">
+            <h2 className="mb-4">My Salary Details</h2>
+            <SalaryCalculation employee={employeeData} />
+          </Container>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is an employee but we don't have their data yet, show loading
+  if (isEmployee && !employeeData) {
+    return (
+      <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="main-content" style={{ height: '100vh', overflow: 'auto' }}>
+          <HrHeader toggleSidebar={toggleSidebar} />
+          
+          <Container fluid className="dashboard-body p-4">
+            <div className="d-flex justify-content-center">
+              <Spinner animation="border" />
+            </div>
           </Container>
         </div>
       </div>
