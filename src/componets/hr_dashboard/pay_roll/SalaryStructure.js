@@ -378,100 +378,109 @@ const SalaryStructure = () => {
   };
 
   const handlePrint = () => {
-    const columnsToRemove = [1, 10]; // REMOVE: Photo (1), Action (7)
-  
-    const table = document.querySelector(".temp-rwd-table")?.cloneNode(true);
-    if (!table) {
-      window.alert("Salary table not found!");
-      return;
-    }
-  
-    // Remove unwanted columns
-    table.querySelectorAll("tr").forEach((row) => {
-      const cells = row.querySelectorAll("th, td");
-      [...columnsToRemove].sort((a, b) => b - a).forEach((colIndex) => {
-        if (cells[colIndex]) cells[colIndex].remove();
-      });
+  const columnsToRemove = [1, 10]; // REMOVE: Photo (1), Action (7)
+
+  const table = document.querySelector(".temp-rwd-table")?.cloneNode(true);
+  if (!table) {
+    window.alert("Salary table not found!");
+    return;
+  }
+
+  // Remove unwanted columns
+  table.querySelectorAll("tr").forEach((row) => {
+    const cells = row.querySelectorAll("th, td");
+    [...columnsToRemove].sort((a, b) => b - a).forEach((colIndex) => {
+      if (cells[colIndex]) cells[colIndex].remove();
     });
-  
-    // Apply print styles directly to the table
-    table.style.width = '100%';
-    table.style.borderCollapse = 'collapse';
-    table.style.marginTop = '20px';
-    
-    // Apply styles to table cells
-    table.querySelectorAll("th, td").forEach(cell => {
-      cell.style.border = '1px solid #ccc';
-      cell.style.padding = '8px';
-      cell.style.textAlign = 'left';
-      cell.style.fontSize = '13px';
-    });
-    
-    // Apply styles to table headers
-    table.querySelectorAll("th").forEach(header => {
-      header.style.backgroundColor = '#f4f4f4';
-      header.style.fontWeight = 'bold';
-    });
-    
-    // Apply alternating row colors
-    table.querySelectorAll("tr:nth-child(even)").forEach(row => {
-      row.style.backgroundColor = '#fafafa';
-    });
-  
-    const newWindow = window.open("", "_blank");
-    newWindow.document.write(table.outerHTML);
-    newWindow.document.close();
-    newWindow.print();
-  };
-  
-  const handleDownload = () => {
-    if (allFilteredEmployees.length === 0) {
-      window.alert("No salary structure records found!");
-      return;
-    }
-  
-    const data = allFilteredEmployees.map((emp, index) => ({
-      "S.No": index + 1,
-      "Employee ID": emp.emp_id,
-      "Employee Name": `${emp.first_name} ${emp.last_name}`,
-      "Department": emp.department,
-      "Designation": emp.designation,
-      "Email": emp.email || "N/A",
-      "Mobile": emp.phone || "N/A",
-      "Status": emp.is_active ? "Active" : "Inactive",
-    }));
-  
-    const ws = XLSX.utils.json_to_sheet(data);
-  
-    const range = XLSX.utils.decode_range(ws["!ref"]);
-  
-    // Header styling (same as EmpList)
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
-      if (!ws[cellRef]) continue;
-      ws[cellRef].s = {
-        font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
-        fill: { fgColor: { rgb: "2B5797" } },
-        alignment: { horizontal: "center", vertical: "center" },
-        border: {
-          top: { style: "thin", color: { rgb: "999999" } },
-          bottom: { style: "thin", color: { rgb: "999999" } },
-          left: { style: "thin", color: { rgb: "999999" } },
-          right: { style: "thin", color: { rgb: "999999" } }
-        }
-      };
-    }
-  
-    // Removed manual column width settings to use table classes instead
-    // ws["!cols"] = [...] has been removed
-  
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Salary Structure");
-  
-    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Salary_Structure.xlsx");
-  };
-  
+  });
+
+  const newWindow = window.open("", "_blank");
+  newWindow.document.write(`
+    <html>
+    <head>
+      <title>Salary Structure</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+        th { background-color: #f4f4f4; font-weight: bold; }
+        tr:nth-child(even) { background-color: #fafafa; }
+      </style>
+    </head>
+    <body>
+      <h2>Employee Salary Structure</h2>
+      ${table.outerHTML}
+    </body>
+    </html>
+  `);
+
+  newWindow.document.close();
+  newWindow.print();
+};
+
+
+const handleDownload = () => {
+  if (allFilteredEmployees.length === 0) {
+    window.alert("No salary structure records found!");
+    return;
+  }
+
+  const data = allFilteredEmployees.map((emp, index) => ({
+    "S.No": index + 1,
+    "Employee ID": emp.emp_id,
+    "Employee Name": `${emp.first_name} ${emp.last_name}`,
+    "Department": emp.department,
+    "Designation": emp.designation,
+    "Email": emp.email || "N/A",
+    "Mobile": emp.phone || "N/A",
+    "Status": emp.is_active ? "Active" : "Inactive",
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  // Header styling (same as EmpList)
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!ws[cellRef]) continue;
+    ws[cellRef].s = {
+      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+      fill: { fgColor: { rgb: "2B5797" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "999999" } },
+        bottom: { style: "thin", color: { rgb: "999999" } },
+        left: { style: "thin", color: { rgb: "999999" } },
+        right: { style: "thin", color: { rgb: "999999" } }
+      }
+    };
+  }
+
+  // Column widths
+  ws["!cols"] = [
+    { wch: 6 },   // S.No
+    { wch: 18 },  // Employee ID
+    { wch: 28 },  // Name
+    { wch: 20 },  // Department
+    { wch: 20 },  // Designation
+    { wch: 15 },  // Basic
+    { wch: 10 },  // HRA
+    { wch: 10 },  // DA
+    { wch: 10 },  // TA
+    { wch: 15 },  // Gross
+    { wch: 15 },  // Net
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Salary Structure");
+
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Salary_Structure.xlsx");
+};
+
+
   // Function to handle setting salary structure
   const handleSetSalaryStructure = (employee) => {
     setSelectedEmployee(employee);
@@ -792,372 +801,371 @@ const SalaryStructure = () => {
     const showMarketingFields = isMarketingOrSales && isOtherStructure;
     
     return (
-      <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
+      <div className="dashboard-container">
         <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <div className="main-content" style={{ height: '100%', overflow: 'hidden' }}>
+        <div className="main-content">
           <HrHeader toggleSidebar={toggleSidebar} />
           
-          <Container fluid className="dashboard-body p-4" style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
-            <Card className="mb-4">
-              <Card.Header className="d-flex justify-content-between align-items-center">
-                <span className="fw-bold">View Salary Structure</span>
-                <Button variant="secondary" onClick={handleBackToList}>
-                  Back to Employee List
-                </Button>
-              </Card.Header>
-              <Card.Body>
-                <h4 className="mb-4">
-                  Employee: {selectedEmployee.first_name} {selectedEmployee.last_name} ({selectedEmployee.emp_id})
-                </h4>
-                
-                {salaryLoading && <div className="d-flex justify-content-center mb-3"><Spinner animation="border" /></div>}
-                {salaryError && <Alert variant="danger">{salaryError}</Alert>}
-                
-                {saveError && <Alert variant="danger">{saveError}</Alert>}
-                
-                {employeeSalaryData && (
-                  <>
-                    <Tabs defaultActiveKey="salary" id="salary-tabs" className="mb-4">
-                      <Tab eventKey="salary" title="Salary Structure">
-                        <Row className="mb-4">
-                          <Col md={4}>
+          <Container fluid className="dashboard-body p-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">View Salary Structure</h2>
+              <Button variant="secondary" onClick={handleBackToList}>
+                Back to Employee List
+              </Button>
+            </div>
+            
+            <Card className="p-4">
+              <h4 className="mb-4">
+                Employee: {selectedEmployee.first_name} {selectedEmployee.last_name} ({selectedEmployee.emp_id})
+              </h4>
+              
+              {salaryLoading && <div className="d-flex justify-content-center mb-3"><Spinner animation="border" /></div>}
+              {salaryError && <Alert variant="danger">{salaryError}</Alert>}
+              
+              {saveError && <Alert variant="danger">{saveError}</Alert>}
+              
+              {employeeSalaryData && (
+                <>
+                  <Tabs defaultActiveKey="salary" id="salary-tabs" className="mb-4">
+                    <Tab eventKey="salary" title="Salary Structure">
+                      <Row className="mb-4">
+                        <Col md={4}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Employee Annual CTC (from System)</Form.Label>
+                            <InputGroup>
+                              <InputGroup.Text>₹</InputGroup.Text>
+                              <Form.Control
+                                type="text"
+                                value={formatCurrencyValue(employeeSalaryData.salary)}
+                                disabled
+                              />
+                            </InputGroup>
+                          </Form.Group>
+                        </Col>
+                        <Col md={4}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Salary Structure Type</Form.Label>
+                            <Form.Select 
+                              value={salaryStructureType} 
+                              onChange={(e) => {
+                                setSalaryStructureType(e.target.value);
+                                // Reset performance bonus when structure type changes
+                                setPerformanceBonusInput('');
+                                // Recalculate salary structure when type changes
+                                if (employeeSalaryData && employeeSalaryData.salary) {
+                                  const annualCTC = parseFloat(employeeSalaryData.salary);
+                                  setTimeout(() => calculateSalaryStructure(annualCTC), 0);
+                                }
+                              }}
+                            >
+                              <option value="government">Government</option>
+                              <option value="other">Other</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={4}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>City Type</Form.Label>
+                            <Form.Select 
+                              value={cityType} 
+                              onChange={(e) => {
+                                setCityType(e.target.value);
+                                // Recalculate salary structure when city type changes
+                                if (employeeSalaryData && employeeSalaryData.salary) {
+                                  const annualCTC = parseFloat(employeeSalaryData.salary);
+                                  setTimeout(() => calculateSalaryStructure(annualCTC), 0);
+                                }
+                              }}
+                            >
+                              <option value="metro">Metro City</option>
+                              <option value="nonMetro">Non-Metro City</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      
+                      <Row>
+                        <Col md={6}>
+                          <h5 className="mb-3">Earnings</h5>
+                          <Form>
                             <Form.Group className="mb-3">
-                              <Form.Label>Employee Annual CTC (from System)</Form.Label>
+                              <Form.Label>Basic Salary (40% of CTC)</Form.Label>
                               <InputGroup>
                                 <InputGroup.Text>₹</InputGroup.Text>
                                 <Form.Control
                                   type="text"
-                                  value={formatCurrencyValue(employeeSalaryData.salary)}
+                                  name="basic"
+                                  value={salaryStructure.basic}
                                   disabled
                                 />
                               </InputGroup>
                             </Form.Group>
-                          </Col>
-                          <Col md={4}>
+                            
                             <Form.Group className="mb-3">
-                              <Form.Label>Salary Structure Type</Form.Label>
-                              <Form.Select 
-                                value={salaryStructureType} 
-                                onChange={(e) => {
-                                  setSalaryStructureType(e.target.value);
-                                  // Reset performance bonus when structure type changes
-                                  setPerformanceBonusInput('');
-                                  // Recalculate salary structure when type changes
-                                  if (employeeSalaryData && employeeSalaryData.salary) {
-                                    const annualCTC = parseFloat(employeeSalaryData.salary);
-                                    setTimeout(() => calculateSalaryStructure(annualCTC), 0);
-                                  }
-                                }}
-                              >
-                                <option value="government">Government</option>
-                                <option value="other">Other</option>
-                              </Form.Select>
+                              <Form.Label>HRA ({isGovernmentStructure ? '20% of Gross' : (cityType === 'metro' ? '50%' : '40%') + ' of Basic'})</Form.Label>
+                              <InputGroup>
+                                <InputGroup.Text>₹</InputGroup.Text>
+                                <Form.Control
+                                  type="text"
+                                  name="hra"
+                                  value={salaryStructure.hra}
+                                  disabled
+                                />
+                              </InputGroup>
                             </Form.Group>
-                          </Col>
-                          <Col md={4}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>City Type</Form.Label>
-                              <Form.Select 
-                                value={cityType} 
-                                onChange={(e) => {
-                                  setCityType(e.target.value);
-                                  // Recalculate salary structure when city type changes
-                                  if (employeeSalaryData && employeeSalaryData.salary) {
-                                    const annualCTC = parseFloat(employeeSalaryData.salary);
-                                    setTimeout(() => calculateSalaryStructure(annualCTC), 0);
-                                  }
-                                }}
-                              >
-                                <option value="metro">Metro City</option>
-                                <option value="nonMetro">Non-Metro City</option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        
-                        <Row>
-                          <Col md={6}>
-                            <h5 className="mb-3">Earnings</h5>
-                            <Form>
-                              <Form.Group className="mb-3">
-                                <Form.Label>Basic Salary (40% of CTC)</Form.Label>
-                                <InputGroup>
-                                  <InputGroup.Text>₹</InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="basic"
-                                    value={salaryStructure.basic}
-                                    disabled
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                              
-                              <Form.Group className="mb-3">
-                                <Form.Label>HRA ({isGovernmentStructure ? '20% of Gross' : (cityType === 'metro' ? '50%' : '40%') + ' of Basic'})</Form.Label>
-                                <InputGroup>
-                                  <InputGroup.Text>₹</InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="hra"
-                                    value={salaryStructure.hra}
-                                    disabled
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                              
-                              {/* Government specific fields */}
-                              {isGovernmentStructure && (
-                                <>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>DA (10% of Gross)</Form.Label>
-                                    <InputGroup>
-                                      <InputGroup.Text>₹</InputGroup.Text>
-                                      <Form.Control
-                                        type="text"
-                                        name="da"
-                                        value={salaryStructure.da}
-                                        disabled
-                                      />
-                                    </InputGroup>
-                                  </Form.Group>
-                                  
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>TA (5% of Gross)</Form.Label>
-                                    <InputGroup>
-                                      <InputGroup.Text>₹</InputGroup.Text>
-                                      <Form.Control
-                                        type="text"
-                                        name="ta"
-                                        value={salaryStructure.ta}
-                                        disabled
-                                      />
-                                    </InputGroup>
-                                  </Form.Group>
-                                </>
-                              )}
-                              
-                              <Form.Group className="mb-3">
-                                <Form.Label>Medical Allowance (5% of CTC)</Form.Label>
-                                <InputGroup>
-                                  <InputGroup.Text>₹</InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="medical"
-                                    value={salaryStructure.medical}
-                                    disabled
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                              
-                              <Form.Group className="mb-3">
-                                <Form.Label>Special Allowance ({isGovernmentStructure ? '20% of Gross' : (isMarketingOrSales ? '29%' : '35%') + ' of CTC'})</Form.Label>
-                                <InputGroup>
-                                  <InputGroup.Text>₹</InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="special"
-                                    value={salaryStructure.special}
-                                    disabled
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                              
-                              {/* Marketing specific fields - Only show when both conditions are met */}
-                              {showMarketingFields && (
-                                <>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Marketing Perks (Editable)</Form.Label>
-                                    <InputGroup>
-                                      <InputGroup.Text>₹</InputGroup.Text>
-                                      <Form.Control
-                                        type="text"
-                                        name="marketing_perks"
-                                        value={salaryStructure.marketing_perks}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          setSalaryStructure(prev => ({
-                                            ...prev,
-                                            marketing_perks: value
-                                          }));
-                                        }}
-                                      />
-                                    </InputGroup>
-                                  </Form.Group>
-                                  
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Number of Clients</Form.Label>
-                                    <Form.Control
-                                      type="number"
-                                      value={numberOfClients}
-                                      onChange={(e) => setNumberOfClients(parseInt(e.target.value) || 0)}
-                                      min="0"
-                                    />
-                                  </Form.Group>
-                                  
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Bonus Per Client (₹)</Form.Label>
-                                    <InputGroup>
-                                      <InputGroup.Text>₹</InputGroup.Text>
-                                      <Form.Control
-                                        type="text"
-                                        value={perClientBonus}
-                                        onChange={(e) => setPerClientBonus(parseFloat(e.target.value) || 0)}
-                                      />
-                                    </InputGroup>
-                                  </Form.Group>
-                                  
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Client Perks (Calculated)</Form.Label>
-                                    <InputGroup>
-                                      <InputGroup.Text>₹</InputGroup.Text>
-                                      <Form.Control
-                                        type="text"
-                                        value={formatCurrencyValue(clientPerks)}
-                                        disabled
-                                      />
-                                    </InputGroup>
-                                  </Form.Group>
-                                </>
-                              )}
-                              
-                              {/* Performance Bonus - Only show for "other" structure type */}
-                              {isOtherStructure && (
+                            
+                            {/* Government specific fields */}
+                            {isGovernmentStructure && (
+                              <>
                                 <Form.Group className="mb-3">
-                                  <Form.Label>Performance Bonus (Editable)</Form.Label>
+                                  <Form.Label>DA (10% of Gross)</Form.Label>
                                   <InputGroup>
                                     <InputGroup.Text>₹</InputGroup.Text>
                                     <Form.Control
                                       type="text"
-                                      name="performance_bonus"
-                                      value={performanceBonusInput}
-                                      onChange={(e) => {
-                                        setPerformanceBonusInput(e.target.value);
-                                        // Recalculate when performance bonus changes
-                                        if (employeeSalaryData && employeeSalaryData.salary) {
-                                          const annualCTC = parseFloat(employeeSalaryData.salary);
-                                          setTimeout(() => calculateSalaryStructure(annualCTC), 0);
-                                        }
-                                      }}
-                                      placeholder="Enter performance bonus"
+                                      name="da"
+                                      value={salaryStructure.da}
+                                      disabled
                                     />
                                   </InputGroup>
                                 </Form.Group>
-                              )}
-                            </Form>
-                          </Col>
-                          
-                          <Col md={6}>
-                            <h5 className="mb-3">Deductions</h5>
-                            <Form>
-                              <Form.Group className="mb-3">
-                                <Form.Label>PF (12% of Basic)</Form.Label>
-                                <InputGroup>
-                                  <InputGroup.Text>₹</InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="pf"
-                                    value={salaryStructure.pf}
-                                    disabled
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                              
-                              {/* Government specific deduction fields */}
-                              {isGovernmentStructure && (
-                                <>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>ESI (0.75% of Gross)</Form.Label>
-                                    <InputGroup>
-                                      <InputGroup.Text>₹</InputGroup.Text>
-                                      <Form.Control
-                                        type="text"
-                                        name="esi"
-                                        value={salaryStructure.esi}
-                                        disabled
-                                      />
-                                    </InputGroup>
-                                  </Form.Group>
-                                  
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>TDS (Based on Annual Salary)</Form.Label>
-                                    <InputGroup>
-                                      <InputGroup.Text>₹</InputGroup.Text>
-                                      <Form.Control
-                                        type="text"
-                                        name="tds"
-                                        value={salaryStructure.tds}
-                                        disabled
-                                      />
-                                    </InputGroup>
-                                  </Form.Group>
-                                </>
-                              )}
-                              
-                              <Form.Group className="mb-3">
-                                <Form.Label>Other Deductions</Form.Label>
-                                <InputGroup>
-                                  <InputGroup.Text>₹</InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="other_deductions"
-                                    value={salaryStructure.other_deductions}
-                                    disabled
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                            </Form>
+                                
+                                <Form.Group className="mb-3">
+                                  <Form.Label>TA (5% of Gross)</Form.Label>
+                                  <InputGroup>
+                                    <InputGroup.Text>₹</InputGroup.Text>
+                                    <Form.Control
+                                      type="text"
+                                      name="ta"
+                                      value={salaryStructure.ta}
+                                      disabled
+                                    />
+                                  </InputGroup>
+                                </Form.Group>
+                              </>
+                            )}
                             
-                            <div className="mt-4">
-                              <h5 className="mb-3">Summary</h5>
-                              <Table striped bordered>
-                                <tbody>
-                                  <tr>
-                                    <td><strong>Total Earnings:</strong></td>
-                                    <td>₹{formatCurrencyValue(totalEarnings)}</td>
-                                  </tr>
-                                  <tr>
-                                    <td><strong>Total Deductions:</strong></td>
-                                    <td>₹{formatCurrencyValue(totalDeductions)}</td>
-                                  </tr>
-                                  {showMarketingFields && (
-                                    <>
-                                      <tr>
-                                        <td><strong>Client Perks ({numberOfClients} × ₹{perClientBonus}):</strong></td>
-                                        <td>₹{formatCurrencyValue(clientPerks)}</td>
-                                      </tr>
-                                    </>
-                                  )}
-                                  {clientBonus > 0 && (
+                            <Form.Group className="mb-3">
+                              <Form.Label>Medical Allowance (5% of CTC)</Form.Label>
+                              <InputGroup>
+                                <InputGroup.Text>₹</InputGroup.Text>
+                                <Form.Control
+                                  type="text"
+                                  name="medical"
+                                  value={salaryStructure.medical}
+                                  disabled
+                                />
+                              </InputGroup>
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Label>Special Allowance ({isGovernmentStructure ? '20% of Gross' : (isMarketingOrSales ? '29%' : '35%') + ' of CTC'})</Form.Label>
+                              <InputGroup>
+                                <InputGroup.Text>₹</InputGroup.Text>
+                                <Form.Control
+                                  type="text"
+                                  name="special"
+                                  value={salaryStructure.special}
+                                  disabled
+                                />
+                              </InputGroup>
+                            </Form.Group>
+                            
+                            {/* Marketing specific fields - Only show when both conditions are met */}
+                            {showMarketingFields && (
+                              <>
+                                <Form.Group className="mb-3">
+                                  <Form.Label>Marketing Perks (Editable)</Form.Label>
+                                  <InputGroup>
+                                    <InputGroup.Text>₹</InputGroup.Text>
+                                    <Form.Control
+                                      type="text"
+                                      name="marketing_perks"
+                                      value={salaryStructure.marketing_perks}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        setSalaryStructure(prev => ({
+                                          ...prev,
+                                          marketing_perks: value
+                                        }));
+                                      }}
+                                    />
+                                  </InputGroup>
+                                </Form.Group>
+                                
+                                <Form.Group className="mb-3">
+                                  <Form.Label>Number of Clients</Form.Label>
+                                  <Form.Control
+                                    type="number"
+                                    value={numberOfClients}
+                                    onChange={(e) => setNumberOfClients(parseInt(e.target.value) || 0)}
+                                    min="0"
+                                  />
+                                </Form.Group>
+                                
+                                <Form.Group className="mb-3">
+                                  <Form.Label>Bonus Per Client (₹)</Form.Label>
+                                  <InputGroup>
+                                    <InputGroup.Text>₹</InputGroup.Text>
+                                    <Form.Control
+                                      type="text"
+                                      value={perClientBonus}
+                                      onChange={(e) => setPerClientBonus(parseFloat(e.target.value) || 0)}
+                                    />
+                                  </InputGroup>
+                                </Form.Group>
+                                
+                                <Form.Group className="mb-3">
+                                  <Form.Label>Client Perks (Calculated)</Form.Label>
+                                  <InputGroup>
+                                    <InputGroup.Text>₹</InputGroup.Text>
+                                    <Form.Control
+                                      type="text"
+                                      value={formatCurrencyValue(clientPerks)}
+                                      disabled
+                                    />
+                                  </InputGroup>
+                                </Form.Group>
+                              </>
+                            )}
+                            
+                            {/* Performance Bonus - Only show for "other" structure type */}
+                            {isOtherStructure && (
+                              <Form.Group className="mb-3">
+                                <Form.Label>Performance Bonus (Editable)</Form.Label>
+                                <InputGroup>
+                                  <InputGroup.Text>₹</InputGroup.Text>
+                                  <Form.Control
+                                    type="text"
+                                    name="performance_bonus"
+                                    value={performanceBonusInput}
+                                    onChange={(e) => {
+                                      setPerformanceBonusInput(e.target.value);
+                                      // Recalculate when performance bonus changes
+                                      if (employeeSalaryData && employeeSalaryData.salary) {
+                                        const annualCTC = parseFloat(employeeSalaryData.salary);
+                                        setTimeout(() => calculateSalaryStructure(annualCTC), 0);
+                                      }
+                                    }}
+                                    placeholder="Enter performance bonus"
+                                  />
+                                </InputGroup>
+                              </Form.Group>
+                            )}
+                          </Form>
+                        </Col>
+                        
+                        <Col md={6}>
+                          <h5 className="mb-3">Deductions</h5>
+                          <Form>
+                            <Form.Group className="mb-3">
+                              <Form.Label>PF (12% of Basic)</Form.Label>
+                              <InputGroup>
+                                <InputGroup.Text>₹</InputGroup.Text>
+                                <Form.Control
+                                  type="text"
+                                  name="pf"
+                                  value={salaryStructure.pf}
+                                  disabled
+                                />
+                              </InputGroup>
+                            </Form.Group>
+                            
+                            {/* Government specific deduction fields */}
+                            {isGovernmentStructure && (
+                              <>
+                                <Form.Group className="mb-3">
+                                  <Form.Label>ESI (0.75% of Gross)</Form.Label>
+                                  <InputGroup>
+                                    <InputGroup.Text>₹</InputGroup.Text>
+                                    <Form.Control
+                                      type="text"
+                                      name="esi"
+                                      value={salaryStructure.esi}
+                                      disabled
+                                    />
+                                  </InputGroup>
+                                </Form.Group>
+                                
+                                <Form.Group className="mb-3">
+                                  <Form.Label>TDS (Based on Annual Salary)</Form.Label>
+                                  <InputGroup>
+                                    <InputGroup.Text>₹</InputGroup.Text>
+                                    <Form.Control
+                                      type="text"
+                                      name="tds"
+                                      value={salaryStructure.tds}
+                                      disabled
+                                    />
+                                  </InputGroup>
+                                </Form.Group>
+                              </>
+                            )}
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Label>Other Deductions</Form.Label>
+                              <InputGroup>
+                                <InputGroup.Text>₹</InputGroup.Text>
+                                <Form.Control
+                                  type="text"
+                                  name="other_deductions"
+                                  value={salaryStructure.other_deductions}
+                                  disabled
+                                />
+                              </InputGroup>
+                            </Form.Group>
+                          </Form>
+                          
+                          <div className="mt-4">
+                            <h5 className="mb-3">Summary</h5>
+                            <Table striped bordered>
+                              <tbody>
+                                <tr>
+                                  <td><strong>Total Earnings:</strong></td>
+                                  <td>₹{formatCurrencyValue(totalEarnings)}</td>
+                                </tr>
+                                <tr>
+                                  <td><strong>Total Deductions:</strong></td>
+                                  <td>₹{formatCurrencyValue(totalDeductions)}</td>
+                                </tr>
+                                {showMarketingFields && (
+                                  <>
                                     <tr>
-                                      <td><strong>Total Client Bonus:</strong></td>
-                                      <td>₹{formatCurrencyValue(clientBonus)}</td>
+                                      <td><strong>Client Perks ({numberOfClients} × ₹{perClientBonus}):</strong></td>
+                                      <td>₹{formatCurrencyValue(clientPerks)}</td>
                                     </tr>
-                                  )}
-                                  <tr className="table-info">
-                                    <td><strong>Net Salary:</strong></td>
-                                    <td><strong>₹{formatCurrencyValue(calculatedNetSalary)}</strong></td>
+                                  </>
+                                )}
+                                {clientBonus > 0 && (
+                                  <tr>
+                                    <td><strong>Total Client Bonus:</strong></td>
+                                    <td>₹{formatCurrencyValue(clientBonus)}</td>
                                   </tr>
-                                </tbody>
-                              </Table>
-                            </div>
-                          </Col>
-                        </Row>
-                      </Tab>
-                    </Tabs>
-                  </>
-                )}
-                
-                <div className="d-flex justify-content-center mt-4">
-                  <Button 
-                    variant="primary" 
-                    onClick={handleSaveSalaryStructure}
-                    disabled={salaryLoading || saveLoading || salaryStatuses[selectedEmployee.emp_id] === 'confirmed'}
-                  >
-                    {saveLoading ? <Spinner as="span" animation="border" size="sm" /> : null}
-                    {salaryStatuses[selectedEmployee.emp_id] === 'confirmed' ? 'Salary Structure Already Confirmed' : 'Save Salary Structure'}
-                  </Button>
-                </div>
-              </Card.Body>
+                                )}
+                                <tr className="table-info">
+                                  <td><strong>Net Salary:</strong></td>
+                                  <td><strong>₹{formatCurrencyValue(calculatedNetSalary)}</strong></td>
+                                </tr>
+                              </tbody>
+                            </Table>
+                          </div>
+                        </Col>
+                      </Row>
+                    </Tab>
+                  </Tabs>
+                </>
+              )}
+              
+              <div className="d-flex justify-content-center mt-4">
+                <Button 
+                  variant="primary" 
+                  onClick={handleSaveSalaryStructure}
+                  disabled={salaryLoading || saveLoading || salaryStatuses[selectedEmployee.emp_id] === 'confirmed'}
+                >
+                  {saveLoading ? <Spinner as="span" animation="border" size="sm" /> : null}
+                  {salaryStatuses[selectedEmployee.emp_id] === 'confirmed' ? 'Salary Structure Already Confirmed' : 'Save Salary Structure'}
+                </Button>
+              </div>
             </Card>
           </Container>
         </div>
@@ -1167,58 +1175,56 @@ const SalaryStructure = () => {
 
   // Otherwise, render employee list
   return (
-    <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
+    <div className="dashboard-container">
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className="main-content" style={{ height: '100%', overflow: 'hidden' }}>
+      <div className="main-content">
         <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         
-        <Container fluid className="dashboard-body p-4" style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
-          <Card className="mb-3">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <span className="fw-bold">Employee List</span>
+        <Container fluid className="dashboard-body p-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="mb-0">Employee List</h2>
+            
+            {/* Filter Dropdowns */}
+            <div className="d-flex align-items-center gap-3">
+              {/* Employee Status Filter */}
+              <div className="d-flex align-items-center">
+                <span className="me-2">Employee Status:</span>
+                <Form.Select 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="form-select"
+                >
+                  <option value="all">All Employees</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </Form.Select>
+              </div>
               
-              {/* Filter Dropdowns */}
-              <div className="d-flex align-items-center gap-3">
-                {/* Employee Status Filter */}
-                <div className="d-flex align-items-center">
-                  <span className="me-2">Employee Status:</span>
-                  <Form.Select 
-                    value={statusFilter} 
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="form-select"
-                  >
-                    <option value="all">All Employees</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </Form.Select>
-                </div>
-                
-                {/* Salary Status Filter */}
-                <div className="d-flex align-items-center">
-                  <span className="me-2">Salary Status:</span>
-                  <Form.Select 
-                    value={salaryStatusFilter} 
-                    onChange={(e) => setSalaryStatusFilter(e.target.value)}
-                    className="form-select"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="unconfirmed">Unconfirmed</option>
-                  </Form.Select>
-                </div>
+              {/* Salary Status Filter */}
+              <div className="d-flex align-items-center">
+                <span className="me-2">Salary Status:</span>
+                <Form.Select 
+                  value={salaryStatusFilter} 
+                  onChange={(e) => setSalaryStatusFilter(e.target.value)}
+                  className="form-select"
+                >
+                  <option value="all">All Status</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="unconfirmed">Unconfirmed</option>
+                </Form.Select>
               </div>
-            </Card.Header>
-            <Card.Body className="pb-2">
-              <div className="text-end mb-2">
-                <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
-                  <FaPrint /> Print
-                </Button>
-                <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
-                  <FaFileExcel /> Download
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
+            </div>
+          </div>
+
+           <div className="mt-2 vmb-2 text-end">
+                        <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
+                          <FaPrint /> Print
+                        </Button>
+          
+                        <Button variant="" size="sm" className="download-btn" onClick={handleDownload}>
+                          <FaFileExcel />Download
+                        </Button>
+                      </div>
           
           {loading && <div className="d-flex justify-content-center"><Spinner animation="border" /></div>}
           {error && <Alert variant="danger">Failed to load employees: {error}</Alert>}
@@ -1300,6 +1306,8 @@ const SalaryStructure = () => {
               {/* --- Pagination Controls --- */}
               {allFilteredEmployees.length > 0 && (
                 <div className="d-flex justify-content-center align-items-center mt-4">
+                  
+                
                   <Pagination>
                     <Pagination.Prev 
                       onClick={() => handlePageChange(currentPage - 1)} 
