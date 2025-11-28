@@ -1,16 +1,19 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from "react-bootstrap";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal, InputGroup } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../../assets/css/Profile.css";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
+import { AuthContext } from "../../context/AuthContext"; // Adjust the import path as needed
 
 const TeamManagement = () => {
+  const { user } = useContext(AuthContext); // Get user from auth context
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // API data states
   const [teamLeaders, setTeamLeaders] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,9 +24,46 @@ const TeamManagement = () => {
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [teamName, setTeamName] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showJsonModal, setShowJsonModal] = useState(false);
+  const [jsonPreview, setJsonPreview] = useState("");
+  
+  // Search/filter states
+  const [searchTerm, setSearchTerm] = useState("");
   
   // Toggle Sidebar
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  
+  // Function to check if an employee is a team leader
+  const isTeamLeader = (employee) => {
+    // Check if role field exists and matches team leader
+    if (employee.role === 'Team Leader' || employee.role === 'team_leader') {
+      return true;
+    }
+    
+    // Check if designation field contains "Team Leader"
+    if (employee.designation && employee.designation.includes('Team Leader')) {
+      return true;
+    }
+    
+    // Check if any field contains "Team Leader" string
+    for (const key in employee) {
+      if (typeof employee[key] === 'string' && employee[key].includes('Team Leader')) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+  
+  // Function to clear all form fields
+  const clearForm = () => {
+    setTeamName("");
+    setSelectedTeamLeader("");
+    setSelectedProject("");
+    setSelectedEmployees([]);
+    setSearchTerm("");
+    setError(null);
+  };
   
   // Fetch data from APIs
   useEffect(() => {
@@ -51,13 +91,15 @@ const TeamManagement = () => {
           employees = employeesData.results;
         }
         
-        // Filter team leaders (assuming role field exists)
-        const leaders = employees.filter(emp => emp.role === 'Team Leader' || emp.role === 'team_leader');
+        // Filter team leaders using the isTeamLeader function
+        const leaders = employees.filter(emp => isTeamLeader(emp));
+        console.log("Team Leaders found:", leaders); // Debug log to see the team leaders
         setTeamLeaders(leaders);
         setAllEmployees(employees);
+        setFilteredEmployees(employees); // Initialize filtered employees
         
         // Fetch projects
-        const projectsResponse = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/projects/', {
+        const projectsResponse = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/project-list/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -68,15 +110,14 @@ const TeamManagement = () => {
         }
         
         const projectsData = await projectsResponse.json();
-        let projectList = [];
         
-        if (Array.isArray(projectsData)) {
-          projectList = projectsData;
-        } else if (projectsData && Array.isArray(projectsData.results)) {
-          projectList = projectsData.results;
+        // Handle the specific project data structure
+        if (projectsData.success && Array.isArray(projectsData.data)) {
+          setProjects(projectsData.data);
+        } else {
+          console.error("Unexpected project data format:", projectsData);
+          setProjects([]);
         }
-        
-        setProjects(projectList);
         
       } catch (err) {
         setError(err.message);
@@ -88,6 +129,25 @@ const TeamManagement = () => {
 
     fetchData();
   }, []);
+  
+  // Filter employees based on search term
+  useEffect(() => {
+    if (!searchTerm) {
+      setFilteredEmployees(allEmployees);
+      return;
+    }
+    
+    const filtered = allEmployees.filter(emp => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        emp.first_name?.toLowerCase().includes(searchLower) ||
+        emp.last_name?.toLowerCase().includes(searchLower) ||
+        emp.emp_id?.toLowerCase().includes(searchLower)
+      );
+    });
+    
+    setFilteredEmployees(filtered);
+  }, [searchTerm, allEmployees]);
   
   // Handle employee selection
   const handleEmployeeSelection = (empId) => {
@@ -107,15 +167,20 @@ const TeamManagement = () => {
       return;
     }
     
+    // Get manager ID from auth context
+    const managerId = user?.uniqueId || user?.id || user?.emp_id;
+    
+    // Create team data object
+    const teamData = {
+      team_name: teamName,
+      team_leader_id: selectedTeamLeader,
+      project_id: selectedProject,
+      employee_ids: selectedEmployees,
+      manager_id: managerId
+    };
+    
     try {
-      const teamData = {
-        team_name: teamName,
-        team_leader_id: selectedTeamLeader,
-        project_id: selectedProject,
-        employee_ids: selectedEmployees
-      };
-      
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/teams/', {
+      const response = await fetch('https://mahadevaaya.com/brainrock/backendbr/api/teams/', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -129,11 +194,9 @@ const TeamManagement = () => {
       const result = await response.json();
       
       if (result.success) {
-        // Reset form
-        setTeamName("");
-        setSelectedTeamLeader("");
-        setSelectedProject("");
-        setSelectedEmployees([]);
+        // Clear form immediately after successful creation
+        clearForm();
+        // Show success modal
         setShowSuccessModal(true);
       } else {
         setError(result.message || "Failed to create team");
@@ -143,6 +206,39 @@ const TeamManagement = () => {
       setError(err.message);
       console.error("Failed to create team:", err);
     }
+  };
+  
+  // Preview JSON before submission
+  const handlePreviewJson = (e) => {
+    e.preventDefault();
+    
+    if (!selectedTeamLeader || !selectedProject || selectedEmployees.length === 0 || !teamName) {
+      setError("Please fill all fields and select at least one employee");
+      return;
+    }
+    
+    // Get manager ID from auth context
+    const managerId = user?.uniqueId || user?.id || user?.emp_id;
+    
+    // Create team data object
+    const teamData = {
+      team_name: teamName,
+      team_leader_id: selectedTeamLeader,
+      project_id: selectedProject,
+      employee_ids: selectedEmployees,
+      manager_id: managerId
+    };
+    
+    // Set JSON preview
+    setJsonPreview(JSON.stringify(teamData, null, 2));
+    setShowJsonModal(true);
+  };
+  
+  // Handle closing success modal
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    // Ensure form is cleared when modal is closed
+    clearForm();
   };
   
   return (
@@ -212,8 +308,8 @@ const TeamManagement = () => {
                       >
                         <option value="">Select Project</option>
                         {projects.map(project => (
-                          <option key={project.id} value={project.id}>
-                            {project.name}
+                          <option key={project.id} value={project.project_id}>
+                            {project.project_name} ({project.project_id})
                           </option>
                         ))}
                       </Form.Select>
@@ -224,31 +320,59 @@ const TeamManagement = () => {
                 <Row className="mb-4">
                   <Col md={12}>
                     <Form.Label>Select Team Members</Form.Label>
+                    
+                    {/* Search bar for filtering employees */}
+                    <InputGroup className="mb-3">
+                      <Form.Control
+                        placeholder="Search by name or employee ID..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <Button variant="outline-secondary" onClick={() => setSearchTerm("")}>
+                        Clear
+                      </Button>
+                    </InputGroup>
+                    
                     <div className="employee-selection-container">
-                      {allEmployees.map(emp => (
-                        <Card key={emp.emp_id} className="employee-card mb-2">
-                          <Card.Body className="d-flex justify-content-between align-items-center p-2">
-                            <div>
-                              <strong>{emp.first_name} {emp.last_name}</strong>
-                              <div className="text-muted small">{emp.emp_id} - {emp.designation}</div>
-                            </div>
-                            <Form.Check
-                              type="checkbox"
-                              checked={selectedEmployees.includes(emp.emp_id)}
-                              onChange={() => handleEmployeeSelection(emp.emp_id)}
-                              disabled={emp.emp_id === selectedTeamLeader}
-                            />
-                          </Card.Body>
-                        </Card>
-                      ))}
+                      {filteredEmployees.length > 0 ? (
+                        filteredEmployees.map(emp => (
+                          <Card key={emp.emp_id} className="employee-card mb-2">
+                            <Card.Body className="d-flex justify-content-between align-items-center p-2">
+                              <div>
+                                <strong>{emp.first_name} {emp.last_name}</strong>
+                                <div className="text-muted small">{emp.emp_id} - {emp.designation}</div>
+                                {isTeamLeader(emp) && (
+                                  <Badge bg="primary" className="ms-2">Team Leader</Badge>
+                                )}
+                              </div>
+                              <Form.Check
+                                type="checkbox"
+                                checked={selectedEmployees.includes(emp.emp_id)}
+                                onChange={() => handleEmployeeSelection(emp.emp_id)}
+                                disabled={emp.emp_id === selectedTeamLeader}
+                              />
+                            </Card.Body>
+                          </Card>
+                        ))
+                      ) : (
+                        <Alert variant="info">No employees found matching your search criteria.</Alert>
+                      )}
                     </div>
                   </Col>
                 </Row>
                 
-                <div className="d-flex justify-content-end">
-                  <Button variant="primary" type="submit">
-                    Create Team
+                <div className="d-flex justify-content-between">
+                  <Button variant="outline-danger" onClick={clearForm}>
+                    Clear Form
                   </Button>
+                  <div>
+                    <Button variant="outline-secondary" className="me-2" onClick={handlePreviewJson}>
+                      Preview JSON
+                    </Button>
+                    <Button variant="primary" type="submit">
+                      Create Team
+                    </Button>
+                  </div>
                 </div>
               </Form>
             )}
@@ -257,7 +381,7 @@ const TeamManagement = () => {
       </div>
       
       {/* Success Modal */}
-      <Modal show={showSuccessModal} onHide={() => setShowSuccessModal(false)}>
+      <Modal show={showSuccessModal} onHide={handleCloseSuccessModal}>
         <Modal.Header closeButton>
           <Modal.Title>Team Created Successfully</Modal.Title>
         </Modal.Header>
@@ -265,7 +389,24 @@ const TeamManagement = () => {
           <p>The team has been created and assigned to the selected project.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowSuccessModal(false)}>
+          <Button variant="secondary" onClick={handleCloseSuccessModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      
+      {/* JSON Preview Modal */}
+      <Modal show={showJsonModal} onHide={() => setShowJsonModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>JSON Data Preview</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <pre className="bg-light p-3 rounded">
+            {jsonPreview}
+          </pre>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowJsonModal(false)}>
             Close
           </Button>
         </Modal.Footer>

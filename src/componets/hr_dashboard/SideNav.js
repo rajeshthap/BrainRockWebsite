@@ -62,7 +62,7 @@ const menuItems = [
      {
       icon: <FaTachometerAlt />,
       label: "Team Managment",
-      path: "/TeamManagment",
+      path: "/TeamManagement",
       active: true,
     },
   // {
