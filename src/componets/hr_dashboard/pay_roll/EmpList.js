@@ -276,9 +276,9 @@ const EmpList = () => {
   // If showing salary view, render the SalaryCalculation component
   if (showSalaryView && selectedEmployee) {
     return (
-      <div className="dashboard-container">
+      <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
         <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <div className="main-content">
+        <div className="main-content" style={{ height: '100vh', overflow: 'auto' }}>
           <HrHeader toggleSidebar={toggleSidebar} />
           
           <Container fluid className="dashboard-body p-4">
@@ -400,12 +400,12 @@ const handleDownload = () => {
 
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className="main-content">
+      <div className="main-content" style={{ height: '100vh', overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
         <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         
-        <Container fluid className="dashboard-body p-4">
+        <Container fluid className="dashboard-body p-4" style={{ flex: 1, overflow: 'auto' }}>
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="mb-0">Employee List (Confirmed Salary Structure Only)</h2>
 
