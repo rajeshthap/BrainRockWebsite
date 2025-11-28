@@ -367,13 +367,15 @@ const EmployeeManagement = () => {
 
   // -------------------- PRINT FUNCTION --------------------
 const handlePrint = () => {
-  const actionColIndex = 9; // "Action" column index (0-based)
+  const columnsToRemove = [1, 9]; // Photo & Action column
   const table = document.querySelector(".temp-rwd-table").cloneNode(true);
 
-  // Remove Action column
+  // Remove columns
   table.querySelectorAll("tr").forEach((row) => {
     const cells = row.querySelectorAll("th, td");
-    if (cells[actionColIndex]) cells[actionColIndex].remove();
+    [...columnsToRemove].sort((a, b) => b - a).forEach((colIndex) => {
+      if (cells[colIndex]) cells[colIndex].remove();
+    });
   });
 
   const newWindow = window.open("", "_blank");
