@@ -1,12 +1,16 @@
-import React, { useEffect, useState, useContext, useMemo } from "react";
-import { Container, Row, Col, Card, Alert, Spinner, Badge, Button, Pagination, Form, Modal } from "react-bootstrap";
+import React, { useEffect, useState, useContext, useMemo, useRef } from "react";
+import { Container, Row, Col, Card, Alert, Spinner, Badge, Button, Pagination, Form, Modal, InputGroup, FormControl } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import { FaCalendar } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-datepicker/dist/react-datepicker.css";
 import "../../../assets/css/Profile.css";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
 import { AuthContext } from "../../context/AuthContext";
 import { FaPrint } from "react-icons/fa6";
 import { FaFileExcel } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -29,14 +33,33 @@ const ManageTeam = () => {
   // State for editing
   const [editingTeam, setEditingTeam] = useState(null);
   const [editFormData, setEditFormData] = useState({});
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState("");
+  const [showEmployeeDropdown, setShowEmployeeDropdown] = useState(false);
   
   // State for search and pagination
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
   
+  // Ref for dropdown
+  const dropdownRef = useRef(null);
+  
   // Toggle Sidebar
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowEmployeeDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownRef]);
   
   // --- Helper Functions to get Names by ID ---
   const getEmployeeNameById = (id) => {
@@ -49,6 +72,13 @@ const ManageTeam = () => {
     if (!id) return "Not assigned";
     const project = projects.find(proj => proj.project_id === id);
     return project ? project.project_name : id;
+  };
+  
+  // Format date for display
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return "Not set";
+    const date = new Date(dateString);
+    return date.toLocaleString();
   };
   
   // Get team leaders (employees with "team leader" designation)
@@ -80,38 +110,13 @@ const ManageTeam = () => {
     return projects.filter(project => !assignedProjectIds.includes(project.project_id));
   };
   
-  // Get all employee IDs that are already assigned to teams
-  const getAssignedEmployeeIds = () => {
-    const assignedIds = [];
-    
-    teams.forEach(team => {
-      // Skip the team being edited
-      if (team.id === editingTeam) return;
-      
-      // Add team leader if exists
-      if (team.team_leader) {
-        assignedIds.push(team.team_leader);
-      }
-      
-      // Add all team members if they exist
-      if (team.employee_ids && Array.isArray(team.employee_ids)) {
-        assignedIds.push(...team.employee_ids);
-      }
-    });
-    
-    return [...new Set(assignedIds)]; // Remove duplicates
-  };
-  
-  // Get non-team-leader employees who are not already assigned to teams
+  // Get non-team-leader employees (only filter by designation, not by team assignment)
   const getNonTeamLeaderEmployees = () => {
-    // Get all assigned employee IDs
-    const assignedIds = getAssignedEmployeeIds();
-    
-    // Get the current team's employee IDs to keep them in the list
+    // Get current team's employee IDs to keep them in list
     const currentTeamEmployeeIds = editFormData.employee_ids || [];
     
     return allEmployees.filter(emp => {
-      // Check if the employee is a team leader
+      // Check if employee is a team leader
       const isTeamLeader = emp.designation && (
         emp.designation.toLowerCase().includes('team leader') || 
         emp.designation.toLowerCase().includes('team lead')
@@ -120,11 +125,30 @@ const ManageTeam = () => {
       // Skip team leaders
       if (isTeamLeader) return false;
       
-      // Keep employees who are:
-      // 1. Not assigned to any team, OR
-      // 2. Currently assigned to the team being edited
-      return !assignedIds.includes(emp.emp_id) || currentTeamEmployeeIds.includes(emp.emp_id);
+      // Show all non-team-leader employees
+      return true;
     });
+  };
+  
+  // Get filtered employees for multiselector
+  const getFilteredEmployees = () => {
+    const allEmployees = getNonTeamLeaderEmployees();
+    const currentTeamEmployeeIds = editFormData.employee_ids || [];
+    
+    // Filter out already selected employees
+    const availableEmployees = allEmployees.filter(emp => 
+      !currentTeamEmployeeIds.includes(emp.emp_id)
+    );
+    
+    if (!employeeSearchTerm) return availableEmployees;
+    
+    const lowercasedSearchTerm = employeeSearchTerm.toLowerCase();
+    return availableEmployees.filter(emp => 
+      emp.first_name.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.last_name.toLowerCase().includes(lowercasedSearchTerm) ||
+      emp.emp_id.toLowerCase().includes(lowercasedSearchTerm) ||
+      (emp.designation && emp.designation.toLowerCase().includes(lowercasedSearchTerm))
+    );
   };
   
   // Fetch all necessary data on component mount
@@ -243,14 +267,20 @@ const ManageTeam = () => {
       team_name: team.team_name,
       team_leader: team.team_leader || "",
       project: team.project || "",
-      employee_ids: team.employee_ids || []
+      employee_ids: team.employee_ids || [],
+      start_date: team.start_date ? new Date(team.start_date) : null,
+      end_date: team.end_date ? new Date(team.end_date) : null
     });
+    setEmployeeSearchTerm("");
+    setShowEmployeeDropdown(false);
   };
   
   // Handle cancel edit
   const handleCancelEdit = () => {
     setEditingTeam(null);
     setEditFormData({});
+    setEmployeeSearchTerm("");
+    setShowEmployeeDropdown(false);
     setApiMessage("");
   };
   
@@ -260,6 +290,14 @@ const ManageTeam = () => {
     setEditFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+  
+  // Handle date changes
+  const handleDateChange = (name, date) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: date
     }));
   };
   
@@ -281,6 +319,14 @@ const ManageTeam = () => {
     });
   };
   
+  // Handle employee removal
+  const handleRemoveEmployee = (empId) => {
+    setEditFormData(prev => ({
+      ...prev,
+      employee_ids: (prev.employee_ids || []).filter(id => id !== empId)
+    }));
+  };
+  
   // Handle save changes
   const handleSaveChanges = async () => {
     try {
@@ -290,6 +336,15 @@ const ManageTeam = () => {
       // Get manager ID from auth context
       const managerId = user?.uniqueId || user?.id || user?.emp_id;
       
+      // Format dates for API
+      const formatDateForApi = (date) => {
+        if (!date) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
       // Create team data object with team_id field
       const teamData = {
         team_id: editFormData.team_id,
@@ -297,10 +352,12 @@ const ManageTeam = () => {
         team_leader: editFormData.team_leader,
         project: editFormData.project,
         employee_ids: editFormData.employee_ids,
+        start_date: formatDateForApi(editFormData.start_date),
+        end_date: formatDateForApi(editFormData.end_date),
         updated_by: managerId
       };
       
-      // Use the all-teams endpoint for PATCH
+      // Use all-teams endpoint for PATCH
       const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/', {
         method: 'PATCH',
         credentials: 'include',
@@ -344,6 +401,8 @@ const ManageTeam = () => {
         // Reset editing state and show success modal
         setEditingTeam(null);
         setEditFormData({});
+        setEmployeeSearchTerm("");
+        setShowEmployeeDropdown(false);
         setShowSuccessModal(true);
       } else {
         // Set error message from API response
@@ -362,7 +421,7 @@ const ManageTeam = () => {
   
   // Print functionality
   const handlePrint = () => {
-    const columnsToRemove = [7]; // Action column index after removal
+    const columnsToRemove = [8]; // Action column index after removal
     const table = document.querySelector(".temp-rwd-table")?.cloneNode(true);
 
     if (!table) {
@@ -417,11 +476,12 @@ const ManageTeam = () => {
         
       return {
         "S.No": index + 1,
-        "ID": team.id,
         "Team ID": team.team_id,
         "Team Name": team.team_name,
         "Team Leader": getEmployeeNameById(team.team_leader),
         "Project": getProjectNameById(team.project),
+        "Start Date": formatDateForDisplay(team.start_date),
+        "End Date": formatDateForDisplay(team.end_date),
         "Employees": employeeNames
       };
     });
@@ -450,11 +510,12 @@ const ManageTeam = () => {
     // Column widths
     ws["!cols"] = [
       { wch: 6 },   // S.No
-      { wch: 6 },   // ID
       { wch: 20 },  // Team ID
       { wch: 25 },  // Team Name
       { wch: 25 },  // Team Leader
       { wch: 25 },  // Project
+      { wch: 20 },  // Start Date
+      { wch: 20 },  // End Date
       { wch: 40 },  // Employees
     ];
 
@@ -464,6 +525,22 @@ const ManageTeam = () => {
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Teams_List.xlsx");
   };
+  
+  // Custom DatePicker Input Component
+  const CustomDatePickerInput = ({ value, onClick, placeholder }) => (
+    <InputGroup>
+      <Form.Control
+        value={value}
+        onClick={onClick}
+        placeholder={placeholder}
+        className="temp-form-control-option"
+        readOnly
+      />
+      <InputGroup.Text onClick={onClick} style={{ cursor: "pointer" }}>
+        <FaCalendar />
+      </InputGroup.Text>
+    </InputGroup>
+  );
   
   return (
     <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
@@ -515,11 +592,12 @@ const ManageTeam = () => {
                       <tbody>
                         <tr>
                           <th>S.No</th>
-                          <th>ID</th>
                           <th>Team ID</th>
                           <th>Team Name</th>
                           <th>Team Leader</th>
                           <th>Project</th>
+                          <th>Start Date</th>
+                          <th>End Date</th>
                           <th>Employees</th>
                           <th>Action</th>
                         </tr>
@@ -528,7 +606,6 @@ const ManageTeam = () => {
                           paginatedTeams.map((team, index) => (
                             <tr key={team.id}>
                               <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                              <td data-th="ID">{team.id}</td>
                               <td data-th="Team ID">{team.team_id}</td>
                               <td data-th="Team Name">
                                 {editingTeam === team.id ? (
@@ -578,21 +655,128 @@ const ManageTeam = () => {
                                   getProjectNameById(team.project)
                                 )}
                               </td>
+                              <td data-th="Start Date">
+                                {editingTeam === team.id ? (
+                                  <DatePicker
+                                    selected={editFormData.start_date}
+                                    onChange={(date) => handleDateChange("start_date", date)}
+                                    showTimeSelect
+                                    timeFormat="hh:mm aa"
+                                    timeIntervals={30}
+                                    dateFormat="MMMM d, yyyy h:mm aa"
+                                    className="form-control temp-form-control-option w-100"
+                                    customInput={
+                                      <CustomDatePickerInput placeholder="Select Start Date and Time" />
+                                    }
+                                  />
+                                ) : (
+                                  formatDateForDisplay(team.start_date)
+                                )}
+                              </td>
+                              <td data-th="End Date">
+                                {editingTeam === team.id ? (
+                                  <DatePicker
+                                    selected={editFormData.end_date}
+                                    onChange={(date) => handleDateChange("end_date", date)}
+                                    showTimeSelect
+                                    timeFormat="hh:mm aa"
+                                    timeIntervals={30}
+                                    dateFormat="MMMM d, yyyy h:mm aa"
+                                    className="form-control temp-form-control-option w-100"
+                                    customInput={
+                                      <CustomDatePickerInput placeholder="Select End Date and Time" />
+                                    }
+                                    minDate={editFormData.start_date}
+                                  />
+                                ) : (
+                                  formatDateForDisplay(team.end_date)
+                                )}
+                              </td>
                               <td data-th="Employees">
                                 {editingTeam === team.id ? (
-                                  <div className="employee-selection-container" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    {getNonTeamLeaderEmployees().length > 0 ? (
-                                      getNonTeamLeaderEmployees().map(emp => (
-                                        <Form.Check
-                                          key={emp.emp_id}
-                                          type="checkbox"
-                                          label={`${emp.first_name} ${emp.last_name} (${emp.emp_id})`}
-                                          checked={editFormData.employee_ids.includes(emp.emp_id)}
-                                          onChange={() => handleEmployeeSelection(emp.emp_id)}
-                                        />
-                                      ))
-                                    ) : (
-                                      <div className="text-muted">No available employees</div>
+                                  <div className="employee-selector" ref={dropdownRef}>
+                                    {/* Selected Employees Display */}
+                                    <div className="selected-employees mb-2" style={{ 
+                                      border: '1px solid #ced4da', 
+                                      borderRadius: '0.25rem', 
+                                      padding: '0.375rem 0.75rem',
+                                      minHeight: '38px',
+                                      display: 'flex',
+                                      flexWrap: 'wrap',
+                                      gap: '0.25rem'
+                                    }}>
+                                      {editFormData.employee_ids && editFormData.employee_ids.length > 0 ? (
+                                        editFormData.employee_ids.map(empId => {
+                                          const emp = allEmployees.find(e => e.emp_id === empId);
+                                          return (
+                                            <Badge 
+                                              key={empId} 
+                                              bg="primary" 
+                                              className="d-flex align-items-center"
+                                              style={{ fontSize: '0.75rem' }}
+                                            >
+                                              {emp ? `${emp.first_name} ${emp.last_name}` : empId}
+                                              <FaTimes 
+                                                className="ms-1" 
+                                                style={{ cursor: 'pointer' }} 
+                                                onClick={() => handleRemoveEmployee(empId)}
+                                              />
+                                            </Badge>
+                                          );
+                                        })
+                                      ) : (
+                                        <span className="text-muted">No employees selected</span>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Search Input */}
+                                    <InputGroup className="mb-2">
+                                      <FormControl
+                                        placeholder="Search by name, ID, or designation"
+                                        value={employeeSearchTerm}
+                                        onChange={(e) => setEmployeeSearchTerm(e.target.value)}
+                                        onFocus={() => setShowEmployeeDropdown(true)}
+                                      />
+                                    </InputGroup>
+                                    
+                                    {/* Dropdown List */}
+                                    {showEmployeeDropdown && (
+                                      <div className="employee-dropdown" style={{
+                                        position: 'absolute',
+                                        zIndex: 1000,
+                                        width: '100%',
+                                        maxHeight: '200px',
+                                        overflowY: 'auto',
+                                        border: '1px solid #ced4da',
+                                        borderRadius: '0.25rem',
+                                        backgroundColor: 'white'
+                                      }}>
+                                        {getFilteredEmployees().length > 0 ? (
+                                          getFilteredEmployees().map(emp => {
+                                            const isSelected = editFormData.employee_ids && editFormData.employee_ids.includes(emp.emp_id);
+                                            return (
+                                              <div 
+                                                key={emp.emp_id} 
+                                                className={`employee-option p-2 ${isSelected ? 'bg-light' : ''}`}
+                                                style={{ 
+                                                  cursor: 'pointer',
+                                                  borderBottom: '1px solid #eee'
+                                                }}
+                                                onClick={() => handleEmployeeSelection(emp.emp_id)}
+                                              >
+                                                <div>
+                                                  <strong>{emp.first_name} {emp.last_name}</strong>
+                                                  <div className="text-muted small">
+                                                    ID: {emp.emp_id} | {emp.designation || 'No designation'}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })
+                                        ) : (
+                                          <div className="p-2 text-muted">No employees found</div>
+                                        )}
+                                      </div>
                                     )}
                                   </div>
                                 ) : (
@@ -653,7 +837,7 @@ const ManageTeam = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="8" className="text-center">
+                            <td colSpan="9" className="text-center">
                               No teams found matching your search.
                             </td>
                           </tr>
