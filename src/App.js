@@ -31,7 +31,7 @@ import AddEmployeeForm from './componets/Payroll_dashboard/AddEmployeeForm';
 import EmployeeList from './componets/Payroll_dashboard/EmployeeList';
 import { PayrollCalculations, calculateTotals } from "./utils/PayrollCalculations";
 
-
+import MyTeam from "./componets/hr_dashboard/teammanagement/MyTeam";
 import PayrollCharts from './componets/Payroll_dashboard/PayrollCharts';
 import PayDashBoard from './componets/Payroll_dashboard/PayDashBoard';
 import LeaveCalendar from "./componets/hr_dashboard/hr_iinerpage/LeaveCalendar";
@@ -78,6 +78,7 @@ function AppContent() {
     "/DepartmentHierarchy",
     "/CreateTeam",
     "/ManageTeam",
+    "/MyTeam",
 
   ]);
 
@@ -186,6 +187,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageTeam />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/MyTeam"
+          element={
+            <ProtectedRoute>
+              <MyTeam />
             </ProtectedRoute>
           }
         />

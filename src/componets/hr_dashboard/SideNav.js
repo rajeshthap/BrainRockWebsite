@@ -77,6 +77,11 @@ const menuItems = [
           path: "/ManageTeam",
           icon: <FaChartLine />,
         },
+        {
+          label: "My Team",
+          path: "/MyTeam",
+          icon: <FaChartLine />,
+        },
        
       ],
     },
