@@ -37,6 +37,7 @@ const EmployeeRegistration = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [validated, setValidated] = useState(false);
   const [bankDetailsFetched, setBankDetailsFetched] = useState(false);
+  const [managers, setManagers] = useState([]);
 
   // Custom DatePicker Input Component
   const CustomDatePickerInput = React.forwardRef(
@@ -127,6 +128,7 @@ const EmployeeRegistration = () => {
     employment_type: "",
     joining_date: "",
     reporting_manager: "",
+    reporting_manager_id: "",
     work_location: "",
     salary: "",
     bank_name: "",
@@ -137,6 +139,37 @@ const EmployeeRegistration = () => {
     password: "",
     experience_certificates: [],
   });
+
+  // Add this useEffect with your other useEffect hooks
+useEffect(() => {
+  const fetchManagers = async () => {
+    try {
+      console.log("Fetching managers...");
+      const response = await axios.get(
+        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-name-details/",
+        {
+          withCredentials: true 
+        }
+      );
+      console.log("Managers API response:", response.data);
+      if (response.data.success && Array.isArray(response.data.data)) {
+        setManagers(response.data.data);
+        console.log("Managers set to state:", response.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching managers:", err);
+      if (err.response) {
+        console.error("Error response data:", err.response.data);
+        console.error("Error response status:", err.response.status);
+      }
+    }
+  };
+  fetchManagers();
+}, []);
+
+  useEffect(() => {
+  console.log("Managers state updated:", managers);
+}, [managers]);
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -336,6 +369,8 @@ const EmployeeRegistration = () => {
         return !value ? "Date of birth is required" : "";
       case "reporting_manager":
         return !value ? "Reporting manager is required" : "";
+         case "reporting_manager_id":
+      return !value ? "Reporting manager ID is required" : "";
       case "emergency_contact_name":
         return !value ? "Emergency contact name is required" : "";
       case "employment_type":
@@ -377,10 +412,10 @@ const EmployeeRegistration = () => {
           return prev.map((f) =>
             f.fileName === fileToUpdate.fileName
               ? {
-                  ...f,
-                  uploadProgress: progress,
-                  uploadComplete: progress >= 100,
-                }
+                ...f,
+                uploadProgress: progress,
+                uploadComplete: progress >= 100,
+              }
               : f
           );
         } else {
@@ -575,6 +610,7 @@ const EmployeeRegistration = () => {
       employment_type: "",
       joining_date: "",
       reporting_manager: "",
+       reporting_manager_id: "",
       work_location: "",
       salary: "",
       bank_name: "",
@@ -640,212 +676,213 @@ const EmployeeRegistration = () => {
 
   // Form submission handler
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setValidated(true);
-  setSubmitStatus({ loading: true, success: null, error: null });
+    e.preventDefault();
+    setValidated(true);
+    setSubmitStatus({ loading: true, success: null, error: null });
 
-  // Validate all text fields
-  const newErrors = {};
-  Object.keys(formData).forEach((key) => {
-    const errorMessage = validateField(key, formData[key]);
-    if (errorMessage) {
-      newErrors[key] = errorMessage;
-    }
-  });
-  setErrors(newErrors);
-
-  const newFileErrors = {};
-
-  if (!photo.fileSelected) {
-    newFileErrors.photo = "Profile photo is required";
-  }
-  if (!resume.fileSelected) {
-    newFileErrors.resume = "Resume is required";
-  }
-  if (!aadhar.fileSelected) {
-    newFileErrors.aadhar = "Aadhar card is required";
-  }
-  if (!panCard.fileSelected) {
-    newFileErrors.panCard = "PAN card is required";
-  }
-  if (!offerLetter.fileSelected) {
-    newFileErrors.offer_letter = "Offer letter is required";
-  }
-
-  setFileErrors(newFileErrors);
-
-  if (
-    Object.keys(newErrors).length > 0 ||
-    Object.keys(newFileErrors).length > 0
-  ) {
-    setSubmitStatus({
-      loading: false,
-      success: null,
-      error: "Please fix errors in the form.",
+    // Validate all text fields
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      const errorMessage = validateField(key, formData[key]);
+      if (errorMessage) {
+        newErrors[key] = errorMessage;
+      }
     });
+    setErrors(newErrors);
 
-    let firstErrorField = Object.keys(newErrors)[0];
+    const newFileErrors = {};
 
-    if (!firstErrorField) {
-      firstErrorField = Object.keys(newFileErrors)[0];
+    if (!photo.fileSelected) {
+      newFileErrors.photo = "Profile photo is required";
     }
+    if (!resume.fileSelected) {
+      newFileErrors.resume = "Resume is required";
+    }
+    if (!aadhar.fileSelected) {
+      newFileErrors.aadhar = "Aadhar card is required";
+    }
+    if (!panCard.fileSelected) {
+      newFileErrors.panCard = "PAN card is required";
+    }
+    if (!offerLetter.fileSelected) {
+      newFileErrors.offer_letter = "Offer letter is required";
+    }
+
+    setFileErrors(newFileErrors);
 
     if (
-      firstErrorField &&
-      formRefs[firstErrorField] &&
-      formRefs[firstErrorField].current
+      Object.keys(newErrors).length > 0 ||
+      Object.keys(newFileErrors).length > 0
     ) {
-      formRefs[firstErrorField].current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
+      setSubmitStatus({
+        loading: false,
+        success: null,
+        error: "Please fix errors in the form.",
       });
 
-      setTimeout(() => {
-        formRefs[firstErrorField].current.focus();
-      }, 500);
-    }
+      let firstErrorField = Object.keys(newErrors)[0];
 
-    return;
-  }
-
-  const payload = new FormData();
-
-  payload.append("first_name", formData.first_name);
-  payload.append("last_name", formData.last_name);
-  payload.append("gender", formData.gender);
-  payload.append("date_of_birth", formData.date_of_birth);
-  payload.append("email", formData.email);
-  payload.append("phone", formData.phone);
-  payload.append("alternate_phone", formData.alternate_phone);
-  payload.append("address", formData.address);
-  payload.append("country", formData.country);
-  payload.append("state", formData.state);
-  payload.append("city", formData.city);
-  payload.append("emergency_contact_name", formData.emergency_contact_name);
-  payload.append(
-    "emergency_contact_number",
-    formData.emergency_contact_number
-  );
-  payload.append("department", formData.department);
-  payload.append("branch_name", formData.branch_name);
-  payload.append("designation", formData.designation);
-  payload.append("employment_type", formData.employment_type);
-  payload.append("joining_date", formData.joining_date);
-  payload.append("reporting_manager", formData.reporting_manager);
-  payload.append("work_location", formData.work_location);
-  payload.append("salary", formData.salary);
-  payload.append("bank_name", formData.bank_name);
-  payload.append("account_number", formData.account_number);
-  payload.append("ifsc_code", formData.ifsc_code);
-  payload.append("pan_number", formData.pan_number);
-  payload.append("username", formData.username);
-  payload.append("password", formData.password);
-
-  if (photo.file) payload.append("profile_photo", photo.file);
-  if (resume.file) payload.append("resume_document", resume.file);
-  if (panCard.file) payload.append("pan_card_document", panCard.file);
-  if (aadhar.file) payload.append("aadhar_document", aadhar.file);
-  if (offerLetter.file) payload.append("offer_letter", offerLetter.file);
-
-  experienceFiles.forEach((fileObj) => {
-    if (fileObj.file) {
-      payload.append("experience_certificates", fileObj.file);
-    }
-  });
-
-  try {
-    const response = await fetch(
-      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-register/",
-      {
-        method: "POST",
-        body: payload,
-        credentials: 'include', 
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Server response:", errorText);
-
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        setSubmitStatus({
-          loading: false,
-          success: null,
-          error: "Server error. Please try again.",
-        });
-        return;
+      if (!firstErrorField) {
+        firstErrorField = Object.keys(newFileErrors)[0];
       }
 
-      if (errorData && errorData.errors) {
-        const fieldErrors = {};
-
-        Object.keys(errorData.errors).forEach((field) => {
-          let frontendField = field;
-
-          if (errorData.errors[field] && errorData.errors[field].length > 0) {
-            fieldErrors[frontendField] = errorData.errors[field][0];
-          }
+      if (
+        firstErrorField &&
+        formRefs[firstErrorField] &&
+        formRefs[firstErrorField].current
+      ) {
+        formRefs[firstErrorField].current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
         });
 
-        setErrors((prevErrors) => ({ ...prevErrors, ...fieldErrors }));
-
-        const firstErrorField = Object.keys(fieldErrors)[0];
-        if (
-          firstErrorField &&
-          formRefs[firstErrorField] &&
-          formRefs[firstErrorField].current
-        ) {
-          formRefs[firstErrorField].current.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-
-          setTimeout(() => {
-            formRefs[firstErrorField].current.focus();
-          }, 500);
-        }
-
-        setSubmitStatus({
-          loading: false,
-          success: null,
-          error: "Please fix the highlighted errors in the form.",
-        });
-      } else {
-        setSubmitStatus({
-          loading: false,
-          success: null,
-          error:
-            errorData.message ||
-            errorData.error ||
-            "Server error. Please try again.",
-        });
+        setTimeout(() => {
+          formRefs[firstErrorField].current.focus();
+        }, 500);
       }
 
       return;
     }
 
-    setSubmitStatus({
-      loading: false,
-      success: "Employee registered successfully!",
-      error: null,
+    const payload = new FormData();
+
+    payload.append("first_name", formData.first_name);
+    payload.append("last_name", formData.last_name);
+    payload.append("gender", formData.gender);
+    payload.append("date_of_birth", formData.date_of_birth);
+    payload.append("email", formData.email);
+    payload.append("phone", formData.phone);
+    payload.append("alternate_phone", formData.alternate_phone);
+    payload.append("address", formData.address);
+    payload.append("country", formData.country);
+    payload.append("state", formData.state);
+    payload.append("city", formData.city);
+    payload.append("emergency_contact_name", formData.emergency_contact_name);
+    payload.append(
+      "emergency_contact_number",
+      formData.emergency_contact_number
+    );
+    payload.append("department", formData.department);
+    payload.append("branch_name", formData.branch_name);
+    payload.append("designation", formData.designation);
+    payload.append("employment_type", formData.employment_type);
+    payload.append("joining_date", formData.joining_date);
+    payload.append("reporting_manager", formData.reporting_manager);
+     payload.append("reporting_manager_id", formData.reporting_manager_id);
+    payload.append("work_location", formData.work_location);
+    payload.append("salary", formData.salary);
+    payload.append("bank_name", formData.bank_name);
+    payload.append("account_number", formData.account_number);
+    payload.append("ifsc_code", formData.ifsc_code);
+    payload.append("pan_number", formData.pan_number);
+    payload.append("username", formData.username);
+    payload.append("password", formData.password);
+
+    if (photo.file) payload.append("profile_photo", photo.file);
+    if (resume.file) payload.append("resume_document", resume.file);
+    if (panCard.file) payload.append("pan_card_document", panCard.file);
+    if (aadhar.file) payload.append("aadhar_document", aadhar.file);
+    if (offerLetter.file) payload.append("offer_letter", offerLetter.file);
+
+    experienceFiles.forEach((fileObj) => {
+      if (fileObj.file) {
+        payload.append("experience_certificates", fileObj.file);
+      }
     });
 
-    setAlertMessage("Employee registered successfully!");
-    setShowModifyAlert(true);
+    try {
+      const response = await fetch(
+        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-register/",
+        {
+          method: "POST",
+          body: payload,
+          credentials: 'include',
+        }
+      );
 
-    resetForm();
-  } catch (err) {
-    console.error("Network error:", err);
-    setSubmitStatus({
-      loading: false,
-      success: null,
-      error: "Network error. Please try again.",
-    });
-  }
-};
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server response:", errorText);
+
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          setSubmitStatus({
+            loading: false,
+            success: null,
+            error: "Server error. Please try again.",
+          });
+          return;
+        }
+
+        if (errorData && errorData.errors) {
+          const fieldErrors = {};
+
+          Object.keys(errorData.errors).forEach((field) => {
+            let frontendField = field;
+
+            if (errorData.errors[field] && errorData.errors[field].length > 0) {
+              fieldErrors[frontendField] = errorData.errors[field][0];
+            }
+          });
+
+          setErrors((prevErrors) => ({ ...prevErrors, ...fieldErrors }));
+
+          const firstErrorField = Object.keys(fieldErrors)[0];
+          if (
+            firstErrorField &&
+            formRefs[firstErrorField] &&
+            formRefs[firstErrorField].current
+          ) {
+            formRefs[firstErrorField].current.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+
+            setTimeout(() => {
+              formRefs[firstErrorField].current.focus();
+            }, 500);
+          }
+
+          setSubmitStatus({
+            loading: false,
+            success: null,
+            error: "Please fix the highlighted errors in the form.",
+          });
+        } else {
+          setSubmitStatus({
+            loading: false,
+            success: null,
+            error:
+              errorData.message ||
+              errorData.error ||
+              "Server error. Please try again.",
+          });
+        }
+
+        return;
+      }
+
+      setSubmitStatus({
+        loading: false,
+        success: "Employee registered successfully!",
+        error: null,
+      });
+
+      setAlertMessage("Employee registered successfully!");
+      setShowModifyAlert(true);
+
+      resetForm();
+    } catch (err) {
+      console.error("Network error:", err);
+      setSubmitStatus({
+        loading: false,
+        success: null,
+        error: "Network error. Please try again.",
+      });
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -1029,9 +1066,8 @@ const EmployeeRegistration = () => {
                       </Form.Label>
 
                       <div
-                        className={`br-upload-box text-center ${
-                          fileErrors.photo ? "is-invalid" : ""
-                        } ${dragOverStates.photo ? "drag-over" : ""}`}
+                        className={`br-upload-box text-center ${fileErrors.photo ? "is-invalid" : ""
+                          } ${dragOverStates.photo ? "drag-over" : ""}`}
                         onDragEnter={(e) => handleDragEnter(e, "photo")}
                         onDragOver={(e) => handleDragOver(e, "photo")}
                         onDragLeave={(e) => handleDragLeave(e, "photo")}
@@ -1429,21 +1465,30 @@ const EmployeeRegistration = () => {
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3" controlId="reportingManager">
                     <Form.Label className="br-label">
-                      Reporting Manager
+                      Reporting Manager <span className="br-span-star">*</span>
                     </Form.Label>
                     <Form.Select
                       className="br-form-control"
                       name="reporting_manager"
-                      required
                       value={formData.reporting_manager}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        const selectedManager = managers.find(m => m.full_name === e.target.value);
+                        setFormData(prev => ({
+                          ...prev,
+                          reporting_manager: e.target.value,
+                          reporting_manager_id: selectedManager ? selectedManager.employee_id : ""
+                        }));
+                      }}
                       isInvalid={!!errors.reporting_manager}
+                      required
+                      ref={formRefs.reporting_manager}
                     >
                       <option value="">Select Manager</option>
-                      <option value="John Doe">John Doe</option>
-                      <option value="Jane Smith">Jane Smith</option>
-                      <option value="Michael Brown">Michael Brown</option>
-                      <option value="Priya Sharma">Priya Sharma</option>
+                      {managers.map(manager => (
+                        <option key={manager.employee_id} value={manager.full_name}>
+                          {manager.full_name} ({manager.designation}, {manager.department})
+                        </option>
+                      ))}
                     </Form.Select>
                     <Form.Control.Feedback type="br-alert">
                       {errors.reporting_manager}
@@ -1615,9 +1660,8 @@ const EmployeeRegistration = () => {
                       Resume / CV <span className="br-span-star">*</span>
                     </Form.Label>
                     <div
-                      className={`br-doc-box text-center ${
-                        fileErrors.resume ? "is-invalid" : ""
-                      } ${dragOverStates.resume ? "drag-over" : ""}`}
+                      className={`br-doc-box text-center ${fileErrors.resume ? "is-invalid" : ""
+                        } ${dragOverStates.resume ? "drag-over" : ""}`}
                       onDragEnter={(e) => handleDragEnter(e, "resume")}
                       onDragOver={(e) => handleDragOver(e, "resume")}
                       onDragLeave={(e) => handleDragLeave(e, "resume")}
@@ -1724,9 +1768,8 @@ const EmployeeRegistration = () => {
                       Aadhar Card <span className="br-span-star">*</span>
                     </Form.Label>
                     <div
-                      className={`br-doc-box text-center ${
-                        fileErrors.aadhar ? "is-invalid" : ""
-                      } ${dragOverStates.aadhar ? "drag-over" : ""}`}
+                      className={`br-doc-box text-center ${fileErrors.aadhar ? "is-invalid" : ""
+                        } ${dragOverStates.aadhar ? "drag-over" : ""}`}
                       onDragEnter={(e) => handleDragEnter(e, "aadhar")}
                       onDragOver={(e) => handleDragOver(e, "aadhar")}
                       onDragLeave={(e) => handleDragLeave(e, "aadhar")}
@@ -1835,9 +1878,8 @@ const EmployeeRegistration = () => {
                       Offer Letter <span className="br-span-star">*</span>
                     </Form.Label>
                     <div
-                      className={`br-doc-box text-center ${
-                        fileErrors.offer_letter ? "is-invalid" : ""
-                      } ${dragOverStates.offerLetter ? "drag-over" : ""}`}
+                      className={`br-doc-box text-center ${fileErrors.offer_letter ? "is-invalid" : ""
+                        } ${dragOverStates.offerLetter ? "drag-over" : ""}`}
                       onDragEnter={(e) => handleDragEnter(e, "offerLetter")}
                       onDragOver={(e) => handleDragOver(e, "offerLetter")}
                       onDragLeave={(e) => handleDragLeave(e, "offerLetter")}
@@ -1952,9 +1994,8 @@ const EmployeeRegistration = () => {
                       Pan Card <span className="br-span-star">*</span>
                     </Form.Label>
                     <div
-                      className={`br-doc-box text-center ${
-                        fileErrors.panCard ? "is-invalid" : ""
-                      } ${dragOverStates.panCard ? "drag-over" : ""}`}
+                      className={`br-doc-box text-center ${fileErrors.panCard ? "is-invalid" : ""
+                        } ${dragOverStates.panCard ? "drag-over" : ""}`}
                       onDragEnter={(e) => handleDragEnter(e, "panCard")}
                       onDragOver={(e) => handleDragOver(e, "panCard")}
                       onDragLeave={(e) => handleDragLeave(e, "panCard")}
@@ -2068,11 +2109,10 @@ const EmployeeRegistration = () => {
                     <Row>
                       <Col lg={6}>
                         <div
-                          className={`br-doc-box text-center ${
-                            dragOverStates.experienceCertificates
+                          className={`br-doc-box text-center ${dragOverStates.experienceCertificates
                               ? "drag-over"
                               : ""
-                          }`}
+                            }`}
                           onDragEnter={(e) =>
                             handleDragEnter(e, "experienceCertificates")
                           }
