@@ -66,12 +66,24 @@ const DailyAttendance = () => {
     return userRole === 'admin' || userRole === 'hr' || userRole === 'manager';
   };
 
-  // Check if check-in/check-out buttons should be visible
+  // Check if user is a regular employee (not admin/HR/manager)
+  const isRegularEmployee = () => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole !== 'admin' && userRole !== 'hr' && userRole !== 'manager';
+  };
+
+  // CORRECTED: Check if check-in/check-out buttons should be visible
   const shouldShowCheckInOutButtons = () => {
     // Show buttons if:
-    // 1. User is admin/other privileged role, OR
-    // 2. User is viewing their own attendance (no selected employee)
-    return isAdminOrOther() || !selectedEmployee;
+    // 1. User is a regular employee (always for their own view), OR
+    // 2. User is admin/other privileged role
+    return isRegularEmployee() || isAdminOrOther();
+  };
+
+  // Check if edit functionality should be visible
+  const shouldShowEditFunctionality = () => {
+    // Only show edit functionality for admin/HR/manager roles
+    return isAdminOrOther();
   };
 
   // Fetch employees from API
@@ -115,10 +127,28 @@ const DailyAttendance = () => {
     }
   };
 
-  // Fetch employees on component mount
+  // Initialize component based on user role
   useEffect(() => {
-    fetchEmployees();
-  }, []);
+    if (isRegularEmployee()) {
+      // For regular employees, set showEmployeeList to false and set selected employee to themselves
+      setShowEmployeeList(false);
+      setSelectedEmployee({
+        emp_id: user?.unique_id,
+        first_name: user?.first_name || 'Your',
+        last_name: user?.last_name || 'Name',
+        department: user?.department || 'N/A',
+        designation: user?.designation || 'N/A',
+        email: user?.email || 'N/A',
+        phone: user?.phone || 'N/A',
+        is_active: true
+      });
+      // Fetch attendance data for the employee
+      fetchAttendanceData(selectedDate, viewMode, user?.unique_id);
+    } else {
+      // For admin/HR/manager, fetch employees and show employee list
+      fetchEmployees();
+    }
+  }, [user]); // This effect runs once when the user context is available
 
   // Function to handle viewing attendance for a specific employee
   const handleViewAttendance = (employee) => {
@@ -232,7 +262,7 @@ const handlePrint = () => {
     });
   });
 
-  // Apply print styles directly to the table
+  // Apply print styles directly to table
   table.style.width = '100%';
   table.style.borderCollapse = 'collapse';
   table.style.marginTop = '20px';
@@ -301,9 +331,6 @@ const handleDownload = () => {
     };
   }
 
-  // Removed manual column width settings to use table classes instead
-  // ws["!cols"] = [...] has been removed
-
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Employee List");
   const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -350,7 +377,7 @@ const handleDownload = () => {
         return "MissedCheckout";
       }
       
-      // Otherwise, user is still within the working hours window, so it's considered "Present"
+      // Otherwise, user is still within working hours window, so it's considered "Present"
       return "Present";
     }
     
@@ -379,7 +406,7 @@ const handleDownload = () => {
         end: formatDateLocal(end)
       };
     } else if (mode === 'week') {
-      // For week view, get start of week (Sunday)
+      // For week view, get start of the week (Sunday)
       const day = start.getDay();
       const diff = start.getDate() - day;
       const startDate = new Date(start.setDate(diff));
@@ -391,7 +418,7 @@ const handleDownload = () => {
         end: formatDateLocal(endDate)
       };
     } else if (mode === 'month') {
-      // For month view, get first and last day of month
+      // For month view, get the first and last day of the month
       const startDate = new Date(start.getFullYear(), start.getMonth(), 1);
       const endDate = new Date(start.getFullYear(), start.getMonth() + 1, 0);
       
@@ -833,8 +860,9 @@ const handleDownload = () => {
     }
   };
 
-  // Fetch data on component mount or when selected employee changes
+  // Fetch data on component mount or when the selected employee changes
   useEffect(() => {
+    // Only fetch if an employee is set (either by admin selection or auto for regular user)
     if (selectedEmployee?.emp_id || user?.unique_id) {
       fetchAttendanceData();
     }
@@ -1151,27 +1179,29 @@ const handleDownload = () => {
           <HrHeader toggleSidebar={toggleSidebar} />
 
           <Container fluid className="dashboard-body" style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
-            {/* Back button and employee info */}
-            <Card className="p-3 shadow-sm mb-3">
-              <Row className="align-items-center">
-                <Col>
-                  <h5 className="d-inline-block mb-0">
-                    Attendance for: {selectedEmployee ? `${selectedEmployee.first_name} ${selectedEmployee.last_name}` : 'N/A'}
-                  </h5>
-                </Col>
-                <Col xs="auto">
-                  <Button 
-                    variant="outline-secondary" 
-                    className="me-3 justify-content-end align-items-end ms-3"
-                    onClick={handleBackToEmployeeList}
-                  >
-                    <IoIosArrowBack /> Back to Employee List
-                  </Button>
-                </Col>
-              </Row>
-            </Card>
+            {/* Back button and employee info - Only show for admin/HR/manager */}
+            {isAdminOrOther() && (
+              <Card className="p-3 shadow-sm mb-3">
+                <Row className="align-items-center">
+                  <Col>
+                    <h5 className="d-inline-block mb-0">
+                      Attendance for: {selectedEmployee ? `${selectedEmployee.first_name} ${selectedEmployee.last_name}` : 'N/A'}
+                    </h5>
+                  </Col>
+                  <Col xs="auto">
+                    <Button 
+                      variant="outline-secondary" 
+                      className="me-3 justify-content-end align-items-end ms-3"
+                      onClick={handleBackToEmployeeList}
+                    >
+                      <IoIosArrowBack /> Back to Employee List
+                    </Button>
+                  </Col>
+                </Row>
+              </Card>
+            )}
 
-            {/* Check-in/Check-out buttons section - Only show if user is admin or viewing own attendance */}
+            {/* Check-in/Check-out buttons section - CORRECTED LOGIC */}
             {shouldShowCheckInOutButtons() && (
               <Card className="p-3 shadow-sm mb-3">
                 <Row className="align-items-center">
@@ -1387,16 +1417,18 @@ const handleDownload = () => {
                         <small className="text-muted br-att-hrs">Hrs worked</small>
                       </Col>
 
-                      {/* EDIT BUTTON */}
-                      <Col xs={6} sm={6} md={2} lg={2}>
-                        <div
-                          className="text-primary br-edit-btn"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => handleEditClick(index)}
-                        >
-                          <AiFillEdit />Edit
-                        </div>
-                      </Col>
+                      {/* EDIT BUTTON - Only show for admin/HR/manager */}
+                      {shouldShowEditFunctionality() && (
+                        <Col xs={6} sm={6} md={2} lg={2}>
+                          <div
+                            className="text-primary br-edit-btn"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleEditClick(index)}
+                          >
+                            <AiFillEdit />Edit
+                          </div>
+                        </Col>
+                      )}
                     </Row>
 
                     {/* =============== EDIT ROW BELOW =============== */}
