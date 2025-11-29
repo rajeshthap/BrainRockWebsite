@@ -76,7 +76,8 @@ function AppContent() {
     "/SalaryStructure",
     "/LeaveHistory",
     "/DepartmentHierarchy",
-    "/TeamManagement"
+    "/CreateTeam",
+    "/ManageTeam",
 
   ]);
 

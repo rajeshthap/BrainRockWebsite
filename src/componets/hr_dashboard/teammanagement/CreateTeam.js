@@ -11,10 +11,15 @@ const CreateTeam = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // API data states
+  const [teams, setTeams] = useState([]);
   const [teamLeaders, setTeamLeaders] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
-  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [filteredTeamLeaders, setFilteredTeamLeaders] = useState([]);
+  const [availableEmployees, setAvailableEmployees] = useState([]);
+  
+  // UI states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -24,8 +29,6 @@ const CreateTeam = () => {
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [teamName, setTeamName] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showJsonModal, setShowJsonModal] = useState(false);
-  const [jsonPreview, setJsonPreview] = useState("");
   
   // Search/filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,48 +73,59 @@ const CreateTeam = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
         
-        // Fetch all employees
-        const employeesResponse = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        });
+        // Fetch all data
+        const [teamsResponse, employeesResponse, projectsResponse] = await Promise.all([
+          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          }),
+          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          }),
+          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/project-list/', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          })
+        ]);
         
-        if (!employeesResponse.ok) {
-          throw new Error(`HTTP error! Status: ${employeesResponse.status}`);
+        // Check if all responses are OK
+        if (!teamsResponse.ok || !employeesResponse.ok || !projectsResponse.ok) {
+          throw new Error("One or more API requests failed");
         }
         
+        const teamsData = await teamsResponse.json();
         const employeesData = await employeesResponse.json();
-        let employees = [];
-        
-        if (Array.isArray(employeesData)) {
-          employees = employeesData;
-        } else if (employeesData && Array.isArray(employeesData.results)) {
-          employees = employeesData.results;
-        }
-        
-        // Filter team leaders using the isTeamLeader function
-        const leaders = employees.filter(emp => isTeamLeader(emp));
-        console.log("Team Leaders found:", leaders); // Debug log to see the team leaders
-        setTeamLeaders(leaders);
-        setAllEmployees(employees);
-        setFilteredEmployees(employees); // Initialize filtered employees
-        
-        // Fetch projects
-        const projectsResponse = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/project-list/', {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (!projectsResponse.ok) {
-          throw new Error(`HTTP error! Status: ${projectsResponse.status}`);
-        }
-        
         const projectsData = await projectsResponse.json();
         
-        // Handle the specific project data structure
+        // Process and set teams data
+        let teamsList = [];
+        if (teamsData.success && Array.isArray(teamsData.data)) {
+          teamsList = teamsData.data;
+        } else if (Array.isArray(teamsData)) {
+          teamsList = teamsData;
+        }
+        setTeams(teamsList);
+        
+        // Process and set employees data
+        let employeesList = [];
+        if (Array.isArray(employeesData)) {
+          employeesList = employeesData;
+        } else if (employeesData && Array.isArray(employeesData.results)) {
+          employeesList = employeesData.results;
+        }
+        setAllEmployees(employeesList);
+        
+        // Filter team leaders using isTeamLeader function
+        const leaders = employeesList.filter(emp => isTeamLeader(emp));
+        setTeamLeaders(leaders);
+        
+        // Process and set projects data
         if (projectsData.success && Array.isArray(projectsData.data)) {
           setProjects(projectsData.data);
         } else {
@@ -126,37 +140,53 @@ const CreateTeam = () => {
         setLoading(false);
       }
     };
-
+    
     fetchData();
   }, []);
   
-  // Filter employees based on search term
+  // Filter team leaders, projects, and employees based on existing assignments
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredEmployees(allEmployees);
-      return;
+    if (teams.length > 0 && teamLeaders.length > 0 && projects.length > 0 && allEmployees.length > 0) {
+      // Get all team leader IDs that are already assigned
+      const assignedLeaderIds = teams.map(team => team.team_leader).filter(Boolean);
+      
+      // Get all project IDs that are already assigned
+      const assignedProjectIds = teams.map(team => team.project).filter(Boolean);
+      
+      // Get all employee IDs that are already assigned to teams
+      const assignedEmployeeIds = [];
+      teams.forEach(team => {
+        // Add team leader if exists
+        if (team.team_leader) {
+          assignedEmployeeIds.push(team.team_leader);
+        }
+        
+        // Add all team members if they exist
+        if (team.employee_ids && Array.isArray(team.employee_ids)) {
+          assignedEmployeeIds.push(...team.employee_ids);
+        }
+      });
+      
+      // Filter out team leaders who are already assigned
+      const availableTeamLeaders = teamLeaders.filter(leader => !assignedLeaderIds.includes(leader.emp_id));
+      setFilteredTeamLeaders(availableTeamLeaders);
+      
+      // Filter out projects that are already assigned
+      const availableProjects = projects.filter(project => !assignedProjectIds.includes(project.project_id));
+      setFilteredProjects(availableProjects);
+      
+      // Filter out employees who are team leaders or already assigned to teams
+      const availableEmployees = allEmployees.filter(emp => {
+        // Skip team leaders
+        if (isTeamLeader(emp)) return false;
+        
+        // Skip employees already assigned to teams
+        return !assignedEmployeeIds.includes(emp.emp_id);
+      });
+      
+      setAvailableEmployees(availableEmployees);
     }
-    
-    const filtered = allEmployees.filter(emp => {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        emp.first_name?.toLowerCase().includes(searchLower) ||
-        emp.last_name?.toLowerCase().includes(searchLower) ||
-        emp.emp_id?.toLowerCase().includes(searchLower)
-      );
-    });
-    
-    setFilteredEmployees(filtered);
-  }, [searchTerm, allEmployees]);
-  
-  // Handle employee selection
-  const handleEmployeeSelection = (empId) => {
-    if (selectedEmployees.includes(empId)) {
-      setSelectedEmployees(selectedEmployees.filter(id => id !== empId));
-    } else {
-      setSelectedEmployees([...selectedEmployees, empId]);
-    }
-  };
+  }, [teams, teamLeaders, projects, allEmployees]);
   
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -180,7 +210,7 @@ const CreateTeam = () => {
     };
     
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock/backendbr/api/teams/', {
+      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -194,9 +224,8 @@ const CreateTeam = () => {
       const result = await response.json();
       
       if (result.success) {
-        // Clear form immediately after successful creation
+        // Clear form and show success modal
         clearForm();
-        // Show success modal
         setShowSuccessModal(true);
       } else {
         setError(result.message || "Failed to create team");
@@ -208,36 +237,9 @@ const CreateTeam = () => {
     }
   };
   
-  // Preview JSON before submission
-  const handlePreviewJson = (e) => {
-    e.preventDefault();
-    
-    if (!selectedTeamLeader || !selectedProject || selectedEmployees.length === 0 || !teamName) {
-      setError("Please fill all fields and select at least one employee");
-      return;
-    }
-    
-    // Get manager ID from auth context
-    const managerId = user?.uniqueId || user?.id || user?.emp_id;
-    
-    // Create team data object
-    const teamData = {
-      team_name: teamName,
-      team_leader_id: selectedTeamLeader,
-      project_id: selectedProject,
-      employee_ids: selectedEmployees,
-      manager_id: managerId
-    };
-    
-    // Set JSON preview
-    setJsonPreview(JSON.stringify(teamData, null, 2));
-    setShowJsonModal(true);
-  };
-  
   // Handle closing success modal
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    // Ensure form is cleared when modal is closed
     clearForm();
   };
   
@@ -252,7 +254,7 @@ const CreateTeam = () => {
         
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            <h2>Team Management</h2>
+            <h2>Create Team</h2>
             
             {loading && (
               <div className="d-flex justify-content-center my-5">
@@ -262,7 +264,7 @@ const CreateTeam = () => {
             
             {error && <Alert variant="danger">{error}</Alert>}
             
-            {!loading && (
+            {!loading && !error && (
               <Form onSubmit={handleSubmit}>
                 <Row className="mb-4">
                   <Col md={6}>
@@ -289,7 +291,7 @@ const CreateTeam = () => {
                         required
                       >
                         <option value="">Select Team Leader</option>
-                        {teamLeaders.map(leader => (
+                        {filteredTeamLeaders.map(leader => (
                           <option key={leader.emp_id} value={leader.emp_id}>
                             {leader.first_name} {leader.last_name} ({leader.emp_id})
                           </option>
@@ -307,9 +309,9 @@ const CreateTeam = () => {
                         required
                       >
                         <option value="">Select Project</option>
-                        {projects.map(project => (
-                          <option key={project.id} value={project.project_id}>
-                            {project.project_name} ({project.project_id})
+                        {filteredProjects.map(project => (
+                          <option key={project.project_id} value={project.project_id}>
+                            {project.project_name}
                           </option>
                         ))}
                       </Form.Select>
@@ -334,28 +336,43 @@ const CreateTeam = () => {
                     </InputGroup>
                     
                     <div className="employee-selection-container">
-                      {filteredEmployees.length > 0 ? (
-                        filteredEmployees.map(emp => (
-                          <Card key={emp.emp_id} className="employee-card mb-2">
-                            <Card.Body className="d-flex justify-content-between align-items-center p-2">
-                              <div>
-                                <strong>{emp.first_name} {emp.last_name}</strong>
-                                <div className="text-muted small">{emp.emp_id} - {emp.designation}</div>
-                                {isTeamLeader(emp) && (
-                                  <Badge bg="primary" className="ms-2">Team Leader</Badge>
-                                )}
-                              </div>
-                              <Form.Check
-                                type="checkbox"
-                                checked={selectedEmployees.includes(emp.emp_id)}
-                                onChange={() => handleEmployeeSelection(emp.emp_id)}
-                                disabled={emp.emp_id === selectedTeamLeader}
-                              />
-                            </Card.Body>
-                          </Card>
-                        ))
+                      {availableEmployees.length > 0 ? (
+                        availableEmployees
+                          .filter(emp => {
+                            // Apply search filter if there's a search term
+                            if (!searchTerm) return true;
+                            const searchLower = searchTerm.toLowerCase();
+                            return (
+                              emp.first_name?.toLowerCase().includes(searchLower) ||
+                              emp.last_name?.toLowerCase().includes(searchLower) ||
+                              emp.emp_id?.toLowerCase().includes(searchLower)
+                            );
+                          })
+                          .map(emp => (
+                            <Card key={emp.emp_id} className="employee-card mb-2">
+                              <Card.Body className="d-flex justify-content-between align-items-center p-2">
+                                <div>
+                                  <strong>{emp.first_name} {emp.last_name}</strong>
+                                  <div className="text-muted small">{emp.emp_id} - {emp.designation}</div>
+                                </div>
+                                <Form.Check
+                                  type="checkbox"
+                                  checked={selectedEmployees.includes(emp.emp_id)}
+                                  onChange={() => {
+                                    if (selectedEmployees.includes(emp.emp_id)) {
+                                      setSelectedEmployees(selectedEmployees.filter(id => id !== emp.emp_id));
+                                    } else {
+                                      setSelectedEmployees([...selectedEmployees, emp.emp_id]);
+                                    }
+                                  }}
+                                />
+                              </Card.Body>
+                            </Card>
+                          ))
                       ) : (
-                        <Alert variant="info">No employees found matching your search criteria.</Alert>
+                        <Alert variant="info">
+                          No available employees found. All employees are either team leaders or already assigned to teams.
+                        </Alert>
                       )}
                     </div>
                   </Col>
@@ -366,9 +383,6 @@ const CreateTeam = () => {
                     Clear Form
                   </Button>
                   <div>
-                    <Button variant="outline-secondary" className="me-2" onClick={handlePreviewJson}>
-                      Preview JSON
-                    </Button>
                     <Button variant="primary" type="submit">
                       Create Team
                     </Button>
@@ -390,23 +404,6 @@ const CreateTeam = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseSuccessModal}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      
-      {/* JSON Preview Modal */}
-      <Modal show={showJsonModal} onHide={() => setShowJsonModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>JSON Data Preview</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <pre className="bg-light p-3 rounded">
-            {jsonPreview}
-          </pre>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowJsonModal(false)}>
             Close
           </Button>
         </Modal.Footer>
