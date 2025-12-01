@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import "../../assets/css/UserPage.css"
 import PoorImg from "../../assets/images/poorimg.jpg";
@@ -30,76 +30,121 @@ import { Link } from "react-router-dom";
 import FooterPage from "../footer/FooterPage";
 
 function UserPage() {
+  const [carouselData, setCarouselData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Function to fetch carousel data from API
+    const fetchCarouselData = async () => {
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch('https://api.example.com/carousel-items');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch carousel data');
+        }
+        
+        const data = await response.json();
+        setCarouselData(data);
+      } catch (error) {
+        console.error('Error fetching carousel data:', error);
+        // Fallback data if API fails
+        setCarouselData([
+          {
+            id: 1,
+            title: "Best It Solution Company",
+            subtitle: "Professional it solution ~",
+            description: "We deliver innovative IT solutions to help your business stay ahead in the digital world",
+            image: Banner1,
+            alt: "groupimage"
+          },
+          {
+            id: 2,
+            title: "Best It Solution Company",
+            subtitle: "Professional it solution ~",
+            description: "We deliver innovative IT solutions to help your business stay ahead in the digital world",
+            image: Banner2,
+            alt: "Banner2"
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCarouselData();
+  }, []);
+
   return (
     <div className="container-fluid p-0">
       <div className="craousal-main">
-        <Carousel className="resorce-craousal  " interval={3000} pause={false}>
-          <Carousel.Item>
-            <Row className="resorce-img">
-              <Col lg={6} md={6} sm={12}>
-                <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
-                  <h1 className=" bg-opacity-50 py-2 px-4">
-                    <span class="hero-sub-title mb-20">Professional it solution ~</span>{" "}<br></br>
-                    <span className="br-span-title"> Best It Solution Company</span>{" "}
-                    {" "}
-
-                  </h1>
-                  <p className=" bg-opacity-50 py-2 px-4">
-                    We deliver innovative IT solutions to help your business stay
-                    ahead in the digital worldd
-                  </p>
-                </div>
-              </Col>
-
-              <Col lg={6} md={6} sm={12}>
-                <div>
-                  <i>
-                    <img
-                      src={Banner1}
-                      alt="groupimage"
-                      className="img-fluid"
-                    ></img>
-                  </i>
-                </div>
-              </Col>
-            </Row>
-            <Carousel.Caption></Carousel.Caption>
-
-          </Carousel.Item>
-
-
-          <Carousel.Item>
-            <Row className="resorce-img">
-              <Col lg={6} md={6} sm={12}>
-                <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
-                  <h1 className=" bg-opacity-50 py-2 px-4">
-                    <span class="hero-sub-title mb-20">Professional it solution ~</span>{" "}<br></br>
-                    <span className="br-span-title"> Best It Solution Company</span>{" "}
-                    {" "}
-
-                  </h1>
-                  <p className=" bg-opacity-50 py-2 px-4">
-                    We deliver innovative IT solutions to help your business stay
-                    ahead in the digital worldd
-                  </p>
-                </div>
-              </Col>
-
-              <Col lg={6} md={6} sm={12}>
-                <div>
-                  <i>
-                    <img
-                      src={Banner2}
-                      alt="Banner2"
-                      className="img-fluid"
-                    ></img>
-                  </i>
-                </div>
-              </Col>
-            </Row>
-            <Carousel.Caption></Carousel.Caption>
-
-          </Carousel.Item>
+        <Carousel className="resorce-craousal" interval={3000} pause={false}>
+          {loading ? (
+            // Show loading state or fallback content while fetching data
+            <>
+              <Carousel.Item>
+                <Row className="resorce-img">
+                  <Col lg={6} md={6} sm={12}>
+                    <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
+                      <h1 className=" bg-opacity-50 py-2 px-4">
+                        <span class="hero-sub-title mb-20">Professional it solution ~</span>{" "}<br></br>
+                        <span className="br-span-title"> Best It Solution Company</span>{" "}
+                        {" "}
+                      </h1>
+                      <p className=" bg-opacity-50 py-2 px-4">
+                        We deliver innovative IT solutions to help your business stay
+                        ahead in the digital worldd
+                      </p>
+                    </div>
+                  </Col>
+                  <Col lg={6} md={6} sm={12}>
+                    <div>
+                      <i>
+                        <img
+                          src={Banner1}
+                          alt="groupimage"
+                          className="img-fluid"
+                        ></img>
+                      </i>
+                    </div>
+                  </Col>
+                </Row>
+                <Carousel.Caption></Carousel.Caption>
+              </Carousel.Item>
+            </>
+          ) : (
+            // Map over the carousel data to render items dynamically
+            carouselData.map((item) => (
+              <Carousel.Item key={item.id}>
+                <Row className="resorce-img">
+                  <Col lg={6} md={6} sm={12}>
+                    <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
+                      <h1 className=" bg-opacity-50 py-2 px-4">
+                        <span class="hero-sub-title mb-20">{item.subtitle}</span>{" "}<br></br>
+                        <span className="br-span-title">{item.title}</span>{" "}
+                        {" "}
+                      </h1>
+                      <p className=" bg-opacity-50 py-2 px-4">
+                        {item.description}
+                      </p>
+                    </div>
+                  </Col>
+                  <Col lg={6} md={6} sm={12}>
+                    <div>
+                      <i>
+                        <img
+                          src={item.image}
+                          alt={item.alt}
+                          className="img-fluid"
+                        ></img>
+                      </i>
+                    </div>
+                  </Col>
+                </Row>
+                <Carousel.Caption></Carousel.Caption>
+              </Carousel.Item>
+            ))
+          )}
         </Carousel>
       </div>
       <div />

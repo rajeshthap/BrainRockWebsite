@@ -65,7 +65,8 @@ import WebsiteManagement from "./componets/adminpanel/WebsiteManagement";
 import LeftNavManagement from "./componets/adminpanel/LeftNavManagement";
 import AddServices from "./componets/adminpanel/Services/AddServices";
 import ViewServices from "./componets/adminpanel/Services/ViewServices";
-
+import AddCarousel from "./componets/adminpanel/carousel/AddCarousel";
+import EditCarousel from "./componets/adminpanel/carousel/EditCarousel";
 
 
 function AppContent() {
@@ -99,7 +100,9 @@ function AppContent() {
     "/WebsiteManagement",
     "LeftNavManagement",
     "/AddServices",
-    "/ViewServices"
+    "/ViewServices",
+    "/AddCarousel",
+    "/EditCarousel",
 
   ]);
 
@@ -153,6 +156,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        
         <Route
           path="/LeaveHistory"
           element={
@@ -332,7 +336,25 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        {/* Admin Panel Routes */}
+        <Route
+          path="/AddCarousel"
+          element={
+            <ProtectedRoute>
+              <AddCarousel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/EditCarousel"
+          element={
+            <ProtectedRoute>
+              <EditCarousel />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+      
 
       {!shouldHideFooter1 && <Footer />}
     </>

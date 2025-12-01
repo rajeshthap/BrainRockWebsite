@@ -40,6 +40,27 @@ const menuItems = [
       path: "/WebsiteManagement",
       active: true,
     },
+    {
+      icon: <PiUserListBold />,
+      label: "Carousel",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Carousel",
+          path: "/AddCarousel",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Edit Carousel",
+          path: "/EditCarousel",
+          icon: <FaChartLine />,
+        },
+        
+       
+      ],
+    },
      
      {
       icon: <PiUserListBold />,
