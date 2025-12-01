@@ -520,7 +520,7 @@ const handleDownload = () => {
         <div className="action-buttons">
           <Button
             variant="success"
-            className="suc-st-btn me-2"
+            className="suc-st-btn"
             size="sm"
             onClick={() => handleAction(leave, "approve")}
           >
@@ -534,7 +534,7 @@ const handleDownload = () => {
               size="sm"
               onClick={() => handleAction(leave, "reject")}
             >
-              <FaTimesCircle className="me-1" /> Reject
+              <FaTimesCircle className="" /> Reject
             </Button>
           </div>
         </div>
