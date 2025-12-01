@@ -198,7 +198,7 @@ const TrainingRegistration = () => {
       payload.append("Training_id", currentTrainingId);
 
       // --- Now registration API will also handle OTP ---
-     const registerResponse = await axios.post("https://your-api-endpoint.com/training", payload);
+      const registerResponse = await axios.post("https://your-api-endpoint.com/training", payload);
 
       if (!registerResponse || registerResponse.error) {
         const ertrain = localStorage.getItem("errortraining");
@@ -242,380 +242,380 @@ const TrainingRegistration = () => {
   };
 
   return (
-    <div className="training-registration-container">
-      <div className="registration-wrapper">
-        <Row className="justify-content-center h-100">
-          <Col md={10} lg={8} className="d-flex align-items-center">
-            <Card className="registration-card w-100">
-              <div className="card-header-custom">
-                <h4 className="text-center mb-0">Training Registration</h4>
-              </div>
-              
-              <div className="card-body-custom">
-                {successMsg && <Alert variant="success" className="mt-3">{successMsg}</Alert>}
-                {errorMsg && <Alert variant="danger" className="mt-3">{errorMsg}</Alert>}
 
-                <Form onSubmit={handleSubmit}>
-                  {/* Training Name */}
-                  <Form.Group className="mb-3">
-                    <Form.Label className="form-label-custom">
-                      Training Name <span className="text-danger">*</span>
-                    </Form.Label>
-                    <Form.Select
-                      ref={refs.training_name}
-                      name="training_name"
-                      value={formData.training_name}
-                      onChange={handleChange}
-                      isInvalid={!!errorMessages.training_name}
-                      required
-                      className="br-form-control"
-                    >
-                      <option value="">-- Select Training --</option>
-                      <option value="React Training">React Training</option>
-                      <option value="Python Training Program">
-                        Python Training
-                      </option>
-                      <option value="PHP Training">PHP Training</option>
-                      <option value="MySQL Training">MySQL Training</option>
-                      <option value="HTML, CSS & Bootstrap Training">
-                        HTML, CSS & Bootstrap Training
-                      </option>
-                      <option value="Web Development Training">
-                        Web Development Training
-                      </option>
-                      <option value="UI/UX Designer Training">
-                        UI/UX Designer Training
-                      </option>
-                      <option value="Communication Skills Training">
-                        Communication Skills Training
-                      </option>
-                      <option value="Self-Confidence & Power Dressing Training">
-                        Self-Confidence & Power Dressing Training
-                      </option>
-                      <option value="Interview Skills Training Program Outline">
-                        Interview Skills Training Program Outline
-                      </option>
-                      <option value="Public Speaking Training">
-                        Public Speaking Training
-                      </option>
-                    </Form.Select>
-                    <Form.Control.Feedback type="invalid">
-                      {errorMessages.training_name}
-                    </Form.Control.Feedback>
-                  </Form.Group>
+    <div className="registration-wrapper">
+      <Row className="justify-content-center h-100">
+        <Col md={12} lg={12} className="d-flex align-items-center">
+          <Card className="registration-card w-100">
+            <div className="card-header-custom">
+              <h4 className="text-center mb-0">Training Registration</h4>
+            </div>
 
-                  {/* Training Description */}
-                  <Form.Group className="mb-3">
-                    <Form.Label className="form-label-custom">
-                      Training Description <span className="text-danger">*</span>
-                    </Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      name="training_description"
-                      value={formData.training_description}
-                      ref={refs.training_description}
-                      onChange={handleChange}
-                      isInvalid={!!errorMessages.training_description}
-                      required
-                      className="br-form-control"
-                      placeholder="Provide a brief description of the training..."
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errorMessages.training_description}
-                    </Form.Control.Feedback>
-                  </Form.Group>
+            <div className="card-body-custom">
+              {successMsg && <Alert variant="success" className="mt-3">{successMsg}</Alert>}
+              {errorMsg && <Alert variant="danger" className="mt-3">{errorMsg}</Alert>}
 
-                  <Row>
-                    {/* Training Date */}
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="form-label-custom">
-                          Training Date
-                        </Form.Label>
-                        <Form.Control
-                          type="date"
-                          name="training_date"
-                          value={formData.training_date}
-                          onChange={handleChange}
-                          disabled
-                          className="br-form-control disabled-input"
-                        />
-                      </Form.Group>
-                    </Col>
+              <Form onSubmit={handleSubmit}>
+                {/* Training Name */}
+                <Form.Group className="mb-3">
+                  <Form.Label className="form-label-custom">
+                    Training Name <span className="text-danger">*</span>
+                  </Form.Label>
+                  <Form.Select
+                    ref={refs.training_name}
+                    name="training_name"
+                    value={formData.training_name}
+                    onChange={handleChange}
+                    isInvalid={!!errorMessages.training_name}
+                    required
+                    className="br-form-control"
+                  >
+                    <option value="">-- Select Training --</option>
+                    <option value="React Training">React Training</option>
+                    <option value="Python Training Program">
+                      Python Training
+                    </option>
+                    <option value="PHP Training">PHP Training</option>
+                    <option value="MySQL Training">MySQL Training</option>
+                    <option value="HTML, CSS & Bootstrap Training">
+                      HTML, CSS & Bootstrap Training
+                    </option>
+                    <option value="Web Development Training">
+                      Web Development Training
+                    </option>
+                    <option value="UI/UX Designer Training">
+                      UI/UX Designer Training
+                    </option>
+                    <option value="Communication Skills Training">
+                      Communication Skills Training
+                    </option>
+                    <option value="Self-Confidence & Power Dressing Training">
+                      Self-Confidence & Power Dressing Training
+                    </option>
+                    <option value="Interview Skills Training Program Outline">
+                      Interview Skills Training Program Outline
+                    </option>
+                    <option value="Public Speaking Training">
+                      Public Speaking Training
+                    </option>
+                  </Form.Select>
+                  <Form.Control.Feedback type="invalid">
+                    {errorMessages.training_name}
+                  </Form.Control.Feedback>
+                </Form.Group>
 
-                    {/* Training Duration */}
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="form-label-custom">
-                          Training Duration
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="training_duration"
-                          value={formData.training_duration}
-                          onChange={handleChange}
-                          disabled
-                          className="br-form-control disabled-input"
-                        />
-                      </Form.Group>
-                    </Col>
-                  </Row>
+                {/* Training Description */}
+                <Form.Group className="mb-3">
+                  <Form.Label className="form-label-custom">
+                    Training Description <span className="text-danger">*</span>
+                  </Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    name="training_description"
+                    value={formData.training_description}
+                    ref={refs.training_description}
+                    onChange={handleChange}
+                    isInvalid={!!errorMessages.training_description}
+                    required
+                    className="br-form-control"
+                    placeholder="Provide a brief description of the training..."
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errorMessages.training_description}
+                  </Form.Control.Feedback>
+                </Form.Group>
 
-                  {/* Candidate Name */}
-                  <Form.Group className="mb-3">
-                    <Form.Label className="form-label-custom">
-                      Name<span className="text-danger">*</span>
-                    </Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="candidate_name"
-                      value={formData.candidate_name}
-                      onChange={handleChange}
-                      isInvalid={!!errorMessages.candidate_name}
-                      required
-                      className="br-form-control"
-                      placeholder="Enter your full name"
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errorMessages.candidate_name}
-                    </Form.Control.Feedback>
-                  </Form.Group>
-
-                  <Row>
-                    {/* Candidate Email */}
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="form-label-custom">
-                          Email<span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          ref={refs.candidate_email}
-                          type="email"
-                          name="candidate_email"
-                          value={formData.candidate_email}
-                          onChange={handleChange}
-                          isInvalid={!!errorMessages.candidate_email}
-                          required
-                          className="br-form-control"
-                          placeholder="your.email@example.com"
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errorMessages.candidate_email}
-                        </Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-
-                    {/* Candidate Phone */}
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="form-label-custom">
-                          Phone<span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="candidate_phone"
-                          ref={refs.candidate_phone}
-                          value={formData.candidate_phone}
-                          onChange={handleChange}
-                          placeholder="10-digit phone"
-                          isInvalid={!!errorMessages.candidate_phone}
-                          required
-                          className="br-form-control"
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errorMessages.candidate_phone}
-                        </Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-                  </Row>
-
-                  <Row>
-                    {/* Date of Birth */}
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="form-label-custom">
-                          Date of Birth<span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="date"
-                          name="Date_of_Birth"
-                          value={formData.Date_of_Birth}
-                          onChange={handleChange}
-                          isInvalid={!!errorMessages.Date_of_Birth}
-                          ref={refs.Date_of_Birth}
-                          required
-                          className="br-form-control"
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errorMessages.Date_of_Birth}
-                        </Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-
-                    {/* Gender */}
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="form-label-custom">
-                          Gender<span className="text-danger">*</span>
-                        </Form.Label>
-                        <div className="d-flex gap-3 mt-2">
-                          <Form.Check
-                            type="radio"
-                            label="Male"
-                            name="Gender"
-                            value="male"
-                            checked={formData.Gender === "male"}
-                            onChange={handleChange}
-                            required
-                            className="custom-radio"
-                          />
-                          <Form.Check
-                            type="radio"
-                            label="Female"
-                            name="Gender"
-                            value="female"
-                            checked={formData.Gender === "female"}
-                            onChange={handleChange}
-                            className="custom-radio"
-                          />
-                        </div>
-                        {errorMessages.Gender && (
-                          <div className="text-danger mt-1">{errorMessages.Gender}</div>
-                        )}
-                      </Form.Group>
-                    </Col>
-                  </Row>
-
-                  <Row>
-                    {/* Password */}
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="br-label">
-                          Password<span className="text-danger">*</span>
-                        </Form.Label>
-                        <InputGroup>
-                          <Form.Control
-                            type={showPassword ? "text" : "password"}
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            isInvalid={!!errorMessages.password}
-                            required
-                            ref={refs.password}
-                            className="br-form-control"
-                            placeholder="Enter password"
-                          />
-                          <InputGroup.Text
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="password-toggle"
-                          >
-                            {showPassword ? <FaEyeSlash /> : <FaEye />}
-                          </InputGroup.Text>
-                          <Form.Control.Feedback type="invalid">
-                            {errorMessages.password}
-                          </Form.Control.Feedback>
-                        </InputGroup>
-                        {errorMessages.password && (
-                          <div className="text-danger mt-1">{errorMessages.password}</div>
-                        )}
-                      </Form.Group>
-                    </Col>
-
-                    {/* Confirm Password */}
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="br-label">
-                          Confirm Password<span className="text-danger">*</span>
-                        </Form.Label>
-                        <InputGroup>
-                          <Form.Control
-                            type={showConfirmPassword ? "text" : "password"}
-                            name="confirm_password"
-                            value={formData.confirm_password}
-                            ref={refs.confirm_password}
-                            onChange={handleChange}
-                            isInvalid={!!errorMessages.confirm_password}
-                            required
-                            className="br-form-control"
-                            placeholder="Confirm password"
-                          />
-                          <InputGroup.Text
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="password-toggle"
-                          >
-                            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                          </InputGroup.Text>
-                          <Form.Control.Feedback type="invalid">
-                            {errorMessages.confirm_password}
-                          </Form.Control.Feedback>
-                        </InputGroup>
-                        {errorMessages.confirm_password && (
-                          <div className="text-danger mt-1">
-                            {errorMessages.confirm_password}
-                          </div>
-                        )}
-                      </Form.Group>
-                    </Col>
-                  </Row>
-
-                  {/* Photo */}
-                  <Form.Group className="mb-4">
-                    <Form.Label className="br-label">
-                      Upload Photo<span className="text-danger">*</span>
-                    </Form.Label>
-                    {formData.photo && (
-                      <div className="text-center mb-3">
-                        <img
-                          src={
-                            formData.photo instanceof File
-                              ? URL.createObjectURL(formData.photo)
-                              : formData.photo
-                          }
-                          alt="Preview"
-                          className="photo-preview"
-                        />
-                      </div>
-                    )}
-                    <div className="custom-file-upload">
+                <Row>
+                  {/* Training Date */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">
+                        Training Date
+                      </Form.Label>
                       <Form.Control
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoChange}
-                        isInvalid={!!errorMessages.photo}
+                        type="date"
+                        name="training_date"
+                        value={formData.training_date}
+                        onChange={handleChange}
+                        disabled
+                        className="br-form-control disabled-input"
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  {/* Training Duration */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">
+                        Training Duration
+                      </Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="training_duration"
+                        value={formData.training_duration}
+                        onChange={handleChange}
+                        disabled
+                        className="br-form-control disabled-input"
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                {/* Candidate Name */}
+                <Form.Group className="mb-3">
+                  <Form.Label className="form-label-custom">
+                    Name<span className="text-danger">*</span>
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="candidate_name"
+                    value={formData.candidate_name}
+                    onChange={handleChange}
+                    isInvalid={!!errorMessages.candidate_name}
+                    required
+                    className="br-form-control"
+                    placeholder="Enter your full name"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errorMessages.candidate_name}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Row>
+                  {/* Candidate Email */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">
+                        Email<span className="text-danger">*</span>
+                      </Form.Label>
+                      <Form.Control
+                        ref={refs.candidate_email}
+                        type="email"
+                        name="candidate_email"
+                        value={formData.candidate_email}
+                        onChange={handleChange}
+                        isInvalid={!!errorMessages.candidate_email}
                         required
                         className="br-form-control"
-                        id="photo-upload"
+                        placeholder="your.email@example.com"
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errorMessages.photo}
+                        {errorMessages.candidate_email}
                       </Form.Control.Feedback>
-                    </div>
-                  </Form.Group>
+                    </Form.Group>
+                  </Col>
 
-                  <div className="text-center mt-4">
-                    <Button 
-                      type="submit" 
-                      variant="primary" 
-                      disabled={loading}
-                      className="submit-btn"
-                    >
-                      {loading ? (
-                        <>
-                          <Spinner animation="border" size="sm" /> Submitting...
-                        </>
-                      ) : (
-                        "Pay Now"
+                  {/* Candidate Phone */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">
+                        Phone<span className="text-danger">*</span>
+                      </Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="candidate_phone"
+                        ref={refs.candidate_phone}
+                        value={formData.candidate_phone}
+                        onChange={handleChange}
+                        placeholder="10-digit phone"
+                        isInvalid={!!errorMessages.candidate_phone}
+                        required
+                        className="br-form-control"
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errorMessages.candidate_phone}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  {/* Date of Birth */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">
+                        Date of Birth<span className="text-danger">*</span>
+                      </Form.Label>
+                      <Form.Control
+                        type="date"
+                        name="Date_of_Birth"
+                        value={formData.Date_of_Birth}
+                        onChange={handleChange}
+                        isInvalid={!!errorMessages.Date_of_Birth}
+                        ref={refs.Date_of_Birth}
+                        required
+                        className="br-form-control"
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errorMessages.Date_of_Birth}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+
+                  {/* Gender */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">
+                        Gender<span className="text-danger">*</span>
+                      </Form.Label>
+                      <div className="d-flex gap-3 mt-2">
+                        <Form.Check
+                          type="radio"
+                          label="Male"
+                          name="Gender"
+                          value="male"
+                          checked={formData.Gender === "male"}
+                          onChange={handleChange}
+                          required
+                          className="custom-radio"
+                        />
+                        <Form.Check
+                          type="radio"
+                          label="Female"
+                          name="Gender"
+                          value="female"
+                          checked={formData.Gender === "female"}
+                          onChange={handleChange}
+                          className="custom-radio"
+                        />
+                      </div>
+                      {errorMessages.Gender && (
+                        <div className="text-danger mt-1">{errorMessages.Gender}</div>
                       )}
-                    </Button>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  {/* Password */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">
+                        Password<span className="text-danger">*</span>
+                      </Form.Label>
+                      <InputGroup>
+                        <Form.Control
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          isInvalid={!!errorMessages.password}
+                          required
+                          ref={refs.password}
+                          className="br-form-control"
+                          placeholder="Enter password"
+                        />
+                        <InputGroup.Text
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="password-toggle"
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </InputGroup.Text>
+                        <Form.Control.Feedback type="invalid">
+                          {errorMessages.password}
+                        </Form.Control.Feedback>
+                      </InputGroup>
+                      {errorMessages.password && (
+                        <div className="text-danger mt-1">{errorMessages.password}</div>
+                      )}
+                    </Form.Group>
+                  </Col>
+
+                  {/* Confirm Password */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">
+                        Confirm Password<span className="text-danger">*</span>
+                      </Form.Label>
+                      <InputGroup>
+                        <Form.Control
+                          type={showConfirmPassword ? "text" : "password"}
+                          name="confirm_password"
+                          value={formData.confirm_password}
+                          ref={refs.confirm_password}
+                          onChange={handleChange}
+                          isInvalid={!!errorMessages.confirm_password}
+                          required
+                          className="br-form-control"
+                          placeholder="Confirm password"
+                        />
+                        <InputGroup.Text
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="password-toggle"
+                        >
+                          {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                        </InputGroup.Text>
+                        <Form.Control.Feedback type="invalid">
+                          {errorMessages.confirm_password}
+                        </Form.Control.Feedback>
+                      </InputGroup>
+                      {errorMessages.confirm_password && (
+                        <div className="text-danger mt-1">
+                          {errorMessages.confirm_password}
+                        </div>
+                      )}
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                {/* Photo */}
+                <Form.Group className="mb-4">
+                  <Form.Label className="form-label-custom">
+                    Upload Photo<span className="text-danger">*</span>
+                  </Form.Label>
+                  {formData.photo && (
+                    <div className="text-center mb-3">
+                      <img
+                        src={
+                          formData.photo instanceof File
+                            ? URL.createObjectURL(formData.photo)
+                            : formData.photo
+                        }
+                        alt="Preview"
+                        className="photo-preview"
+                      />
+                    </div>
+                  )}
+                  <div className="custom-file-upload">
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      isInvalid={!!errorMessages.photo}
+                      required
+                      className="br-form-control"
+                      id="photo-upload"
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errorMessages.photo}
+                    </Form.Control.Feedback>
                   </div>
-                </Form>
-              </div>
-            </Card>
-          </Col>
-        </Row>
-      </div>
+                </Form.Group>
+
+                <div className="text-center mt-4">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={loading}
+                    className="submit-btn"
+                  >
+                    {loading ? (
+                      <>
+                        <Spinner animation="border" size="sm" /> Submitting...
+                      </>
+                    ) : (
+                      "Pay Now"
+                    )}
+                  </Button>
+                </div>
+              </Form>
+            </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
+
   );
 };
 

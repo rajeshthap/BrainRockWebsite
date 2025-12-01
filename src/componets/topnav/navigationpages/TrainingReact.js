@@ -2,6 +2,7 @@ import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import "../../../assets/css/course.css";
 import { Link } from "react-router-dom";
+import TrainingRegistration from "./TrainingRegistration";
 
 const TrainingReact = () => {
   return (
@@ -32,7 +33,7 @@ const TrainingReact = () => {
           <div className="training-wrapper p-2">
             <Row>
               {/* Left Column (Course Content) */}
-              <Col md={12} sm={12} className="mb-4">
+              <Col md={6} sm={6} className="mb-4">
                 {/* Module 1 */}
                 <div className="module-container">
                   <h4 className="module-heading">
@@ -245,6 +246,7 @@ const TrainingReact = () => {
                   </div>
                 </div>
               </Col>
+              <Col md={6} sm={6} ><TrainingRegistration /></Col>
               <div className="text-center">
                 <Link
                   to="/TrainingRegistration"
