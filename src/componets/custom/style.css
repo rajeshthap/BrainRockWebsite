@@ -129,9 +129,11 @@ body {
 }
 .reject-st-btn{
   font-size: var(--br-space-250);
+    width: 68px;
 }
 .suc-st-btn{
   font-size: var(--br-space-250);
+  width: 68px;
 }
 .leave-app-pending{
     font-size: var(--br-space-250);

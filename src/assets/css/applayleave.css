@@ -52,3 +52,7 @@ font-size: var(--br-space-350) !important;
 .rbc-month-row {
 font-size: 12px;
 }
+.rbc-toolbar{
+  display: flex;
+  justify-content: space-between !important;
+}

@@ -50,6 +50,16 @@ import DepartmentHierarchy from "./componets/hr_dashboard/Departments/Department
 
 import CreateTeam from "./componets/hr_dashboard/teammanagement/CreateTeam";
 import ManageTeam from "./componets/hr_dashboard/teammanagement/ManageTeam";
+import Courses from "./componets/topnav/navigationpages/Courses";
+import Gallery from "./componets/topnav/navigationpages/Gallery";
+import TrainingReact from "./componets/topnav/navigationpages/TrainingReact";
+import TrainingRegistration from "./componets/topnav/navigationpages/TrainingRegistration";
+import Python from "./componets/topnav/navigationpages/Python";
+import TrainingPHP from "./componets/topnav/navigationpages/TrainingPHP";
+import UIUXTraining from "./componets/topnav/navigationpages/UIUXTraining";
+import TrainingBootstrap from "./componets/topnav/navigationpages/TrainingBootstrap";
+import TrainingMySql from "./componets/topnav/navigationpages/TrainingMySql";
+import TrainingWebDesign from "./componets/topnav/navigationpages/TrainingWebDesign";
 
 
 function AppContent() {
@@ -106,6 +116,18 @@ function AppContent() {
         <Route path="/DailyAttendance" element={<DailyAttendance />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/ApplyLeaveCalendar" element={<ApplyLeaveCalendar />} />
+        <Route path="/Courses" element={<Courses />} />
+        <Route path="/Gallery" element={<Gallery />} />
+        <Route path="/TrainingReact" element={<TrainingReact />} />
+        <Route path="/TrainingRegistration" element={<TrainingRegistration />} />
+        <Route path="/Python" element={<Python />} />
+        <Route path="/TrainingPHP" element={<TrainingPHP />} />
+        <Route path="/TrainingBootstrap" element={<TrainingBootstrap />} />
+        <Route path="/TrainingMySql" element={<TrainingMySql />} />
+        <Route path="/TrainingPHP" element={<TrainingPHP />} />
+        <Route path="/TrainingWebDesign" element={<TrainingWebDesign />} />
+        <Route path="/UIUXTraining" element={<UIUXTraining />} />
+         
 
         {/* Hr  Payroll (protected) */}
         <Route

@@ -7,6 +7,7 @@ import {
   Spinner,
   Tabs,
   Tab,
+  Button,
 } from "react-bootstrap";
 import axios from "axios";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -14,6 +15,7 @@ import moment from "moment";
 import HrHeader from "../HrHeader";
 import SideNav from "../SideNav";
 import { AuthContext } from "../../context/AuthContext";
+import CreateMeetingModal from "./CreateMeetingModal";
 import "../../../assets/css/applayleave.css";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -24,6 +26,7 @@ const localizer = momentLocalizer(moment);
 const ApplyLeaveCalendar = () => {
   const { user } = useContext(AuthContext);
   const employee_id = user?.unique_id;
+  const userRole = user?.role; // Assuming role is available in user object
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -43,46 +46,77 @@ const ApplyLeaveCalendar = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
+  // State for create meeting modal
+  const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
+  const [selectedMeeting, setSelectedMeeting] = useState(null);
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   /* ---------------------------------------
       Fetch Leave Data
   ----------------------------------------- */
   const fetchLeaveData = async () => {
-    if (!employee_id) return;
-
     try {
       setLoading(true);
+      
+      // Different API endpoints based on user role
+      const apiUrl = userRole === 'employee' 
+        ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`
+        : 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/'; // For admin/HR, get all employees
 
-      const res = await axios.get(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`
-      );
+      const res = await axios.get(apiUrl);
+      
+      // Process the response differently based on user role
+      let allLeaveHistory = [];
+      
+      if (userRole === 'employee') {
+        // For employees, use their own leave history
+        setLeaveBalance(res.data.leave_balance);
+        allLeaveHistory = res.data.leave_history || [];
+      } else {
+        // For admin/HR, collect all employees' leave history
+        allLeaveHistory = [];
+        res.data.employees.forEach(emp => {
+          if (emp.leave_history && emp.leave_history.length > 0) {
+            // Add employee name and role to each leave entry
+            const leaveHistoryWithEmployee = emp.leave_history.map(leave => ({
+              ...leave,
+              employee_name: emp.leave_balance.employee_name,
+              employee_role: emp.leave_history[0]?.role || 'N/A'
+            }));
+            allLeaveHistory = [...allLeaveHistory, ...leaveHistoryWithEmployee];
+          }
+        });
+      }
 
-      setLeaveBalance(res.data.leave_balance);
-
-      const events = res.data.leave_history.map((item) => {
-        const eventDate = new Date(item.dates[0]);
-
-        let color = "#ffc107";
-        if (item.status === "approved") color = "#28a745";
-        if (item.status === "rejected") color = "#dc3545";
-
-        return {
-          id: item.id,
-          title: `${item.leave_type.toUpperCase()} (${item.status})`,
-          start: eventDate,
-          end: eventDate,
-          allDay: true,
-          color,
-          type: "leave",
-          data: item,
-        };
-      });
+      // Only include approved leaves (actual absences)
+      const events = allLeaveHistory
+        .filter(item => item.status === "approved")
+        .map((item) => {
+          // Handle multiple dates for a single leave request
+          const eventsForDates = item.dates.map(dateStr => {
+            const eventDate = new Date(dateStr);
+            return {
+              id: `${item.id}-${dateStr}`, // Unique ID combining leave ID and date
+              title: `${item.employee_name} - ${item.leave_type.toUpperCase()}`,
+              start: eventDate,
+              end: eventDate,
+              allDay: true,
+              color: "#28a745", // Green for approved leaves
+              type: "leave",
+              data: item,
+            };
+          });
+          
+          return eventsForDates;
+        })
+        .flat(); // Flatten the array of arrays
 
       setLeaveEvents(events);
       setFilteredLeave(events);
     } catch (err) {
       setError("Failed to load leave data.");
+      console.error("Error fetching leave data:", err);
     } finally {
       setLoading(false);
     }
@@ -121,7 +155,7 @@ const ApplyLeaveCalendar = () => {
   useEffect(() => {
     fetchLeaveData();
     fetchMeetingData();
-  }, [employee_id]);
+  }, [employee_id, userRole]);
 
   /* ===========================================================
          FILTER EVENTS BASED ON CURRENT DATE + VIEW
@@ -173,8 +207,13 @@ const ApplyLeaveCalendar = () => {
       User Click (event)
   ----------------------------------------- */
   const handleSelectEvent = (event) => {
-    setSelectedData(event.data);
-    setShowModal(true);
+    if (event.type === "meeting") {
+      setSelectedMeeting(event.data);
+      setShowCreateMeetingModal(true);
+    } else {
+      setSelectedData(event.data);
+      setShowModal(true);
+    }
   };
 
   /* ---------------------------------------
@@ -191,6 +230,111 @@ const ApplyLeaveCalendar = () => {
     setCurrentView(view);
   };
 
+  // Custom toolbar component with enhanced navigation
+  const CustomToolbar = (toolbar) => {
+    const goToPrevious = () => {
+      const newDate = new Date(date);
+      if (currentView === "month") {
+        newDate.setMonth(newDate.getMonth() - 1);
+      } else if (currentView === "week") {
+        newDate.setDate(newDate.getDate() - 7);
+      } else {
+        newDate.setDate(newDate.getDate() - 1);
+      }
+      handleNavigate(newDate);
+    };
+
+    const goToNext = () => {
+      const newDate = new Date(date);
+      if (currentView === "month") {
+        newDate.setMonth(newDate.getMonth() + 1);
+      } else if (currentView === "week") {
+        newDate.setDate(newDate.getDate() + 7);
+      } else {
+        newDate.setDate(newDate.getDate() + 1);
+      }
+      handleNavigate(newDate);
+    };
+
+    const goToToday = () => {
+      handleNavigate(new Date());
+    };
+
+    const handleMonthChange = (e) => {
+      const newDate = new Date(date);
+      newDate.setMonth(parseInt(e.target.value));
+      handleNavigate(newDate);
+    };
+
+    const handleYearChange = (e) => {
+      const newDate = new Date(date);
+      newDate.setFullYear(parseInt(e.target.value));
+      handleNavigate(newDate);
+    };
+
+    // Generate month options
+    const months = moment.months();
+    const currentMonth = date.getMonth();
+
+    // Generate year options (current year ± 5)
+    const currentYear = date.getFullYear();
+    const years = [];
+    for (let i = -5; i <= 5; i++) {
+      years.push(currentYear + i);
+    }
+
+    return (
+      <div className="rbc-toolbar">
+        <div className="rbc-btn-group">
+          <button className="rbc-btn" onClick={goToPrevious}>
+            <i className="bi bi-chevron-left"></i>
+          </button>
+          <button className="rbc-btn" onClick={goToToday}>
+            Today
+          </button>
+          <button className="rbc-btn" onClick={goToNext}>
+            <i className="bi bi-chevron-right"></i>
+          </button>
+        </div>
+       <div className="rbc-selectors">
+  {/* 
+    Replaced the two <select> dropdowns with a single <span> to display the date.
+    It uses the same state variables (currentMonth, currentYear) to show the correct value.
+  */}
+  <span className="rbc-date-label">
+    {months[currentMonth]} {currentYear}
+  </span>
+</div>
+        <div className="rbc-btn-group">
+          <button
+            className={`rbc-btn ${currentView === "month" ? "rbc-active" : ""}`}
+            onClick={() => handleViewChange("month")}
+          >
+            Month
+          </button>
+          <button
+            className={`rbc-btn ${currentView === "week" ? "rbc-active" : ""}`}
+            onClick={() => handleViewChange("week")}
+          >
+            Week
+          </button>
+          <button
+            className={`rbc-btn ${currentView === "day" ? "rbc-active" : ""}`}
+            onClick={() => handleViewChange("day")}
+          >
+            Day
+          </button>
+        </div>
+        
+        {/* Month/Year Selectors */}
+       
+      </div>
+    );
+  };
+
+  // Determine default active tab based on user role
+  const defaultActiveKey = userRole === 'employee' ? 'meeting' : 'leave';
+
   return (
     <div className="dashboard-container d-flex">
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -199,58 +343,68 @@ const ApplyLeaveCalendar = () => {
         <HrHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="py-3 px-2 px-md-4">
-          <Tabs defaultActiveKey="leave" className="mb-3 br-tabs">
+          <Tabs defaultActiveKey={defaultActiveKey} className="mb-3 br-tabs">
             {/* ============== LEAVE CALENDAR ============== */}
-            <Tab eventKey="leave" title="Leave Calendar">
-              <div className="br-box-container">
+            {userRole !== 'employee' && (
+              <Tab eventKey="leave" title="Absent Employees">
+                <div className="br-box-container">
 
-                {/* Legend */}
-                <div className="d-flex flex-wrap gap-4 mb-3">
-                  <div className="legend-item">
-                    <span className="legend-color" style={{ background: "#28a745" }}></span>
-                    Approved
-                  </div>
-                  <div className="legend-item">
-                    <span className="legend-color" style={{ background: "#ffc107" }}></span>
-                    Pending
-                  </div>
-                  <div className="legend-item">
-                    <span className="legend-color" style={{ background: "#dc3545" }}></span>
-                    Rejected
-                  </div>
-                </div>
-
-                <div className="calendar-wrapper shadow-sm">
-                  {loading ? (
-                    <div className="calendar-loading">
-                      <Spinner animation="border" />
+                  {/* Legend - MODIFIED: Only show approved leaves */}
+                  <div className="d-flex flex-wrap gap-4 mb-3">
+                    <div className="legend-item">
+                      <span className="legend-color" style={{ background: "#28a745" }}></span>
+                      Absent (Approved Leave)
                     </div>
-                  ) : (
-                    <Calendar
-                      localizer={localizer}
-                      events={filteredLeave}
-                      startAccessor="start"
-                      endAccessor="end"
-                      onSelectEvent={handleSelectEvent}
-                      views={["month", "week", "day"]}
-                      onNavigate={handleNavigate}
-                      onView={handleViewChange}
-                      eventPropGetter={eventStyleGetter}
-                      popup
-                    />
-                  )}
+                  </div>
+
+                  <div className="calendar-wrapper shadow-sm">
+                    {loading ? (
+                      <div className="calendar-loading">
+                        <Spinner animation="border" />
+                      </div>
+                    ) : (
+                      <Calendar
+                        localizer={localizer}
+                        events={filteredLeave}
+                        startAccessor="start"
+                        endAccessor="end"
+                        onSelectEvent={handleSelectEvent}
+                        views={["month", "week", "day"]}
+                        onNavigate={handleNavigate}
+                        onView={handleViewChange}
+                        eventPropGetter={eventStyleGetter}
+                        components={{
+                          toolbar: CustomToolbar
+                        }}
+                        popup
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Tab>
+              </Tab>
+            )}
 
             {/* ============== MEETING CALENDAR ============== */}
             <Tab eventKey="meeting" title="Meeting Schedule">
               <div className="br-box-container">
-                <div className="d-flex flex-wrap gap-3 mb-3">
-                  <div className="legend-item">
-                    <span className="legend-color" style={{ background: "#007bff" }}></span>
-                    Meeting
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div className="d-flex flex-wrap gap-3">
+                    <div className="legend-item">
+                      <span className="legend-color" style={{ background: "#007bff" }}></span>
+                      Meeting
+                    </div>
                   </div>
+                  <Button 
+                    variant="primary" 
+                    onClick={() => {
+                      setSelectedMeeting(null);
+                      setShowCreateMeetingModal(true);
+                    }}
+                    className="create-meeting-btn"
+                  >
+                    <i className="bi bi-plus-circle me-2"></i>
+                    Create Meeting
+                  </Button>
                 </div>
 
                 <div className="calendar-wrapper shadow-sm">
@@ -269,6 +423,9 @@ const ApplyLeaveCalendar = () => {
                       onNavigate={handleNavigate}
                       onView={handleViewChange}
                       eventPropGetter={eventStyleGetter}
+                      components={{
+                        toolbar: CustomToolbar
+                      }}
                       popup
                     />
                   )}
@@ -279,10 +436,10 @@ const ApplyLeaveCalendar = () => {
         </Container>
       </div>
 
-      {/* -------- Modal -------- */}
+      {/* -------- Event Details Modal -------- */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Details</Modal.Title>
+          <Modal.Title>{selectedData?.leave_type ? 'Absence Details' : 'Meeting Details'}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -290,9 +447,13 @@ const ApplyLeaveCalendar = () => {
             <>
               {selectedData.leave_type && (
                 <>
+                  <p><b>Employee:</b> {selectedData.employee_name || 'N/A'}</p>
+                  <p><b>Role:</b> {selectedData.employee_role || 'N/A'}</p>
                   <p><b>Leave Type:</b> {selectedData.leave_type}</p>
                   <p><b>Status:</b> {selectedData.status}</p>
                   <p><b>Reason:</b> {selectedData.reason}</p>
+                  <p><b>Dates:</b> {selectedData.dates.join(', ')}</p>
+                  <p><b>Leave Days:</b> {selectedData.leave_days}</p>
                 </>
               )}
 
@@ -307,6 +468,15 @@ const ApplyLeaveCalendar = () => {
           )}
         </Modal.Body>
       </Modal>
+
+      {/* -------- Create/Edit Meeting Modal -------- */}
+      <CreateMeetingModal
+        show={showCreateMeetingModal}
+        onHide={() => setShowCreateMeetingModal(false)}
+        user={user}
+        onMeetingCreated={fetchMeetingData}
+        existingMeeting={selectedMeeting}
+      />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
+import { Container, Nav, Navbar, NavDropdown, NavLink } from "react-bootstrap";
 import Logo from "../../assets/images/brainrock_logo.png";
 // import Wecdlogo from "../../assets/images/wecdlogo.png";
 
@@ -37,6 +37,10 @@ function NavBar() {
                 <NavDropdown.Item as={Link} to="/Overview">Overview</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/WhyChooiceUs">Why Choose Us</NavDropdown.Item>
               </NavDropdown>
+             <Nav.Link href="Courses">Courses</Nav.Link>
+             <Nav.Link href="Gallery">Gallery</Nav.Link>
+
+              
 
               <NavDropdown title="About Us" id="AboutUs">
                 <NavDropdown.Item as={Link} to="/CompanyProfile">Company Profile</NavDropdown.Item>
