@@ -26,7 +26,8 @@ const AddCarousel = () => {
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
-  const [variant, setVariant] = useState("");
+  const [variant, setVariant] = useState("success"); // 'success' or 'danger'
+  const [showAlert, setShowAlert] = useState(false);
 
   // Responsive check
   useEffect(() => {
@@ -57,14 +58,9 @@ const AddCarousel = () => {
     const { name, value, files } = e.target;
     
     if (name === 'image') {
-      // Handle file input
       const file = files[0];
-      setFormData(prev => ({
-        ...prev,
-        image: file
-      }));
+      setFormData(prev => ({ ...prev, image: file }));
       
-      // Create a preview URL for the selected image
       if (file) {
         const previewUrl = URL.createObjectURL(file);
         setImagePreview(previewUrl);
@@ -72,21 +68,30 @@ const AddCarousel = () => {
         setImagePreview(null);
       }
     } else {
-      // Handle text inputs
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  // Clear form function
+  const clearForm = () => {
+    setFormData({
+      title: "",
+      subtitle: "",
+      description: "",
+      image: null,
+      alt: ""
+    });
+    setImagePreview(null);
+    setMessage("");
+    setShowAlert(false);
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setMessage(""); // Clear previous messages
+    setShowAlert(false); // Hide any previous alerts
     
-    // Create a FormData object to send the file
     const dataToSend = new FormData();
     dataToSend.append('title', formData.title);
     dataToSend.append('subtitle', formData.subtitle);
@@ -97,40 +102,51 @@ const AddCarousel = () => {
     dataToSend.append('alt', formData.alt);
     
     try {
-      // Replace with your actual API endpoint for file upload
-      const response = await fetch('https://api.example.com/carousel-items/upload', {
+      // IMPORTANT: Replace this with your actual API endpoint
+      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/carousel-items/', {
         method: 'POST',
-        // Do NOT set the 'Content-Type' header. The browser will set it to 'multipart/form-data' with the correct boundary.
+        headers: {
+          // 'Content-Type' should be omitted when sending FormData
+        },
+        credentials: 'include', // <-- THIS IS THE ADDED LINE
         body: dataToSend,
       });
       
+      // Handle bad API responses (e.g., 400, 404, 500 status codes)
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add carousel item');
+        // Try to get more error details from the response
+        const errorData = await response.json().catch(() => ({ message: 'Server error' }));
+        throw new Error(errorData.message || `Failed to add carousel item (Status: ${response.status})`);
       }
       
+      // --- SUCCESS PATH ---
       setMessage("Carousel item added successfully!");
       setVariant("success");
+      setShowAlert(true);
+      clearForm(); // Clear the form on success
       
-      // Reset form after successful submission
-      setFormData({
-        title: "",
-        subtitle: "",
-        description: "",
-        image: null,
-        alt: ""
-      });
-      setImagePreview(null);
-      
-      // Optionally redirect after a delay
-      setTimeout(() => {
-        navigate('/admin/website-management');
-      }, 2000);
+      // Hide success alert after 3 seconds
+      setTimeout(() => setShowAlert(false), 3000);
       
     } catch (error) {
+      // --- FAILURE PATH ---
       console.error('Error adding carousel item:', error);
-      setMessage(error.message || "Failed to add carousel item. Please try again.");
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      
+      // Provide a more specific message for network errors
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        errorMessage = "Network error: Could not connect to the server. Please check the API endpoint.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setMessage(errorMessage);
       setVariant("danger");
+      setShowAlert(true);
+      
+      // Hide error alert after 5 seconds
+      setTimeout(() => setShowAlert(false), 5000);
+      
     } finally {
       setIsSubmitting(false);
     }
@@ -138,26 +154,21 @@ const AddCarousel = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
       <LeftNavManagement
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         isMobile={isMobile}
         isTablet={isTablet}
       />
-
-      {/* Main Content */}
       <div className="main-content">
-        {/* Header */}
         <AdminHeader toggleSidebar={toggleSidebar} />
-
-        {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
             <h2 className="mb-4">Add New Carousel Item</h2>
             
-            {message && (
-              <Alert variant={variant} className="mb-4">
+            {/* This alert will show for both success and error */}
+            {showAlert && (
+              <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
                 {message}
               </Alert>
             )}
@@ -203,7 +214,7 @@ const AddCarousel = () => {
                   type="file"
                   name="image"
                   onChange={handleChange}
-                  accept="image/*" // Accept only image files
+                  accept="image/*"
                 />
                  {imagePreview && (
                   <div className="mt-3">
@@ -234,9 +245,10 @@ const AddCarousel = () => {
               
               <Button 
                 variant="secondary" 
-                onClick={() => navigate('/admin/website-management')}
+                onClick={clearForm}
+                type="button"
               >
-                Cancel
+                Clear
               </Button>
             </Form>
           </div>
