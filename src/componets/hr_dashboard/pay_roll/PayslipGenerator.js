@@ -45,8 +45,17 @@ const PayslipGenerator = () => {
   const [payslipData, setPayslipData] = useState(null);
   const [payslipLoading, setPayslipLoading] = useState(false);
   const [payslipError, setPayslipError] = useState(null);
+  
+  // State for salary calculation status
+  const [salaryCalculationStatuses, setSalaryCalculationStatuses] = useState({});
+  
+  // State for user's own data
+  const [userEmployeeData, setUserEmployeeData] = useState(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  // Check if user is HR based on role from login response
+  const isHR = user && user.role && user.role.toLowerCase() === 'hr';
 
   // Fetch data from API
   useEffect(() => {
@@ -79,8 +88,112 @@ const PayslipGenerator = () => {
       }
     };
 
-    fetchEmployees();
-  }, []);
+    // Only fetch employees if user is HR
+    if (isHR) {
+      fetchEmployees();
+    } else {
+      // For non-HR users, just get their own data
+      const fetchUserData = async () => {
+        try {
+          const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          
+          let allEmployees = [];
+          if (Array.isArray(data)) {
+              allEmployees = data;
+          } else if (data && Array.isArray(data.results)) {
+              allEmployees = data.results;
+          }
+          
+          // Find the current user's data
+          const currentUserData = allEmployees.find(emp => emp.emp_id === user.unique_id);
+          if (currentUserData) {
+            setUserEmployeeData(currentUserData);
+            // Directly fetch their payslip
+            handleGeneratePayslip(currentUserData);
+          } else {
+            setError("Your employee data not found in the system.");
+          }
+          
+        } catch (e) {
+          setError(e.message);
+          console.error("Failed to fetch user data:", e);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchUserData();
+    }
+  }, [isHR, user.unique_id]);
+
+  // Function to check salary calculation status for all employees
+  const checkAllSalaryCalculationStatuses = async () => {
+    try {
+      // Create an array of promises to fetch salary calculation status for all employees
+      const statusPromises = employees.map(emp => 
+        fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-calculation/?employee_id=${emp.emp_id}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        }).then(data => {
+          // Check if there's any salary calculation data for this employee
+          if (data.success && data.data && data.data.length > 0) {
+            // Check if any salary calculation is confirmed
+            const confirmedCalculation = data.data.find(item => item.status === 'confirmed');
+            return {
+              employeeId: emp.emp_id,
+              status: confirmedCalculation ? 'confirmed' : 'unconfirmed'
+            };
+          } else {
+            return {
+              employeeId: emp.emp_id,
+              status: 'unconfirmed'
+            };
+          }
+        }).catch(err => {
+          console.error(`Error checking salary calculation status for ${emp.emp_id}:`, err);
+          return {
+            employeeId: emp.emp_id,
+            status: 'unconfirmed'
+          };
+        })
+      );
+      
+      // Wait for all promises to resolve
+      const statusResults = await Promise.all(statusPromises);
+      
+      // Convert array to object for easier lookup
+      const statusMap = statusResults.reduce((acc, result) => {
+        acc[result.employeeId] = result.status;
+        return acc;
+      }, {});
+      
+      setSalaryCalculationStatuses(statusMap);
+    } catch (err) {
+      console.error("Failed to fetch salary calculation statuses:", err);
+    }
+  };
+
+  // Check salary calculation status for all employees when employees data is loaded
+  useEffect(() => {
+    if (employees.length > 0 && isHR) {
+      checkAllSalaryCalculationStatuses();
+    }
+  }, [employees, isHR]);
 
   // Function to handle generating payslip
   const handleGeneratePayslip = async (employee) => {
@@ -152,7 +265,7 @@ const PayslipGenerator = () => {
     newWindow.print();
   };
 
-  // Filter employees based on search term and status
+  // Filter employees based on search term, status, and ONLY confirmed salary calculation status
   const allFilteredEmployees = useMemo(() => {
     let filtered = employees;
     
@@ -168,6 +281,12 @@ const PayslipGenerator = () => {
       });
     }
     
+    // Apply salary calculation status filter - ONLY SHOW CONFIRMED
+    filtered = filtered.filter(emp => {
+      const empSalaryCalcStatus = salaryCalculationStatuses[emp.emp_id];
+      return empSalaryCalcStatus === 'confirmed'; // Only show confirmed employees
+    });
+    
     // Apply search filter
     if (!searchTerm) {
       return filtered;
@@ -181,7 +300,7 @@ const PayslipGenerator = () => {
       emp.emp_id?.toLowerCase().includes(lowercasedSearchTerm) ||
       emp.phone?.toLowerCase().includes(lowercasedSearchTerm)
     );
-  }, [employees, searchTerm, statusFilter]);
+  }, [employees, searchTerm, statusFilter, salaryCalculationStatuses]);
 
   // Reset page on search or status filter change
   useEffect(() => {
@@ -210,11 +329,15 @@ const PayslipGenerator = () => {
           
           <Container fluid className="dashboard-body p-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="mb-0">Employee Payslip</h2>
+              <h2 className="mb-0">
+                {isHR ? "Employee Payslip" : "My Payslip"}
+              </h2>
               <div>
-                <Button variant="secondary" className="me-2" onClick={handleBackToList}>
-                  Back to Employee List
-                </Button>
+                {isHR && (
+                  <Button variant="secondary" className="me-2" onClick={handleBackToList}>
+                    Back to Employee List
+                  </Button>
+                )}
                 {payslipData && (
                   <Button variant="primary" onClick={handlePrintPayslip}>
                     <FaPrint /> Print Payslip
@@ -253,12 +376,6 @@ const PayslipGenerator = () => {
                       <Col md={6}>
                         <p><strong>Email:</strong> {selectedEmployee.email || "N/A"}</p>
                         <p><strong>Mobile:</strong> {selectedEmployee.phone || "N/A"}</p>
-                        <p><strong>Payslip Status:</strong> 
-                          <Badge bg={payslipData.status === 'confirmed' ? "success" : "warning"} className="ms-2">
-                            {payslipData.status === 'confirmed' ? 'Confirmed' : 'Unconfirmed'}
-                          </Badge>
-                        </p>
-                        <p><strong>Prorated:</strong> {payslipData.is_prorated ? 'Yes' : 'No'}</p>
                       </Col>
                     </Row>
                     
@@ -280,14 +397,18 @@ const PayslipGenerator = () => {
                             <td>HRA</td>
                             <td>₹{parseFloat(payslipData.hra).toFixed(2)}</td>
                           </tr>
-                          <tr>
-                            <td>DA</td>
-                            <td>₹{parseFloat(payslipData.da).toFixed(2)}</td>
-                          </tr>
-                          <tr>
-                            <td>TA</td>
-                            <td>₹{parseFloat(payslipData.ta).toFixed(2)}</td>
-                          </tr>
+                          {parseFloat(payslipData.da) > 0 && (
+                            <tr>
+                              <td>DA</td>
+                              <td>₹{parseFloat(payslipData.da).toFixed(2)}</td>
+                            </tr>
+                          )}
+                          {parseFloat(payslipData.ta) > 0 && (
+                            <tr>
+                              <td>TA</td>
+                              <td>₹{parseFloat(payslipData.ta).toFixed(2)}</td>
+                            </tr>
+                          )}
                           <tr>
                             <td>Medical Allowance</td>
                             <td>₹{parseFloat(payslipData.medical_allowance).toFixed(2)}</td>
@@ -296,18 +417,24 @@ const PayslipGenerator = () => {
                             <td>Special Allowance</td>
                             <td>₹{parseFloat(payslipData.special_allowance).toFixed(2)}</td>
                           </tr>
-                          <tr>
-                            <td>Marketing Perks</td>
-                            <td>₹{parseFloat(payslipData.marketing_perks).toFixed(2)}</td>
-                          </tr>
-                          <tr>
-                            <td>Performance Bonus</td>
-                            <td>₹{parseFloat(payslipData.performance_bonus).toFixed(2)}</td>
-                          </tr>
-                          <tr>
-                            <td>Client Bonus</td>
-                            <td>₹{parseFloat(payslipData.client_bonus).toFixed(2)}</td>
-                          </tr>
+                          {parseFloat(payslipData.marketing_perks) > 0 && (
+                            <tr>
+                              <td>Marketing Perks</td>
+                              <td>₹{parseFloat(payslipData.marketing_perks).toFixed(2)}</td>
+                            </tr>
+                          )}
+                          {parseFloat(payslipData.performance_bonus) > 0 && (
+                            <tr>
+                              <td>Performance Bonus</td>
+                              <td>₹{parseFloat(payslipData.performance_bonus).toFixed(2)}</td>
+                            </tr>
+                          )}
+                          {parseFloat(payslipData.client_bonus) > 0 && (
+                            <tr>
+                              <td>Client Bonus</td>
+                              <td>₹{parseFloat(payslipData.client_bonus).toFixed(2)}</td>
+                            </tr>
+                          )}
                           <tr className="table-active">
                             <td><strong>Total Earnings</strong></td>
                             <td><strong>₹{parseFloat(payslipData.total_earnings).toFixed(2)}</strong></td>
@@ -326,30 +453,42 @@ const PayslipGenerator = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>PF</td>
-                            <td>₹{parseFloat(payslipData.pf).toFixed(2)}</td>
-                          </tr>
-                          <tr>
-                            <td>ESI</td>
-                            <td>₹{parseFloat(payslipData.esi).toFixed(2)}</td>
-                          </tr>
-                          <tr>
-                            <td>TDS</td>
-                            <td>₹{parseFloat(payslipData.tds).toFixed(2)}</td>
-                          </tr>
-                          <tr>
-                            <td>Other Deductions</td>
-                            <td>₹{parseFloat(payslipData.other_deductions).toFixed(2)}</td>
-                          </tr>
-                          <tr>
-                            <td>Unpaid Leave Deduction</td>
-                            <td>₹{parseFloat(payslipData.unpaid_leave_deduction).toFixed(2)}</td>
-                          </tr>
-                          <tr>
-                            <td>Maternity Leave Deduction</td>
-                            <td>₹{parseFloat(payslipData.maternity_leave_deduction).toFixed(2)}</td>
-                          </tr>
+                          {parseFloat(payslipData.pf) > 0 && (
+                            <tr>
+                              <td>PF</td>
+                              <td>₹{parseFloat(payslipData.pf).toFixed(2)}</td>
+                            </tr>
+                          )}
+                          {parseFloat(payslipData.esi) > 0 && (
+                            <tr>
+                              <td>ESI</td>
+                              <td>₹{parseFloat(payslipData.esi).toFixed(2)}</td>
+                            </tr>
+                          )}
+                          {parseFloat(payslipData.tds) > 0 && (
+                            <tr>
+                              <td>TDS</td>
+                              <td>₹{parseFloat(payslipData.tds).toFixed(2)}</td>
+                            </tr>
+                          )}
+                          {parseFloat(payslipData.other_deductions) > 0 && (
+                            <tr>
+                              <td>Other Deductions</td>
+                              <td>₹{parseFloat(payslipData.other_deductions).toFixed(2)}</td>
+                            </tr>
+                          )}
+                          {parseFloat(payslipData.unpaid_leave_deduction) > 0 && (
+                            <tr>
+                              <td>Unpaid Leave Deduction</td>
+                              <td>₹{parseFloat(payslipData.unpaid_leave_deduction).toFixed(2)}</td>
+                            </tr>
+                          )}
+                          {parseFloat(payslipData.maternity_leave_deduction) > 0 && (
+                            <tr>
+                              <td>Maternity Leave Deduction</td>
+                              <td>₹{parseFloat(payslipData.maternity_leave_deduction).toFixed(2)}</td>
+                            </tr>
+                          )}
                           <tr className="table-active">
                             <td><strong>Total Deductions</strong></td>
                             <td><strong>₹{parseFloat(payslipData.total_deductions).toFixed(2)}</strong></td>
@@ -363,15 +502,6 @@ const PayslipGenerator = () => {
                         <h4>Summary</h4>
                         <p><strong>Monthly Salary:</strong> ₹{parseFloat(payslipData.monthly_salary).toFixed(2)}</p>
                         <p><strong>Net Salary:</strong> ₹{parseFloat(payslipData.net_salary).toFixed(2)}</p>
-                        <p><strong>Earned Leave Balance:</strong> {payslipData.earned_leave_balance} days</p>
-                        <p><strong>EL Value:</strong> ₹{parseFloat(payslipData.el_value).toFixed(2)}</p>
-                      </div>
-                      <div>
-                        <h4>Additional Information</h4>
-                        <p><strong>Prorated Days:</strong> {payslipData.prorated_days}</p>
-                        <p><strong>Prorated Explanation:</strong> {payslipData.prorated_explanation}</p>
-                        <p><strong>EL Value at Year End:</strong> ₹{parseFloat(payslipData.el_value_at_year_end).toFixed(2)}</p>
-                        <p><strong>Total Payout Including EL:</strong> ₹{parseFloat(payslipData.total_payout_including_el).toFixed(2)}</p>
                       </div>
                     </div>
                     
@@ -383,6 +513,23 @@ const PayslipGenerator = () => {
                 </Card>
               </div>
             )}
+          </Container>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is not HR, show loading or error
+  if (!isHR) {
+    return (
+      <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="main-content" style={{ height: '100vh', overflow: 'auto' }}>
+          <HrHeader toggleSidebar={toggleSidebar} />
+          
+          <Container fluid className="dashboard-body p-4">
+            {loading && <div className="d-flex justify-content-center"><Spinner animation="border" /></div>}
+            {error && <Alert variant="danger">Failed to load your payslip: {error}</Alert>}
           </Container>
         </div>
       </div>
@@ -485,6 +632,7 @@ const PayslipGenerator = () => {
     saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Employee_List.xlsx");
   };
 
+  // HR view - show employee list
   return (
     <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -493,7 +641,7 @@ const PayslipGenerator = () => {
         
         <Container fluid className="dashboard-body p-4" style={{ flex: 1, overflow: 'auto' }}>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="mb-0">Employee List</h2>
+            <h2 className="mb-0">Employee List (Confirmed Salary Calculation Only)</h2>
 
             {/* Status Filter Dropdown */}
             <div className="d-flex align-items-center">
@@ -541,11 +689,14 @@ const PayslipGenerator = () => {
                         <th>Email</th>
                         <th>Mobile</th>
                         <th>Status</th>
+                        <th>Salary Calculation Status</th>
                         <th>Action</th>
                       </tr>
  
                       {paginatedEmployees.length > 0 ? (
                         paginatedEmployees.map((emp, index) => {
+                          const salaryCalcStatus = salaryCalculationStatuses[emp.emp_id] || 'unconfirmed';
+                          
                           return (
                             <tr key={emp.id}>
                               <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
@@ -569,6 +720,11 @@ const PayslipGenerator = () => {
                                   {emp.is_active ? "Active" : "Inactive"}
                                 </Badge>
                               </td>
+                              <td data-th="Salary Calculation Status">
+                                <Badge bg="success">
+                                  Confirmed
+                                </Badge>
+                              </td>
                               <td data-th="Action">
                                 <Button 
                                   className="big-edit-btn"
@@ -584,8 +740,8 @@ const PayslipGenerator = () => {
                         })
                       ) : (
                         <tr>
-                          <td colSpan="10" className="text-center">
-                            No employees found matching your search.
+                          <td colSpan="11" className="text-center">
+                            No employees with confirmed salary calculation found matching your search.
                           </td>
                         </tr>
                       )}
