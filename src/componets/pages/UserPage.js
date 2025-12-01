@@ -32,22 +32,36 @@ import FooterPage from "../footer/FooterPage";
 function UserPage() {
   const [carouselData, setCarouselData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Function to fetch carousel data from API
     const fetchCarouselData = async () => {
       try {
-        // Replace with your actual API endpoint
-        const response = await fetch('https://api.example.com/carousel-items');
+        // Using the provided API endpoint
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/carousel-items/');
         
         if (!response.ok) {
           throw new Error('Failed to fetch carousel data');
         }
         
-        const data = await response.json();
-        setCarouselData(data);
+        const result = await response.json();
+        
+        // Check if the API response is successful
+        if (result.success) {
+          // Extract the data array from the response
+          const data = result.data.map(item => ({
+            ...item,
+            // Construct full image URL if image path is provided
+            image: item.image ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.image}` : null
+          }));
+          setCarouselData(data);
+        } else {
+          throw new Error('API returned unsuccessful response');
+        }
       } catch (error) {
         console.error('Error fetching carousel data:', error);
+        setError(error.message);
         // Fallback data if API fails
         setCarouselData([
           {
@@ -133,8 +147,8 @@ function UserPage() {
                     <div>
                       <i>
                         <img
-                          src={item.image}
-                          alt={item.alt}
+                          src={item.image || Banner1} // Use fallback image if item.image is null
+                          alt={item.alt || "Carousel image"}
                           className="img-fluid"
                         ></img>
                       </i>
