@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Card, Table } from "react-bootstrap";
+import { Container, Row, Col, Button, Card, Table, Modal } from "react-bootstrap";
 import {
   FaTachometerAlt,
   FaUsers,
   FaPlus,
   FaGift,
   FaUserCheck,
+  FaTimes,
 } from "react-icons/fa";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { Tooltip, ResponsiveContainer } from "recharts";
@@ -26,6 +27,9 @@ const HrDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [birthdays, setBirthdays] = useState([]);
+  const [birthdayLoading, setBirthdayLoading] = useState(true);
+  const [showBirthdayModal, setShowBirthdayModal] = useState(false);
   const navigate = useNavigate();
 
   // HR Stats Data
@@ -71,6 +75,35 @@ const HrDashBoard = () => {
     },
   ];
 
+  // Fetch birthday data
+  useEffect(() => {
+    const fetchBirthdays = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-birthday-list/', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.birthdays_today) {
+          setBirthdays(data.birthdays_today);
+        }
+      } catch (error) {
+        console.error("Failed to fetch birthday data:", error);
+      } finally {
+        setBirthdayLoading(false);
+      }
+    };
+
+    fetchBirthdays();
+  }, []);
+
   // Responsive check
   useEffect(() => {
     const checkDevice = () => {
@@ -86,6 +119,10 @@ const HrDashBoard = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  // Get first 2 birthdays and remaining count
+  const displayBirthdays = birthdays.slice(0, 1);
+  const remainingCount = birthdays.length > 1 ? birthdays.length - 1 : 0;
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -99,7 +136,6 @@ const HrDashBoard = () => {
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
-
         <HrHeader toggleSidebar={toggleSidebar} />
 
         {/* Dashboard Body */}
@@ -220,20 +256,69 @@ const HrDashBoard = () => {
               <FeedBackPost />
             </Col>
             <Col lg={4} md={12} sm={12} className="mb-3">
-              <Card className="birthday-card d-flex  justify-content-between">
-                <div className="birthday-left d-flex align-items-center gap-3">
-                  <FaGift className="birthday-icon" />
-                  <div className="birthday-text">
-                    <h6 className="birthday-title">Happy Birthday!</h6>
-
-                    <p className="birthday-subtext mb-0">
-                      <FaUsers className="me-1 br-birthday" /> 15 people wished
-                      you
-                    </p>
-                    <small className="birthday-date">Today</small>
+              {/* Dynamic Birthday Card */}
+              {birthdayLoading ? (
+                <Card className="birthday-card d-flex justify-content-between">
+                  <div className="birthday-left d-flex align-items-center gap-3">
+                    <FaGift className="birthday-icon" />
+                    <div className="birthday-text">
+                      <h6 className="birthday-title">Loading Birthdays...</h6>
+                    </div>
+                  </div>Kamal Hassan
+                </Card>
+              ) : birthdays.length > 0 ? (
+                <Card className="birthday-card d-flex flex-column">
+                  <div className="birthday-left d-flex align-items-center gap-3">
+                    <FaGift className="birthday-icon" />
+                    <div className="birthday-text">
+                      <h6 className="birthday-title">Happy Birthday!</h6>
+                      <p className="birthday-subtext mb-0">
+                        <FaUsers className="me-1 br-birthday" /> {birthdays.length} {birthdays.length === 1 ? 'person has' : 'people have'} birthday today
+                      </p>
+                      <small className="birthday-date">Today</small>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                  
+                  {/* Display first 2 birthdays */}
+                  <div className="birthday-list mt-3">
+                    {displayBirthdays.map((birthday, index) => (
+                      <div key={index} className="birthday-item d-flex align-items-center gap-2 mb-2">
+                        <div className="birthday-avatar bg-primary rounded-circle d-flex align-items-center justify-content-center" style={{width: '30px', height: '30px', color: 'white', fontSize: '0.7rem'}}>
+                          {birthday.full_name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div className="birthday-details">
+                          <p className="mb-0 fw-bold">{birthday.full_name}</p>
+                          <small className="text-muted">{birthday.designation}, {birthday.department}</small>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Show +X more link if there are more birthdays */}
+                    {remainingCount > 0 && (
+                      <Button 
+                        variant="link" 
+                        className="birthday-more-link p-0 text-primary"
+                        onClick={() => setShowBirthdayModal(true)}
+                      >
+                        +{remainingCount} more
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ) : (
+                <Card className="birthday-card d-flex justify-content-between">
+                  <div className="birthday-left d-flex align-items-center gap-3">
+                    <FaGift className="birthday-icon" />
+                    <div className="birthday-text">
+                      <h6 className="birthday-title">No Birthdays Today</h6>
+                      <p className="birthday-subtext mb-0">
+                        <FaUsers className="me-1 br-birthday" /> Check back tomorrow
+                      </p>
+                      <small className="birthday-date">Today</small>
+                    </div>
+                  </div>
+                </Card>
+              )}
               <TeamMember />
               <LeaveCalendar />
               <LeaveBalance />
@@ -252,6 +337,44 @@ const HrDashBoard = () => {
           {/* Existing Table + Quick Actions (same layout) */}
         </Container>
       </div>
+
+      {/* Birthday Modal */}
+      <Modal 
+        show={showBirthdayModal} 
+        onHide={() => setShowBirthdayModal(false)}
+        centered
+        size="lg"
+        className="birthday-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="d-flex align-items-center gap-2">
+            <FaGift className="text-primary" />
+            Today's Birthdays ({birthdays.length})
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="birthday-modal-list">
+            {birthdays.map((birthday, index) => (
+              <div key={index} className="birthday-modal-item d-flex align-items-center gap-3 p-3 border-bottom">
+                <div className="birthday-modal-avatar bg-primary rounded-circle d-flex align-items-center justify-content-center" style={{width: '50px', height: '50px', color: 'white', fontSize: '1rem'}}>
+                  {birthday.full_name.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div className="birthday-modal-details flex-grow-1">
+                  <h6 className="mb-1 fw-bold">{birthday.full_name}</h6>
+                  <p className="mb-1 text-muted">{birthday.designation}</p>
+                  <p className="mb-0 text-muted">{birthday.department}</p>
+                </div>
+                
+              </div>
+            ))}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowBirthdayModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
