@@ -8,7 +8,7 @@ function OurTeam() {
       <Container>
         <div className="ourteam-box">
            <Row className='mt-5'>
-          <div >
+          <div className='our-heading-team' >
             <h1> OUR Team</h1>
              <section className="our-team-section">
       <div className="container">

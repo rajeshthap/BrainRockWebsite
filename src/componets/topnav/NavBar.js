@@ -40,11 +40,11 @@ function NavBar() {
                 <NavDropdown.Item as={Link} to="/Careers">Careers</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/Partners">Partners</NavDropdown.Item>
               </NavDropdown>
-             <Nav.Link href="Courses">Services</Nav.Link>
+             <Nav.Link href="Services">Services</Nav.Link>
              <Nav.Link href="Courses">Courses</Nav.Link>
              <Nav.Link href="Gallery">Gallery</Nav.Link>
              <Nav.Link href="Feedback">Feedback</Nav.Link>
-             <Nav.Link href="Registration">Registration</Nav.Link>
+             <Nav.Link href="TrainingRegistration">Registration</Nav.Link>
              <Nav.Link href="Training">Training </Nav.Link>
            
 
