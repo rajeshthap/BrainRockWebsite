@@ -40,18 +40,24 @@ export default function Login() {
   }, []);
 
   // This effect runs when the 'user' object is set in the context after a successful login
-  useEffect(() => {
-    if (user) {
-      const from = location.state?.from?.pathname;
+useEffect(() => {
+  if (user) {
+    const from = location.state?.from?.pathname;
 
-      // If a redirect origin exists, go there; otherwise always send the user to HrDashBoard
-      if (from) {
-        navigate(from, { state: { unique_id: user.id }, replace: true });
-      } else {
-        navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
-      }
+    // If redirect origin exists
+    if (from) {
+      navigate(from, { state: { unique_id: user.id }, replace: true });
+      return;
     }
-  }, [user, navigate, location]);
+    // Role-based redirection
+    if (user.role === "admin") {
+      navigate("/WebsiteManagement", { state: { unique_id: user.id }, replace: true });
+    } else {
+      navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
+    }
+  }
+}, [user, navigate, location]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;

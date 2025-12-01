@@ -61,6 +61,12 @@ import TrainingBootstrap from "./componets/topnav/navigationpages/TrainingBootst
 import TrainingMySql from "./componets/topnav/navigationpages/TrainingMySql";
 import TrainingWebDesign from "./componets/topnav/navigationpages/TrainingWebDesign";
 import PayslipGenerator from "./componets/hr_dashboard/pay_roll/PayslipGenerator";
+import WebsiteManagement from "./componets/adminpanel/WebsiteManagement";
+import LeftNavManagement from "./componets/adminpanel/LeftNavManagement";
+import AddServices from "./componets/adminpanel/Services/AddServices";
+import ViewServices from "./componets/adminpanel/Services/ViewServices";
+import AddCarousel from "./componets/adminpanel/carousel/AddCarousel";
+import EditCarousel from "./componets/adminpanel/carousel/EditCarousel";
 
 
 function AppContent() {
@@ -91,6 +97,12 @@ function AppContent() {
     "/ManageTeam",
     "/MyTeam",
     "/PayslipGenerator",
+    "/WebsiteManagement",
+    "LeftNavManagement",
+    "/AddServices",
+    "/ViewServices",
+    "/AddCarousel",
+    "/EditCarousel",
 
   ]);
 
@@ -129,6 +141,10 @@ function AppContent() {
         <Route path="/TrainingPHP" element={<TrainingPHP />} />
         <Route path="/TrainingWebDesign" element={<TrainingWebDesign />} />
         <Route path="/UIUXTraining" element={<UIUXTraining />} />
+        <Route path="/WebsiteManagement" element={<WebsiteManagement />} />
+        <Route path="/LeftNavManagement" element={<LeftNavManagement />} />
+        <Route path="/AddServices" element={<AddServices />} />
+        <Route path="/ViewServices" element={<ViewServices />} />
          
 
         {/* Hr  Payroll (protected) */}
@@ -140,6 +156,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        
         <Route
           path="/LeaveHistory"
           element={
@@ -319,7 +336,25 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        {/* Admin Panel Routes */}
+        <Route
+          path="/AddCarousel"
+          element={
+            <ProtectedRoute>
+              <AddCarousel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/EditCarousel"
+          element={
+            <ProtectedRoute>
+              <EditCarousel />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+      
 
       {!shouldHideFooter1 && <Footer />}
     </>
