@@ -245,7 +245,7 @@ const menuItems = [
         },
         {
           label: "Payslip Generation",
-          path: "/EmployeeManagement",
+          path: "/PayslipGenerator",
           icon: <FaChartLine />,
         },
         {
