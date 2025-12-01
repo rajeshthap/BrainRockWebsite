@@ -27,7 +27,6 @@ export const AuthProvider = ({ children }) => {
         role: res.data.user?.role || res.data.role || null,
       });
 
-      // Clear any client-side 'logged out' marker when login succeeds
       try {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('BR_LOGGED_OUT');
@@ -52,7 +51,6 @@ export const AuthProvider = ({ children }) => {
       const res = await axiosInstance.post("logout/");
       console.log("Logout response:", res.data);
 
-      // Clear all cookies when logging out
       clearAllCookies();
       try {
         if (typeof window !== 'undefined') {
@@ -65,7 +63,6 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       setHasRefreshFailed(false);
 
-      // Navigate to login page to ensure user lands on the login screen.
       if (options && options.redirect !== false) {
         try {
           if (typeof window !== 'undefined') {
@@ -80,7 +77,6 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Logout failed:", err.response?.data || err.message);
 
-      // Even if logout API fails, clear local state and navigate to login.
       clearAllCookies();
       try {
         if (typeof window !== 'undefined') {
@@ -110,7 +106,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const validateOrRefreshToken = async () => {
-    // If client recorded a logout, don't attempt refresh (prevents auto-login)
     try {
       if (typeof window !== 'undefined' && localStorage.getItem('BR_LOGGED_OUT') === '1') {
         setHasRefreshFailed(true);
@@ -143,10 +138,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setHasRefreshFailed(true);
       setLoading(false);
-      // Clear local auth state but avoid forcing another redirect from logout
-      // (this prevents a reload loop if we're already on /Login).
       await logout({ redirect: false });
-      // Only replace the location if we're not already on the login page.
       try {
         if (typeof window !== 'undefined' && window.location.pathname !== '/Login') {
           window.location.replace('/Login');
@@ -209,10 +201,6 @@ export const AuthProvider = ({ children }) => {
   }, [hasRefreshFailed]);
 
   useEffect(() => {
-    // On mount:
-    // - If this was a full page reload and the current path is a protected path
-    //   (not '/' or '/Login'), force a logout and redirect to '/Login'.
-    // - Otherwise, attempt a token refresh (unless already failed) as before.
     const doInit = async () => {
       try {
         const perf = typeof performance !== 'undefined' ? performance : null;
@@ -230,14 +218,17 @@ export const AuthProvider = ({ children }) => {
         const isReload = navType === 'reload';
         const path = (typeof window !== 'undefined' && window.location.pathname) ? window.location.pathname : '/';
 
-        // If the page was reloaded and it's not the public landing or login page,
-        // force a logout so the user is sent to Login.
         if (isReload && path !== '/' && path !== '/Login') {
-          await logout();
+          try {
+            if (typeof window !== 'undefined') {
+              window.location.replace('/');
+            }
+          } catch (e) {
+            // ignore
+          }
           return;
         }
 
-        // Otherwise, attempt refresh as before (skip if already failed or on /Login).
         if (!hasRefreshFailed) {
           if (typeof window === 'undefined' || window.location.pathname !== '/Login') {
             validateOrRefreshToken();
