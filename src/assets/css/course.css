@@ -5,22 +5,27 @@
 
 .course-label {
   font-weight: 600;
-  color: #374151;   /* Elegant dark gray */
+  color: #374151;
+  /* Elegant dark gray */
   margin-right: 6px;
 }
+
 .course-value {
   font-weight: 700;
-  color: #d97706;  
+  color: #d97706;
 }
+
 .course-info:hover .course-label,
 .course-info:hover .course-value {
   color: #ffffff;
 }
-.course-sub-heading h4{
-    font-size: 16px !important;
+
+.course-sub-heading h4 {
+  font-size: 16px !important;
 }
-.course-sub-heading p{
-    font-size: var(--br-space-300);
+
+.course-sub-heading p {
+  font-size: var(--br-space-300);
 }
 
 /* Module Container Styles */
@@ -51,8 +56,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   margin-right: 12px;
@@ -68,13 +72,13 @@
 
 .module-card ul {
   margin-bottom: 0;
-  padding-left: 20px;
+
 }
 
 .module-card li {
   margin-bottom: 8px;
-  line-height: 1.5;
-  font-size: 12px;
+  line-height: 1;
+  font-size: 13px;
 }
 
 .module-card li:last-child {
@@ -89,30 +93,34 @@
   padding-bottom: 10px;
   border-bottom: 2px solid #61dafb;
 }
-.btn-register-top{
+
+.btn-register-top {
   background: transparent linear-gradient(180deg, #1973D8 0%, #0B488F 100%) !important;
   color: #ffffff;
   border: none !important;
   font-size: 12px;
   border-radius: 2px;
- width: 102px;
+  width: 102px;
 }
-.btn-register-top:hover{
+
+.btn-register-top:hover {
   color: #f09e40;
 
 }
+
 .service-btn-read {
-    background-color: #1973d8;
-    color: var(--br-white);
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 8px;
-    cursor: pointer;
+  background-color: #1973d8;
+  color: var(--br-white);
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 8px;
+  cursor: pointer;
 }
+
 /* Training Wrapper */
 .training-wrapper {
-  background-color: #f8f9fa;
+
   border-radius: 10px;
   /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); */
 }
@@ -123,7 +131,7 @@
     font-size: 16px;
     padding: 10px 12px;
   }
-  
+
   .module-number {
     width: 25px;
     height: 25px;

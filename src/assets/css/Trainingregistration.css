@@ -13,6 +13,7 @@
   flex-direction: column;
   justify-content: center;
   padding: 20px;
+
 }
 
 /* Card styling */
@@ -23,6 +24,7 @@
   transition: transform 0.3s ease;
   margin: 0 auto;
   max-width: 100%;
+  background-color: #f8f9fa;
 }
 
 .registration-card:hover {
@@ -36,22 +38,26 @@
 
 /* Custom card header */
 .card-header-custom {
-  
-  color: #000;
+
+  color: #fff;
   padding: 15px 20px;
   border-radius: 15px 15px 0 0;
+  background: var(--br-primary) !important;
 }
 
 .card-header-custom h4 {
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 18px;
 }
 
 /* Form label styling */
 .form-label-custom {
-  font-weight: 600;
+  font-weight: 500;
   color: #333;
   margin-bottom: 8px;
+  font-size: 12px;
 }
+
 
 /* Form control styling */
 .form-control-custom {
@@ -141,16 +147,16 @@
   .training-registration-container {
     padding: 10px 0;
   }
-  
+
   .registration-wrapper {
     min-height: calc(100vh - 20px);
     padding: 10px;
   }
-  
+
   .card-body-custom {
     padding: 15px;
   }
-  
+
   .photo-preview {
     width: 80px;
     height: 80px;
