@@ -279,7 +279,7 @@ const EditCourses = () => {
                               <AiOutlineFileDone size={60} style={{ marginRight: '15px' }} />
                             )}
                             <div>
-                              <Card.Title>{course.title}</Card.Title>
+                              <Card.Title className="managetitle">{course.title}</Card.Title>
                               <Card.Subtitle className="mb-2 text-muted">Duration: {course.duration}</Card.Subtitle>
                             </div>
                           </div>
