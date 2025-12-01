@@ -49,7 +49,6 @@ useEffect(() => {
       navigate(from, { state: { unique_id: user.id }, replace: true });
       return;
     }
-
     // Role-based redirection
     if (user.role === "admin") {
       navigate("/WebsiteManagement", { state: { unique_id: user.id }, replace: true });
