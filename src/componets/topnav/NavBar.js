@@ -33,53 +33,20 @@ function NavBar() {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto justify-content-end flex-grow-1 nd-nav">
               {/* Main Navigation Items */}
-              <NavDropdown title="Home" id="Home">
-                <NavDropdown.Item as={Link} to="/Overview">Overview</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/WhyChooiceUs">Why Choose Us</NavDropdown.Item>
-              </NavDropdown>
-             <Nav.Link href="Courses">Courses</Nav.Link>
-             <Nav.Link href="Gallery">Gallery</Nav.Link>
-
-              
-
-              <NavDropdown title="About Us" id="AboutUs">
+                 <Nav.Link href="Home">Home</Nav.Link>
+                <NavDropdown title="About Us" id="AboutUs">
                 <NavDropdown.Item as={Link} to="/CompanyProfile">Company Profile</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/OurTeam">Our Team</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/Careers">Careers</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/Partners">Partners</NavDropdown.Item>
               </NavDropdown>
-
-              <NavDropdown title="Services" id="Services">
-                <NavDropdown.Item as={Link} to="/WebDevelopment">Web Development</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/MobileAppDevelopment">Mobile App Development</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/CloudSolutions">Cloud Solutions</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/ITConsulting">IT Consulting</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/UIUXDesign">UI/UX Design</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/QATesting">QA & Testing</NavDropdown.Item>
-              </NavDropdown>
-
-              <NavDropdown title="Solutions" id="Solutions">
-                <NavDropdown.Item href="#overview">SaaS Solutions</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">ERP Solutions</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">E-commerce Solutions</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Custom Software</NavDropdown.Item>
-              </NavDropdown>
-
-              <NavDropdown title="Industries" id="Industries">
-                <NavDropdown.Item href="#overview">Healthcare</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Finance</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Education</NavDropdown.Item>
-                <NavDropdown.Item href="#why-choose-us">Retail</NavDropdown.Item>
-              </NavDropdown>
-
-              {/* Grouped Dropdown for Less Important Items */}
-              <NavDropdown title="More" id="More">
-                <NavDropdown.Item href="#courses">Courses</NavDropdown.Item>
-                <NavDropdown.Item href="#programming">Programming Languages</NavDropdown.Item>
-                <NavDropdown.Item href="#portfolio">Portfolio</NavDropdown.Item>
-                <NavDropdown.Item href="#data-science">Data Science & AI</NavDropdown.Item>
-                <NavDropdown.Item href="#others">Others</NavDropdown.Item>
-              </NavDropdown>
+             <Nav.Link href="Courses">Services</Nav.Link>
+             <Nav.Link href="Courses">Courses</Nav.Link>
+             <Nav.Link href="Gallery">Gallery</Nav.Link>
+             <Nav.Link href="Feedback">Feedback</Nav.Link>
+             <Nav.Link href="Registration">Registration</Nav.Link>
+             <Nav.Link href="Training">Training </Nav.Link>
+           
 
               <NavDropdown title="Contact Us" id="ContactUs">
                 <NavDropdown.Item href="#get-in-touch">Get in Touch</NavDropdown.Item>
