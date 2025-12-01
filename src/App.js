@@ -60,6 +60,7 @@ import UIUXTraining from "./componets/topnav/navigationpages/UIUXTraining";
 import TrainingBootstrap from "./componets/topnav/navigationpages/TrainingBootstrap";
 import TrainingMySql from "./componets/topnav/navigationpages/TrainingMySql";
 import TrainingWebDesign from "./componets/topnav/navigationpages/TrainingWebDesign";
+import PayslipGenerator from "./componets/hr_dashboard/pay_roll/PayslipGenerator";
 
 
 function AppContent() {
@@ -89,6 +90,7 @@ function AppContent() {
     "/CreateTeam",
     "/ManageTeam",
     "/MyTeam",
+    "/PayslipGenerator",
 
   ]);
 
@@ -187,6 +189,15 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/PayslipGenerator"
+          element={
+            <ProtectedRoute>
+              <PayslipGenerator />
+            </ProtectedRoute>
+          }
+        />
+        
         
         <Route
           path="/PayDashBoard"
