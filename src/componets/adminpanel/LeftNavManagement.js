@@ -61,6 +61,48 @@ const menuItems = [
        
       ],
     },
+    {
+      icon: <PiUserListBold />,
+      label: "Manage Courses",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Course",
+          path: "/AddCourses",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Edit Course",
+          path: "/EditCourses",
+          icon: <FaChartLine />,
+        },
+        
+       
+      ],
+    }, 
+    {
+      icon: <PiUserListBold />,
+      label: "Students Gallery",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Student",
+          path: "/AddStudent",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Manage Student",
+          path: "/ManageStudent",
+          icon: <FaChartLine />,
+        },
+        
+       
+      ],
+    },
      
      {
       icon: <PiUserListBold />,

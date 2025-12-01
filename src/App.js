@@ -67,7 +67,10 @@ import AddServices from "./componets/adminpanel/Services/AddServices";
 import ViewServices from "./componets/adminpanel/Services/ViewServices";
 import AddCarousel from "./componets/adminpanel/carousel/AddCarousel";
 import EditCarousel from "./componets/adminpanel/carousel/EditCarousel";
-
+import AddCourses from "./componets/adminpanel/courses/AddCourses";
+import EditCourses from "./componets/adminpanel/courses/EditCourses";
+import AddStudent from "./componets/adminpanel/gallery/AddStudent";
+import ManageStudent from "./componets/adminpanel/gallery/ManageStudent";
 
 function AppContent() {
   const location = useLocation();
@@ -103,6 +106,10 @@ function AppContent() {
     "/ViewServices",
     "/AddCarousel",
     "/EditCarousel",
+    "/AddCourses",
+    "/EditCourses",
+    "/AddStudent",
+    "/ManageStudent",
 
   ]);
 
@@ -353,7 +360,40 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/AddCourses"
+          element={
+            <ProtectedRoute>
+              <AddCourses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/EditCourses"
+          element={
+            <ProtectedRoute>
+              <EditCourses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/AddStudent"
+          element={
+            <ProtectedRoute>
+              <AddStudent />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ManageStudent"
+          element={
+            <ProtectedRoute>
+              <ManageStudent />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+      
       
 
       {!shouldHideFooter1 && <Footer />}
