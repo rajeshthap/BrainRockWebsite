@@ -38,6 +38,7 @@ const EmployeeRegistration = () => {
   const [validated, setValidated] = useState(false);
   const [bankDetailsFetched, setBankDetailsFetched] = useState(false);
   const [managers, setManagers] = useState([]);
+  const [skillInput, setSkillInput] = useState("");
 
   // Custom DatePicker Input Component
   const CustomDatePickerInput = React.forwardRef(
@@ -138,38 +139,40 @@ const EmployeeRegistration = () => {
     username: "",
     password: "",
     experience_certificates: [],
+    experience: "",
+    skills_set: [],
   });
 
   // Add this useEffect with your other useEffect hooks
-useEffect(() => {
-  const fetchManagers = async () => {
-    try {
-      console.log("Fetching managers...");
-      const response = await axios.get(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-name-details/",
-        {
-          withCredentials: true 
+  useEffect(() => {
+    const fetchManagers = async () => {
+      try {
+        console.log("Fetching managers...");
+        const response = await axios.get(
+          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-name-details/",
+          {
+            withCredentials: true
+          }
+        );
+        console.log("Managers API response:", response.data);
+        if (response.data.success && Array.isArray(response.data.data)) {
+          setManagers(response.data.data);
+          console.log("Managers set to state:", response.data.data);
         }
-      );
-      console.log("Managers API response:", response.data);
-      if (response.data.success && Array.isArray(response.data.data)) {
-        setManagers(response.data.data);
-        console.log("Managers set to state:", response.data.data);
+      } catch (err) {
+        console.error("Error fetching managers:", err);
+        if (err.response) {
+          console.error("Error response data:", err.response.data);
+          console.error("Error response status:", err.response.status);
+        }
       }
-    } catch (err) {
-      console.error("Error fetching managers:", err);
-      if (err.response) {
-        console.error("Error response data:", err.response.data);
-        console.error("Error response status:", err.response.status);
-      }
-    }
-  };
-  fetchManagers();
-}, []);
+    };
+    fetchManagers();
+  }, []);
 
   useEffect(() => {
-  console.log("Managers state updated:", managers);
-}, [managers]);
+    console.log("Managers state updated:", managers);
+  }, [managers]);
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -369,8 +372,8 @@ useEffect(() => {
         return !value ? "Date of birth is required" : "";
       case "reporting_manager":
         return !value ? "Reporting manager is required" : "";
-         case "reporting_manager_id":
-      return !value ? "Reporting manager ID is required" : "";
+      case "reporting_manager_id":
+        return !value ? "Reporting manager ID is required" : "";
       case "emergency_contact_name":
         return !value ? "Emergency contact name is required" : "";
       case "employment_type":
@@ -397,6 +400,10 @@ useEffect(() => {
         return "";
       case "joining_date":
         return !value ? "Joining date is required" : "";
+      case "experience":
+        return !value.trim() ? "Experience is required" : "";
+      case "skills_set":
+        return value.length === 0 ? "At least one skill is required" : "";
       default:
         return "";
     }
@@ -432,6 +439,27 @@ useEffect(() => {
       }
     }, 200);
   };
+
+  // Add a function to handle adding skills
+  const handleAddSkill = () => {
+    if (skillInput.trim() && !formData.skills_set.includes(skillInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        skills_set: [...prev.skills_set, skillInput.trim()]
+      }));
+      setSkillInput("");
+      setErrors(prev => ({ ...prev, skills_set: "" }));
+    }
+  };
+
+  // Add a function to handle removing skills
+  const handleRemoveSkill = (skillToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      skills_set: prev.skills_set.filter(skill => skill !== skillToRemove)
+    }));
+  };
+
 
   // File upload handler
   const handleFileUpload = (e, setter, multiple = false) => {
@@ -610,7 +638,7 @@ useEffect(() => {
       employment_type: "",
       joining_date: "",
       reporting_manager: "",
-       reporting_manager_id: "",
+      reporting_manager_id: "",
       work_location: "",
       salary: "",
       bank_name: "",
@@ -619,6 +647,9 @@ useEffect(() => {
       pan_number: "",
       username: "",
       password: "",
+      experience_certificates: [],
+      experience: "", // Reset this new field
+      skills_set: [], // Reset this new field
     });
 
     setPhoto({
@@ -672,6 +703,7 @@ useEffect(() => {
     setFileErrors({});
     setValidated(false);
     setBankDetailsFetched(false);
+    setSkillInput("");
   };
 
   // Form submission handler
@@ -768,7 +800,7 @@ useEffect(() => {
     payload.append("employment_type", formData.employment_type);
     payload.append("joining_date", formData.joining_date);
     payload.append("reporting_manager", formData.reporting_manager);
-     payload.append("reporting_manager_id", formData.reporting_manager_id);
+    payload.append("reporting_manager_id", formData.reporting_manager_id);
     payload.append("work_location", formData.work_location);
     payload.append("salary", formData.salary);
     payload.append("bank_name", formData.bank_name);
@@ -777,6 +809,9 @@ useEffect(() => {
     payload.append("pan_number", formData.pan_number);
     payload.append("username", formData.username);
     payload.append("password", formData.password);
+    payload.append("experience", formData.experience);
+
+    payload.append("skills_set", JSON.stringify(formData.skills_set));
 
     if (photo.file) payload.append("profile_photo", photo.file);
     if (resume.file) payload.append("resume_document", resume.file);
@@ -1522,6 +1557,68 @@ useEffect(() => {
                   </Form.Group>
                 </Col>
 
+
+                <Col lg={4} md={6} sm={12}>
+                  <Form.Group className="mb-3" controlId="experience">
+                    <Form.Label className="br-label">
+                      Experience <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="e.g., 1 year, 2 years"
+                      className="br-form-control"
+                      name="experience"
+                      value={formData.experience}
+                      onChange={handleInputChange}
+                      isInvalid={!!errors.experience}
+                      required
+                      ref={formRefs.experience}
+                    />
+                    <Form.Control.Feedback type="br-alert">
+                      {errors.experience}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
+
+
+                <Col lg={4} md={6} sm={12}>
+                  <Form.Group className="mb-3" controlId="skills_set">
+                    <Form.Label className="br-label">
+                      Skills <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <div className="d-flex">
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter a skill"
+                        className="br-form-control me-2"
+                        value={skillInput}
+                        onChange={(e) => setSkillInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
+                      />
+                      <Button variant="primary" onClick={handleAddSkill}>Add</Button>
+                    </div>
+                    {errors.skills_set && (
+                      <div className="br-alert-feedback">
+                        {errors.skills_set}
+                      </div>
+                    )}
+                    <div className="mt-2">
+                      {formData.skills_set.map((skill, index) => (
+                        <span key={index} className="badge bg-secondary me-2 mb-2 d-inline-flex align-items-center">
+                          {skill}
+                          <button
+                            type="button"
+                            className="btn-close btn-close-white ms-2"
+                            onClick={() => handleRemoveSkill(skill)}
+                            aria-label="Remove skill"
+                          ></button>
+                        </span>
+                      ))}
+                    </div>
+                  </Form.Group>
+                </Col>
+
+
                 {/* ================= Payroll & Salary Details Section ================= */}
                 <div className="br-basic-info mt-4">
                   <h1>4. Payroll & Salary Details</h1>
@@ -2110,8 +2207,8 @@ useEffect(() => {
                       <Col lg={6}>
                         <div
                           className={`br-doc-box text-center ${dragOverStates.experienceCertificates
-                              ? "drag-over"
-                              : ""
+                            ? "drag-over"
+                            : ""
                             }`}
                           onDragEnter={(e) =>
                             handleDragEnter(e, "experienceCertificates")
