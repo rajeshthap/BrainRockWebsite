@@ -231,7 +231,7 @@ const DepartmentHierarchy = () => {
         {/* Dashboard Body */}
         <div className="dashboard-body">
           <div className="org-chart-container">
-            <h1>Company Organization Chart</h1>
+            <h1>Hierarchy Chart</h1>
             
             {/* Search Bar */}
             <div className="search-container">
@@ -263,7 +263,8 @@ const DepartmentHierarchy = () => {
             </div>
             
             <div className="org-chart-wrapper">
-              <div className="org-chart">
+              {/* Hierarchy Structure - 4 columns on large and medium screens */}
+              <div className="org-chart org-chart-lg-4 org-chart-md-4 org-chart-sm-12">
                 {treeData.length > 0 ? (
                   <Tree data={treeData} onEmployeeClick={handleEmployeeClick} baseUrl={baseUrl} handleImageError={handleImageError} />
                 ) : (
@@ -273,12 +274,15 @@ const DepartmentHierarchy = () => {
                 )}
               </div>
               
+              {/* Employee Details - 8 columns on large and medium screens */}
               {selectedEmployee && (
-                <EmployeeDetails 
-                  employee={selectedEmployee} 
-                  handleImageError={handleImageError}
-                  baseUrl={baseUrl}
-                />
+                <div className="employee-details employee-details-lg-8 employee-details-md-8 employee-details-sm-12">
+                  <EmployeeDetails 
+                    employee={selectedEmployee} 
+                    handleImageError={handleImageError}
+                    baseUrl={baseUrl}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -375,10 +379,10 @@ const TreeNodeItem = ({ node, onEmployeeClick, baseUrl, handleImageError }) => {
   );
 };
 
-// Component for displaying employee details
+// Component for displaying employee details (without financial information)
 const EmployeeDetails = ({ employee, handleImageError, baseUrl }) => {
   return (
-    <div className="employee-details">
+    <div className="employee-details-content">
       <h2>Employee Details</h2>
       <div className="details-card">
         <div className="details-header">
@@ -421,18 +425,12 @@ const EmployeeDetails = ({ employee, handleImageError, baseUrl }) => {
           <h4>Professional Information</h4>
           <p><strong>Department:</strong> {employee.department}</p>
           <p><strong>Designation:</strong> {employee.designation}</p>
+          <p><strong>Experience:</strong> {employee.experience || 'Not specified'}</p>
+          <p><strong>Skills:</strong> {employee.skills_set && employee.skills_set.length > 0 ? employee.skills_set.join(', ') : 'Not specified'}</p>
           <p><strong>Reporting Manager:</strong> {employee.reporting_manager || 'None'}</p>
           <p><strong>Work Location:</strong> {employee.work_location}</p>
           <p><strong>Joining Date:</strong> {new Date(employee.joining_date).toLocaleDateString()}</p>
           <p><strong>Branch:</strong> {employee.branch_name}</p>
-        </div>
-        
-        <div className="details-section">
-          <h4>Financial Information</h4>
-          <p><strong>Salary:</strong> ₹{parseFloat(employee.salary).toLocaleString()}</p>
-          <p><strong>Bank Name:</strong> {employee.bank_name}</p>
-          <p><strong>Account Number:</strong> {employee.account_number}</p>
-          <p><strong>IFSC Code:</strong> {employee.ifsc_code}</p>
         </div>
       </div>
     </div>
