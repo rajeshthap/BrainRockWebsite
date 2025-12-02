@@ -17,6 +17,7 @@ const DepartmentHierarchy = () => {
   const [isTablet] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState('all');
+  const [expandedNodes, setExpandedNodes] = useState(new Set());
 
   // Fetch employee data from API with authentication
   useEffect(() => {
@@ -70,6 +71,24 @@ const DepartmentHierarchy = () => {
     }
     
     return chain;
+  };
+
+  // Function to get all subordinates of an employee (direct and indirect reports)
+  const getAllSubordinates = (employeeId, allEmployees, result = []) => {
+    // Find direct reports
+    const directReports = allEmployees.filter(emp => emp.reporting_manager_id === employeeId);
+    
+    // Add direct reports to result
+    directReports.forEach(emp => {
+      if (!result.find(e => e.emp_id === emp.emp_id)) {
+        result.push(emp);
+      }
+      
+      // Recursively get subordinates of each direct report
+      getAllSubordinates(emp.emp_id, allEmployees, result);
+    });
+    
+    return result;
   };
 
   // Convert employee data to tree structure
@@ -132,6 +151,7 @@ const DepartmentHierarchy = () => {
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredEmployees(employees);
+      setExpandedNodes(new Set());
       return;
     }
 
@@ -162,24 +182,37 @@ const DepartmentHierarchy = () => {
     // If no matches, set filteredEmployees to empty array
     if (matchedEmployees.length === 0) {
       setFilteredEmployees([]);
+      setExpandedNodes(new Set());
       return;
     }
 
-    // Collect all employee IDs in the reporting chains of matched employees
+    // Collect all employee IDs in the reporting chains and subordinates of matched employees
     const employeeIdsToInclude = new Set();
+    const newExpandedNodes = new Set();
+    
     matchedEmployees.forEach(emp => {
+      // Get the reporting chain (from employee up to CEO)
       const chain = getReportingChain(emp.emp_id, employees);
       chain.forEach(employee => {
         employeeIdsToInclude.add(employee.emp_id);
+        newExpandedNodes.add(employee.emp_id);
+      });
+      
+      // Get all subordinates (from employee down to lowest level)
+      const subordinates = getAllSubordinates(emp.emp_id, employees);
+      subordinates.forEach(employee => {
+        employeeIdsToInclude.add(employee.emp_id);
+        newExpandedNodes.add(employee.emp_id);
       });
     });
 
-    // Create the filtered employee array with all employees in the reporting chains
+    // Create the filtered employee array with all employees in the reporting chains and subordinates
     const newFilteredEmployees = employees.filter(emp => 
       employeeIdsToInclude.has(emp.emp_id)
     );
 
     setFilteredEmployees(newFilteredEmployees);
+    setExpandedNodes(newExpandedNodes);
   }, [searchTerm, searchField, employees]);
 
   // Handle employee selection
@@ -203,6 +236,19 @@ const DepartmentHierarchy = () => {
     if (e.target.nextElementSibling) {
       e.target.nextElementSibling.style.display = 'flex'; // Show the placeholder
     }
+  };
+
+  // Toggle node expansion
+  const toggleNodeExpansion = (employeeId) => {
+    setExpandedNodes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(employeeId)) {
+        newSet.delete(employeeId);
+      } else {
+        newSet.add(employeeId);
+      }
+      return newSet;
+    });
   };
 
   if (loading) return <div className="loading">Loading organization chart...</div>;
@@ -266,7 +312,14 @@ const DepartmentHierarchy = () => {
               {/* Hierarchy Structure - 4 columns on large and medium screens */}
               <div className="org-chart org-chart-lg-4 org-chart-md-4 org-chart-sm-12">
                 {treeData.length > 0 ? (
-                  <Tree data={treeData} onEmployeeClick={handleEmployeeClick} baseUrl={baseUrl} handleImageError={handleImageError} />
+                  <Tree 
+                    data={treeData} 
+                    onEmployeeClick={handleEmployeeClick} 
+                    baseUrl={baseUrl} 
+                    handleImageError={handleImageError}
+                    expandedNodes={expandedNodes}
+                    toggleNodeExpansion={toggleNodeExpansion}
+                  />
                 ) : (
                   <div className="no-results">
                     {searchTerm ? "No employees found matching your search." : "No employee data available."}
@@ -293,7 +346,7 @@ const DepartmentHierarchy = () => {
 };
 
 // Tree component that matches the provided structure
-const Tree = ({ data, onEmployeeClick, baseUrl, handleImageError }) => {
+const Tree = ({ data, onEmployeeClick, baseUrl, handleImageError, expandedNodes, toggleNodeExpansion }) => {
   return (
     <div className="tree">
       {data.map((node) => (
@@ -303,6 +356,8 @@ const Tree = ({ data, onEmployeeClick, baseUrl, handleImageError }) => {
           onEmployeeClick={onEmployeeClick}
           baseUrl={baseUrl}
           handleImageError={handleImageError}
+          expandedNodes={expandedNodes}
+          toggleNodeExpansion={toggleNodeExpansion}
         />
       ))}
     </div>
@@ -310,29 +365,32 @@ const Tree = ({ data, onEmployeeClick, baseUrl, handleImageError }) => {
 };
 
 // TreeNodeItem component that matches the provided structure
-const TreeNodeItem = ({ node, onEmployeeClick, baseUrl, handleImageError }) => {
-  const [expanded, setExpanded] = React.useState(false);
-
+const TreeNodeItem = ({ node, onEmployeeClick, baseUrl, handleImageError, expandedNodes, toggleNodeExpansion }) => {
   const hasChildren = node.children && node.children.length > 0;
+  const isExpanded = expandedNodes.has(node.id);
 
   const handleClick = () => {
-    if (hasChildren) {
-      setExpanded(!expanded);
-    }
     // Call the employee click handler with the employee data
     if (node.employee) {
       onEmployeeClick(node.employee);
     }
   };
 
+  const handleToggleClick = (e) => {
+    e.stopPropagation();
+    toggleNodeExpansion(node.id);
+  };
+
   return (
     <div className="tree-node">
-      <div
-        className={`tree-label ${hasChildren ? "clickable" : ""}`}
-        onClick={handleClick}
-      >
+      <div className={`tree-label ${hasChildren ? "clickable" : ""}`} onClick={handleClick}>
         {hasChildren && (
-          <span className={`toggle ${expanded ? "expanded" : ""}`}>▸</span>
+          <span 
+            className={`toggle ${isExpanded ? "expanded" : ""}`} 
+            onClick={handleToggleClick}
+          >
+            ▸
+          </span>
         )}
         <div className="employee-card">
           <div className="employee-photo-container">
@@ -362,7 +420,7 @@ const TreeNodeItem = ({ node, onEmployeeClick, baseUrl, handleImageError }) => {
         </div>
       </div>
 
-      {hasChildren && expanded && (
+      {hasChildren && isExpanded && (
         <div className="tree-children">
           {node.children.map((child) => (
             <TreeNodeItem 
@@ -371,6 +429,8 @@ const TreeNodeItem = ({ node, onEmployeeClick, baseUrl, handleImageError }) => {
               onEmployeeClick={onEmployeeClick}
               baseUrl={baseUrl}
               handleImageError={handleImageError}
+              expandedNodes={expandedNodes}
+              toggleNodeExpansion={toggleNodeExpansion}
             />
           ))}
         </div>
