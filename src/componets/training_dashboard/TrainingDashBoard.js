@@ -12,7 +12,7 @@ const TrainingDashBoard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
 
-  const navigate = useNavigate();   // ⭐ Added
+  const navigate = useNavigate();   //  Added
 
   // ⭐ Redirect Function
   const openVideoPage = () => {

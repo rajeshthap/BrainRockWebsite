@@ -1,38 +1,25 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Nav, Offcanvas, Collapse } from "react-bootstrap";
-import {
-  FaTachometerAlt,
+import { FaTachometerAlt,
   FaSignOutAlt,
   FaChevronDown,
   FaChevronRight,
-  FaChartLine,
-  FaUserCheck,
+ 
 } from "react-icons/fa";
-import axios from "axios";
-
 import "../../assets/css/emp_dashboard.css";
 import { Link } from "react-router-dom";
-import { PiUserListBold} from "react-icons/pi";
-
 import BRLogo from "../../assets/images/brainrock_logo.png";
-
 import { AuthContext } from "../context/AuthContext";
-
-
 const TrainingLeftnav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     const { logout } = useContext(AuthContext);
-    const { user } = useContext(AuthContext);
-const emp_id = user?.unique_id;  // This is the correct value
-
-    const [userRole, setUserRole] = useState(null);
+    // const { user } = useContext(AuthContext);
+// const emp_id = user?.unique_id;  // This is the correct value
+    const [userRole,] = useState(null);
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const toggleSubmenu = (index) => {
     setOpenSubmenu(openSubmenu === index ? null : index);
   };
   
-
-
-
 const menuItems = [
     {
       icon: <FaTachometerAlt />,

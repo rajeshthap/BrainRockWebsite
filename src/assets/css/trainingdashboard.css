@@ -42,7 +42,7 @@
 }
 
 .tab-btn.active {
-  background: #4e73df;
+  background: orange;
   color: white;
 }
 
@@ -172,8 +172,8 @@
 }
 
 .tab-btn.active {
-  border-bottom: 3px solid #000;
-  color: #000;
+  border-bottom: 3px solid #fff;
+  color: #fff;
 }
 
 /* -------- Cards -------- */

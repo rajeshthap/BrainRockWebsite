@@ -75,7 +75,9 @@
     position: relative;
     overflow: hidden;
 }
-
+.sidebar{
+    overflow-y: auto !important;
+}
 .sidebar .nav-item:hover {
     color: white;
     background: rgba(255, 255, 255, 0.1);
