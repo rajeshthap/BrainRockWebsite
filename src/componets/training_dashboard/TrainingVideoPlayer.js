@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import "../../assets/css/trainingvideoplayer.css";
 import { VideoPlayer } from "@graphland/react-video-player";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaHome, FaStar, FaChartLine, FaShareAlt, FaPlay, FaCheck } from "react-icons/fa";
-import { Button } from "react-bootstrap";
+import { FaHome, FaStar, FaChartLine, FaShareAlt, FaCheck } from "react-icons/fa";
+
 
 const TrainingVideoPlayer = () => {
   const location = useLocation();
@@ -16,10 +16,7 @@ const TrainingVideoPlayer = () => {
     title = "How to Make a Responsive Website in React JS",
     video = "https://www.w3schools.com/html/mov_bbb.mp4",
     poster = "https://i.ibb.co/4Y6HcRD/reactjs-banner.png",
-    instructor = "John Doe",
-    rating = 4.1,
-    totalHours = "1.5",
-    totalStudents = "2,456"
+  
   } = location.state || {};
 
   const [activeIndex, setActiveIndex] = useState(0);
