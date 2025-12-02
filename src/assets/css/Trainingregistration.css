@@ -1,48 +1,6 @@
-.training-container {
-  max-width: 850px;
-  margin: 50px auto;
-}
+.text-heading h3{
+font-size: 24px;
+color: #000;
+font-weight: 600;
 
-.training-card {
-  background: #fff;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: none;
-}
-
-.training-title {
-  text-align: center;
-  font-weight: 700;
-  margin-bottom: 25px;
-  color: #2a4d69;
-}
-
-
-.br-form-control:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 3px rgba(13, 110, 253, 0.5);
-}
-
-.training-submit-btn {
-  width: 100%;
-  padding: 12px;
-  margin-top: 25px;
-  font-size: 18px;
-  font-weight: bold;
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  transition: 0.3s ease;
-}
-
-.training-submit-btn:hover {
-  background: #084298;
-  cursor: pointer;
-}
-
-.training-submit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }

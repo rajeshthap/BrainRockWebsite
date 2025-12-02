@@ -47,12 +47,8 @@ function NavBar() {
              <Nav.Link href="TrainingRegistration">Registration</Nav.Link>
              <Nav.Link href="Training">Training </Nav.Link>
            
-
-              <NavDropdown title="Contact Us" id="ContactUs">
-                <NavDropdown.Item href="#get-in-touch">Get in Touch</NavDropdown.Item>
-                <NavDropdown.Item href="#request-quote">Request a Quote</NavDropdown.Item>
-                <NavDropdown.Item href="#faqs">FAQs</NavDropdown.Item>
-              </NavDropdown>
+ <Nav.Link href="/Contact">Contact Us</Nav.Link>
+             
             </Nav>
           </Navbar.Collapse>
         </Container>
