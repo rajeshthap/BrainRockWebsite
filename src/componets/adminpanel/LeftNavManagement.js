@@ -86,6 +86,28 @@ const menuItems = [
         
         
       ],
+    },
+     {
+      icon: <PiUserListBold />,
+      label: "Our Team",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Our Team",
+          path: "/AddOurTeam",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Manage Our Team",
+          path: "/ManageOurTeam",
+          icon: <FaChartLine />,
+        },
+        
+        
+        
+      ],
     }, 
     {
       icon: <PiUserListBold />,

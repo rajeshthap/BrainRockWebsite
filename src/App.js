@@ -78,6 +78,8 @@ import TrainingLeftnav from "./componets/training_dashboard/TrainingLeftnav";
 import EditContactUs from "./componets/adminpanel/aboutus/EditContactUs";
 import ContactUsQuery from "./componets/adminpanel/aboutus/ContactUsQuery";
 import TrainingVideoPlayer from "./componets/training_dashboard/TrainingVideoPlayer";
+import AddOurTeam from "./componets/adminpanel/ourteam/AddOurTeam";
+import ManageOurTeam from "./componets/adminpanel/ourteam/ManageOurTeam";
 
 function AppContent() {
   const location = useLocation();
@@ -122,7 +124,10 @@ function AppContent() {
     "/TrainingLeftnav",
     "/EditContactUs",
     "/ContactUsQuery",
-    "/TrainingVideoPlayer"
+    "/TrainingVideoPlayer",
+    "/AddOurTeam",
+    "/ManageOurTeam",
+
 
   ]);
 
@@ -431,6 +436,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ContactUsQuery />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/AddOurTeam"
+          element={
+            <ProtectedRoute>
+              <AddOurTeam />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ManageOurTeam"
+          element={
+            <ProtectedRoute>
+              <ManageOurTeam />
             </ProtectedRoute>
           }
         />
