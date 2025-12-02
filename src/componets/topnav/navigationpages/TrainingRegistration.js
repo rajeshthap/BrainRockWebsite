@@ -216,13 +216,13 @@ function TrainingRegistration() {
               {/* CATEGORY */}
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label className="br-label">Select Category<span className="br-span-star">*</span></Form.Label>
+                  <Form.Label className="br-label">Select training<span className="br-span-star">*</span></Form.Label>
                   <Form.Select
                     value={selectedCategory}
                     onChange={handleCategoryChange}
                     className="br-form-control"
                   >
-                    <option value="">-- Select Category --</option>
+                    <option value="">-- Select training --</option>
                     {courseData.map((item) => (
                       <option key={item.id} value={item.category}>
                         {item.category}
@@ -271,7 +271,7 @@ function TrainingRegistration() {
                     type="text"
                     className="br-form-control"
                     name="candidate_name"
-                    value={formData.candidate_name}
+                    value={formData.candidate_name} placeholder="Enter your name"
                     onChange={handleChange}
                   />
                   <Form.Control.Feedback type="br-alert">
@@ -289,7 +289,7 @@ function TrainingRegistration() {
                     className="br-form-control"
                     name="guardian_name"
                     value={formData.guardian_name}
-                    onChange={handleChange}
+                    onChange={handleChange} placeholder="Enter your guardian name "
                   />
                 </Form.Group>
               </Col>
@@ -303,7 +303,7 @@ function TrainingRegistration() {
                     className="br-form-control"
                     name="address"
                     value={formData.address}
-                    onChange={handleChange}
+                    onChange={handleChange} placeholder="Enter your Address"
                   />
                 </Form.Group>
               </Col>
@@ -332,7 +332,7 @@ function TrainingRegistration() {
                     className="br-form-control"
                     name="email"
                     value={formData.email}
-                    onChange={handleChange}
+                    onChange={handleChange} placeholder="Enter Your Email"
                   
                   />
                    <Form.Control.Feedback type="br-alert">
@@ -349,7 +349,7 @@ function TrainingRegistration() {
                     type="password"
                     className="br-form-control"
                     name="password"
-                    value={formData.password}
+                    value={formData.password} placeholder="enter your Password"
                     onChange={handleChange}
                 
                   />
@@ -368,7 +368,7 @@ function TrainingRegistration() {
                     name="confirm_password"
                     className="br-form-control"
                     value={formData.confirm_password}
-                    onChange={handleChange}
+                    onChange={handleChange} placeholder="Enter your confirm Password"
                     isInvalid={!!errors.confirm_password}
                   />
                    <Form.Control.Feedback type="br-alert">
@@ -385,7 +385,7 @@ function TrainingRegistration() {
                     type="text"
                     className="br-form-control"
                     name="mobile_no"
-                    value={formData.mobile_no}
+                    value={formData.mobile_no} placeholder="Enter your phone number"
                     onChange={handleChange}
                   
                   />
@@ -406,7 +406,7 @@ function TrainingRegistration() {
                     className="br-form-control"
                     name="school_college_name"
                     value={formData.school_college_name}
-                    onChange={handleChange}
+                    onChange={handleChange} placeholder="Enter your collage name"
                   />
                 </Form.Group>
               </Col>
@@ -418,7 +418,7 @@ function TrainingRegistration() {
                   <Form.Control
                     type="text"
                     className="br-form-control"
-                    name="highest_education"
+                    name="highest_education" placeholder="Enter your highest education"
                     value={formData.highest_education}
                     onChange={handleChange}
                   />

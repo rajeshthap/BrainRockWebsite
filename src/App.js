@@ -73,6 +73,8 @@ import AddStudent from "./componets/adminpanel/gallery/AddStudent";
 import ManageStudent from "./componets/adminpanel/gallery/ManageStudent";
 import EditAboutUs from "./componets/adminpanel/aboutus/EditAboutUs";
 import Contact from "./componets/topnav/navigationpages/Contact";
+import TrainingDashBoard from "./componets/training_dashboard/TrainingDashBoard";
+import TrainingLeftnav from "./componets/training_dashboard/TrainingLeftnav";
 
 function AppContent() {
   const location = useLocation();
@@ -113,6 +115,8 @@ function AppContent() {
     "/AddStudent",
     "/ManageStudent",
     "/EditAboutUs",
+    "/TrainingDashBoard",
+    "/TrainingLeftnav",
 
   ]);
 
@@ -155,7 +159,9 @@ function AppContent() {
         <Route path="/LeftNavManagement" element={<LeftNavManagement />} />
         <Route path="/AddServices" element={<AddServices />} />
         <Route path="/ViewServices" element={<ViewServices />} />
+        <Route path="/TrainingDashBoard" element={<TrainingDashBoard />} />
         <Route path="/Contact" element={<Contact />} />
+        <Route path="/TrainingLeftnav" element={<TrainingLeftnav />} />
 
         
 
