@@ -75,7 +75,8 @@ import EditAboutUs from "./componets/adminpanel/aboutus/EditAboutUs";
 import Contact from "./componets/topnav/navigationpages/Contact";
 import TrainingDashBoard from "./componets/training_dashboard/TrainingDashBoard";
 import TrainingLeftnav from "./componets/training_dashboard/TrainingLeftnav";
-
+import EditContactUs from "./componets/adminpanel/aboutus/EditContactUs";
+import ContactUsQuery from "./componets/adminpanel/aboutus/ContactUsQuery";
 function AppContent() {
   const location = useLocation();
 
@@ -117,6 +118,8 @@ function AppContent() {
     "/EditAboutUs",
     "/TrainingDashBoard",
     "/TrainingLeftnav",
+    "/EditContactUs",
+    "/ContactUsQuery",
 
   ]);
 
@@ -411,7 +414,22 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        
+        <Route
+          path="/EditContactUs"
+          element={
+            <ProtectedRoute>
+              <EditContactUs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ContactUsQuery"
+          element={
+            <ProtectedRoute>
+              <ContactUsQuery />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       
       

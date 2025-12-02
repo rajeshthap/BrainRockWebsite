@@ -73,6 +73,17 @@ const menuItems = [
           path: "/EditAboutUs",
           icon: <FaChartLine />,
         },
+        {
+          label: "Contact Us",
+          path: "/EditContactUs",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "ContactUs Query",
+          path: "/ContactUsQuery",
+          icon: <FaChartLine />,
+        },
+        
         
       ],
     }, 
