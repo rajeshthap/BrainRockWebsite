@@ -72,6 +72,7 @@ import EditCourses from "./componets/adminpanel/courses/EditCourses";
 import AddStudent from "./componets/adminpanel/gallery/AddStudent";
 import ManageStudent from "./componets/adminpanel/gallery/ManageStudent";
 import EditAboutUs from "./componets/adminpanel/aboutus/EditAboutUs";
+import Contact from "./componets/topnav/navigationpages/Contact";
 
 function AppContent() {
   const location = useLocation();
@@ -154,6 +155,7 @@ function AppContent() {
         <Route path="/LeftNavManagement" element={<LeftNavManagement />} />
         <Route path="/AddServices" element={<AddServices />} />
         <Route path="/ViewServices" element={<ViewServices />} />
+        <Route path="/Contact" element={<Contact />} />
 
         
 

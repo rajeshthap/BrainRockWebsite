@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import "../../../assets/css/Trainingregistration.css";
 
 function TrainingRegistration() {
   const [courseData, setCourseData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [availableCourses, setAvailableCourses] = useState([]);
+  const [maxDate, setMaxDate] = useState(""); // For DOB max date (today)
 
   const [formData, setFormData] = useState({
     application_for_course: "",
@@ -15,249 +16,437 @@ function TrainingRegistration() {
     date_of_birth: "",
     email: "",
     password: "",
+    confirm_password: "",
     mobile_no: "",
     school_college_name: "",
     highest_education: "",
     profile_photo: null,
   });
 
-  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [successMsg, setSuccessMsg] = useState("");
 
-  // Fetch Courses
+  // Set max date for DOB to today's date
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const res = await axios.get(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/"
-        );
-
-        setCourseData(Array.isArray(res.data?.courses) ? res.data.courses : []);
-      } catch (err) {
-        console.error(err);
-        setCourseData([]);
-      }
-    };
-
-    fetchCourses();
+    const today = new Date().toISOString().split('T')[0];
+    setMaxDate(today);
   }, []);
 
-  // Category Change
-  const handleCategoryChange = (e) => {
-    const category = e.target.value;
-    setSelectedCategory(category);
+  // FETCH COURSES
+  useEffect(() => {
+    axios
+      .get("https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/")
+      .then((res) => {
+        if (res.data && Array.isArray(res.data.courses)) {
+          setCourseData(res.data.courses);
+        }
+      })
+      .catch((err) => console.error("Course list error:", err));
+  }, []);
 
-    const found = courseData.find((item) => item.category === category);
-    setAvailableCourses(found ? found.courses : []);
+  // LIVE VALIDATION
+  const validateField = (name, value) => {
+    let msg = "";
+
+    switch (name) {
+      case "candidate_name":
+        if (!value.trim()) msg = "Candidate name is required";
+        break;
+
+      case "email":
+        if (!value.trim()) msg = "Email is required";
+        else if (!/^\S+@\S+\.\S+$/.test(value)) msg = "Invalid email format";
+        break;
+
+      case "mobile_no":
+        if (!value.trim()) msg = "Mobile number is required";
+        else if (!/^[0-9]{10}$/.test(value))
+          msg = "Mobile number must be 10 digits";
+        break;
+
+      case "password":
+        if (!value.trim()) msg = "Password is required";
+        else if (value.length < 6)
+          msg = "Password must be at least 6 characters long";
+        break;
+
+      case "confirm_password":
+        if (!value.trim()) msg = "Confirm password is required";
+        else if (value !== formData.password)
+          msg = "Passwords do not match";
+        break;
+
+      case "application_for_course":
+        if (!value.trim()) msg = "Please select a course";
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: msg }));
+  };
+
+  // INPUT CHANGE HANDLER
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    const newValue = files ? files[0] : value;
+
+    setFormData({ ...formData, [name]: newValue });
+    validateField(name, newValue);
+  };
+
+  // CATEGORY CHANGE
+  const handleCategoryChange = (e) => {
+    const cat = e.target.value;
+    setSelectedCategory(cat);
 
     setFormData({
       ...formData,
       application_for_course: "",
     });
+
+    // Clear both category and application_for_course errors
+    setErrors((prev) => ({ 
+      ...prev, 
+      application_for_course: "",
+      category: "" 
+    }));
   };
 
-  // Input Handler
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
+  // FINAL VALIDATION BEFORE SUBMIT
+  const validateFormBeforeSubmit = () => {
+    let temp = {};
 
-    if (name === "profile_photo") {
-      setFormData({ ...formData, profile_photo: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    if (!selectedCategory) temp.category = "Please select category";
+    if (!formData.application_for_course)
+      temp.application_for_course = "Please select course";
+
+    if (!formData.candidate_name)
+      temp.candidate_name = "Candidate name is required";
+
+    if (!formData.email) temp.email = "Email is required";
+
+    if (!formData.mobile_no) temp.mobile_no = "Mobile is required";
+
+    if (!formData.password) temp.password = "Password required";
+
+    if (formData.confirm_password !== formData.password)
+      temp.confirm_password = "Passwords do not match";
+
+    setErrors(temp);
+    return Object.keys(temp).length === 0;
   };
 
-  // Submit Form
+  // SUBMIT FORM
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+
+    if (!validateFormBeforeSubmit()) return;
 
     const payload = new FormData();
-    Object.keys(formData).forEach((key) => payload.append(key, formData[key]));
+    for (const key in formData) {
+      payload.append(key, formData[key]);
+    }
+    payload.append("category", selectedCategory);
 
     try {
-      const res = await axios.post(
+      const response = await axios.post(
         "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/",
         payload,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      alert("Registration Successful!");
-    } catch (err) {
-      console.error(err);
-      alert("Registration Failed!");
-    } finally {
-      setLoading(false);
+      alert(" Registration Successful!");
+
+      // RESET FORM
+      setFormData({
+        application_for_course: "",
+        candidate_name: "",
+        guardian_name: "",
+        address: "",
+        date_of_birth: "",
+        email: "",
+        password: "",
+        confirm_password: "",
+        mobile_no: "",
+        school_college_name: "",
+        highest_education: "",
+        profile_photo: null,
+      });
+
+      setSelectedCategory("");
+      setErrors({});
+    } catch (error) {
+      console.error("Registration Error:", error);
+      
+      // Handle API errors for duplicate email/phone
+      if (error.response && error.response.data && error.response.data.errors) {
+        const apiErrors = {};
+        
+        // Check for email already exists error
+        if (error.response.data.errors.email && Array.isArray(error.response.data.errors.email)) {
+          apiErrors.email = "Email already exists. Please use a different email.";
+        }
+        
+        // Check for phone already exists error
+        if (error.response.data.errors.mobile_no && Array.isArray(error.response.data.errors.mobile_no)) {
+          apiErrors.mobile_no = "Mobile number already exists. Please use a different number.";
+        }
+        
+        // Update errors state with API errors
+        if (Object.keys(apiErrors).length > 0) {
+          setErrors(prev => ({ ...prev, ...apiErrors }));
+        }
+      }
     }
   };
 
   return (
-    <div className="training-container">
-      <div className="training-card">
+    <div className="ourteam-section">
+      <Container className="mt-4">
+        <div className="ourteam-box text-heading">
+          <h3 className="text-center mb-3">Training Registration</h3>
 
-        <h2 className="training-title">Training Registration Form</h2>
+          {successMsg && <Alert variant="success">{successMsg}</Alert>}
 
-        <form onSubmit={handleSubmit}>
-          <div className="row g-3">
+          <Form onSubmit={handleSubmit}>
+            <Row>
 
-            {/* CATEGORY */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Select Category</label>
-              <select
-                className="br-form-control"
-                value={selectedCategory}
-                onChange={handleCategoryChange}
-                required
-              >
-                <option value="">-- Select Category --</option>
-                {courseData.map((item) => (
-                  <option key={item.id} value={item.category}>
-                    {item.category}
-                  </option>
-                ))}
-              </select>
+              {/* CATEGORY */}
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="br-label">Select Category<span className="br-span-star">*</span></Form.Label>
+                  <Form.Select
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
+                    className="br-form-control"
+                  >
+                    <option value="">-- Select Category --</option>
+                    {courseData.map((item) => (
+                      <option key={item.id} value={item.category}>
+                        {item.category}
+                      </option>
+                    ))}
+                  </Form.Select>
+                  <Form.Control.Feedback type="br-alert">
+                    {errors.category}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              {/* COURSE */}
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="br-label">Select Course <span className="br-span-star">*</span></Form.Label>
+                  <Form.Select
+                    className="br-form-control"
+                    name="application_for_course"
+                    value={formData.application_for_course}
+                    onChange={handleChange}
+                    disabled={!selectedCategory}
+                  >
+                    <option value="">-- Select Course --</option>
+
+                    {selectedCategory &&
+                      courseData
+                        .find((c) => c.category === selectedCategory)
+                        ?.courses.map((course, index) => (
+                          <option key={index} value={course}>
+                            {course}
+                          </option>
+                        ))}
+                  </Form.Select>
+                   <Form.Control.Feedback type="br-alert">
+                    {errors.application_for_course}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              {/* Candidate Name */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Candidate Name <span className="br-span-star">*</span></Form.Label>
+                  <Form.Control
+                    type="text"
+                    className="br-form-control"
+                    name="candidate_name"
+                    value={formData.candidate_name}
+                    onChange={handleChange}
+                  />
+                  <Form.Control.Feedback type="br-alert">
+                    {errors.candidate_name}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              {/* Guardian Name */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Guardian Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    className="br-form-control"
+                    name="guardian_name"
+                    value={formData.guardian_name}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </Col>
+
+              {/* Address */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    className="br-form-control"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </Col>
+
+              {/* DOB */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Date of Birth</Form.Label>
+                  <Form.Control
+                    type="date"
+                    className="br-form-control"
+                    name="date_of_birth"
+                    value={formData.date_of_birth}
+                    onChange={handleChange}
+                    max={maxDate} // Prevent future dates
+                  />
+                </Form.Group>
+              </Col>
+
+              {/* Email */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Email <span className="br-span-star">*</span></Form.Label>
+                  <Form.Control
+                    type="email"
+                    className="br-form-control"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                  
+                  />
+                   <Form.Control.Feedback type="br-alert">
+                    {errors.email}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              {/* Password */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Password <span className="br-span-star">*</span></Form.Label>
+                  <Form.Control
+                    type="password"
+                    className="br-form-control"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                
+                  />
+                   <Form.Control.Feedback type="br-alert">
+                    {errors.password}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              {/* Confirm Password */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Confirm Password <span className="br-span-star">*</span></Form.Label>
+                  <Form.Control
+                    type="password"
+                    name="confirm_password"
+                    className="br-form-control"
+                    value={formData.confirm_password}
+                    onChange={handleChange}
+                    isInvalid={!!errors.confirm_password}
+                  />
+                   <Form.Control.Feedback type="br-alert">
+                    {errors.confirm_password}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              {/* Mobile */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Mobile Number <span className="br-span-star">*</span></Form.Label>
+                  <Form.Control
+                    type="text"
+                    className="br-form-control"
+                    name="mobile_no"
+                    value={formData.mobile_no}
+                    onChange={handleChange}
+                  
+                  />
+                   <Form.Control.Feedback type="br-alert">
+                    {errors.mobile_no}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              {/* School */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">
+                    School / College Name
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    className="br-form-control"
+                    name="school_college_name"
+                    value={formData.school_college_name}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </Col>
+
+              {/* Education */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Highest Education</Form.Label>
+                  <Form.Control
+                    type="text"
+                    className="br-form-control"
+                    name="highest_education"
+                    value={formData.highest_education}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </Col>
+
+              {/* Photo */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">Upload Profile Photo</Form.Label>
+                  <Form.Control
+                    type="file"
+                    className="br-form-control"
+                    name="profile_photo"
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <div className="text-center">
+              <Button type="submit" className="mt-4" variant="primary">
+                Register Now
+              </Button>
             </div>
-
-            {/* COURSE */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Select Course</label>
-              <select
-                className="br-form-control"
-                name="application_for_course"
-                value={formData.application_for_course}
-                onChange={handleChange}
-                required
-              >
-                <option value="">-- Select Course --</option>
-                {availableCourses.map((course, i) => (
-                  <option key={i} value={course}>
-                    {course}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* NAME */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Candidate Name</label>
-              <input
-                name="candidate_name"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* GUARDIAN */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Guardian Name</label>
-              <input
-                name="guardian_name"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* ADDRESS */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Address</label>
-              <input
-                name="address"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* DOB */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Date of Birth</label>
-              <input
-                type="date"
-                name="date_of_birth"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* EMAIL */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Email Address</label>
-              <input
-                type="email"
-                name="email"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* PASSWORD */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Password</label>
-              <input
-                type="password"
-                name="password"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* MOBILE */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Mobile Number</label>
-              <input
-                name="mobile_no"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* SCHOOL */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">School / College Name</label>
-              <input
-                name="school_college_name"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* EDUCATION */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Highest Education</label>
-              <input
-                name="highest_education"
-                className="br-form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* PHOTO */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <label className="br-label">Profile Photo</label>
-              <input
-                type="file"
-                name="profile_photo"
-                className="br-form-control"
-                accept="image/*"
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <button className="training-submit-btn" disabled={loading}>
-            {loading ? "Submitting..." : "Submit Registration"}
-          </button>
-        </form>
-
-      </div>
+          </Form>
+        </div>
+      </Container>
     </div>
   );
 }
