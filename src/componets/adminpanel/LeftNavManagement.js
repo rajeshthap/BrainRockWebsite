@@ -63,6 +63,21 @@ const menuItems = [
     },
     {
       icon: <PiUserListBold />,
+      label: "About Us",
+ 
+      submenu: [
+        
+       
+        {
+          label: "About Us",
+          path: "/EditAboutUs",
+          icon: <FaChartLine />,
+        },
+        
+      ],
+    }, 
+    {
+      icon: <PiUserListBold />,
       label: "Manage Courses",
  
       submenu: [

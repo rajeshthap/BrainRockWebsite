@@ -71,6 +71,7 @@ import AddCourses from "./componets/adminpanel/courses/AddCourses";
 import EditCourses from "./componets/adminpanel/courses/EditCourses";
 import AddStudent from "./componets/adminpanel/gallery/AddStudent";
 import ManageStudent from "./componets/adminpanel/gallery/ManageStudent";
+import EditAboutUs from "./componets/adminpanel/aboutus/EditAboutUs";
 
 function AppContent() {
   const location = useLocation();
@@ -110,6 +111,7 @@ function AppContent() {
     "/EditCourses",
     "/AddStudent",
     "/ManageStudent",
+    "/EditAboutUs",
 
   ]);
 
@@ -152,7 +154,8 @@ function AppContent() {
         <Route path="/LeftNavManagement" element={<LeftNavManagement />} />
         <Route path="/AddServices" element={<AddServices />} />
         <Route path="/ViewServices" element={<ViewServices />} />
-         
+
+        
 
         {/* Hr  Payroll (protected) */}
         <Route
@@ -392,6 +395,15 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/EditAboutUs"
+          element={
+            <ProtectedRoute>
+              <EditAboutUs />
+            </ProtectedRoute>
+          }
+        />
+        
       </Routes>
       
       
