@@ -19,6 +19,8 @@ const EditAboutUs = () => {
   const [aboutUsData, setAboutUsData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now()); // Add timestamp for cache busting
+  const [forceRefresh, setForceRefresh] = useState(false); // Add force refresh flag
   
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
@@ -29,6 +31,7 @@ const EditAboutUs = () => {
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [hasImageChanged, setHasImageChanged] = useState(false);
+  const [updating, setUpdating] = useState(false); // Add updating state
   
   // Alert state
   const [showAlert, setShowAlert] = useState(false);
@@ -68,7 +71,7 @@ const EditAboutUs = () => {
             id: item.id,
             title: item.title,
             description: item.description,
-            image: item.image ? `${API_BASE_URL}${item.image}?t=${Date.now()}` : null
+            image: item.image ? `${API_BASE_URL}${item.image}` : null
           };
 
           setAboutUsData(processedData);
@@ -128,6 +131,7 @@ const EditAboutUs = () => {
   // Handle edit form submission
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    setUpdating(true);
     
     const dataToSend = new FormData();
     // Send the ID in the payload as requested
@@ -154,15 +158,27 @@ const EditAboutUs = () => {
       
       const apiResponseData = await response.json();
 
+      // Create a unique timestamp to force image refresh
+      const newTimestamp = Date.now();
+      setImageTimestamp(newTimestamp);
+      
+      // Force a refresh
+      setForceRefresh(prev => !prev);
+
       // Update the state with the new data
       setAboutUsData({
         ...aboutUsData,
         title: editFormData.title,
         description: editFormData.description,
         image: hasImageChanged && apiResponseData.data && apiResponseData.data.image
-            ? `${API_BASE_URL}${apiResponseData.data.image}?t=${Date.now()}`
+            ? `${API_BASE_URL}${apiResponseData.data.image}`
             : aboutUsData.image
       });
+      
+      // If image was updated, also update the preview in the modal
+      if (hasImageChanged && apiResponseData.data && apiResponseData.data.image) {
+        setImagePreview(`${API_BASE_URL}${apiResponseData.data.image}?t=${newTimestamp}`);
+      }
       
       setMessage("About Us updated successfully!");
       setVariant("success");
@@ -177,8 +193,13 @@ const EditAboutUs = () => {
       setShowAlert(true);
       
       setTimeout(() => setShowAlert(false), 5000);
+    } finally {
+      setUpdating(false);
     }
   };
+
+  // Create image URL with timestamp for cache busting
+  const imageUrl = aboutUsData.image ? `${aboutUsData.image}?t=${imageTimestamp}&r=${forceRefresh ? '1' : '0'}` : null;
 
   return (
     <div className="dashboard-container">
@@ -222,11 +243,12 @@ const EditAboutUs = () => {
                       <Card.Body>
                         <div className="d-flex align-items-center mb-3">
                           {/* Display the image or a default */}
-                          {aboutUsData.image ? (
+                          {imageUrl ? (
                             <img 
-                              src={aboutUsData.image} 
+                              src={imageUrl} 
                               alt="About Us" 
-                              style={{ width: '120px', height: '120px', marginRight: '15px', objectFit: 'cover' }} 
+                              style={{ width: '120px', height: '120px', marginRight: '15px', objectFit: 'cover' }}
+                              key={`${imageUrl}-${forceRefresh}`} // Add key to force re-render
                             />
                           ) : (
                             <AiOutlineFileDone size={120} style={{ marginRight: '15px' }} />
@@ -238,8 +260,9 @@ const EditAboutUs = () => {
                             variant="primary" 
                             size="sm" 
                             onClick={handleEdit}
+                            disabled={updating}
                           >
-                            Edit
+                            {updating ? 'Updating...' : 'Edit'}
                           </Button>
                         </div>
                         <Card.Text>{aboutUsData.description}</Card.Text>
@@ -296,18 +319,26 @@ const EditAboutUs = () => {
                   <img 
                     src={imagePreview} 
                     alt="Image Preview" 
-                    style={{ maxWidth: '200px', maxHeight: '200px' }} 
+                    style={{ maxWidth: '200px', maxHeight: '200px' }}
+                    key={imagePreview} // Add key to force re-render
                   />
                 </div>
               )}
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            <Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={updating}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
-              Save Changes
+            <Button variant="primary" type="submit" disabled={updating}>
+              {updating ? (
+                <>
+                  <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                  <span className="ms-2">Saving...</span>
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </Modal.Footer>
         </Form>

@@ -33,6 +33,14 @@ function UserPage() {
   const [carouselData, setCarouselData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // State for About Us data - now includes image
+  const [aboutData, setAboutData] = useState({
+    title: "Why Choose Brainrock Consulting Services?",
+    description: "",
+    image: null
+  });
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now()); // Add timestamp for cache busting
 
   useEffect(() => {
     // Function to fetch carousel data from API
@@ -86,8 +94,42 @@ function UserPage() {
       }
     };
 
+    // Function to fetch About Us data from API
+    const fetchAboutData = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/aboutus-item/');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const result = await response.json();
+        
+        // The API returns data in the format {success: true, data: [{...}]}
+        if (result.success && result.data && result.data.length > 0) {
+          // Get the first item from the array
+          const item = result.data[0];
+          
+          // Process the data - construct full image URL if image path is provided
+          const processedData = {
+            title: item.title,
+            description: item.description,
+            image: item.image ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.image}` : null
+          };
+          
+          setAboutData(processedData);
+          // Update timestamp to force image refresh
+          setImageTimestamp(Date.now());
+        }
+      } catch (err) {
+        console.error('Error fetching About Us data:', err);
+      }
+    };
+
     fetchCarouselData();
+    fetchAboutData();
   }, []);
+
+  // Create image URL with timestamp for cache busting
+  const imageUrl = aboutData.image ? `${aboutData.image}?t=${imageTimestamp}` : null;
 
   return (
     <div className="container-fluid p-0">
@@ -250,50 +292,66 @@ function UserPage() {
               <div className="about-left-content">
                 <div className="about-phase-1">
                   <i>
-                    <img
-                      src={PoorImg}
-                      alt="groupimage"
-                      className="img-fluid  about-1 mt-30"
-                    ></img>
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt="About Us"
+                        className="img-fluid about-1 mt-30"
+                        key={`img1-${imageTimestamp}`} // Add key to force re-render
+                      />
+                    ) : (
+                      <div className="img-fluid about-1 mt-30 d-flex align-items-center justify-content-center bg-light" style={{height: '200px'}}>
+                        <span className="text-muted">No image available</span>
+                      </div>
+                    )}
                   </i>
-
                   <i>
-                    <img
-                      src={PoorImg}
-                      alt="groupimage"
-                      className="img-fluid  about-2"
-                    ></img>
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt="About Us"
+                        className="img-fluid about-2"
+                        key={`img2-${imageTimestamp}`} // Add key to force re-render
+                      />
+                    ) : (
+                      <div className="img-fluid about-2 d-flex align-items-center justify-content-center bg-light" style={{height: '200px'}}>
+                        <span className="text-muted">No image available</span>
+                      </div>
+                    )}
                   </i>
                 </div>
                 <div className="about-pic-content">
                   <i>
-                    <img
-                      src={PoorImg}
-                      alt="groupimage"
-                      className="img-fluid about-3"
-                    ></img>
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt="About Us"
+                        className="img-fluid about-3"
+                        key={`img3-${imageTimestamp}`} // Add key to force re-render
+                      />
+                    ) : (
+                      <div className="img-fluid about-3 d-flex align-items-center justify-content-center bg-light" style={{height: '200px'}}>
+                        <span className="text-muted">No image available</span>
+                      </div>
+                    )}
                   </i>
                   <div className="about-yr-exp"><p>18</p>
                     <h5>
                       <span>Year</span> Experience
                     </h5></div>
                 </div>
-
               </div>
 
             </Col>
             <Col lg={6} md={6} sm={12} className="about-right pl-30 d-flex flex-column justify-content-center p-5">
 
               <span className="hero-sub-title">About Us</span>
-              <h2 className="heading-1">Why Choose Brainrock Consulting Services?</h2>
-              <p> </p>
-              <ul className="about-list">
-                <li>Experienced Professionals: Our team comprises skilled experts with extensive experience in web development and IT solutions.</li>
-                <li>Customized Solutions: We tailor our services to meet the unique needs of each client, ensuring optimal results.</li>
-                <li>Quality Assurance: We prioritize quality in every project, adhering to industry standards and best practices.</li>
-                <li>Customer-Centric Approach: Client satisfaction is at the core of our business, and we strive to exceed expectations.</li>
-                <li>Innovative Technologies: We leverage the latest technologies to deliver cutting-edge solutions that drive business growth.</li>
-              </ul>
+              {/* Dynamic title from API */}
+              <h2 className="heading-1">{aboutData.title}</h2>
+              {/* Dynamic description from API - using p tag instead of ul */}
+              <p>{aboutData.description}</p>
+              {/* Static list items */}
+             
             </Col>
           </Row>
         </div>
