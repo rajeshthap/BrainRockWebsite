@@ -37,212 +37,77 @@ const menuItems = [
     {
       icon: <FaTachometerAlt />,
       label: "Dashboard",
-      path: "/WebsiteManagement",
+      path: "/TrainingDashBoard",
+      active: true,
+    },
+     {
+      icon: <FaTachometerAlt />,
+      label: "My Learning",
+      path: "#",
+      active: true,
+    },
+     {
+      icon: <FaTachometerAlt />,
+      label: "Refer a Friend",
+      path: "#",
       active: true,
     },
     {
-      icon: <PiUserListBold />,
-      label: "Carousel",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Carousel",
-          path: "/AddCarousel",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Edit Carousel",
-          path: "/EditCarousel",
-          icon: <FaChartLine />,
-        },
-        
-       
-      ],
+      icon: <FaTachometerAlt />,
+      label: "Teach On BrainRock",
+      path: "#",
+      active: true,
     },
-    {
-      icon: <PiUserListBold />,
-      label: "About Us",
- 
-      submenu: [
-        
-       
-        {
-          label: "About Us",
-          path: "/EditAboutUs",
-          icon: <FaChartLine />,
-        },
-        
-      ],
-    }, 
-    {
-      icon: <PiUserListBold />,
-      label: "Manage Courses",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Course",
-          path: "/AddCourses",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Edit Course",
-          path: "/EditCourses",
-          icon: <FaChartLine />,
-        },
-        
-       
-      ],
-    }, 
-    {
-      icon: <PiUserListBold />,
-      label: "Students Gallery",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Student",
-          path: "/AddStudent",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Manage Student",
-          path: "/ManageStudent",
-          icon: <FaChartLine />,
-        },
-        
-       
-      ],
-    },
-     
      {
-      icon: <PiUserListBold />,
-      label: "Services",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Services",
-          path: "/AddServices",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Services",
-          path: "/ViewServices",
-          icon: <FaChartLine />,
-        },
-        
-       
-      ],
+      icon: <FaTachometerAlt />,
+      label: "Notifications",
+      path: "#",
+      active: true,
     },
-   {
-      icon: <PiUserListBold />,
-      label: "Courses",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Courses",
-          path: "/AddCourses",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Courses",
-          path: "/ViewCourses",
-          icon: <FaChartLine />,
-        },
-        
-       
-      ],
+     {
+      icon: <FaTachometerAlt />,
+      label: "Account Settings",
+      path: "#",
+      active: true,
     },
-   {
-      icon: <PiUserListBold />,
-      label: "Image Gallery ",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Image",
-          path: "/AddImage",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Image",
-          path: "/ViewImage",
-          icon: <FaChartLine />,
-        },
-      
-       
-      ],
+     {
+      icon: <FaTachometerAlt />,
+      label: "Payment Method",
+      path: "#",
+      active: true,
+    },
+      {
+      icon: <FaTachometerAlt />,
+      label: "Purchase history",
+      path: "#",
+      active: true,
     },
    
-        {
-      icon: <FaTachometerAlt />,
-      label: "Feedback",
-      path: "/WebsiteManagement",
-      active: true,
-    },  
-      
-      {
-      icon: <PiUserListBold />,
-      label: "Student Gallery ",
+     
+  
+       
+    //    {
+    //   icon: <PiUserListBold />,
+    //   label: "Projects ",
  
-      submenu: [
+    //   submenu: [
         
        
-        {
-          label: "Registered Student",
-          path: "/CreateTeam",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Add Certification",
-          path: "/AddCertification",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Certified Student",
-          path: "/ViewCertified",
-          icon: <FaChartLine />,
-        },
-       
-      ],
-    },
-       
-       {
-      icon: <PiUserListBold />,
-      label: "Projects ",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Projects",
-          path: "/AddProjects",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Projects",
-          path: "/ViewProjects",
-          icon: <FaChartLine />,
-        }, 
-      ],
-    },   
+    //     {
+    //       label: "Add Projects",
+    //       path: "/AddProjects",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "View Projects",
+    //       path: "/ViewProjects",
+    //       icon: <FaChartLine />,
+    //     }, 
+    //   ],
+    // },   
    
 
-      {
-      icon: <FaTachometerAlt />,
-      label: "Online Messages",
-      path: "/WebsiteManagement",
-      active: true,
-    },  
+    
 
    
  

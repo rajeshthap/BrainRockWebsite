@@ -42,6 +42,7 @@ export default function Login() {
   // This effect runs when the 'user' object is set in the context after a successful login
 useEffect(() => {
   if (user) {
+
     const from = location.state?.from?.pathname;
 
     // If redirect origin exists
@@ -49,11 +50,28 @@ useEffect(() => {
       navigate(from, { state: { unique_id: user.id }, replace: true });
       return;
     }
-    // Role-based redirection
+
+    //  NEW CONDITION (your API response role)
+    // If role === "JAVA/ Python" → go to TrainingDashBoard
+    if (user.role === "JAVA/ Python") {
+      navigate("/TrainingDashBoard", {
+        state: { unique_id: user.unique_id },
+        replace: true,
+      });
+      return;
+    }
+
+    // Existing Role-based redirection
     if (user.role === "admin") {
-      navigate("/WebsiteManagement", { state: { unique_id: user.id }, replace: true });
+      navigate("/WebsiteManagement", {
+        state: { unique_id: user.id },
+        replace: true,
+      });
     } else {
-      navigate("/HrDashBoard", { state: { unique_id: user.id }, replace: true });
+      navigate("/HrDashBoard", {
+        state: { unique_id: user.id },
+        replace: true,
+      });
     }
   }
 }, [user, navigate, location]);

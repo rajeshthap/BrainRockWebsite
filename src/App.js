@@ -77,6 +77,8 @@ import TrainingDashBoard from "./componets/training_dashboard/TrainingDashBoard"
 import TrainingLeftnav from "./componets/training_dashboard/TrainingLeftnav";
 import EditContactUs from "./componets/adminpanel/aboutus/EditContactUs";
 import ContactUsQuery from "./componets/adminpanel/aboutus/ContactUsQuery";
+import TrainingVideoPlayer from "./componets/training_dashboard/TrainingVideoPlayer";
+
 function AppContent() {
   const location = useLocation();
 
@@ -120,6 +122,7 @@ function AppContent() {
     "/TrainingLeftnav",
     "/EditContactUs",
     "/ContactUsQuery",
+    "/TrainingVideoPlayer"
 
   ]);
 
@@ -165,6 +168,7 @@ function AppContent() {
         <Route path="/TrainingDashBoard" element={<TrainingDashBoard />} />
         <Route path="/Contact" element={<Contact />} />
         <Route path="/TrainingLeftnav" element={<TrainingLeftnav />} />
+        <Route path="/TrainingVideoPlayer" element={<TrainingVideoPlayer />} />
 
         
 
