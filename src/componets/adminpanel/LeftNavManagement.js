@@ -269,6 +269,20 @@ const menuItems = [
        
       ],
     },
+     {
+      icon: <PiUserListBold />,
+      label: "Our Tech Stack ",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Manage Tech Stack",
+          path: "/ManageTechStack",
+          icon: <FaChartLine />,
+        },
+      ],
+    }, 
        
        {
       icon: <PiUserListBold />,
