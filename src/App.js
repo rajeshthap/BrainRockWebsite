@@ -87,6 +87,8 @@ import RunningProjects from "./componets/pages/aboutus/RunningProjects";
 // import Services from "./componets/pages/ServicesPage";
 import ServicesPage from "./componets/pages/ServicesPage";
 import ManageTechStack from "./componets/adminpanel/ourtechstack/ManageTechStack";
+import ManageItServices from "./componets/adminpanel/itservices/ManageItServices";
+import AddItServices from "./componets/adminpanel/itservices/AddItServices";
 
 
 function AppContent() {
@@ -138,7 +140,8 @@ function AppContent() {
     "/AddDesAndDev",
     "/ManageDesAndDev",
     "/ManageTechStack",
-
+    "/ManageItServices",
+    "/AddItServices",
 
   ]);
 
@@ -491,6 +494,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageTechStack />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/AddItServices"
+          element={
+            <ProtectedRoute>
+              <AddItServices />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/ManageItServices"
+          element={
+            <ProtectedRoute>
+              <ManageItServices />
             </ProtectedRoute>
           }
         />

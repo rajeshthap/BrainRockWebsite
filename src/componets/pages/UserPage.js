@@ -56,6 +56,11 @@ function UserPage() {
   const [techStackLoading, setTechStackLoading] = useState(true);
   const [techStackError, setTechStackError] = useState(null);
   const [techImageTimestamp, setTechImageTimestamp] = useState(Date.now());
+  
+  // State for IT service data
+  const [itServiceData, setItServiceData] = useState([]);
+  const [itServiceLoading, setItServiceLoading] = useState(true);
+  const [itServiceError, setItServiceError] = useState(null);
 
   useEffect(() => {
     // Function to fetch carousel data from API
@@ -204,18 +209,50 @@ function UserPage() {
         setTechStackLoading(false);
       }
     };
+    
+    // Function to fetch IT service data from API
+    const fetchItServiceData = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/itservice-items/');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch IT service data');
+        }
+        
+        const result = await response.json();
+        
+        // Check if the API response is successful
+        if (result.success) {
+          // Extract the data array from the response
+          const data = result.data.map(item => ({
+            ...item,
+            // Construct full image URL if image path is provided
+            icon: item.icon ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.icon}` : null
+          }));
+          setItServiceData(data);
+        } else {
+          throw new Error('API returned unsuccessful response');
+        }
+      } catch (error) {
+        console.error('Error fetching IT service data:', error);
+        setItServiceError(error.message);
+      } finally {
+        setItServiceLoading(false);
+      }
+    };
 
     fetchCarouselData();
     fetchAboutData();
     fetchDesignDevData();
     fetchTechStackData();
+    fetchItServiceData();
   }, []);
 
   // Create image URL with timestamp for cache busting
   const imageUrl = aboutData.image ? `${aboutData.image}?t=${imageTimestamp}` : null;
   const techImageUrl = techStackData.image ? `${techStackData.image}?t=${techImageTimestamp}` : TechImg;
 
-  // Function to render the icon component based on the icon from API
+  // Function to render icon component based on the icon from API
   const renderIcon = (iconUrl) => {
     if (iconUrl) {
       return <img src={iconUrl} alt="Service Icon" className="img-fluid" style={{width: '40px', height: '40px'}} />;
@@ -303,72 +340,124 @@ function UserPage() {
           <Container>
             <div className="feature-wpr grid-3">
 
-              <div className="feature-box">
-                <div className="feature-icon">
-                  <i class="flaticon-cloud"><LuBrainCircuit /></i>
-
-
-
-                </div>
-                <div className="flaticon-cloud">
-
-
-                </div>
-                <div className="feature-desc">   <h4>It Solution</h4>
-                  <p>
-                    It Solution
-                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
-
-                  <Link to="/service-single" className="feature-btn">
-                    Read More
-                    <i className="ti-arrow-right"><FaArrowRight /></i>
-                  </Link>
-                </div>
-              </div>
-              <div className="feature-box">
-                <div className="feature-icon">
-                  <i class="flaticon-cloud"><SiCircuitverse /></i>
-
-
-
-                </div>
-                <div className="flaticon-cloud">
-
-
-                </div>
-                <div className="feature-desc">   <h4>
-                  It Management</h4>
-                  <p>
-                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
-
-                  <Link to="/service-single" className="feature-btn">
-                    Read More
-                    <i className="ti-arrow-right"><FaArrowRight /></i>
-                  </Link>
-                </div>
-              </div>
-              <div className="feature-box">
-                <div className="feature-icon">
-                  <i class="flaticon-cloud"><SiAmazoncloudwatch /></i>
-
-
-
-                </div>
-                <div className="flaticon-cloud">
-
-
-                </div>
-                <div className="feature-desc">   <h4>
-                  It Consultancy</h4>
-                  <p>
-                    It is a long established fact that a reader will be distracted by the readable content fact that a reader will</p>
-
-                  <Link to="/service-single" className="feature-btn">
-                    Read More
-                    <i className="ti-arrow-right"><FaArrowRight /></i>
-                  </Link>
-                </div>
-              </div>
+              {itServiceLoading ? (
+                // Show loading state while fetching data
+                Array(3).fill().map((_, index) => (
+                  <div className="feature-box" key={index}>
+                    <div className="feature-icon">
+                      <i class="flaticon-cloud">
+                        <div className="spinner-border spinner-border-sm" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                      </i>
+                    </div>
+                    <div className="flaticon-cloud"></div>
+                    <div className="feature-desc">
+                      <h4>Loading...</h4>
+                      <p>Loading content...</p>
+                      <Link to="/service-single" className="feature-btn">
+                        Read More
+                        <i className="ti-arrow-right"><FaArrowRight /></i>
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              ) : itServiceError ? (
+                // Show error state if API call fails
+                Array(3).fill().map((_, index) => (
+                  <div className="feature-box" key={index}>
+                    <div className="feature-icon">
+                      <i class="flaticon-cloud">
+                        <LuBrainCircuit />
+                      </i>
+                    </div>
+                    <div className="flaticon-cloud"></div>
+                    <div className="feature-desc">
+                      <h4>Error Loading Data</h4>
+                      <p>Unable to load service information. Please try again later.</p>
+                      <Link to="/service-single" className="feature-btn">
+                        Read More
+                        <i className="ti-arrow-right"><FaArrowRight /></i>
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              ) : itServiceData.length > 0 ? (
+                // Map over the IT service data to render items dynamically
+                itServiceData.map((item, index) => (
+                  <div className="feature-box" key={item.id}>
+                    <div className="feature-icon">
+                      <i class="flaticon-cloud">
+                        {renderIcon(item.icon)}
+                      </i>
+                    </div>
+                    <div className="flaticon-cloud"></div>
+                    <div className="feature-desc">
+                      <h4>{item.title}</h4>
+                      <p>{item.description}</p>
+                      <Link to="/service-single" className="feature-btn">
+                        Read More
+                        <i className="ti-arrow-right"><FaArrowRight /></i>
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                // Fallback to hardcoded data if no data is available
+                <>
+                  <div className="feature-box">
+                    <div className="feature-icon">
+                      <i class="flaticon-cloud"><LuBrainCircuit /></i>
+                    </div>
+                    <div className="flaticon-cloud"></div>
+                    <div className="feature-desc">
+                      <h4>It Solution</h4>
+                      <p>
+                        It Solution
+                        It is a long established fact that a reader will be distracted by the readable content fact that a reader will
+                      </p>
+                      <Link to="/service-single" className="feature-btn">
+                        Read More
+                        <i className="ti-arrow-right"><FaArrowRight /></i>
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="feature-box">
+                    <div className="feature-icon">
+                      <i class="flaticon-cloud"><SiCircuitverse /></i>
+                    </div>
+                    <div className="flaticon-cloud"></div>
+                    <div className="feature-desc">
+                      <h4>
+                        It Management</h4>
+                      <p>
+                        It is a long established fact that a reader will be distracted by the readable content fact that a reader will
+                      </p>
+                      <Link to="/service-single" className="feature-btn">
+                        Read More
+                        <i className="ti-arrow-right"><FaArrowRight /></i>
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="feature-box">
+                    <div className="feature-icon">
+                      <i class="flaticon-cloud"><SiAmazoncloudwatch /></i>
+                    </div>
+                    <div className="flaticon-cloud"></div>
+                    <div className="feature-desc">
+                      <h4>
+                        It Consultancy</h4>
+                      <p>
+                        It is a long established fact that a reader will be distracted by the readable content fact that a reader will
+                      </p>
+                      <Link to="/service-single" className="feature-btn">
+                        Read More
+                        <i className="ti-arrow-right"><FaArrowRight /></i>
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
           </Container>
