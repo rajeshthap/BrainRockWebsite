@@ -130,6 +130,29 @@ const menuItems = [
        
       ],
     }, 
+
+
+     {
+      icon: <PiUserListBold />,
+      label: "Client ",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Client ",
+          path: "/AddClient",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Edit Client",
+          path: "/EditClient",
+          icon: <FaChartLine />,
+        },
+        
+       
+      ],
+    }, 
     {
       icon: <PiUserListBold />,
       label: "Students Gallery",

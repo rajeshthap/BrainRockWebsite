@@ -91,6 +91,8 @@ import ManageItServices from "./componets/adminpanel/itservices/ManageItServices
 import AddItServices from "./componets/adminpanel/itservices/AddItServices";
 import Feedback from "./componets/topnav/navigationpages/Feedback";
 import Feedbackget from "./componets/adminpanel/Feedback/Feedbackget";
+import AddClient from "./componets/adminpanel/Client/AddClient";
+import EditClient from "./componets/adminpanel/Client/EditClient";
 
 
 function AppContent() {
@@ -145,6 +147,8 @@ function AppContent() {
     "/ManageItServices",
     "/AddItServices",
     "/Feedbackget",
+    "/AddClient",
+    "/EditClient",
 
   ]);
 
@@ -523,6 +527,24 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageItServices />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/AddClient"
+          element={
+            <ProtectedRoute>
+              <AddClient/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/EditClient"
+          element={
+            <ProtectedRoute>
+              <EditClient/>
             </ProtectedRoute>
           }
         />
