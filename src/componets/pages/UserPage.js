@@ -41,6 +41,11 @@ function UserPage() {
     image: null
   });
   const [imageTimestamp, setImageTimestamp] = useState(Date.now()); // Add timestamp for cache busting
+  
+  // State for design and development data
+  const [designDevData, setDesignDevData] = useState([]);
+  const [designDevLoading, setDesignDevLoading] = useState(true);
+  const [designDevError, setDesignDevError] = useState(null);
 
   useEffect(() => {
     // Function to fetch carousel data from API
@@ -123,13 +128,54 @@ function UserPage() {
         console.error('Error fetching About Us data:', err);
       }
     };
+    
+    // Function to fetch design and development data from API
+    const fetchDesignDevData = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/design-development-items/');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch design and development data');
+        }
+        
+        const result = await response.json();
+        
+        // Check if the API response is successful
+        if (result.success) {
+          // Extract the data array from the response
+          const data = result.data.map(item => ({
+            ...item,
+            // Construct full image URL if image path is provided
+            icon: item.icon ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.icon}` : null
+          }));
+          setDesignDevData(data);
+        } else {
+          throw new Error('API returned unsuccessful response');
+        }
+      } catch (error) {
+        console.error('Error fetching design and development data:', error);
+        setDesignDevError(error.message);
+      } finally {
+        setDesignDevLoading(false);
+      }
+    };
 
     fetchCarouselData();
     fetchAboutData();
+    fetchDesignDevData();
   }, []);
 
   // Create image URL with timestamp for cache busting
   const imageUrl = aboutData.image ? `${aboutData.image}?t=${imageTimestamp}` : null;
+
+  // Function to render the icon component based on the icon from API
+  const renderIcon = (iconUrl) => {
+    if (iconUrl) {
+      return <img src={iconUrl} alt="Service Icon" className="img-fluid" style={{width: '40px', height: '40px'}} />;
+    }
+    // Fallback to default icon if no icon is provided
+    return <MdEngineering />;
+  };
 
   return (
     <div className="container-fluid p-0">
@@ -367,127 +413,178 @@ function UserPage() {
 
 
             <Row>
-              <Col lg={3} md={3} sm={12} className="box-info" >
-                <div className="service-box">
-                  <div className="service-icon">
-                    <i className="flaticon-cloud-service"><MdEngineering /></i>
-                  </div>
-                  <div className="service-desc">
-
-                    <h4 className="heading-5">UX Driven Engineering</h4>
-                    <p>
-                      We combine user-centric design with robust engineering to build digital solutions that are intuitive, engaging, and highly functional. Our process ensures that every line of code serves the user experience, delivering products that people love to us
-                    </p>
-                    <button className="service-btn">
-                      Read More
-                      <i className="ti-arrow-right"><FaArrowRight /></i>
-                    </button>
-                  </div>
-
-                </div>
-
-              </Col>
-              <Col lg={3} md={3} sm={12} className="box-info" >
-                <div className="service-box">
-                  <div className="service-icon">
-                    <i className="flaticon-cloud-service"><GoCodeReview /></i>
-                  </div>
-                  <div className="service-desc">
-
-                    <h4 className="heading-5">Developing Shared Understanding</h4>
-                    <p>
-                      We bridge the gap between teams and stakeholders to create a clear, common vision. By fostering collaboration and aligning goals, we ensure seamless communication and
-                    </p>
-                    <button className="service-btn">
-                      Read More
-                      <i className="ti-arrow-right"><FaArrowRight /></i>
-                    </button>
-                  </div>
-
-                </div>
-
-              </Col>
-              <Col lg={3} md={3} sm={12} className="box-info" >
-                <div className="service-box">
-                  <div className="service-icon">
-                    <i className="flaticon-cloud-service"><TbSettingsCode /></i>
-                  </div>
-                  <div className="service-desc">
-
-                    <h4 className="heading-5">Proven Experience and Expertise</h4>
-                    <p>
-                      With years of industry experience and a team of skilled professionals, we deliver reliable solutions that drive innovation and business growth.
-                    </p>
-                    <button className="service-btn">
-                      Read More
-                      <i className="ti-arrow-right"><FaArrowRight /></i>
-                    </button>
-                  </div>
-
-                </div>
-
-              </Col>
-              <Col lg={3} md={3} sm={12} className="box-info" >
-                <div className="service-box">
-                  <div className="service-icon">
-                    <i className="flaticon-cloud-service"><GrShieldSecurity /></i>
-                  </div>
-                  <div className="service-desc">
-
-                    <h4 className="heading-5">Security & Intellectual Property (IP)</h4>
-                    <p>
-                      We prioritize data security and safeguard your intellectual property with strict confidentiality, robust systems, and compliance with global standards.
-                    </p>
-                    <button className="service-btn">
-                      Read More
-                      <i className="ti-arrow-right"><FaArrowRight /></i>
-                    </button>
-                  </div>
-
-                </div>
-
-              </Col>
-
-              <Col lg={3} md={3} sm={12} className="mt-4 box-info" >
-                <div className="service-box">
-                  <div className="service-icon">
-                    <i className="flaticon-cloud-service"><LuSearchCode /></i>
-                  </div>
-                  <div className="service-desc">
-
-                    <h4 className="heading-5">Code Review</h4>
-                    <p>
-                      We ensure clean, efficient, and secure code through rigorous reviews, fostering high-quality software and seamless collaboration.
-                    </p>
-                    <button className="service-btn">
-                      Read More
-                      <i className="ti-arrow-right"><FaArrowRight /></i>
-                    </button>
-                  </div>
-
-                </div>
-
-              </Col>
-              <Col lg={3} md={3} sm={12} className="mt-4 box-info" >
-                <div className="service-box">
-                  <div className="service-icon">
-                    <i className="flaticon-cloud-service"><AiOutlineFileDone /></i>
-                  </div>
-                  <div className="service-desc">
-
-                    <h4 className="heading-5">Quality Assurance & Testing</h4>
-                    <p>
-                      We deliver flawless digital solutions through rigorous QA processes and comprehensive testing to ensure performance, reliability, and user satisfaction.
-                    </p>
-                    <button className="service-btn">
-                      Read More
-                      <i className="ti-arrow-right"><FaArrowRight /></i>
-                    </button>
-                  </div>
-
-                </div>
-
-              </Col>
+              {designDevLoading ? (
+                // Show loading state while fetching data
+                Array(6).fill().map((_, index) => (
+                  <Col lg={3} md={3} sm={12} className={index < 4 ? "box-info" : "mt-4 box-info"} key={index}>
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service">
+                          <div className="spinner-border spinner-border-sm" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        </i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">Loading...</h4>
+                        <p>Loading content...</p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                ))
+              ) : designDevError ? (
+                // Show error state if API call fails
+                Array(6).fill().map((_, index) => (
+                  <Col lg={3} md={3} sm={12} className={index < 4 ? "box-info" : "mt-4 box-info"} key={index}>
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service">
+                          <MdEngineering />
+                        </i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">Error Loading Data</h4>
+                        <p>Unable to load service information. Please try again later.</p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                ))
+              ) : designDevData.length > 0 ? (
+                // Map over the design and development data to render items dynamically
+                designDevData.map((item, index) => (
+                  <Col lg={3} md={3} sm={12} className={index < 4 ? "box-info" : "mt-4 box-info"} key={item.id}>
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service">
+                          {renderIcon(item.icon)}
+                        </i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">{item.title}</h4>
+                        <p>{item.description}</p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                ))
+              ) : (
+                // Fallback to hardcoded data if no data is available
+                <>
+                  <Col lg={3} md={3} sm={12} className="box-info" >
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service"><MdEngineering /></i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">UX Driven Engineering</h4>
+                        <p>
+                          We combine user-centric design with robust engineering to build digital solutions that are intuitive, engaging, and highly functional. Our process ensures that every line of code serves the user experience, delivering products that people love to us
+                        </p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col lg={3} md={3} sm={12} className="box-info" >
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service"><GoCodeReview /></i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">Developing Shared Understanding</h4>
+                        <p>
+                          We bridge the gap between teams and stakeholders to create a clear, common vision. By fostering collaboration and aligning goals, we ensure seamless communication and
+                        </p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col lg={3} md={3} sm={12} className="box-info" >
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service"><TbSettingsCode /></i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">Proven Experience and Expertise</h4>
+                        <p>
+                          With years of industry experience and a team of skilled professionals, we deliver reliable solutions that drive innovation and business growth.
+                        </p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col lg={3} md={3} sm={12} className="box-info" >
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service"><GrShieldSecurity /></i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">Security & Intellectual Property (IP)</h4>
+                        <p>
+                          We prioritize data security and safeguard your intellectual property with strict confidentiality, robust systems, and compliance with global standards.
+                        </p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col lg={3} md={3} sm={12} className="mt-4 box-info" >
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service"><LuSearchCode /></i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">Code Review</h4>
+                        <p>
+                          We ensure clean, efficient, and secure code through rigorous reviews, fostering high-quality software and seamless collaboration.
+                        </p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col lg={3} md={3} sm={12} className="mt-4 box-info" >
+                    <div className="service-box">
+                      <div className="service-icon">
+                        <i className="flaticon-cloud-service"><AiOutlineFileDone /></i>
+                      </div>
+                      <div className="service-desc">
+                        <h4 className="heading-5">Quality Assurance & Testing</h4>
+                        <p>
+                          We deliver flawless digital solutions through rigorous QA processes and comprehensive testing to ensure performance, reliability, and user satisfaction.
+                        </p>
+                        <button className="service-btn">
+                          Read More
+                          <i className="ti-arrow-right"><FaArrowRight /></i>
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                </>
+              )}
             </Row>
 
 
