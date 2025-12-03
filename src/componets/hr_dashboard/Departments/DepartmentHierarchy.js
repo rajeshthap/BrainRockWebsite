@@ -3,6 +3,9 @@ import axios from 'axios';
 import SideNav from "../SideNav";
 import HrHeader from "../HrHeader";
 import "../../../assets/css/DepartmentHierarchy.css";
+import { Table, Badge, Spinner, Alert, Form, Button, DatePicker, InputGroup, FormControl,Row } from 'react-bootstrap';
+import { FaCalendar } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 
 const DepartmentHierarchy = () => {
   const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
@@ -18,6 +21,12 @@ const DepartmentHierarchy = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState('all');
   const [expandedNodes, setExpandedNodes] = useState(new Set());
+  
+  // New state for project and team data
+  const [projects, setProjects] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [employeeProjects, setEmployeeProjects] = useState([]);
+  const [projectsLoading, setProjectsLoading] = useState(false);
 
   // Fetch employee data from API with authentication
   useEffect(() => {
@@ -45,6 +54,34 @@ const DepartmentHierarchy = () => {
     };
 
     fetchEmployees();
+  }, [baseUrl]);
+
+  // Fetch projects and teams data
+  useEffect(() => {
+    const fetchProjectsAndTeams = async () => {
+      try {
+        const [projectsResponse, teamsResponse] = await Promise.all([
+          axios.get(`${baseUrl}/api/project-list/`, {
+            withCredentials: true
+          }),
+          axios.get(`${baseUrl}/api/all-teams/`, {
+            withCredentials: true
+          })
+        ]);
+
+        if (projectsResponse.data && projectsResponse.data.success) {
+          setProjects(projectsResponse.data.data);
+        }
+
+        if (teamsResponse.data && teamsResponse.data.success) {
+          setTeams(teamsResponse.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching projects and teams:", err);
+      }
+    };
+
+    fetchProjectsAndTeams();
   }, [baseUrl]);
 
   // Function to get the reporting chain for an employee (from employee up to CEO)
@@ -215,6 +252,56 @@ const DepartmentHierarchy = () => {
     setExpandedNodes(newExpandedNodes);
   }, [searchTerm, searchField, employees]);
 
+  // Fetch employee projects when an employee is selected
+  useEffect(() => {
+    if (!selectedEmployee) {
+      setEmployeeProjects([]);
+      return;
+    }
+
+    const fetchEmployeeProjects = async () => {
+      setProjectsLoading(true);
+      try {
+        // Find teams that include the selected employee
+        const employeeTeams = teams.filter(team => 
+          team.employee_ids && team.employee_ids.includes(selectedEmployee.emp_id)
+        );
+
+        // Find teams led by the selected employee
+        const ledTeams = teams.filter(team => 
+          team.team_leader === selectedEmployee.emp_id
+        );
+
+        // Combine both types of teams
+        const allRelevantTeams = [...employeeTeams, ...ledTeams];
+
+        // Get project details for each team
+        const projectsData = allRelevantTeams.map(team => {
+          const project = projects.find(p => p.project_id === team.project);
+          return {
+            team_id: team.team_id,
+            team_name: team.team_name,
+            project_id: team.project,
+            project_name: project ? project.project_name : 'Not assigned',
+            start_date: team.start_date,
+            end_date: team.end_date,
+            team_leader: team.team_leader,
+            role: team.team_leader === selectedEmployee.emp_id ? 'Team Leader' : 'Team Member'
+          };
+        });
+
+        setEmployeeProjects(projectsData);
+      } catch (err) {
+        console.error("Error fetching employee projects:", err);
+        setEmployeeProjects([]);
+      } finally {
+        setProjectsLoading(false);
+      }
+    };
+
+    fetchEmployeeProjects();
+  }, [selectedEmployee, teams, projects]);
+
   // Handle employee selection
   const handleEmployeeClick = (employee) => {
     setSelectedEmployee(employee);
@@ -250,6 +337,41 @@ const DepartmentHierarchy = () => {
       return newSet;
     });
   };
+
+  // Helper function to get employee name by ID
+  const getEmployeeNameById = (empId) => {
+    const employee = employees.find(emp => emp.emp_id === empId);
+    return employee ? `${employee.first_name} ${employee.last_name}` : 'Not assigned';
+  };
+
+  // Helper function to get project name by ID
+  const getProjectNameById = (projectId) => {
+    const project = projects.find(proj => proj.project_id === projectId);
+    return project ? project.project_name : 'Not assigned';
+  };
+
+  // Format date for display
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return "Not set";
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
+  // Custom DatePicker Input Component
+  const CustomDatePickerInput = ({ value, onClick, placeholder }) => (
+    <InputGroup>
+      <Form.Control
+        value={value}
+        onClick={onClick}
+        placeholder={placeholder}
+        className="temp-form-control-option"
+        readOnly
+      />
+      <InputGroup.Text onClick={onClick} style={{ cursor: "pointer" }}>
+        <FaCalendar />
+      </InputGroup.Text>
+    </InputGroup>
+  );
 
   if (loading) return <div className="loading">Loading organization chart...</div>;
   if (error) return (
@@ -334,6 +456,12 @@ const DepartmentHierarchy = () => {
                     employee={selectedEmployee} 
                     handleImageError={handleImageError}
                     baseUrl={baseUrl}
+                    employeeProjects={employeeProjects}
+                    projectsLoading={projectsLoading}
+                    getEmployeeNameById={getEmployeeNameById}
+                    getProjectNameById={getProjectNameById}
+                    formatDateForDisplay={formatDateForDisplay}
+                    CustomDatePickerInput={CustomDatePickerInput}
                   />
                 </div>
               )}
@@ -440,7 +568,17 @@ const TreeNodeItem = ({ node, onEmployeeClick, baseUrl, handleImageError, expand
 };
 
 // Component for displaying employee details (without financial information)
-const EmployeeDetails = ({ employee, handleImageError, baseUrl }) => {
+const EmployeeDetails = ({ 
+  employee, 
+  handleImageError, 
+  baseUrl, 
+  employeeProjects, 
+  projectsLoading,
+  getEmployeeNameById,
+  getProjectNameById,
+  formatDateForDisplay,
+  CustomDatePickerInput
+}) => {
   return (
     <div className="employee-details-content">
       <h2>Employee Details</h2>
@@ -491,6 +629,55 @@ const EmployeeDetails = ({ employee, handleImageError, baseUrl }) => {
           <p><strong>Work Location:</strong> {employee.work_location}</p>
           <p><strong>Joining Date:</strong> {new Date(employee.joining_date).toLocaleDateString()}</p>
           <p><strong>Branch:</strong> {employee.branch_name}</p>
+        </div>
+        
+        {/* Projects and Teams Section */}
+        <div className="details-section">
+          <h4>Projects & Teams</h4>
+          {projectsLoading ? (
+            <div className="d-flex justify-content-center my-3">
+              <Spinner animation="border" size="sm" />
+              <span className="ms-2">Loading projects...</span>
+            </div>
+          ) : employeeProjects.length > 0 ? (
+            <Row className="mt-3">
+              <div className="col-md-12">
+                <table className="temp-rwd-table">
+                  <tbody>
+                    <tr>
+                      <th>S.No</th>
+                      <th>Team ID</th>
+                      <th>Team Name</th>
+                      <th>Team Leader</th>
+                      <th>Project</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Employees</th>
+                    </tr>
+                    {employeeProjects.map((project, index) => (
+                      <tr key={index}>
+                        <td data-th="S.No">{index + 1}</td>
+                        <td data-th="Team ID">{project.team_id}</td>
+                        <td data-th="Team Name">{project.team_name}</td>
+                        <td data-th="Team Leader">{getEmployeeNameById(project.team_leader)}</td>
+                        <td data-th="Project">{project.project_name}</td>
+                        <td data-th="Start Date">{formatDateForDisplay(project.start_date)}</td>
+                        <td data-th="End Date">{formatDateForDisplay(project.end_date)}</td>
+                        <td data-th="Employees">
+                          {/* This would normally show employee names, but we don't have employee_ids in our project data */}
+                          <div>Team Members</div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Row>
+          ) : (
+            <Alert variant="info">
+              This employee is not currently assigned to any projects or teams.
+            </Alert>
+          )}
         </div>
       </div>
     </div>
