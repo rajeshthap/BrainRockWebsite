@@ -173,6 +173,27 @@ const menuItems = [
        
       ],
     },
+     {
+      icon: <PiUserListBold />,
+      label: "Add Design & Dev",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Design",
+          path: "/AddDesAndDev",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Manage Design",
+          path: "/ManageDesAndDev",
+          icon: <FaChartLine />,
+        },
+        
+       
+      ],
+    },
    {
       icon: <PiUserListBold />,
       label: "Courses",

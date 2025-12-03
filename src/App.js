@@ -81,6 +81,8 @@ import TrainingVideoPlayer from "./componets/training_dashboard/TrainingVideoPla
 import AddOurTeam from "./componets/adminpanel/ourteam/AddOurTeam";
 import ManageOurTeam from "./componets/adminpanel/ourteam/ManageOurTeam";
 import Services from "./componets/topnav/navigationpages/Services";
+import AddDesAndDev from "./componets/adminpanel/designanddevelopment/AddDesAndDev";
+import ManageDesAndDev from "./componets/adminpanel/designanddevelopment/ManageDesAndDev";
 
 
 function AppContent() {
@@ -129,6 +131,8 @@ function AppContent() {
     "/TrainingVideoPlayer",
     "/AddOurTeam",
     "/ManageOurTeam",
+    "/AddDesAndDev",
+    "/ManageDesAndDev",
 
 
   ]);
@@ -455,6 +459,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageOurTeam />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/AddDesAndDev"
+          element={
+            <ProtectedRoute>
+              <AddDesAndDev />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ManageDesAndDev"
+          element={
+            <ProtectedRoute>
+              <ManageDesAndDev />
             </ProtectedRoute>
           }
         />
