@@ -259,11 +259,11 @@
 }
 
 .btn-primary {
-  background: #5624d0;
+  
   color: #fff;
   padding: 8px 18px;
   border-radius: 6px;
-  border: none;
+  border: none !important;
 }
 
 .btn-light {

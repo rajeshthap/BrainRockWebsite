@@ -30,50 +30,76 @@ const HrDashBoard = () => {
   const [birthdays, setBirthdays] = useState([]);
   const [birthdayLoading, setBirthdayLoading] = useState(true);
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
+  const [employeeCount, setEmployeeCount] = useState({
+    total_employees: 0,
+    total_active: 0,
+    total_inactive: 0
+  });
+  const [attendanceSummary, setAttendanceSummary] = useState({
+    total_employees: 0,
+    present_today: 0,
+    on_leave_today: 0,
+    absent_today: 0
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // HR Stats Data
-  const statsData = [
-    {
-      title: "Employee Overview",
-      value: "Total Employees:",
-      number: " 250",
-      change: "Active",
-      leavnumber: " 230",
-      Leavechange: "On Leave:",
-      onleave: "15",
-      resign: "Resigned:",
-      resignumber: "5",
-      icon: <FaUsers />,
-    },
+  // Fetch employee count data
+  useEffect(() => {
+    const fetchEmployeeCount = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employees-count/', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setEmployeeCount(data);
+      } catch (error) {
+        console.error("Failed to fetch employee count:", error);
+      }
+    };
 
-    {
-      title: " Attendance Summary",
-      value: "Absent:",
-      number: " 250",
-      change: "Present",
-      leavnumber: " 230",
-      icon: <FaTachometerAlt />,
-    },
-    {
-      title: "Leave Requests",
-      value: "Pending:",
-      number: " 5",
-      change: "Approved",
-      leavnumber: " 1",
-      resign: "Rejected:",
-      resignumber: "5",
-      icon: <FaTachometerAlt />,
-    },
-    {
-      title: " Payroll Summary",
-      value: "Current Month Processed:",
-      number: " ₹24,00,000",
-      change: "Processed",
+    fetchEmployeeCount();
+  }, []);
 
-      icon: <FaTachometerAlt />,
-    },
-  ];
+  // Fetch attendance summary data
+  useEffect(() => {
+    const fetchAttendanceSummary = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/today-attendance-summary/', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          setAttendanceSummary({
+            total_employees: data.total_employees,
+            present_today: data.present_today,
+            on_leave_today: data.on_leave_today,
+            absent_today: data.absent_today
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch attendance summary:", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchAttendanceSummary();
+  }, []);
 
   // Fetch birthday data
   useEffect(() => {
@@ -122,6 +148,62 @@ const HrDashBoard = () => {
   // Get first 2 birthdays and remaining count
   const displayBirthdays = birthdays.slice(0, 1);
   const remainingCount = birthdays.length > 1 ? birthdays.length - 1 : 0;
+
+  // Function to determine button color based on status
+  const getButtonColor = (status) => {
+    if (!status) return "btn-secondary";
+    
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes("active")) return "btn-primary";
+    if (statusLower.includes("approved")) return "btn-success";
+    if (statusLower.includes("processed")) return "btn-info";
+    if (statusLower.includes("present")) return "btn-warning";
+    if (statusLower.includes("absent")) return "btn-danger btn-br-dgr";
+    if (statusLower.includes("rejected")) return "btn-danger";
+    
+    return "btn-secondary";
+  };
+
+  // HR Stats Data - using API data
+  const statsData = [
+    {
+      title: "Employee Overview",
+      value: "Total Employees:",
+      number: ` ${employeeCount.total_employees}`,
+      change: "Active",
+      leavnumber: ` ${employeeCount.total_active}`,
+      Leavechange: "On Leave:",
+      onleave: `${attendanceSummary.on_leave_today}`,
+      resign: "Inactive:",
+      resignumber: `${employeeCount.total_inactive}`,
+      icon: <FaUsers />,
+    },
+    {
+      title: "Attendance Summary",
+      value: "Absent:",
+      number: ` ${attendanceSummary.absent_today}`,
+      change: "Present",
+      leavnumber: ` ${attendanceSummary.present_today}`,
+      icon: <FaTachometerAlt />,
+    },
+    {
+      title: "Leave Requests",
+      value: "Pending:",
+      number: " 5",
+      change: "Approved",
+      leavnumber: " 1",
+      resign: "Rejected:",
+      resignumber: "5",
+      icon: <FaTachometerAlt />,
+    },
+    {
+      title: "Payroll Summary",
+      value: "Current Month Processed:",
+      number: " ₹24,00,000",
+      change: "Processed",
+      icon: <FaTachometerAlt />,
+    },
+  ];
 
   return (
     <div className="dashboard-container">
@@ -228,19 +310,7 @@ const HrDashBoard = () => {
                           </div>
                           <div className="br-stat-info ">
                             <Button
-                              className={`br-stat-btn ${
-                                stat.change?.toLowerCase().includes("active")
-                                  ? "btn-primary"
-                                  : stat.change
-                                      ?.toLowerCase()
-                                      .includes("approved")
-                                  ? "btn-success"
-                                  : stat.change
-                                      ?.toLowerCase()
-                                      .includes("absent")
-                                  ? "btn-danger btn-br-dgr"
-                                  : "btn-secondary"
-                              }`}
+                              className={`br-stat-btn ${getButtonColor(stat.change)}`}
                             >
                               {stat.change}
                             </Button>
