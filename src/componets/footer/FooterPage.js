@@ -59,10 +59,6 @@ function FooterPage() {
               <li> <i><MdArrowForwardIos className='i-space' /></i>News & Media</li>
               <li> <i><MdArrowForwardIos className='i-space' /></i>Contact us</li>
 
-
-
-
-
             </ul>
 
           </div>
