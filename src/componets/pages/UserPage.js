@@ -46,6 +46,16 @@ function UserPage() {
   const [designDevData, setDesignDevData] = useState([]);
   const [designDevLoading, setDesignDevLoading] = useState(true);
   const [designDevError, setDesignDevError] = useState(null);
+  
+  // State for tech stack data
+  const [techStackData, setTechStackData] = useState({
+    title: "",
+    description: "",
+    image: null
+  });
+  const [techStackLoading, setTechStackLoading] = useState(true);
+  const [techStackError, setTechStackError] = useState(null);
+  const [techImageTimestamp, setTechImageTimestamp] = useState(Date.now());
 
   useEffect(() => {
     // Function to fetch carousel data from API
@@ -159,14 +169,51 @@ function UserPage() {
         setDesignDevLoading(false);
       }
     };
+    
+    // Function to fetch tech stack data from API
+    const fetchTechStackData = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourtechstack-item/');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch tech stack data');
+        }
+        
+        const result = await response.json();
+        
+        // The API returns data in the format {success: true, data: [{...}]}
+        if (result.success && result.data && result.data.length > 0) {
+          // Get the first item from the array
+          const item = result.data[0];
+          
+          // Process the data - construct full image URL if image path is provided
+          const processedData = {
+            title: item.title,
+            description: item.description,
+            image: item.image ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.image}` : null
+          };
+          
+          setTechStackData(processedData);
+          // Update timestamp to force image refresh
+          setTechImageTimestamp(Date.now());
+        }
+      } catch (err) {
+        console.error('Error fetching tech stack data:', err);
+        setTechStackError(err.message);
+      } finally {
+        setTechStackLoading(false);
+      }
+    };
 
     fetchCarouselData();
     fetchAboutData();
     fetchDesignDevData();
+    fetchTechStackData();
   }, []);
 
   // Create image URL with timestamp for cache busting
   const imageUrl = aboutData.image ? `${aboutData.image}?t=${imageTimestamp}` : null;
+  const techImageUrl = techStackData.image ? `${techStackData.image}?t=${techImageTimestamp}` : TechImg;
 
   // Function to render the icon component based on the icon from API
   const renderIcon = (iconUrl) => {
@@ -611,20 +658,24 @@ function UserPage() {
 
               <Row className="d-flex justify-content-center br-tech-stack">
 
-                <Col lg={6} md={6} sm={12} className="mb-3"><h3><b>Brainrock Consulting – Technologies We Use as a Top Application Development Company</b></h3>
-
-
-                  <p>At <b>Brainrock Consulting,</b> we leverage the most advanced and reliable technologies to deliver high-performance <b>Application Development and mobile applications.</b> As a top application development company, we follow agile methodologies to ensure smooth project execution—from initial ideation and UI/UX design to development, testing, deployment, and long-term maintenance.</p>
-                  <p>Our expert developers work with a powerful and future-ready tech stack, including <b> React Native, Flutter, Kotlin, Swift, React.js, Next.js, Node.js, Laravel, </b> and other industry-leading tools. This enables us to build scalable, secure, and feature-rich applications tailored to your business needs.</p>
+                <Col lg={6} md={6} sm={12} className="mb-3">
+                  <h3><b>{techStackData.title || "Brainrock Consulting – Technologies We Use as a Top Application Development Company"}</b></h3>
+                  <div dangerouslySetInnerHTML={{ __html: techStackData.description || `
+                    <p>At <b>Brainrock Consulting,</b> we leverage the most advanced and reliable technologies to deliver high-performance <b>Application Development and mobile applications.</b> As a top application development company, we follow agile methodologies to ensure smooth project execution—from initial ideation and UI/UX design to development, testing, deployment, and long-term maintenance.</p>
+                    <p>Our expert developers work with a powerful and future-ready tech stack, including <b> React Native, Flutter, Kotlin, Swift, React.js, Next.js, Node.js, Laravel, </b> and other industry-leading tools. This enables us to build scalable, secure, and feature-rich applications tailored to your business needs.</p>
+                  `}} />
 
                 </Col>
-                <Col lg={6} md={6} sm={12} className="mb-3 text-center"> <div>
-                  <img
-                    src={TechImg}
-                    alt="TechImg"
-                    className="img-fluid mt-3"
-                  ></img>
-                </div></Col>
+                <Col lg={6} md={6} sm={12} className="mb-3 text-center"> 
+                  <div>
+                    <img
+                      src={techImageUrl}
+                      alt="TechImg"
+                      className="img-fluid mt-3"
+                      key={`tech-img-${techImageTimestamp}`}
+                    ></img>
+                  </div>
+                </Col>
               </Row>
 
             </div>
