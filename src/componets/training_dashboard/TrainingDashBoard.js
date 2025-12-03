@@ -139,8 +139,23 @@ const TrainingDashBoard = () => {
         return <AllCoursesUI />;
       case "lists":
         return <h2>My Lists</h2>;
-      case "wishlist":
-        return <h2>Wishlist</h2>;
+     // ⭐ ONLY WISHLIST TAB UPDATED — REST OF YOUR CODE IS SAME
+
+case "wishlist":
+  return (
+    <div className="wishlist-page">
+      <h2>Wishlist</h2>
+      <p>Your saved favourite courses.</p>
+
+      <button
+        className="view-reco-btn"
+        onClick={() => navigate("/RecommendedCourses")}
+      >
+        View All Recommended Courses →
+      </button>
+    </div>
+  );
+
       case "archived":
         return <h2>Archived Courses</h2>;
       case "tools":

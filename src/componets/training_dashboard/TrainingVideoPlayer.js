@@ -3,38 +3,34 @@ import "../../assets/css/trainingvideoplayer.css";
 import { VideoPlayer } from "@graphland/react-video-player";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaHome, FaStar, FaChartLine, FaShareAlt, FaCheck } from "react-icons/fa";
-
+import { FaGlobeAsia, FaClock, FaUserGraduate, FaCalendar } from "react-icons/fa";
 
 const TrainingVideoPlayer = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Remove this line that was causing immediate navigation
-  // navigate("/TrainingDashBoard");
-
   const {
-    title = "How to Make a Responsive Website in React JS",
+    title = "How to Make a Responsive Website in React JS with pure CSS",
     video = "https://www.w3schools.com/html/mov_bbb.mp4",
     poster = "https://i.ibb.co/4Y6HcRD/reactjs-banner.png",
-  
   } = location.state || {};
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState("overview"); // ⭐ tab state
 
   const chapters = [
-    { id: 1, title: "Introduction and Showcase", time: "19min", completed: true, isCurrent: true },
-    { id: 2, title: "Together Section", time: "10min", completed: true, isCurrent: false },
-    { id: 3, title: "Not Your Section", time: "14min", completed: false, isCurrent: false },
-    { id: 4, title: "Membership", time: "12min", completed: false, isCurrent: false },
-    { id: 5, title: "About", time: "7min", completed: false, isCurrent: false },
-    { id: 6, title: "Footer", time: "9min", completed: false, isCurrent: false },
-    { id: 7, title: "Desktop Responsive", time: "8min", completed: false, isCurrent: false },
-    { id: 8, title: "Responsiveness in Tablet and Mobile", time: "14min", completed: false, isCurrent: false }
+    { id: 1, title: "Introduction and Showcase", time: "19min", completed: true },
+    { id: 2, title: "Together Section", time: "10min", completed: true },
+    { id: 3, title: "Not Your Section", time: "14min", completed: false },
+    { id: 4, title: "Membership", time: "12min", completed: false },
+    { id: 5, title: "About", time: "7min", completed: false },
+    { id: 6, title: "Footer", time: "9min", completed: false },
+    { id: 7, title: "Desktop Responsive", time: "8min", completed: false },
+    { id: 8, title: "Responsiveness in Tablet and Mobile", time: "14min", completed: false },
   ];
 
   const handleChapterClick = (index) => {
     setActiveIndex(index);
-    // Here you would typically load the corresponding video
   };
 
   const handleGoToDashboard = () => {
@@ -43,32 +39,26 @@ const TrainingVideoPlayer = () => {
 
   return (
     <div className="tvp-page tvp-with-margin">
-      {/* TOP HEADER LIKE UDEMY */}
+
+      {/* HEADER */}
       <header className="tvp-header">
-        <div className="tvp-left-section">
-          <button className="tvp-dashboard-btn" onClick={handleGoToDashboard}>
-            <FaHome /> Dashboard
-          </button>
-        </div>
+        <button className="tvp-dashboard-btn" onClick={handleGoToDashboard}>
+          <FaHome /> Dashboard
+        </button>
 
         <h2 className="tvp-title">{title}</h2>
 
         <div className="tvp-right-buttons">
-          <button className="tvp-btn">
-            <FaStar /> Leave a rating
-          </button>
-          <button className="tvp-btn">
-            <FaChartLine /> Your progress
-          </button>
-          <button className="tvp-btn">
-            <FaShareAlt /> Share
-          </button>
+          <button className="tvp-btn"><FaStar /> Leave a rating</button>
+          <button className="tvp-btn"><FaChartLine /> Your progress</button>
+          <button className="tvp-btn"><FaShareAlt /> Share</button>
         </div>
       </header>
 
-      {/* MAIN FULLSCREEN CONTENT */}
+      {/* MAIN */}
       <div className="tvp-main">
-        {/* LEFT VIDEO PLAYER AREA */}
+
+        {/* VIDEO SECTION */}
         <div className="tvp-video">
           <VideoPlayer
             src={video}
@@ -79,69 +69,153 @@ const TrainingVideoPlayer = () => {
             style={{ marginTop: "130px" }}
             autoPlay={true}
           />
-          
-          {/* Blue button with margin-top 125px, centered */}
+
+          {/* COMPLETE BUTTON */}
           <div className="tvp-button-container">
             <button className="tvp-blue-button">Complete Lecture & Continue</button>
           </div>
-          
+
+       
+          {/* ⭐ TAB CONTENT AREA ⭐ */}
+          <div className="tvp-tab-content">
+   {/* ⭐ TABS LIKE UDEMY ⭐ */}
+          <div className="tvp-tabs">
+            <button
+              className={`tvp-tab-btn ${activeTab === "overview" ? "active" : ""}`}
+              onClick={() => setActiveTab("overview")}
+            >
+              Overview
+            </button>
+
+            <button
+              className={`tvp-tab-btn ${activeTab === "notes" ? "active" : ""}`}
+              onClick={() => setActiveTab("notes")}
+            >
+              Notes
+            </button>
+
+            <button
+              className={`tvp-tab-btn ${activeTab === "announcements" ? "active" : ""}`}
+              onClick={() => setActiveTab("announcements")}
+            >
+              Announcements
+            </button>
+
+            <button
+              className={`tvp-tab-btn ${activeTab === "reviews" ? "active" : ""}`}
+              onClick={() => setActiveTab("reviews")}
+            >
+              Reviews
+            </button>
+
+            <button
+              className={`tvp-tab-btn ${activeTab === "tools" ? "active" : ""}`}
+              onClick={() => setActiveTab("tools")}
+            >
+              Learning tools
+            </button>
+          </div>
+
+            {activeTab === "overview" && (
+              <div>
+                <h2 className="course-main-title">{title}</h2>
+
+                <div className="course-meta-row">
+                  <span className="rating">4.1 ⭐</span>
+                  <span className="students"><FaUserGraduate /> 2,955 Students</span>
+                  <span className="duration"><FaClock /> 1.5 hours</span>
+                </div>
+
+                <p className="update-info">
+                  <FaCalendar /> Last updated January 2025
+                </p>
+
+                <p className="language-info">
+                  <FaGlobeAsia /> English [Auto]
+                </p>
+
+                <div className="schedule-box">
+                  <h4>📅 Schedule learning time</h4>
+                  <p>
+                    Learning a little each day adds up. Set reminders to stay consistent.
+                  </p>
+                  <button className="schedule-btn">Set Reminder</button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "notes" && (
+              <div>
+                <h3>Your Notes</h3>
+                <p>You have not added any notes yet.</p>
+              </div>
+            )}
+
+            {activeTab === "announcements" && (
+              <div>
+                <h3>Announcements</h3>
+                <p>No announcements available.</p>
+              </div>
+            )}
+
+            {activeTab === "reviews" && (
+              <div>
+                <h3>Student Reviews</h3>
+                <p>No reviews yet.</p>
+              </div>
+            )}
+
+            {activeTab === "tools" && (
+              <div>
+                <h3>Learning Tools</h3>
+                <p>Tools and resources will appear here.</p>
+              </div>
+            )}
+
+          </div>
 
         </div>
-       
-        {/* RIGHT SIDEBAR CONTENT */}
+
+        {/* SIDEBAR */}
         <aside className="tvp-sidebar">
           <div className="sidebar-header">
             <h3 className="sidebar-heading">Course content</h3>
             <span className="content-stats">8 lectures</span>
           </div>
 
-          <div className="course-content">
-            <div className="lecture-section">
-              <div className="lecture-section-header">
-                <div className="lecture-section-title">
-                  <i className="expand-icon">▼</i>
-                  <span>Introduction and Showcase</span>
+          <ul className="lecture-list">
+            {chapters.map((item, index) => (
+              <li
+                key={item.id}
+                className={`lecture-item ${activeIndex === index ? "active" : ""}`}
+                onClick={() => handleChapterClick(index)}
+              >
+                <div className="lecture-left">
+                  {item.completed ? (
+                    <div className="lecture-checkbox completed"><FaCheck /></div>
+                  ) : (
+                    <div className="lecture-checkbox"><div className="checkbox-inner"></div></div>
+                  )}
+
+                  <div className="lecture-content">
+                    <div className="lecture-number">{index + 1}.</div>
+                    <div className="lecture-title">{item.title}</div>
+                  </div>
                 </div>
-                <span className="lecture-section-time">19min</span>
-              </div>
-              
-              <ul className="lecture-list">
-                {chapters.map((item, index) => (
-                  <li
-                    key={item.id}
-                    className={`lecture-item ${activeIndex === index ? "active" : ""}`}
-                    onClick={() => handleChapterClick(index)}
-                  >
-                    <div className="lecture-left">
-                      {item.completed ? (
-                        <div className="lecture-checkbox completed">
-                          <FaCheck />
-                        </div>
-                      ) : (
-                        <div className="lecture-checkbox">
-                          <div className="checkbox-inner"></div>
-                        </div>
-                      )}
-                      <div className="lecture-content">
-                        <div className="lecture-number">{index + 1}.</div>
-                        <div className="lecture-title">{item.title}</div>
-                      </div>
-                    </div>
-                    <div className="lecture-right">
-                      {activeIndex === index ? (
-                        <div className="current-lecture">
-                          <span className="current-label">Current lecture</span>
-                        </div>
-                      ) : (
-                        <span className="lecture-time">{item.time}</span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+
+                <div className="lecture-right">
+                  {activeIndex === index ? (
+                    <span className="current-label">Current lecture</span>
+                  ) : (
+                    <span className="lecture-time">{item.time}</span>
+                  )}
+                </div>
+
+              </li>
+            ))}
+          </ul>
         </aside>
+
       </div>
     </div>
   );

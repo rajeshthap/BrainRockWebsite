@@ -6,6 +6,34 @@ import DevoteeImg from "../../assets/images/women.jpg";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
+  const trainingRoles = [
+  "Professional Corporate Training",
+  "Industrial Training Program",
+  "Full-Stack Web Development Training",
+  "Advanced Internship Program",
+  "On-Job Training (OJT)",
+  "JAVA/ Python",
+  "Fundamentals of Graphic Design",
+  "Advanced Creative Designing",
+  "UI/UX & Web Graphics",
+  "Video Editing & Motion Graphics",
+
+  "Digital Marketing Certification",
+  "Programming with Java",
+  "Programming with Python",
+  "WordPress Development",
+
+  "Core PHP Development",
+  "Advanced PHP & MVC Frameworks",
+
+  "C Programming",
+  "C++ Programming",
+
+  "Basic Computer Essentials (3 Months)",
+  "Advanced Computer Operations (6 Months)",
+  "Professional Computer Certification (1 Year)",
+];
+
   const { login, loading: authLoading, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,6 +55,20 @@ export default function Login() {
       document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     }
   };
+useEffect(() => {
+  if (user) {
+    // If user's selected course (role) is in the training list
+    if (trainingRoles.includes(user.role)) {
+      navigate("/TrainingDashBoard", {
+        state: { unique_id: user.unique_id },
+        replace: true,
+      });
+      return;
+    }
+
+    // You can add more conditions for other dashboards here...
+  }
+}, [user, navigate]);
 
   // This effect runs when the component mounts to clear cookies
   useEffect(() => {
@@ -53,13 +95,7 @@ useEffect(() => {
 
     //  NEW CONDITION (your API response role)
     // If role === "JAVA/ Python" → go to TrainingDashBoard
-    if (user.role === "JAVA/ Python") {
-      navigate("/TrainingDashBoard", {
-        state: { unique_id: user.unique_id },
-        replace: true,
-      });
-      return;
-    }
+   
 
     // Existing Role-based redirection
     if (user.role === "admin") {
