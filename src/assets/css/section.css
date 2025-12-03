@@ -63,12 +63,15 @@
   border-color: #4285f4;
   z-index: 10;
 }
+.industry-icon-red{
+  border-radius: 50% !important;
 
+}
 .industry-icon {
   width: 80px;
   height: 80px;
   background: var(--br-primary);
-  border-radius: 50%;
+  border-radius: 50% !important;
   margin-bottom: 10px;
   transition: all 0.3s ease;
   display: flex;
@@ -88,6 +91,7 @@
   text-align: center;
   align-items: center;
   justify-content: center;
+ 
 }
 
 .industry-box span {

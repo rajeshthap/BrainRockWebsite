@@ -37,8 +37,8 @@ function NavBar() {
                 <NavDropdown title="About Us" id="AboutUs">
                 <NavDropdown.Item as={Link} to="/CompanyProfile">Company Profile</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/OurTeam">Our Team</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/Careers">Careers</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/Partners">Partners</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/RunningProjects">Our Running Project</NavDropdown.Item>
+              
               </NavDropdown>
              <Nav.Link href="Services">Services</Nav.Link>
              <Nav.Link href="Courses">Courses</Nav.Link>

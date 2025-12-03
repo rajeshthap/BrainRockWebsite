@@ -119,7 +119,7 @@ const ServicesCarousel = () => {
             {/* First set of services */}
             {services.map((service, index) => (
               <div key={index} className="industry-box">
-                <div className="industry-icon">{service.icon}</div>
+                <div className="industry-icon industry-icon-red img-fluid rounded-circle">{service.icon}</div>
                 <span>{service.name}</span>
               </div>
             ))}

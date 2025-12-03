@@ -5,14 +5,17 @@ import "../../assets/css/trainingdashboard.css";
 import TrainingHeader from "./TrainingHeader";
 import TrainingLeftnav from "./TrainingLeftnav";
 import { VideoPlayer } from "@graphland/react-video-player";
-import { useNavigate } from "react-router-dom";   // ⭐ Added
+import { useNavigate } from "react-router-dom";
+import { FaHeart } from "react-icons/fa";
 
 const TrainingDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
 
-  const navigate = useNavigate();   //  Added
+  const [wishlist, setWishlist] = useState([]); // ⭐ Wishlist state added
+
+  const navigate = useNavigate();
 
   // ⭐ Redirect Function
   const openVideoPage = () => {
@@ -23,6 +26,11 @@ const TrainingDashBoard = () => {
         poster: "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"
       }
     });
+  };
+
+  // ⭐ Add to Wishlist function
+  const addToWishlist = (course) => {
+    setWishlist((prev) => [...prev, course]);
   };
 
   useEffect(() => {
@@ -87,49 +95,56 @@ const TrainingDashBoard = () => {
               <p className="ws-date">Dec 1 – 8</p>
             </div>
           </div>
-
         </div>
       </div>
 
       {/* ⭐ COURSE CARD CLICKABLE */}
       <div className="course-card-container">
-        <div
-          className="course-card"
-          onClick={openVideoPage}          // ⭐ Added
-          style={{ cursor: "pointer" }}   // ⭐ Added
-        >
-          <div className="course-video">
-            <VideoPlayer
-              src="https://www.w3schools.com/html/mov_bbb.mp4"
-              poster="https://i.ibb.co/4Y6HcRD/reactjs-banner.png"
-              primaryColor="#5624d0"
-              height={220}
-              width={"100%"}
-              autoPlay={false}
-            />
+        <div className="course-card" >
+
+          {/* ⭐ Wishlist Heart Button */}
+         
+
+          <div onClick={openVideoPage}>
+            <div className="course-video">
+              <VideoPlayer
+                src="https://www.w3schools.com/html/mov_bbb.mp4"
+                poster="https://i.ibb.co/4Y6HcRD/reactjs-banner.png"
+                primaryColor="#5624d0"
+                height={220}
+                width={"100%"}
+                autoPlay={false}
+              />
+            </div>
+
+            <div className="course-info">
+              <h3 className="course-title">How to Make a Responsive Website in React JS</h3>
+              <p className="course-instructor">Software Engineer</p>
+ <button
+            className="wishlist-btn-show" style={{ cursor: "pointer",}}
+          
+          >
+            <i className="">
+          <FaHeart />
+          </i>
+          </button>
+              <div className="course-meta">
+                <span className="progress-text">88% complete</span>
+                <div className="rating">⭐⭐⭐☆☆</div>
+              </div>
+
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: "88%" }}></div>
+              </div>
+
+              <div className="course-footer">
+                <span className="rate-text">Leave a rating</span>
+              </div>
+            </div>
           </div>
 
-          <div className="course-info">
-            <h3 className="course-title">How to Make a Responsive Website in React JS</h3>
-
-            <p className="course-instructor">Software Engineer</p>
-
-            <div className="course-meta">
-              <span className="progress-text">88% complete</span>
-              <div className="rating">⭐⭐⭐☆☆</div>
-            </div>
-
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: "88%" }}></div>
-            </div>
-
-            <div className="course-footer">
-              <span className="rate-text">Leave a rating</span>
-            </div>
-          </div>
         </div>
       </div>
-
     </div>
   );
 
@@ -137,29 +152,42 @@ const TrainingDashBoard = () => {
     switch (activeTab) {
       case "all":
         return <AllCoursesUI />;
+
+      case "wishlist":
+        return (
+          <div className="wishlist-section">
+            <h2>Wishlist</h2>
+            {wishlist.length === 0 ? (
+              <p>No courses added yet.</p>
+            ) : (
+              wishlist.map((item, index) => (
+                <div key={index} className="wishlist-item">
+                  <img src={item.poster} alt="" width="120" />
+                  <div>
+                    <h4>{item.title}</h4>
+                    <button
+                      onClick={() =>
+                        navigate("/TrainingVideoPlayer", { state: item })
+                      }
+                    >
+                      Watch Now →
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        );
+
       case "lists":
         return <h2>My Lists</h2>;
-     // ⭐ ONLY WISHLIST TAB UPDATED — REST OF YOUR CODE IS SAME
-
-case "wishlist":
-  return (
-    <div className="wishlist-page">
-      <h2>Wishlist</h2>
-      <p>Your saved favourite courses.</p>
-
-      <button
-        className="view-reco-btn"
-        onClick={() => navigate("/RecommendedCourses")}
-      >
-        View All Recommended Courses →
-      </button>
-    </div>
-  );
 
       case "archived":
         return <h2>Archived Courses</h2>;
+
       case "tools":
         return <h2>Learning Tools</h2>;
+
       default:
         return null;
     }
@@ -167,7 +195,6 @@ case "wishlist":
 
   return (
     <div className="dashboard-container">
-
       <TrainingLeftnav
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -175,7 +202,6 @@ case "wishlist":
       />
 
       <div className="main-content">
-
         <TrainingHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="dashboard-body">
@@ -193,9 +219,7 @@ case "wishlist":
             <button className={`tab-btn ${activeTab === "tools" ? "active" : ""}`} onClick={() => setActiveTab("tools")}>Learning tools</button>
           </div>
 
-          <div className="tab-content-wrapper">
-            {renderTabContent()}
-          </div>
+          <div className="tab-content-wrapper">{renderTabContent()}</div>
 
         </Container>
       </div>

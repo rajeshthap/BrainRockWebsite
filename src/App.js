@@ -40,7 +40,7 @@ import SalaryCalculation from "./componets/hr_dashboard/pay_roll/SalaryCalculati
 import LeaveManagement from "./componets/hr_dashboard/Leave/LeaveManagement";
 import CompanyProfile from "./componets/pages/aboutus/CompanyProfile";
 import OurTeam from "./componets/pages/aboutus/OurTeam";
-import Careers from "./componets/pages/aboutus/Careers";
+import Careers from "./componets/pages/aboutus/RunningProjects";
 import ApplyLeaveCalendar from "./componets/hr_dashboard/Leave/ApplyLeaveCalendar";
 import LeaveStatus from "./componets/hr_dashboard/Leave/LeaveStatus";
 import SalaryStructure from "./componets/hr_dashboard/pay_roll/SalaryStructure";
@@ -80,9 +80,12 @@ import ContactUsQuery from "./componets/adminpanel/aboutus/ContactUsQuery";
 import TrainingVideoPlayer from "./componets/training_dashboard/TrainingVideoPlayer";
 import AddOurTeam from "./componets/adminpanel/ourteam/AddOurTeam";
 import ManageOurTeam from "./componets/adminpanel/ourteam/ManageOurTeam";
-import Services from "./componets/topnav/navigationpages/Services";
+// import Services from "./componets/topnav/navigationpages/Services";
 import AddDesAndDev from "./componets/adminpanel/designanddevelopment/AddDesAndDev";
 import ManageDesAndDev from "./componets/adminpanel/designanddevelopment/ManageDesAndDev";
+import RunningProjects from "./componets/pages/aboutus/RunningProjects";
+// import Services from "./componets/pages/ServicesPage";
+import ServicesPage from "./componets/pages/ServicesPage";
 
 
 function AppContent() {
@@ -135,6 +138,7 @@ function AppContent() {
     "/ManageDesAndDev",
 
 
+
   ]);
 
   const hiddenFooter1 = new Set([
@@ -180,7 +184,10 @@ function AppContent() {
         <Route path="/Contact" element={<Contact />} />
         <Route path="/TrainingLeftnav" element={<TrainingLeftnav />} />
         <Route path="/TrainingVideoPlayer" element={<TrainingVideoPlayer />} />
-        <Route path="/Services" element={<Services />} />
+        {/* <Route path="/Services" element={<Services />} /> */}
+        <Route path="/RunningProjects" element={<RunningProjects />} />
+        <Route path="/ServicesPage" element={<ServicesPage />} />
+    
 
         
 
