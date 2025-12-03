@@ -351,7 +351,7 @@ const ManageOurTeam = () => {
                           />
                         )}
                         <Card.Body className="d-flex flex-column">
-                          <Card.Title>{member.full_name}</Card.Title>
+                          <Card.Title className="managetitle">{member.full_name}</Card.Title>
                           <Card.Subtitle className="mb-2 text-muted">{member.designation}</Card.Subtitle>
                           <div className="social-links mt-auto mb-3">
                             {member.facebook_profile_link && <a href={member.facebook_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-facebook"></i></a>}

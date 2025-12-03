@@ -1,83 +1,110 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import "../../assets/css/section.css";
-import DevelopmentIcon from '../../assets/images/Development-icon.png';
-import CloudIcon from '../../assets/images/cloud-icon.png'
-import StrategyIcon from '../../assets/images/Strategy-icon.png'
-import MobileIcon from '../../assets/images/mobile-icon.png'
-import UIUXIcon from '../../assets/images/ui-icon.png'
-import CybersecurityIcon from '../../assets/images/Cybersecurity-icon.png'
-import InfrastructureIcon from '../../assets/images/IT-icon.png'
-import DataServicesIcon from '../../assets/images/DataServices-icon.png'
-import DigitalMarketingsIcon from '../../assets/images/DigitalMarketing-icon.png'
-import ManagedITServicesIcon from '../../assets/images/ManagedITServicesIcon-icon.png'
-import TestingIcon from '../../assets/images/qa-icon.png'
-import ITTraningIcon from '../../assets/images/traning-icon.png'
 import { Container } from 'react-bootstrap';
+
 const ServicesCarousel = () => {
-  const industries = [
-    {
-      name: "Software Development Services",
-      icon: <img src={DevelopmentIcon} alt="DevelopmentIcon" className="img-fluid" />
-    },
+  // State for storing services data
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Base URL for images
+  const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
 
-    {
-      name: "Cloud Services",
-      icon: <img src={CloudIcon} alt="CloudIcon" className="img-fluid" />
-    },
+  // Fetch services from API
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/innovative-service-items/');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch services');
+        }
+        
+        const apiResponse = await response.json();
+        
+        // Extract the data array from the response
+        if (apiResponse.success && apiResponse.data) {
+          // Transform the API data to match the expected structure
+          const transformedServices = apiResponse.data.map(service => ({
+            name: service.title,
+            icon: <img src={`${BASE_URL}${service.icon}`} alt={service.title} className="img-fluid" />
+          }));
+          
+          setServices(transformedServices);
+        } else {
+          throw new Error('Invalid API response structure');
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        setError(error.message);
+        setLoading(false);
+      }
+    };
 
-    {
-      name: "IT Consulting & Strategy",
-      icon: <img src={StrategyIcon} alt="StrategyIcon" className="img-fluid" />
-    },
-    {
-      name: "Mobile App Development",
-      icon: <img src={MobileIcon} alt="MobileIcon" className="img-fluid" />
-    },
+    fetchServices();
+  }, []);
 
-    {
-      name: "Website & UI/UX Services",
-      icon: <img src={UIUXIcon} alt="UIUXIcon" className="img-fluid" />
-    },
+  // If still loading, show a loading message
+  if (loading) {
+    return (
+      <Container fluid className='mt-4 Service-bg-img'>
+        <div className="sme-container pt-3">
+          <div className="text-center">
+            <h1 className=" hero-sub-title1 ">
+              Innovative <br></br>
+              <span className="br-span-list mt-3">Service Offerings</span>
+            </h1>
+          </div>
+          <div className="text-center mt-5">
+            <p>Loading services...</p>
+          </div>
+        </div>
+      </Container>
+    );
+  }
 
-    {
-      name: "Cybersecurity Services",
-      icon: <img src={CybersecurityIcon} alt="CybersecurityIcon" className="img-fluid" />
-    },
+  // If there's an error, show an error message
+  if (error) {
+    return (
+      <Container fluid className='mt-4 Service-bg-img'>
+        <div className="sme-container pt-3">
+          <div className="text-center">
+            <h1 className=" hero-sub-title1 ">
+              Innovative <br></br>
+              <span className="br-span-list mt-3">Service Offerings</span>
+            </h1>
+          </div>
+          <div className="text-center mt-5">
+            <p>Error loading services: {error}</p>
+          </div>
+        </div>
+      </Container>
+    );
+  }
 
-    {
-      name: "IT Infrastructure Management",
-      icon: <img src={InfrastructureIcon} alt="InfrastructureIcon" className="img-fluid" />
-    },
-
-    {
-      name: "Data & Analytics Services",
-      icon: <img src={DataServicesIcon} alt="DataServicesIcon" className="img-fluid" />
-    },
-
-    {
-      name: "Digital Marketing Services",
-      icon: <img src={DigitalMarketingsIcon} alt="DigitalMarketingsIcon" className="img-fluid" />
-    },
-    {
-      name: "Managed IT Services",
-      icon: <img src={ManagedITServicesIcon} alt="ManagedITServicesIcon" className="img-fluid" />
-    },
-
-    {
-      name: "QA & Testing Services",
-      icon: <img src={TestingIcon} alt="TestingIcon" className="img-fluid" />
-    },
-    {
-      name: "IT Software Training & Development",
-      icon: <img src={ITTraningIcon} alt="ITTraningIcon" className="img-fluid" />
-    },
-
-
-
-  ];
+  // If no services are available
+  if (services.length === 0) {
+    return (
+      <Container fluid className='mt-4 Service-bg-img'>
+        <div className="sme-container pt-3">
+          <div className="text-center">
+            <h1 className=" hero-sub-title1 ">
+              Innovative <br></br>
+              <span className="br-span-list mt-3">Service Offerings</span>
+            </h1>
+          </div>
+          <div className="text-center mt-5">
+            <p>No services available at the moment.</p>
+          </div>
+        </div>
+      </Container>
+    );
+  }
 
   return (
-
     <Container fluid className='mt-4 Service-bg-img'>
       <div className="sme-container pt-3">
         <div className="text-center">
@@ -89,24 +116,19 @@ const ServicesCarousel = () => {
 
         <div className="scroll-container">
           <div className="scroll-track">
-            {/* First set of industries */}
-            {industries.map((industry, index) => (
+            {/* First set of services */}
+            {services.map((service, index) => (
               <div key={index} className="industry-box">
-                <div className="industry-icon">{industry.icon}</div>
-                <span>{industry.name}</span>
+                <div className="industry-icon">{service.icon}</div>
+                <span>{service.name}</span>
               </div>
             ))}
 
-            {/* Duplicate set for seamless looping */}
-            {industries.map((industry, index) => (
-              <div key={`duplicate-${index}`} className="industry-box">
-                <div className="industry-icon">{industry.icon}</div>
-                <span>{industry.name}</span>
-              </div>
-            ))}
+            
           </div>
         </div>
-      </div></Container>
+      </div>
+    </Container>
   );
 };
 
