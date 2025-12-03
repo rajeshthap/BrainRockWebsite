@@ -652,7 +652,7 @@ const EmployeeDetails = ({
                       <th>Project</th>
                       <th>Start Date</th>
                       <th>End Date</th>
-                      <th>Employees</th>
+                      
                     </tr>
                     {employeeProjects.map((project, index) => (
                       <tr key={index}>
@@ -663,10 +663,7 @@ const EmployeeDetails = ({
                         <td data-th="Project">{project.project_name}</td>
                         <td data-th="Start Date">{formatDateForDisplay(project.start_date)}</td>
                         <td data-th="End Date">{formatDateForDisplay(project.end_date)}</td>
-                        <td data-th="Employees">
-                          {/* This would normally show employee names, but we don't have employee_ids in our project data */}
-                          <div>Team Members</div>
-                        </td>
+                       
                       </tr>
                     ))}
                   </tbody>
