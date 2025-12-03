@@ -1,45 +1,73 @@
-import React from 'react';
-import { Col, Container, Row } from 'react-bootstrap';
+import React from "react";
+import { Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
+
+// Icons
+import { LuBrainCircuit } from "react-icons/lu";
+import { SiCircuitverse, SiAmazoncloudwatch } from "react-icons/si";
+import { FaArrowRight } from "react-icons/fa6";
+
 import "../../../assets/css/aboutus.css";
-import TechImg from "../../../assets/images/hr.jpg"
 
 function RunningProjects() {
+
+  // ⭐ Your All Projects List (Add more here)
+  const projects = [
+    {
+      id: 1,
+      title: "IT Brainrock Project",
+      desc: "It is a long established fact that a reader will be distracted by readable content.",
+      icon: <LuBrainCircuit />
+    },
+    {
+      id: 2,
+      title: "IT Management System",
+      desc: "Management project that handles business operations and workflow.",
+      icon: <SiCircuitverse />
+    },
+    {
+      id: 3,
+      title: "Cloud Watch Monitoring",
+      desc: "Automated cloud monitoring and alerting service.",
+      icon: <SiAmazoncloudwatch />
+    }
+  ];
+
   return (
     <div className="ourteam-section">
-      <Container>
-        <div className="ourteam-box">
-    
+      <Container className="ourteam-box">
 
-            <div className="resorce-sub-list text-center">
-              <h1 className="text-center mt-3">
-                Our
-                <span className="resorce-about-list">Running Project</span>
-              </h1>
-            </div>
-            <div>
-
-              <Row className="d-flex justify-content-center br-tech-stack">
-
-                <Col lg={6} md={6} sm={12} className="mb-3"><h3><b>Brainrock Consulting – Technologies We Use as a Top Application Development Company</b></h3>
-
-
-                  <p>At <b>Brainrock Consulting,</b> we leverage the most advanced and reliable technologies to deliver high-performance <b>Application Development and mobile applications.</b> As a top application development company, we follow agile methodologies to ensure smooth project execution—from initial ideation and UI/UX design to development, testing, deployment, and long-term maintenance.</p>
-                  <p>Our expert developers work with a powerful and future-ready tech stack, including <b> React Native, Flutter, Kotlin, Swift, React.js, Next.js, Node.js, Laravel, </b> and other industry-leading tools. This enables us to build scalable, secure, and feature-rich applications tailored to your business needs.</p>
-
-                </Col>
-                <Col lg={6} md={6} sm={12} className="mb-3 text-center"> <div>
-                  <img
-                    src={TechImg}
-                    alt="TechImg"
-                    className="img-fluid mt-3"
-                  ></img>
-                </div></Col>
-              </Row>
-
-            </div>
-      
-        
+        {/* Heading + Total Count */}
+        <div className="our-heading-team">
+          <h1>OUR PROJECTS</h1>
+          <p style={{ marginTop: "-10px", fontSize: "18px", color: "#555" }}>
+            Total Completed Projects: <b>{projects.length}</b>
+          </p>
         </div>
+
+        {/* Cards Section */}
+        <div className="grid-3">
+          {projects.map((project) => (
+            <div className="feature-box" key={project.id}>
+              <div className="feature-icon">
+                <i className="flaticon-cloud">{project.icon}</i>
+              </div>
+
+              <div className="feature-desc">
+                <h4>{project.title}</h4>
+                <p>{project.desc}</p>
+
+                <Link to="#" className="feature-btn">
+                  Read More
+                  <i className="ti-arrow-right">
+                    <FaArrowRight />
+                  </i>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+
       </Container>
     </div>
   );

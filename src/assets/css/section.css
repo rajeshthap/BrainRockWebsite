@@ -81,7 +81,9 @@
   font-size: 32px;
 
 }
-
+.industry-icon  img{
+  border-radius: 50%;
+}
 /* Icon grows on hover */
 .industry-box:hover .industry-icon {
   width: 90px;

@@ -12,7 +12,6 @@ const TrainingDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-
   const [wishlist, setWishlist] = useState([]); // ⭐ Wishlist state added
 
   const navigate = useNavigate();
@@ -117,7 +116,7 @@ const TrainingDashBoard = () => {
               />
             </div>
 
-            <div className="course-info">
+            <div className="course-info-text">
               <h3 className="course-title">How to Make a Responsive Website in React JS</h3>
               <p className="course-instructor">Software Engineer</p>
  <button
