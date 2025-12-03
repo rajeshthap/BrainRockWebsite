@@ -303,7 +303,25 @@ const menuItems = [
         }, 
       ],
     },   
-   
+      {
+      icon: <PiUserListBold />,
+      label: "IT Services ",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add ItServices",
+          path: "/AddItServices",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Manage ItServices",
+          path: "/ManageItServices",
+          icon: <FaChartLine />,
+        }, 
+      ],
+    }, 
 
       {
       icon: <FaTachometerAlt />,
