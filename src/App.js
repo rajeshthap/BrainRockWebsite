@@ -89,6 +89,8 @@ import ServicesPage from "./componets/pages/ServicesPage";
 import ManageTechStack from "./componets/adminpanel/ourtechstack/ManageTechStack";
 import ManageItServices from "./componets/adminpanel/itservices/ManageItServices";
 import AddItServices from "./componets/adminpanel/itservices/AddItServices";
+import Feedback from "./componets/topnav/navigationpages/Feedback";
+import Feedbackget from "./componets/adminpanel/Feedback/Feedbackget";
 
 
 function AppContent() {
@@ -142,6 +144,7 @@ function AppContent() {
     "/ManageTechStack",
     "/ManageItServices",
     "/AddItServices",
+    "/Feedbackget",
 
   ]);
 
@@ -186,6 +189,7 @@ function AppContent() {
         <Route path="/ViewServices" element={<ViewServices />} />
         <Route path="/TrainingDashBoard" element={<TrainingDashBoard />} />
         <Route path="/Contact" element={<Contact />} />
+        <Route path="/Feedback" element={<Feedback/>} />
         <Route path="/TrainingLeftnav" element={<TrainingLeftnav />} />
         <Route path="/TrainingVideoPlayer" element={<TrainingVideoPlayer />} />
         {/* <Route path="/Services" element={<Services />} /> */}
@@ -505,6 +509,15 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/Feedbackget"
+          element={
+            <ProtectedRoute>
+              <Feedbackget/>
+            </ProtectedRoute>
+          }
+        />
+
          <Route
           path="/ManageItServices"
           element={
