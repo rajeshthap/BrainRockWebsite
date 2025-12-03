@@ -92,10 +92,14 @@ function Courses() {
                       <span className="course-label">Duration:</span>
                       <span className="course-value">{course.duration}</span>
                     </p>
-                    <button className="service-btn-read" onClick={() => navigate(`/course/${course.id}`)}>
-                      Read More
-                      <i className="ti-arrow-right"><FaArrowRight /></i>
-                    </button>
+                   <button
+  className="service-btn-read"
+  onClick={() => navigate("/TrainingReact")}
+>
+  Read More
+  <i className="ti-arrow-right"><FaArrowRight /></i>
+</button>
+
                   </div>
                 </div>
               </Col>

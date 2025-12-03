@@ -16,21 +16,10 @@ function RunningProjects() {
     {
       id: 1,
       title: "IT Brainrock Project",
-      desc: "It is a long established fact that a reader will be distracted by readable content.",
+      desc: "react.js",
       icon: <LuBrainCircuit />
     },
-    {
-      id: 2,
-      title: "IT Management System",
-      desc: "Management project that handles business operations and workflow.",
-      icon: <SiCircuitverse />
-    },
-    {
-      id: 3,
-      title: "Cloud Watch Monitoring",
-      desc: "Automated cloud monitoring and alerting service.",
-      icon: <SiAmazoncloudwatch />
-    }
+   
   ];
 
   return (

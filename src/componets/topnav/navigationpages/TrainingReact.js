@@ -25,7 +25,7 @@ const TrainingReact = () => {
                   📚 React Training Program
                 </h3>
 
-                <button className="btn-register-top">Register Now</button>
+             
               </div>
             </Link>
           </div>
@@ -248,18 +248,7 @@ const TrainingReact = () => {
               </Col>
               <Col md={6} sm={6} ><TrainingRegistration /></Col>
               <div className="text-center">
-                <Link
-                  to="/TrainingRegistration"
-                  state={{
-                    training_name: "React Training",
-                    training_description:
-                      "Learn to build fast and scalable web applications using React. Gain hands-on experience with components, hooks, state management, API integration, and modern frontend workflows.",
-                  }}
-                >
-                  <button className="btn-register-top btn-regis">
-                    Register Now
-                  </button>
-                </Link>
+               
               </div>
             </Row>
           </div>
