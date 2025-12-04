@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Col, Container, Row } from 'react-bootstrap';
 import "../../../assets/css/aboutus.css";
 import "../../../assets/css/UserPage.css"
+import FooterPage from '../../footer/FooterPage';
 
 function CompanyProfile() {
   const [aboutData, setAboutData] = useState({
@@ -129,7 +130,12 @@ function CompanyProfile() {
             </Row>
           </div>
         </Container>
+       <Container fluid className="br-footer-box">
+        <Container>
+          <FooterPage /></Container>
+      </Container>
       </div>
+      
     </div>
   )
 }

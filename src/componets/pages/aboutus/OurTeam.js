@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import "../../../assets/css/aboutus.css";
+import FooterPage from '../../footer/FooterPage';
+import { Link } from 'react-router-dom';
 
 function OurTeam() {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -105,42 +107,42 @@ function OurTeam() {
                           <ul className="social">
                             {member.facebook_profile_link && (
                               <li>
-                                <a 
+                                <Link 
                                   href={member.facebook_profile_link} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
                                   className="fa fa-facebook"
-                                ></a>
+                                ></Link>
                               </li>
                             )}
                             {member.x_profile_link && (
                               <li>
-                                <a 
+                                <Link
                                   href={member.x_profile_link} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
                                   className="fa fa-twitter"
-                                ></a>
+                                ></Link>
                               </li>
                             )}
                             {member.instagram_profile_link && (
                               <li>
-                                <a 
+                                <Link
                                   href={member.instagram_profile_link} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
                                   className="fa fa-instagram"
-                                ></a>
+                                ></Link>
                               </li>
                             )}
                             {member.linkedinn_profile_link && (
                               <li>
-                                <a 
+                                <Link 
                                   href={member.linkedinn_profile_link} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
                                   className="fa fa-linkedin"
-                                ></a>
+                                ></Link>
                               </li>
                             )}
                           </ul>
@@ -157,6 +159,10 @@ function OurTeam() {
             </section>
           )}
         </div>
+      </Container>
+       <Container fluid className="br-footer-box">
+        
+          <FooterPage />
       </Container>
     </div>
   );

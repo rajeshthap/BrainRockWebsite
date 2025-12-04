@@ -8,6 +8,7 @@ import { DiMysql } from "react-icons/di";
 import { MdDeveloperBoard } from "react-icons/md";
 import { IoLogoHtml5 } from "react-icons/io";
 import { TbDeviceDesktop } from "react-icons/tb";
+import FooterPage from '../../footer/FooterPage';
 
 // Define the base URL for the API and media
 const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
@@ -108,6 +109,10 @@ function Courses() {
         )}
 
       
+      </Container>
+       <Container fluid className="br-footer-box">
+        
+          <FooterPage />
       </Container>
     </div>
   )

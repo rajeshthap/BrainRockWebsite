@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Spinner, Alert } from 'react-bootstrap';
 import "../../../assets/css/course.css";
+import FooterPage from '../../footer/FooterPage';
 
 // Define the base URL for your API
 const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
@@ -96,6 +97,10 @@ function Gallery() {
             )}
           </div>
         </Row>
+      </Container>
+       <Container fluid className="br-footer-box">
+        
+          <FooterPage />
       </Container>
     </div>
   );

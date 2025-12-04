@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import "../../assets/css/aboutus.css";
+import FooterPage from '../footer/FooterPage';
 
 function ServicesPage() {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -158,6 +159,10 @@ function ServicesPage() {
           )}
         </div>
       </Container>
+       <Container fluid className="br-footer-box">
+              
+                <FooterPage />
+            </Container>
     </div>
   );
 }

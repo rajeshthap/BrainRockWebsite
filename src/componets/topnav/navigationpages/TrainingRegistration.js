@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import "../../../assets/css/Trainingregistration.css";
+import FooterPage from "../../footer/FooterPage";
 
 function TrainingRegistration() {
   const [courseData, setCourseData] = useState([]);
@@ -446,6 +447,10 @@ function TrainingRegistration() {
             </div>
           </Form>
         </div>
+      </Container>
+       <Container fluid className="br-footer-box">
+        
+          <FooterPage />
       </Container>
     </div>
   );

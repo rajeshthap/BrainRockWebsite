@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Alert } from "react-bootstrap";
 import "../../../assets/css/ContactForm.css";
+import FooterPage from "../../footer/FooterPage";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -280,6 +281,10 @@ function Contact() {
             </div>
           </div>
         </div>
+      </Container>
+       <Container fluid className="br-footer-box">
+        
+          <FooterPage />
       </Container>
     </div>
   );
