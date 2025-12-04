@@ -9,6 +9,7 @@
 
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-top:12px
 }
 
 .ourteam-box:hover {
@@ -99,4 +100,129 @@
 .breadcrumb-menu {
   justify-content: center;
   display: flex;
+}
+/* ============================
+   OUR TEAM PAGE CSS
+   ============================ */
+
+/* TEAM CARD */
+.team-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+}
+
+/* IMAGE */
+.team-card-img {
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+  position: relative;
+}
+
+.team-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: 0.4s ease;
+}
+
+/* Zoom image on hover */
+.team-card:hover img {
+  transform: scale(1.08);
+}
+
+/* OVERLAY BACKGROUND */
+.team-overlay {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+
+  display: flex;
+  justify-content: center;
+
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s ease;
+}
+
+/* SHOW ON HOVER */
+.team-card:hover .team-overlay {
+  opacity: 1;
+  visibility: visible;
+  bottom: 25px;
+}
+
+/* SOCIAL ICONS */
+.team-social {
+  list-style: none;
+  display: flex;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+}
+
+.team-social li a {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #0263c7;
+  border-radius: 5px;
+  color: #0263c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s ease;
+  font-size: 16px;
+}
+
+.team-social li a:hover {
+  background: #0263c7;
+  color: #fff;
+}
+
+/* NAME & DESIGNATION */
+.team-card-info {
+  text-align: center;
+  padding: 18px 10px;
+}
+
+.team-card-info h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #0263c7;
+}
+
+.team-card-info p {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+/* RESPONSIVE */
+@media(max-width: 768px) {
+  .team-card-img {
+    height: 220px;
+  }
+}
+
+@media(max-width: 576px) {
+  .team-card-img {
+    height: 200px;
+  }
 }
