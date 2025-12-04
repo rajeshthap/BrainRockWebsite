@@ -453,6 +453,11 @@ a:hover {
     z-index: 4;
     margin-top: -70px;
 }
+.feature-minus-top {
+    position: relative;
+    z-index: 4;
+   
+}
 
 
 
