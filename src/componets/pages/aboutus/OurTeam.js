@@ -54,7 +54,7 @@ function OurTeam() {
    
   
       <Container className='ourteam-box'>
-        <Row className='mt-3'>
+        <Row className=''>
           <div className='text-center mb-5'>
             <h1>
               Administrative Team

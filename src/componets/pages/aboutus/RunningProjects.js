@@ -63,7 +63,7 @@ function RunningProjects() {
   return (
     <div className="ourteam-section">
       <Container className="ourteam-box">
- <Row className='mt-5'>
+ <Row className=''>
             <div className='our-heading-team'>
               <h1>OUR Projects</h1>
             </div>
