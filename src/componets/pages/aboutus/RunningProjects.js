@@ -1,26 +1,65 @@
-import React from "react";
-import { Container } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Spinner, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 // Icons
-import { LuBrainCircuit } from "react-icons/lu";
-import { SiCircuitverse, SiAmazoncloudwatch } from "react-icons/si";
+import { LuBrainCircuit } from "react-icons/lu"; 
 import { FaArrowRight } from "react-icons/fa6";
 
 import "../../../assets/css/aboutus.css";
 
-function RunningProjects() {
+const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
-  // ⭐ Your All Projects List (Add more here)
-  const projects = [
-    {
-      id: 1,
-      title: "IT Brainrock Project",
-      desc: "react.js",
-      icon: <LuBrainCircuit />
-    },
-   
-  ];
+function RunningProjects() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        // Fetch data from the API endpoint
+        const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch projects');
+        }
+        const result = await response.json();
+        // The API might wrap the data in a `data` property, handle that
+        const projectsData = result.data || result;
+        setProjects(projectsData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []); 
+
+
+  if (loading) {
+    return (
+      <div className="ourteam-section text-center">
+        <Container className="ourteam-box">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="ourteam-section text-center">
+        <Container className="ourteam-box">
+          <Alert variant="danger">Error: {error}</Alert>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="ourteam-section">
@@ -39,12 +78,21 @@ function RunningProjects() {
           {projects.map((project) => (
             <div className="feature-box" key={project.id}>
               <div className="feature-icon">
-                <i className="flaticon-cloud">{project.icon}</i>
+                {/* Display company logo if it exists, otherwise show a default icon */}
+                {project.company_logo ? (
+                  <img 
+                    src={`${API_BASE_URL}${project.company_logo}`} 
+                    alt={`${project.company_name} logo`} 
+                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '50%' }} 
+                  />
+                ) : (
+                  <i className="flaticon-cloud"><LuBrainCircuit /></i>
+                )}
               </div>
 
               <div className="feature-desc">
-                <h4>{project.title}</h4>
-                <p>{project.desc}</p>
+                <h4>{project.company_name}</h4>
+                <p>{project.technology_used.join(', ')}</p>
 
                 <Link to="#" className="feature-btn">
                   Read More
