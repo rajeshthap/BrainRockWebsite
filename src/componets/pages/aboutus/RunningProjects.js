@@ -7,6 +7,7 @@ import { LuBrainCircuit } from "react-icons/lu";
 import { FaArrowRight } from "react-icons/fa6";
 
 import "../../../assets/css/aboutus.css";
+import FooterPage from "../../footer/FooterPage";
 
 const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
@@ -105,6 +106,10 @@ function RunningProjects() {
           ))}
         </div>
 
+      </Container>
+       <Container fluid className="br-footer-box">
+        
+          <FooterPage />
       </Container>
     </div>
   );
