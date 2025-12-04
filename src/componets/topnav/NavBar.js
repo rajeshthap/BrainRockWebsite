@@ -33,7 +33,7 @@ function NavBar() {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto justify-content-end flex-grow-1 nd-nav">
               {/* Main Navigation Items */}
-                 <Nav.Link href="Home">Home</Nav.Link>
+                 <Nav.Link href="/">Home</Nav.Link>
                 <NavDropdown title="About Us" id="AboutUs">
                 <NavDropdown.Item as={Link} to="/CompanyProfile">Company Profile</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/OurTeam">Our Team</NavDropdown.Item>

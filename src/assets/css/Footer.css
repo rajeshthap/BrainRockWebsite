@@ -44,6 +44,7 @@
 
 .footer-li ul li {
     font-size: var(--br-space-350);
+  
 }
 
 .footer-icon {
@@ -185,6 +186,11 @@
 
 li {
     list-style: none;
+      color: #fff !important;
+}
+li:hover {
+    list-style: none;
+    color: orange !important;
 }
 
 .i-space {

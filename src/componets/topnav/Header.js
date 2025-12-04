@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MdOutlineMail } from "react-icons/md";
 import { MdOutlinePhoneAndroid } from "react-icons/md";
-import { FaInstagram, FaTwitter } from "react-icons/fa";
+import { FaInstagram, FaLinkedinIn, FaTwitter } from "react-icons/fa";
 import { PiSignInBold } from "react-icons/pi";
 import { ImFacebook } from "react-icons/im";
 import "../../assets/css/Header.css";
@@ -51,6 +51,7 @@ function Header() {
             <ImFacebook className="br-m-left br-header-icon" />
             <FaInstagram className="br-header-icon" />
             <FaTwitter className="br-header-icon" />
+             <FaLinkedinIn className="br-header-icon" />
           </ul>
         </div>
       </div>
@@ -86,6 +87,7 @@ function Header() {
             <ImFacebook className="br-m-left br-header-icon" />
             <FaInstagram className="br-header-icon" />
             <FaTwitter className="br-header-icon" />
+            <FaLinkedinIn className="br-header-icon" />
           </ul>
         </div>
       </div>

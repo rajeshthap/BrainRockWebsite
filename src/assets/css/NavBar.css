@@ -41,8 +41,9 @@ img.logo1 {
 }
 
 img.logo-wecd {
-    width: 88px;
+    width: 50px;
     text-align: center;
+    margin-right: 8px;
 }
 
 .subtitle {
