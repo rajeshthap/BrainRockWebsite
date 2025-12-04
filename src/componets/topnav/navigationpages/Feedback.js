@@ -9,6 +9,7 @@ function Feedback() {
     full_name: "",
     email: "",
     phone: "",
+    subject: "", // Added subject field
     message: "",
   });
 
@@ -33,6 +34,10 @@ function Feedback() {
         if (!value.trim()) msg = "Phone number is required";
         else if (!/^[0-9]{10}$/.test(value))
           msg = "Phone number must be 10 digits";
+        break;
+
+      case "subject": // Added subject validation
+        if (!value.trim()) msg = "Subject is required";
         break;
 
       case "message":
@@ -60,6 +65,7 @@ function Feedback() {
     if (!formData.full_name) temp.full_name = "Full name is required";
     if (!formData.email) temp.email = "Email is required";
     if (!formData.phone) temp.phone = "Phone number is required";
+    if (!formData.subject) temp.subject = "Subject is required"; // Added subject validation
     if (!formData.message) temp.message = "Message is required";
 
     setErrors(temp);
@@ -85,6 +91,7 @@ function Feedback() {
         full_name: "",
         email: "",
         phone: "",
+        subject: "", // Added subject field reset
         message: "",
       });
 
@@ -177,6 +184,26 @@ function Feedback() {
                   />
                   <Form.Control.Feedback type="br-alert">
                     {errors.phone}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              {/* Subject - New field added */}
+              <Col md={6} className="mt-3">
+                <Form.Group>
+                  <Form.Label className="br-label">
+                    Subject <span className="br-span-star">*</span>
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    className="br-form-control"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    placeholder="Enter the subject"
+                  />
+                  <Form.Control.Feedback type="br-alert">
+                    {errors.subject}
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
