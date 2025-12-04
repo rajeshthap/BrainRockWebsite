@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 import { AiOutlineFileDone } from 'react-icons/ai'; // Default icon
+import { FaPlus, FaTrash } from 'react-icons/fa'; // Icons for module management
 
 // Define the base URL for your API
 const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
@@ -28,7 +29,8 @@ const EditCourses = () => {
     description: "",
     price: "",
     duration: "",
-    icon: null
+    icon: null,
+    modules: [] // Add modules to form data
   });
   const [iconPreview, setIconPreview] = useState(null);
   const [hasIconChanged, setHasIconChanged] = useState(false);
@@ -132,7 +134,8 @@ const EditCourses = () => {
       description: course.description,
       price: course.price,
       duration: course.duration,
-      icon: null // We'll handle the icon separately
+      icon: null,
+      modules: course.modules || [] // Initialize modules from course data
     });
     // Use the original image without the timestamp for the preview
     const originalImageUrl = course.icon ? course.icon.split('?t=')[0] : null;
@@ -164,6 +167,37 @@ const EditCourses = () => {
     }
   };
 
+  // Handle module changes
+  const handleModuleChange = (index, field, value) => {
+    const updatedModules = [...editFormData.modules];
+    if (!updatedModules[index]) {
+      updatedModules[index] = ["", ""];
+    }
+    updatedModules[index][field === 'name' ? 0 : 1] = value;
+    setEditFormData(prev => ({
+      ...prev,
+      modules: updatedModules
+    }));
+  };
+
+  // Add a new module
+  const addModule = () => {
+    setEditFormData(prev => ({
+      ...prev,
+      modules: [...prev.modules, ["", ""]]
+    }));
+  };
+
+  // Remove a module
+  const removeModule = (index) => {
+    const updatedModules = [...editFormData.modules];
+    updatedModules.splice(index, 1);
+    setEditFormData(prev => ({
+      ...prev,
+      modules: updatedModules
+    }));
+  };
+
   // Handle edit form submission
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -175,6 +209,12 @@ const EditCourses = () => {
     dataToSend.append('description', editFormData.description);
     dataToSend.append('price', editFormData.price);
     dataToSend.append('duration', editFormData.duration);
+    
+    // Add modules as JSON string
+    dataToSend.append('modules', JSON.stringify(editFormData.modules));
+    
+    // Store the current preview URL before submission
+    const currentPreviewUrl = iconPreview;
     
     if (hasIconChanged && editFormData.icon) {
       dataToSend.append('icon', editFormData.icon);
@@ -205,10 +245,14 @@ const EditCourses = () => {
                 description: editFormData.description,
                 price: editFormData.price,
                 duration: editFormData.duration,
-                // Update the icon URL if a new one was uploaded
-                icon: hasIconChanged && apiResponseData.data && apiResponseData.data.icon
-                    ? `${API_BASE_URL}${apiResponseData.data.icon}?t=${Date.now()}`
-                    : item.icon
+                modules: editFormData.modules,
+                // Use the preview URL immediately if icon was changed
+                // This ensures the new image shows up instantly
+                icon: hasIconChanged 
+                  ? currentPreviewUrl 
+                  : (apiResponseData.data && apiResponseData.data.icon
+                      ? `${API_BASE_URL}${apiResponseData.data.icon}?t=${Date.now()}`
+                      : item.icon)
               } 
             : item
         )
@@ -220,6 +264,36 @@ const EditCourses = () => {
       setShowEditModal(false);
       
       setTimeout(() => setShowAlert(false), 3000);
+      
+      // If icon was changed, fetch the updated course data after a short delay
+      // This will replace the temporary preview URL with the actual server URL
+      if (hasIconChanged) {
+        setTimeout(async () => {
+          try {
+            const refreshResponse = await fetch(`${API_BASE_URL}/api/course-items/`);
+            if (refreshResponse.ok) {
+              const refreshResult = await refreshResponse.json();
+              const refreshCoursesData = refreshResult.data || refreshResult;
+              
+              const updatedCourse = refreshCoursesData.find(c => c.id === currentEditItem.id);
+              if (updatedCourse && updatedCourse.icon) {
+                setCourses(prevData => 
+                  prevData.map(item => 
+                    item.id === currentEditItem.id 
+                      ? {
+                          ...item,
+                          icon: `${API_BASE_URL}${updatedCourse.icon}?t=${Date.now()}`
+                        } 
+                      : item
+                  )
+                );
+              }
+            }
+          } catch (refreshError) {
+            console.error('Error refreshing course data:', refreshError);
+          }
+        }, 2000); // Wait 2 seconds for the server to process the image
+      }
     } catch (error) {
       console.error('Error updating course:', error);
       setMessage(error.message || "Failed to update course");
@@ -388,6 +462,73 @@ const EditCourses = () => {
                     alt="Icon Preview" 
                     style={{ maxWidth: '100px', maxHeight: '100px' }} 
                   />
+                </div>
+              )}
+            </Form.Group>
+            
+            {/* Modules Section */}
+            <Form.Group className="mb-3">
+              <Form.Label className="d-flex justify-content-between align-items-center">
+                <span>Course Modules</span>
+                <Button 
+                  variant="outline-primary" 
+                  size="sm" 
+                  onClick={addModule}
+                  type="button"
+                >
+                  <FaPlus className="me-1" /> Add Module
+                </Button>
+              </Form.Label>
+              
+              {editFormData.modules.length === 0 ? (
+                <Card className="text-center p-3 bg-light">
+                  <p className="text-muted mb-0">No modules added yet. Click "Add Module" to get started.</p>
+                </Card>
+              ) : (
+                <div className="modules-container">
+                  {editFormData.modules.map((module, index) => (
+                    <Card key={index} className="mb-3">
+                      <Card.Body>
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <h5 className="mb-0">Module {index + 1}</h5>
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm" 
+                            onClick={() => removeModule(index)}
+                            type="button"
+                          >
+                            <FaTrash />
+                          </Button>
+                        </div>
+                        <Row>
+                          <Col md={6}>
+                            <Form.Group className="mb-2">
+                              <Form.Label>Module Name</Form.Label>
+                              <Form.Control
+                                type="text"
+                                placeholder="e.g., Module 1"
+                                value={module[0]}
+                                onChange={(e) => handleModuleChange(index, 'name', e.target.value)}
+                                required
+                              />
+                            </Form.Group>
+                          </Col>
+                          <Col md={6}>
+                            <Form.Group className="mb-2">
+                              <Form.Label>Module Description</Form.Label>
+                              <Form.Control
+                                type="text"
+                                placeholder="e.g., Basic Introduction"
+                                value={module[1]}
+                                onChange={(e) => handleModuleChange(index, 'description', e.target.value)}
+                                required
+                              />
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  ))}
                 </div>
               )}
             </Form.Group>

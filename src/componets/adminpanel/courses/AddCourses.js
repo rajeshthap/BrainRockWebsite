@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Card, InputGroup } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
+import { FaPlus, FaTrash } from "react-icons/fa";
 
 const AddCourses = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -17,13 +18,14 @@ const AddCourses = () => {
     description: "",
     price: "",
     duration: "",
-    icon: null // Will hold the file object
+    icon: null, // Will hold the file object
+    modules: [] // New field for modules
   });
   
   // State for icon preview
   const [iconPreview, setIconPreview] = useState(null);
 
-  // --- NEW: State for description validation error ---
+  // State for description validation error
   const [descriptionError, setDescriptionError] = useState("");
 
   // Submission state
@@ -56,7 +58,7 @@ const AddCourses = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // --- UPDATED: Handle form input changes with validation ---
+  // Handle form input changes with validation
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     
@@ -82,7 +84,7 @@ const AddCourses = () => {
         [name]: value
       }));
       
-      // --- NEW: Validate description length ---
+      // Validate description length
       if (name === 'description') {
         const wordCount = value.trim().split(/\s+/).length;
         if (value.trim() === '') {
@@ -96,6 +98,37 @@ const AddCourses = () => {
     }
   };
 
+  // Handle module changes
+  const handleModuleChange = (index, field, value) => {
+    const updatedModules = [...formData.modules];
+    if (!updatedModules[index]) {
+      updatedModules[index] = ["", ""];
+    }
+    updatedModules[index][field === 'name' ? 0 : 1] = value;
+    setFormData(prev => ({
+      ...prev,
+      modules: updatedModules
+    }));
+  };
+
+  // Add a new module
+  const addModule = () => {
+    setFormData(prev => ({
+      ...prev,
+      modules: [...prev.modules, ["", ""]]
+    }));
+  };
+
+  // Remove a module
+  const removeModule = (index) => {
+    const updatedModules = [...formData.modules];
+    updatedModules.splice(index, 1);
+    setFormData(prev => ({
+      ...prev,
+      modules: updatedModules
+    }));
+  };
+
   // Clear form function
   const clearForm = () => {
     setFormData({
@@ -103,7 +136,8 @@ const AddCourses = () => {
       description: "",
       price: "",
       duration: "",
-      icon: null
+      icon: null,
+      modules: []
     });
     setIconPreview(null);
     setMessage("");
@@ -111,11 +145,11 @@ const AddCourses = () => {
     setDescriptionError(""); // Clear description error
   };
 
-  // --- UPDATED: Handle form submission with validation check ---
+  // Handle form submission with validation check
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // --- NEW: Check for validation errors before submitting ---
+    // Check for validation errors before submitting
     if (descriptionError) {
       setMessage("Please fix the validation errors before submitting.");
       setVariant("danger");
@@ -132,6 +166,10 @@ const AddCourses = () => {
     dataToSend.append('description', formData.description);
     dataToSend.append('price', formData.price);
     dataToSend.append('duration', formData.duration);
+    
+    // Add modules as JSON string
+    dataToSend.append('modules', JSON.stringify(formData.modules));
+    
     if (formData.icon) {
       dataToSend.append('icon', formData.icon, formData.icon.name);
     }
@@ -150,7 +188,7 @@ const AddCourses = () => {
         throw new Error(errorData.message || 'Failed to add course');
       }
       
-      // --- SUCCESS PATH ---
+      // SUCCESS PATH
       setMessage("Course added successfully!");
       setVariant("success");
       setShowAlert(true);
@@ -160,7 +198,7 @@ const AddCourses = () => {
       setTimeout(() => setShowAlert(false), 3000);
       
     } catch (error) {
-      // --- FAILURE PATH ---
+      // FAILURE PATH
       console.error('Error adding course:', error);
       let errorMessage = "An unexpected error occurred. Please try again.";
       
@@ -235,7 +273,7 @@ const AddCourses = () => {
                   required
                   isInvalid={!!descriptionError} // Bootstrap class for invalid state
                 />
-                {/* --- NEW: Display validation error for description --- */}
+                {/* Display validation error for description */}
                 <Form.Control.Feedback type="invalid">
                   {descriptionError}
                 </Form.Control.Feedback>
@@ -261,7 +299,7 @@ const AddCourses = () => {
                     <Form.Label>Duration</Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="e.g., 3 months"
+                      placeholder="e.g., 30 Days"
                       name="duration"
                       value={formData.duration}
                       onChange={handleChange}
@@ -282,6 +320,73 @@ const AddCourses = () => {
                  {iconPreview && (
                   <div className="mt-3">
                     <img src={iconPreview} alt="Icon Preview" style={{ maxWidth: '100px', maxHeight: '100px' }} />
+                  </div>
+                )}
+              </Form.Group>
+              
+              {/* NEW: Modules Section */}
+              <Form.Group className="mb-4">
+                <Form.Label className="d-flex justify-content-between align-items-center">
+                  <span>Course Modules</span>
+                  <Button 
+                    variant="outline-primary" 
+                    size="sm" 
+                    onClick={addModule}
+                    type="button"
+                  >
+                    <FaPlus className="me-1" /> Add Module
+                  </Button>
+                </Form.Label>
+                
+                {formData.modules.length === 0 ? (
+                  <Card className="text-center p-3 bg-light">
+                    <p className="text-muted mb-0">No modules added yet. Click "Add Module" to get started.</p>
+                  </Card>
+                ) : (
+                  <div className="modules-container">
+                    {formData.modules.map((module, index) => (
+                      <Card key={index} className="mb-3">
+                        <Card.Body>
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <h5 className="mb-0">Module {index + 1}</h5>
+                            <Button 
+                              variant="outline-danger" 
+                              size="sm" 
+                              onClick={() => removeModule(index)}
+                              type="button"
+                            >
+                              <FaTrash />
+                            </Button>
+                          </div>
+                          <Row>
+                            <Col md={6}>
+                              <Form.Group className="mb-2">
+                                <Form.Label>Module Name</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  placeholder="e.g., Module 1"
+                                  value={module[0]}
+                                  onChange={(e) => handleModuleChange(index, 'name', e.target.value)}
+                                  required
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-2">
+                                <Form.Label>Module Description</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  placeholder="e.g., Basic Introduction"
+                                  value={module[1]}
+                                  onChange={(e) => handleModuleChange(index, 'description', e.target.value)}
+                                  required
+                                />
+                              </Form.Group>
+                            </Col>
+                          </Row>
+                        </Card.Body>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </Form.Group>
