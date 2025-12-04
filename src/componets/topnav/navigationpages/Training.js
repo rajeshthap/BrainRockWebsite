@@ -3,8 +3,9 @@ import { Container, Row, Col, Card } from "react-bootstrap";
 import "../../../assets/css/course.css";
 import { Link } from "react-router-dom";
 import TrainingRegistration from "./TrainingRegistration";
+import FooterPage from "../../footer/FooterPage";
 
-const TrainingReact = () => {
+const Training = () => {
   return (
     <div className="ourteam-section">
       <Container className="ourteam-box">
@@ -254,8 +255,12 @@ const TrainingReact = () => {
           </div>
         </div>
       </Container>
+       <Container fluid className="br-footer-box">
+        
+          <FooterPage />
+      </Container>
     </div>
   );
 };
 
-export default TrainingReact;
+export default Training;

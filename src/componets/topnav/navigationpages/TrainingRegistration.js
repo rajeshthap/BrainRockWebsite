@@ -448,10 +448,7 @@ function TrainingRegistration() {
           </Form>
         </div>
       </Container>
-       <Container fluid className="br-footer-box">
-        
-          <FooterPage />
-      </Container>
+      
     </div>
   );
 }

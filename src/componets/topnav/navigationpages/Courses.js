@@ -95,7 +95,7 @@ function Courses() {
                     </p>
                    <button
   className="service-btn-read"
-  onClick={() => navigate("/TrainingReact")}
+  onClick={() => navigate("/Training")}
 >
   Read More
   <i className="ti-arrow-right"><FaArrowRight /></i>

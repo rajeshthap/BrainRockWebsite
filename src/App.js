@@ -52,7 +52,7 @@ import CreateTeam from "./componets/hr_dashboard/teammanagement/CreateTeam";
 import ManageTeam from "./componets/hr_dashboard/teammanagement/ManageTeam";
 import Courses from "./componets/topnav/navigationpages/Courses";
 import Gallery from "./componets/topnav/navigationpages/Gallery";
-import TrainingReact from "./componets/topnav/navigationpages/TrainingReact";
+
 import TrainingRegistration from "./componets/topnav/navigationpages/TrainingRegistration";
 import Python from "./componets/topnav/navigationpages/Python";
 import TrainingPHP from "./componets/topnav/navigationpages/TrainingPHP";
@@ -95,6 +95,7 @@ import AddClient from "./componets/adminpanel/Client/AddClient";
 import EditClient from "./componets/adminpanel/Client/EditClient";
 import AddProject from "./componets/adminpanel/ourproject/AddProject";
 import ManageProject from "./componets/adminpanel/ourproject/ManageProject";
+import Training from "./componets/topnav/navigationpages/Training";
 
 
 function AppContent() {
@@ -182,7 +183,7 @@ function AppContent() {
         <Route path="/ApplyLeaveCalendar" element={<ApplyLeaveCalendar />} />
         <Route path="/Courses" element={<Courses />} />
         <Route path="/Gallery" element={<Gallery />} />
-        <Route path="/TrainingReact" element={<TrainingReact />} />
+        <Route path="/Training" element={<Training />} />
         <Route path="/TrainingRegistration" element={<TrainingRegistration />} />
         <Route path="/Python" element={<Python />} />
         <Route path="/TrainingPHP" element={<TrainingPHP />} />
