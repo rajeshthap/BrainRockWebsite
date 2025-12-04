@@ -96,6 +96,8 @@ import EditClient from "./componets/adminpanel/Client/EditClient";
 import AddProject from "./componets/adminpanel/ourproject/AddProject";
 import ManageProject from "./componets/adminpanel/ourproject/ManageProject";
 import Training from "./componets/topnav/navigationpages/Training";
+import AddCertification from "./componets/adminpanel/Candidate/AddCertification";
+import ViewCertified from "./componets/adminpanel/Candidate/ViewCertified";
 
 
 function AppContent() {
@@ -154,6 +156,8 @@ function AppContent() {
     "/EditClient",
     "/AddProject",
     "/ManageProject",
+    "/AddCertification",
+    "/ViewCertified",
 
   ]);
 
@@ -566,6 +570,23 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageProject/>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/AddCertification"
+          element={
+            <ProtectedRoute>
+              <AddCertification/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ViewCertified"
+          element={
+            <ProtectedRoute>
+              <ViewCertified/>
             </ProtectedRoute>
           }
         />
