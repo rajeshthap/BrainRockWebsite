@@ -183,6 +183,9 @@ const EditClient = () => {
       
       const apiResponseData = await response.json();
 
+      // Generate a unique timestamp for cache busting
+      const timestamp = Date.now();
+      
       // Instant UI update with correct path
       setClientData(prevData => 
         prevData.map(item => 
@@ -192,10 +195,12 @@ const EditClient = () => {
                 full_name: editFormData.full_name,
                 designation: editFormData.designation,
                 description: editFormData.description,
-                // Construct the full URL using the base URL constant and the new path from the API response
-                image: hasImageChanged && apiResponseData.data && apiResponseData.data.image
-                    ? `${API_BASE_URL}${apiResponseData.data.image}?t=${Date.now()}`
-                    : item.image // Keep the old image URL if no new one was uploaded
+                // Always update the image URL with a new timestamp to force refresh
+                image: hasImageChanged 
+                  ? (editImagePreview && editImagePreview.startsWith('blob:') 
+                      ? editImagePreview // Use the blob URL for immediate preview
+                      : `${API_BASE_URL}${apiResponseData.data.image || item.image?.split('?t=')[0]}?t=${timestamp}`)
+                  : `${item.image?.split('?t=')[0]}?t=${timestamp}` // Add timestamp to existing image
               } 
             : item
         )

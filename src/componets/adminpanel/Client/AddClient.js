@@ -17,7 +17,7 @@ const AddClient = () => {
     designation: "",
     description: "",
     image: null, // Will hold the file object
-    alt: ""
+    
   });
   
   // State for image preview
@@ -79,7 +79,7 @@ const AddClient = () => {
       designation: "",
       description: "",
       image: null,
-      alt: ""
+      
     });
     setImagePreview(null);
     setMessage("");
@@ -99,7 +99,6 @@ const AddClient = () => {
     if (formData.image) {
       dataToSend.append('image', formData.image, formData.image.name);
     }
-    dataToSend.append('alt', formData.alt);
     
     try {
       // Client API endpoint
@@ -176,7 +175,7 @@ const AddClient = () => {
                 <Form.Label>Full Name</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter client's full name"
+                  placeholder="Enter Full Name"
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleChange}
@@ -187,7 +186,7 @@ const AddClient = () => {
                 <Form.Label>Designation</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter client's designation"
+                  placeholder="Enter Designation"
                   name="designation"
                   value={formData.designation}
                   onChange={handleChange}
@@ -199,7 +198,7 @@ const AddClient = () => {
                 <Form.Control
                   as="textarea"
                   rows={4}
-                  placeholder="Enter client description"
+                  placeholder="Enter Description"
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
@@ -221,16 +220,7 @@ const AddClient = () => {
                 )}
               </Form.Group>
               
-              <Form.Group className="mb-4">
-                <Form.Label>Alt Text</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter alt text for image"
-                  name="alt"
-                  value={formData.alt}
-                  onChange={handleChange}
-                />
-              </Form.Group>
+         
               
               <Button 
                 variant="primary" 
