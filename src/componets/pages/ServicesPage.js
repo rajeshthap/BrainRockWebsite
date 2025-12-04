@@ -19,7 +19,7 @@ function ServicesPage() {
   // Render icon from URL OR default icon
   const renderIcon = (iconUrl) => {
     if (!iconUrl) return <LuBrainCircuit />;
-    return <img src={iconUrl} alt="service-icon" style={{ width: "40px" }} />;
+    return <img src={iconUrl} alt="service-icon" style={{ width: "80px" }} />;
   };
 
   useEffect(() => {
@@ -61,6 +61,11 @@ function ServicesPage() {
       <Container className="">
       <div className="ourteam-box ">
         <Container className="">
+          <Row className=''>
+                      <div className='our-heading-team'>
+                        <h1> Our Services</h1>
+                      </div>
+                    </Row>
           <Row className="feature-area feature-minus-top">
             <Container>
               <div className="feature-wpr grid-3">
@@ -222,7 +227,7 @@ function ServicesPage() {
 </Container>
       <Container />
 
-      <Container fluid className="br-footer-box">
+      <Container fluid className="br-footer-box mt-4">
         <FooterPage />
       </Container>
     </div>
