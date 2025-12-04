@@ -95,7 +95,7 @@ function Courses() {
                     </p>
                    <button
   className="service-btn-read"
-  onClick={() => navigate("/Training")}
+  onClick={() => navigate("/Training", { state: { courseId: course.id } })}
 >
   Read More
   <i className="ti-arrow-right"><FaArrowRight /></i>
@@ -118,4 +118,4 @@ function Courses() {
   )
 }
 
-export default Courses
+export default Courses;

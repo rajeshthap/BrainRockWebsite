@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 import "../../../assets/css/Trainingregistration.css";
 import FooterPage from "../../footer/FooterPage";
 
-function TrainingRegistration() {
+function TrainingRegistration({ courseTitle, courseDuration }) {
+  const location = useLocation();
   const [courseData, setCourseData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [maxDate, setMaxDate] = useState(""); // For DOB max date (today)
+  const [maxDate, setMaxDate] = useState(""); 
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  
+  const isFromTrainingPage = (location.state && 
+    (location.state.training_name || location.state.courseTitle)) || 
+    courseTitle; 
 
   const [formData, setFormData] = useState({
     application_for_course: "",
@@ -27,25 +37,58 @@ function TrainingRegistration() {
   const [errors, setErrors] = useState({});
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Set max date for DOB to today's date
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setMaxDate(today);
   }, []);
 
-  // FETCH COURSES
+  useEffect(() => {
+    const courseName = location.state?.training_name || 
+                      location.state?.courseTitle || 
+                      courseTitle; 
+    if (courseName) {
+      setFormData(prev => ({
+        ...prev,
+        application_for_course: courseName
+      }));
+      
+      if (courseData.length > 0) {
+        const matchingCategory = courseData.find(cat => 
+          cat.courses.includes(courseName)
+        );
+        if (matchingCategory) {
+          setSelectedCategory(matchingCategory.category);
+        }
+      }
+    }
+  }, [location.state, courseData, courseTitle]); 
   useEffect(() => {
     axios
       .get("https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/")
       .then((res) => {
         if (res.data && Array.isArray(res.data.courses)) {
           setCourseData(res.data.courses);
+          
+          const courseName = location.state?.training_name || 
+                            location.state?.courseTitle || 
+                            courseTitle;
+          if (courseName) {
+            const matchingCategory = res.data.courses.find(cat => 
+              cat.courses.includes(courseName)
+            );
+            if (matchingCategory) {
+              setSelectedCategory(matchingCategory.category);
+            }
+          }
         }
       })
-      .catch((err) => console.error("Course list error:", err));
-  }, []);
+      .catch((err) => {
+        console.error("Course list error:", err);
+        setErrorMessage("Failed to load course data. Please refresh the page.");
+        setShowError(true);
+      });
+  }, [location.state, courseTitle]);
 
-  // LIVE VALIDATION
   const validateField = (name, value) => {
     let msg = "";
 
@@ -86,9 +129,9 @@ function TrainingRegistration() {
     }
 
     setErrors((prev) => ({ ...prev, [name]: msg }));
+    return msg === "";
   };
 
-  // INPUT CHANGE HANDLER
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     const newValue = files ? files[0] : value;
@@ -97,7 +140,6 @@ function TrainingRegistration() {
     validateField(name, newValue);
   };
 
-  // CATEGORY CHANGE
   const handleCategoryChange = (e) => {
     const cat = e.target.value;
     setSelectedCategory(cat);
@@ -107,7 +149,6 @@ function TrainingRegistration() {
       application_for_course: "",
     });
 
-    // Clear both category and application_for_course errors
     setErrors((prev) => ({ 
       ...prev, 
       application_for_course: "",
@@ -115,41 +156,68 @@ function TrainingRegistration() {
     }));
   };
 
-  // FINAL VALIDATION BEFORE SUBMIT
   const validateFormBeforeSubmit = () => {
     let temp = {};
+    let isValid = true;
 
-    if (!selectedCategory) temp.category = "Please select category";
-    if (!formData.application_for_course)
+    if (!selectedCategory) {
+      temp.category = "Please select category";
+      isValid = false;
+    }
+    
+    if (!formData.application_for_course) {
       temp.application_for_course = "Please select course";
+      isValid = false;
+    }
 
-    if (!formData.candidate_name)
+    if (!formData.candidate_name) {
       temp.candidate_name = "Candidate name is required";
+      isValid = false;
+    }
 
-    if (!formData.email) temp.email = "Email is required";
+    if (!formData.email) {
+      temp.email = "Email is required";
+      isValid = false;
+    }
 
-    if (!formData.mobile_no) temp.mobile_no = "Mobile is required";
+    if (!formData.mobile_no) {
+      temp.mobile_no = "Mobile is required";
+      isValid = false;
+    }
 
-    if (!formData.password) temp.password = "Password required";
+    if (!formData.password) {
+      temp.password = "Password required";
+      isValid = false;
+    }
 
-    if (formData.confirm_password !== formData.password)
+    if (formData.confirm_password !== formData.password) {
       temp.confirm_password = "Passwords do not match";
+      isValid = false;
+    }
 
     setErrors(temp);
-    return Object.keys(temp).length === 0;
+    return isValid;
   };
 
-  // SUBMIT FORM
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateFormBeforeSubmit()) return;
+
+    setIsLoading(true);
+    setShowError(false);
+    setShowSuccess(false);
 
     const payload = new FormData();
     for (const key in formData) {
       payload.append(key, formData[key]);
     }
     payload.append("category", selectedCategory);
+
+    console.log("Submitting form data:");
+    for (let [key, value] of payload.entries()) {
+      console.log(`${key}:`, value);
+    }
 
     try {
       const response = await axios.post(
@@ -158,9 +226,9 @@ function TrainingRegistration() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      alert(" Registration Successful!");
-
-      // RESET FORM
+      setSuccessMsg("Registration Successful!");
+      setShowSuccess(true);
+      
       setFormData({
         application_for_course: "",
         candidate_name: "",
@@ -178,50 +246,81 @@ function TrainingRegistration() {
 
       setSelectedCategory("");
       setErrors({});
+      
+      setTimeout(() => setShowSuccess(false), 5000);
     } catch (error) {
       console.error("Registration Error:", error);
       
-      // Handle API errors for duplicate email/phone
-      if (error.response && error.response.data && error.response.data.errors) {
+      if (error.response) {
+        console.log("Error response data:", error.response.data);
+        console.log("Error response status:", error.response.status);
+        console.log("Error response headers:", error.response.headers);
+      }
+      
+      if (error.response && error.response.data) {
         const apiErrors = {};
         
-        // Check for email already exists error
-        if (error.response.data.errors.email && Array.isArray(error.response.data.errors.email)) {
-          apiErrors.email = "Email already exists. Please use a different email.";
-        }
-        
-        // Check for phone already exists error
-        if (error.response.data.errors.mobile_no && Array.isArray(error.response.data.errors.mobile_no)) {
-          apiErrors.mobile_no = "Mobile number already exists. Please use a different number.";
+        if (error.response.data.errors) {
+          Object.keys(error.response.data.errors).forEach(field => {
+            if (Array.isArray(error.response.data.errors[field]) && error.response.data.errors[field].length > 0) {
+              apiErrors[field] = error.response.data.errors[field][0];
+            }
+          });
+        } else if (error.response.data.message) {
+          setErrorMessage(error.response.data.message);
+          setShowError(true);
+        } else if (typeof error.response.data === 'string') {
+          setErrorMessage(error.response.data);
+          setShowError(true);
+        } else {
+          // Unknown structure
+          setErrorMessage("Registration failed. Please try again.");
+          setShowError(true);
         }
         
         // Update errors state with API errors
         if (Object.keys(apiErrors).length > 0) {
           setErrors(prev => ({ ...prev, ...apiErrors }));
         }
+      } else {
+        setErrorMessage("Registration failed. Please check your connection and try again.");
+        setShowError(true);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="ourteam-section">
+    <div className={`ourteam-section ${isFromTrainingPage ? 'no-footer' : ''}`}>
       <Container className="mt-4">
         <div className="ourteam-box text-heading">
           <h3 className="text-center mb-3">Training Registration</h3>
 
-          {successMsg && <Alert variant="success">{successMsg}</Alert>}
+          {showSuccess && (
+            <Alert variant="success" onClose={() => setShowSuccess(false)} dismissible>
+              {successMsg}
+            </Alert>
+          )}
+
+          {showError && (
+            <Alert variant="danger" onClose={() => setShowError(false)} dismissible>
+              {errorMessage}
+            </Alert>
+          )}
 
           <Form onSubmit={handleSubmit}>
             <Row>
-
               {/* CATEGORY */}
               <Col md={6}>
-                <Form.Group>
-                  <Form.Label className="br-label">Select training<span className="br-span-star">*</span></Form.Label>
+                <Form.Group className="mb-3">
+                  <Form.Label className="br-label">
+                    Select training<span className="br-span-star">*</span>
+                  </Form.Label>
                   <Form.Select
                     value={selectedCategory}
                     onChange={handleCategoryChange}
-                    className="br-form-control"
+                    className={`br-form-control ${errors.category ? "is-invalid" : ""}`}
                   >
                     <option value="">-- Select training --</option>
                     {courseData.map((item) => (
@@ -230,18 +329,22 @@ function TrainingRegistration() {
                       </option>
                     ))}
                   </Form.Select>
-                  <Form.Control.Feedback type="br-alert">
-                    {errors.category}
-                  </Form.Control.Feedback>
+                  {errors.category && (
+                    <div className="invalid-feedback d-block">
+                      {errors.category}
+                    </div>
+                  )}
                 </Form.Group>
               </Col>
 
               {/* COURSE */}
               <Col md={6}>
-                <Form.Group>
-                  <Form.Label className="br-label">Select Course <span className="br-span-star">*</span></Form.Label>
+                <Form.Group className="mb-3">
+                  <Form.Label className="br-label">
+                    Select Course <span className="br-span-star">*</span>
+                  </Form.Label>
                   <Form.Select
-                    className="br-form-control"
+                    className={`br-form-control ${errors.application_for_course ? "is-invalid" : ""}`}
                     name="application_for_course"
                     value={formData.application_for_course}
                     onChange={handleChange}
@@ -258,26 +361,33 @@ function TrainingRegistration() {
                           </option>
                         ))}
                   </Form.Select>
-                   <Form.Control.Feedback type="br-alert">
-                    {errors.application_for_course}
-                  </Form.Control.Feedback>
+                  {errors.application_for_course && (
+                    <div className="invalid-feedback d-block">
+                      {errors.application_for_course}
+                    </div>
+                  )}
                 </Form.Group>
               </Col>
 
               {/* Candidate Name */}
               <Col md={6} className="mt-3">
                 <Form.Group>
-                  <Form.Label className="br-label">Candidate Name <span className="br-span-star">*</span></Form.Label>
+                  <Form.Label className="br-label">
+                    Candidate Name <span className="br-span-star">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
-                    className="br-form-control"
+                    className={`br-form-control ${errors.candidate_name ? "is-invalid" : ""}`}
                     name="candidate_name"
-                    value={formData.candidate_name} placeholder="Enter your name"
+                    value={formData.candidate_name}
                     onChange={handleChange}
+                    placeholder="Enter your name"
                   />
-                  <Form.Control.Feedback type="br-alert">
-                    {errors.candidate_name}
-                  </Form.Control.Feedback>
+                  {errors.candidate_name && (
+                    <div className="invalid-feedback">
+                      {errors.candidate_name}
+                    </div>
+                  )}
                 </Form.Group>
               </Col>
 
@@ -290,7 +400,8 @@ function TrainingRegistration() {
                     className="br-form-control"
                     name="guardian_name"
                     value={formData.guardian_name}
-                    onChange={handleChange} placeholder="Enter your guardian name "
+                    onChange={handleChange}
+                    placeholder="Enter your guardian name"
                   />
                 </Form.Group>
               </Col>
@@ -304,7 +415,8 @@ function TrainingRegistration() {
                     className="br-form-control"
                     name="address"
                     value={formData.address}
-                    onChange={handleChange} placeholder="Enter your Address"
+                    onChange={handleChange}
+                    placeholder="Enter your Address"
                   />
                 </Form.Group>
               </Col>
@@ -319,7 +431,7 @@ function TrainingRegistration() {
                     name="date_of_birth"
                     value={formData.date_of_birth}
                     onChange={handleChange}
-                    max={maxDate} // Prevent future dates
+                    max={maxDate} 
                   />
                 </Form.Group>
               </Col>
@@ -327,72 +439,88 @@ function TrainingRegistration() {
               {/* Email */}
               <Col md={6} className="mt-3">
                 <Form.Group>
-                  <Form.Label className="br-label">Email <span className="br-span-star">*</span></Form.Label>
+                  <Form.Label className="br-label">
+                    Email <span className="br-span-star">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="email"
-                    className="br-form-control"
+                    className={`br-form-control ${errors.email ? "is-invalid" : ""}`}
                     name="email"
                     value={formData.email}
-                    onChange={handleChange} placeholder="Enter Your Email"
-                  
+                    onChange={handleChange}
+                    placeholder="Enter Your Email"
                   />
-                   <Form.Control.Feedback type="br-alert">
-                    {errors.email}
-                  </Form.Control.Feedback>
+                  {errors.email && (
+                    <div className="invalid-feedback">
+                      {errors.email}
+                    </div>
+                  )}
                 </Form.Group>
               </Col>
 
               {/* Password */}
               <Col md={6} className="mt-3">
                 <Form.Group>
-                  <Form.Label className="br-label">Password <span className="br-span-star">*</span></Form.Label>
+                  <Form.Label className="br-label">
+                    Password <span className="br-span-star">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="password"
-                    className="br-form-control"
+                    className={`br-form-control ${errors.password ? "is-invalid" : ""}`}
                     name="password"
-                    value={formData.password} placeholder="enter your Password"
+                    value={formData.password}
                     onChange={handleChange}
-                
+                    placeholder="Enter your password"
                   />
-                   <Form.Control.Feedback type="br-alert">
-                    {errors.password}
-                  </Form.Control.Feedback>
+                  {errors.password && (
+                    <div className="invalid-feedback">
+                      {errors.password}
+                    </div>
+                  )}
                 </Form.Group>
               </Col>
 
               {/* Confirm Password */}
               <Col md={6} className="mt-3">
                 <Form.Group>
-                  <Form.Label className="br-label">Confirm Password <span className="br-span-star">*</span></Form.Label>
+                  <Form.Label className="br-label">
+                    Confirm Password <span className="br-span-star">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="password"
                     name="confirm_password"
-                    className="br-form-control"
+                    className={`br-form-control ${errors.confirm_password ? "is-invalid" : ""}`}
                     value={formData.confirm_password}
-                    onChange={handleChange} placeholder="Enter your confirm Password"
-                    isInvalid={!!errors.confirm_password}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
                   />
-                   <Form.Control.Feedback type="br-alert">
-                    {errors.confirm_password}
-                  </Form.Control.Feedback>
+                  {errors.confirm_password && (
+                    <div className="invalid-feedback">
+                      {errors.confirm_password}
+                    </div>
+                  )}
                 </Form.Group>
               </Col>
 
               {/* Mobile */}
               <Col md={6} className="mt-3">
                 <Form.Group>
-                  <Form.Label className="br-label">Mobile Number <span className="br-span-star">*</span></Form.Label>
+                  <Form.Label className="br-label">
+                    Mobile Number <span className="br-span-star">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
-                    className="br-form-control"
+                    className={`br-form-control ${errors.mobile_no ? "is-invalid" : ""}`}
                     name="mobile_no"
-                    value={formData.mobile_no} placeholder="Enter your phone number"
+                    value={formData.mobile_no}
                     onChange={handleChange}
-                  
+                    placeholder="Enter your phone number"
                   />
-                   <Form.Control.Feedback type="br-alert">
-                    {errors.mobile_no}
-                  </Form.Control.Feedback>
+                  {errors.mobile_no && (
+                    <div className="invalid-feedback">
+                      {errors.mobile_no}
+                    </div>
+                  )}
                 </Form.Group>
               </Col>
 
@@ -407,7 +535,8 @@ function TrainingRegistration() {
                     className="br-form-control"
                     name="school_college_name"
                     value={formData.school_college_name}
-                    onChange={handleChange} placeholder="Enter your collage name"
+                    onChange={handleChange}
+                    placeholder="Enter your college name"
                   />
                 </Form.Group>
               </Col>
@@ -419,9 +548,10 @@ function TrainingRegistration() {
                   <Form.Control
                     type="text"
                     className="br-form-control"
-                    name="highest_education" placeholder="Enter your highest education"
+                    name="highest_education"
                     value={formData.highest_education}
                     onChange={handleChange}
+                    placeholder="Enter your highest education"
                   />
                 </Form.Group>
               </Col>
@@ -435,20 +565,47 @@ function TrainingRegistration() {
                     className="br-form-control"
                     name="profile_photo"
                     onChange={handleChange}
+                    accept="image/*"
                   />
+                  <Form.Text className="text-muted">
+                    Accepted formats: jpg, jpeg, png (Max size: 2MB)
+                  </Form.Text>
                 </Form.Group>
               </Col>
             </Row>
 
-            <div className="text-center">
-              <Button type="submit" className="mt-4" variant="primary">
-                Register Now
+            <div className="text-center mt-4">
+              <Button 
+                type="submit" 
+                variant="primary" 
+                disabled={isLoading}
+                className="px-5"
+              >
+                {isLoading ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                    />
+                    {" "}Registering...
+                  </>
+                ) : (
+                  "Register Now"
+                )}
               </Button>
             </div>
           </Form>
         </div>
       </Container>
       
+      {!isFromTrainingPage && (
+        <Container fluid className="br-footer-box">
+          <FooterPage />
+        </Container>
+      )}
     </div>
   );
 }
