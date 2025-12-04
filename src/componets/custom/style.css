@@ -88,6 +88,14 @@ body {
   font-size: var(--br-space-250);
   color: #ff0000;
 }
+.team-card:hover img {
+  transform: scale(1.08);
+}
+
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
 
 .br-label {
   font-size: var(--br-space-350);

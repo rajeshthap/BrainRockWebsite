@@ -16,8 +16,7 @@ const AddClient = () => {
     full_name: "",
     designation: "",
     description: "",
-    image: null, // Will hold the file object
-    
+    image: null,
   });
   
   // State for image preview
@@ -25,9 +24,11 @@ const AddClient = () => {
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
-  const [variant, setVariant] = useState("success"); // 'success' or 'danger'
+  
+  // Alert state - using the same pattern as EditClient
   const [showAlert, setShowAlert] = useState(false);
+  const [message, setMessage] = useState("");
+  const [variant, setVariant] = useState("success");
 
   // Responsive check
   useEffect(() => {
@@ -79,7 +80,6 @@ const AddClient = () => {
       designation: "",
       description: "",
       image: null,
-      
     });
     setImagePreview(null);
     setMessage("");
@@ -104,9 +104,6 @@ const AddClient = () => {
       // Client API endpoint
       const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourclient-items/', {
         method: 'POST',
-        headers: {
-          // 'Content-Type' should be omitted when sending FormData
-        },
         credentials: 'include',
         body: dataToSend,
       });
@@ -123,7 +120,7 @@ const AddClient = () => {
       setShowAlert(true);
       clearForm(); // Clear the form on success
       
-      // Hide success alert after 3 seconds
+      // Hide success alert after 3 seconds (same as EditClient)
       setTimeout(() => setShowAlert(false), 3000);
       
     } catch (error) {
@@ -141,7 +138,7 @@ const AddClient = () => {
       setVariant("danger");
       setShowAlert(true);
       
-      // Hide error alert after 5 seconds
+      // Hide error alert after 5 seconds (same as EditClient)
       setTimeout(() => setShowAlert(false), 5000);
       
     } finally {
@@ -163,7 +160,7 @@ const AddClient = () => {
           <div className="br-box-container">
             <h2 className="mb-4">Add New Client</h2>
             
-            {/* This alert will show for both success and error */}
+            {/* Alert component - same as in EditClient */}
             {showAlert && (
               <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
                 {message}
@@ -179,6 +176,7 @@ const AddClient = () => {
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleChange}
+                  required
                 />
               </Form.Group>
               
@@ -190,6 +188,7 @@ const AddClient = () => {
                   name="designation"
                   value={formData.designation}
                   onChange={handleChange}
+                  required
                 />
               </Form.Group>
               
@@ -202,6 +201,7 @@ const AddClient = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
+                  required
                 />
               </Form.Group>
               
@@ -220,24 +220,24 @@ const AddClient = () => {
                 )}
               </Form.Group>
               
-         
-              
-              <Button 
-                variant="primary" 
-                type="submit" 
-                disabled={isSubmitting}
-                className="me-2"
-              >
-                {isSubmitting ? 'Submitting...' : 'Add Client'}
-              </Button>
-              
-              <Button 
-                variant="secondary" 
-                onClick={clearForm}
-                type="button"
-              >
-                Clear
-              </Button>
+              <div className="d-flex justify-content-end">
+                <Button 
+                  variant="secondary" 
+                  onClick={clearForm}
+                  type="button"
+                  className="me-2"
+                >
+                  Clear
+                </Button>
+                
+                <Button 
+                  variant="primary" 
+                  type="submit" 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Add Client'}
+                </Button>
+              </div>
             </Form>
           </div>
         </Container>
