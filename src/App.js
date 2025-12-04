@@ -93,6 +93,8 @@ import Feedback from "./componets/topnav/navigationpages/Feedback";
 import Feedbackget from "./componets/adminpanel/Feedback/Feedbackget";
 import AddClient from "./componets/adminpanel/Client/AddClient";
 import EditClient from "./componets/adminpanel/Client/EditClient";
+import AddProject from "./componets/adminpanel/ourproject/AddProject";
+import ManageProject from "./componets/adminpanel/ourproject/ManageProject";
 
 
 function AppContent() {
@@ -149,6 +151,8 @@ function AppContent() {
     "/Feedbackget",
     "/AddClient",
     "/EditClient",
+    "/AddProject",
+    "/ManageProject",
 
   ]);
 
@@ -548,6 +552,23 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/AddProject"
+          element={
+            <ProtectedRoute>
+              <AddProject/>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ManageProject"
+          element={
+            <ProtectedRoute>
+              <ManageProject/>
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
       
       

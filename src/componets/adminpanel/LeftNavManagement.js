@@ -306,6 +306,25 @@ const menuItems = [
         },
       ],
     }, 
+    {
+      icon: <PiUserListBold />,
+      label: "Our Projects",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Project",
+          path: "/AddProject",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "ManageProject",
+          path: "/ManageProject",
+          icon: <FaChartLine />,
+        },
+      ],
+    },
        
        {
       icon: <PiUserListBold />,
