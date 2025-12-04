@@ -255,7 +255,7 @@ function UserPage() {
   // Function to render icon component based on the icon from API
   const renderIcon = (iconUrl) => {
     if (iconUrl) {
-      return <img src={iconUrl} alt="Service Icon" className="img-fluid" style={{width: '40px', height: '40px'}} />;
+      return <img src={iconUrl} alt="Service Icon" className="img-fluid" style={{width: '50px', height: '50px'}} />;
     }
     // Fallback to default icon if no icon is provided
     return <MdEngineering />;
