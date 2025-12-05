@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Card, Modal } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Card, Modal,Pagination } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
@@ -33,6 +33,11 @@ const EditClient = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [message, setMessage] = useState("");
   const [variant, setVariant] = useState("success");
+  
+  // Pagination and search state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
+  const [searchTerm, setSearchTerm] = useState('');
  
   // Responsive check
   useEffect(() => {
@@ -85,6 +90,26 @@ const EditClient = () => {
   }, []);
  
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  
+  // Filter client data based on search term
+  const filteredClientData = searchTerm.trim() === '' 
+    ? clientData 
+    : clientData.filter((item) => {
+        const lowerSearch = searchTerm.toLowerCase();
+        return (
+          item.full_name?.toLowerCase().includes(lowerSearch) ||
+          item.designation?.toLowerCase().includes(lowerSearch) ||
+          item.description?.toLowerCase().includes(lowerSearch)
+        );
+      });
+  
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredClientData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredClientData.length / itemsPerPage);
+  
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
  
   // Handle delete
   const handleDelete = async (id) => {
@@ -234,7 +259,21 @@ const EditClient = () => {
         <AdminHeader toggleSidebar={toggleSidebar} />
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            <h2 className="mb-4">Manage Clients</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Manage Clients</h2>
+              <div style={{ width: '300px' }}>
+                <input
+                  type="text"
+                  placeholder="Search by name, designation, or description..."
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            </div>
            
             {showAlert && (
               <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
@@ -249,13 +288,14 @@ const EditClient = () => {
                 </div>
               </div>
             ) : (
+              <>
               <Row>
-                {clientData.length === 0 ? (
+                {currentItems.length === 0 ? (
                   <Col xs={12} className="text-center my-5">
-                    <p>No clients found.</p>
+                    <p>{searchTerm ? 'No clients match your search.' : 'No clients found.'}</p>
                   </Col>
                 ) : (
-                  clientData.map((item) => (
+                  currentItems.map((item) => (
                     <Col lg={4} md={6} sm={12} className="mb-4" key={item.id}>
                       <Card className="h-100">
                         {item.image && (
@@ -292,6 +332,32 @@ const EditClient = () => {
                   ))
                 )}
               </Row>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="d-flex justify-content-center mt-4">
+                  <Pagination>
+                    <Pagination.Prev 
+                      onClick={() => handlePageChange(currentPage - 1)} 
+                      disabled={currentPage === 1}
+                    />
+                    {[...Array(totalPages).keys()].map(page => (
+                      <Pagination.Item 
+                        key={page + 1} 
+                        active={page + 1 === currentPage}
+                        onClick={() => handlePageChange(page + 1)}
+                      >
+                        {page + 1}
+                      </Pagination.Item>
+                    ))}
+                    <Pagination.Next 
+                      onClick={() => handlePageChange(currentPage + 1)} 
+                      disabled={currentPage === totalPages}
+                    />
+                  </Pagination>
+                </div>
+              )}
+              </>
             )}
           </div>
         </Container>

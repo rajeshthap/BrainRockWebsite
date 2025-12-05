@@ -18,6 +18,9 @@ const ViewCertified = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
+  
   // Responsive check
   useEffect(() => {
     const checkDevice = () => {
@@ -64,11 +67,25 @@ const ViewCertified = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   
+  // Filter certificates based on search term
+  const filteredCertificates = searchTerm.trim() === '' 
+    ? certificates 
+    : certificates.filter((cert) => {
+        const lowerSearch = searchTerm.toLowerCase();
+        return (
+          cert.certificate_number?.toLowerCase().includes(lowerSearch) ||
+          cert.certificate_id?.toLowerCase().includes(lowerSearch) ||
+          cert.full_name?.toLowerCase().includes(lowerSearch) ||
+          cert.father_name?.toLowerCase().includes(lowerSearch) ||
+          cert.program?.toLowerCase().includes(lowerSearch)
+        );
+      });
+  
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = certificates.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(certificates.length / itemsPerPage);
+  const currentItems = filteredCertificates.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredCertificates.length / itemsPerPage);
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
   
@@ -96,7 +113,21 @@ const ViewCertified = () => {
         {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            <h2 className="mb-4">Certificate Management</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Certificate Management</h2>
+              <div style={{ width: '300px' }}>
+                <input
+                  type="text"
+                  placeholder="Search by certificate number, ID, name, or program..."
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1); // Reset to first page on search
+                  }}
+                />
+              </div>
+            </div>
             
             {error && (
               <Alert variant="danger" className="mb-4">

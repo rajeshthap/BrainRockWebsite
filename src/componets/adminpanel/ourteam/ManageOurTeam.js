@@ -20,6 +20,9 @@ const ManageOurTeam = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Number of cards to show per page
   
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
+  
   // Modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentMember, setCurrentMember] = useState(null);
@@ -78,6 +81,17 @@ const ManageOurTeam = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  // --- Filter Team Members ---
+  const filteredTeamMembers = searchTerm.trim() === '' 
+    ? teamMembers 
+    : teamMembers.filter((member) => {
+        const lowerSearch = searchTerm.toLowerCase();
+        return (
+          member.full_name?.toLowerCase().includes(lowerSearch) ||
+          member.designation?.toLowerCase().includes(lowerSearch)
+        );
+      });
+
   // Fetch team members from API
   const fetchTeamMembers = async () => {
     try {
@@ -117,8 +131,8 @@ const ManageOurTeam = () => {
   // --- Pagination Logic ---
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = teamMembers.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(teamMembers.length / itemsPerPage);
+  const currentItems = filteredTeamMembers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredTeamMembers.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -324,7 +338,21 @@ const ManageOurTeam = () => {
         <AdminHeader toggleSidebar={toggleSidebar} />
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            <h2 className="mb-4">Manage Team Members</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Manage Team Members</h2>
+              <div style={{ width: '300px' }}>
+                <input
+                  type="text"
+                  placeholder="Search by name or designation..."
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            </div>
             
             {showAlert && (
               <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
@@ -339,8 +367,13 @@ const ManageOurTeam = () => {
             ) : (
               <>
                 <Row>
-                  {currentItems.map((member) => (
-                    <Col lg={4} md={6} sm={12} className="mb-4" key={member.id}>
+                  {currentItems.length === 0 ? (
+                    <Col xs={12} className="text-center my-5">
+                      <p>{searchTerm ? 'No team members match your search.' : 'No team members found.'}</p>
+                    </Col>
+                  ) : (
+                    currentItems.map((member) => (
+                      <Col lg={4} md={6} sm={12} className="mb-4" key={member.id}>
                       <Card className="h-100 team-card">
                         {member.image && (
                           <Card.Img 
@@ -366,7 +399,8 @@ const ManageOurTeam = () => {
                         </Card.Footer>
                       </Card>
                     </Col>
-                  ))}
+                    ))
+                  )}
                 </Row>
                 {renderPagination()}
               </>

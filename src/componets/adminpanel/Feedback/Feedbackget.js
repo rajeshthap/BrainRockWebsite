@@ -18,6 +18,9 @@ const Feedbackget = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
+  
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
   const [showReplyModal, setShowReplyModal] = useState(false);
@@ -73,11 +76,25 @@ const Feedbackget = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   
+  // Filter feedbacks based on search term
+  const filteredFeedbacks = searchTerm.trim() === '' 
+    ? feedbacks 
+    : feedbacks.filter((feedback) => {
+        const lowerSearch = searchTerm.toLowerCase();
+        return (
+          feedback.full_name?.toLowerCase().includes(lowerSearch) ||
+          feedback.email?.toLowerCase().includes(lowerSearch) ||
+          feedback.phone?.toLowerCase().includes(lowerSearch) ||
+          feedback.subject?.toLowerCase().includes(lowerSearch) ||
+          feedback.message?.toLowerCase().includes(lowerSearch)
+        );
+      });
+  
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = feedbacks.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(feedbacks.length / itemsPerPage);
+  const currentItems = filteredFeedbacks.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredFeedbacks.length / itemsPerPage);
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
   
@@ -209,7 +226,21 @@ const Feedbackget = () => {
         {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            <h2 className="mb-4">Feedback Management</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Feedback Management</h2>
+              <div style={{ width: '300px' }}>
+                <input
+                  type="text"
+                  placeholder="Search by name, email, phone, or subject..."
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            </div>
             
             {error && (
               <Alert variant="danger" className="mb-4">
