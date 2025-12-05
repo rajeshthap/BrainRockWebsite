@@ -82,7 +82,7 @@ const Training = () => {
 
   return (
     <div className="ourteam-section">
-      <Container className="ourteam-box">
+      <Container className="ourteam-box-training">
         <div className="my-3 main-mt-0">
           {/* Top Registration Button */}
           <div className="m-3 mobile-register">

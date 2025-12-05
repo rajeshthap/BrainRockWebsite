@@ -19,7 +19,7 @@ function FooterPage() {
         <Col lg={4} md={6} sm={6}>
           <div className='footer-widget about-us'>
            <Link to="/"> <div className='footer-logo mb-30'><img src={Logo} alt="logo" className="logo-wecd" /></div></Link>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temp incididunt ut labore et dolore</p>
+            <p>32 New Park Road, Gandhi Gram Near Kanwali Road Dehradun, Uttarakhand</p>
             <div className='subscribe-area'>
               <Form className=''>
                 <span className='btn-shape'></span>
@@ -45,54 +45,16 @@ function FooterPage() {
              <Link to="/CompanyProfile"> <li> <i><MdArrowForwardIos className='i-space' /></i>About Us</li></Link>
            <Link to="/OurTeam"> <li> <i><MdArrowForwardIos className='i-space' /></i>Meet Our Team</li></Link>  
              <Link to="/RunningProjects"> <li> <i><MdArrowForwardIos className='i-space' /></i>Our Projects</li></Link>   
-          <Link to="/Contact"><li> <i><MdArrowForwardIos className='i-space' /></i>Contact us</li></Link>
+          
                     <Link to="/Feedback"><li> <i><MdArrowForwardIos className='i-space' /></i>Feedback</li></Link>
                     <Link to="/Certificate"><li> <i><MdArrowForwardIos className='i-space' /></i>Certificate</li></Link>
+                    <Link to="/Contact"><li> <i><MdArrowForwardIos className='i-space' /></i>Contact us</li></Link>
             </ul>
           </div>
 
         </Col>
-        <Col lg={3} md={6} sm={6}>
-          <div className='footer-widget footer-recent-post'>
-            <h4 className='footer-widget-title'>
-              Working Hours
+ 
 
-              <span className='footer-title-line'></span>
-            </h4>
-            <div className='recent-post-wrp'>
-              <div className='footer-recent-post-single'>
-
-                <div className='recent-post-pic'> <img src={fImge} alt="fImge" className="" /></div>
-
-                <div className='recent-post-desc'>
-                  <h5>
-                    Fruitcake cotton candy<br></br>
-                    wafer pudding
-                  </h5>
-                  <span className='recent-post-date'>17 April 2023</span>
-                </div>
-              </div>
-            </div>
-            <div className='recent-post-wrp'>
-              <div className='footer-recent-post-single'>
-
-                <div className='recent-post-pic'> <img src={FImg1} alt="FImg1" className="" /></div>
-
-                <div className='recent-post-desc'>
-                  <h5>
-                    Muffin apple pie tootsie
-                    <br></br>
-                    sweet cotton roll
-                  </h5>
-                  <span className='recent-post-date'>18 April 2023</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-
-        </Col>
         <Col lg={3} md={6} sm={6}>
 
           <div className='footer-widget footer-link'>
@@ -125,6 +87,32 @@ function FooterPage() {
 
 
         </Col>
+              <Col lg={3} md={6} sm={6}>
+  <div className='footer-widget footer-recent-post'>
+    <h4 className='footer-widget-title'>
+      Our Location
+      <span className='footer-title-line'></span>
+    </h4>
+
+ <div 
+  className="footer-map-container" 
+  style={{ cursor: "pointer" }}
+  onClick={() => window.open("https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3444.0949168590623!2d78.0170128!3d30.319817899999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39092bb4f9cc1c19%3A0x7e1f8bfd41e158f2!2sBrainrock%20Consulting%20Services%20India!5e0!3m2!1sen!2sin!4v1764934647758!5m2!1sen!2sin", "_blank")}
+>
+  <iframe
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3444.0949168590623!2d78.0170128!3d30.319817899999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39092bb4f9cc1c19%3A0x7e1f8bfd41e158f2!2sBrainrock%20Consulting%20Services%20India!5e0!3m2!1sen!2sin!4v1764934647758!5m2!1sen!2sin"
+    width="250"
+    height="200"
+    style={{ border: 0, pointerEvents: "none" }}
+    allowFullScreen=""
+    loading="lazy"
+    referrerPolicy="no-referrer-when-downgrade"
+    className="footer-map-iframe"
+    title="company-location"
+  ></iframe>
+</div>
+  </div>
+</Col>
       </Row>
 
 

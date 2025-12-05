@@ -302,6 +302,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
   return (
     <>
+       {!isFromTrainingPage && (
        <div className='TrainingRegistration-banner'>
                       <div className='site-breadcrumb-wpr'>
                         <h2 className='breadcrumb-title'>Our Training Registration</h2>
@@ -319,6 +320,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
               
                       </div>
                     </div>
+       )}
     <div className={`ourteam-section ${isFromTrainingPage ? 'no-footer' : ''}`}>
       <Container className="mt-4">
         <div className="ourteam-box text-heading">

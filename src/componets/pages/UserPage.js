@@ -709,7 +709,7 @@ function UserPage() {
                     lg={3}
                     md={3}
                     sm={12}
-                    className={index < 4 ? "box-info" : " box-info"}
+                    className={index < 4 ? "box-info" : " box-info mt-3"}
                     key={item.id}
                   >
                     <div className="service-box">
