@@ -269,7 +269,7 @@ const menuItems = [
       
       {
       icon: <PiUserListBold />,
-      label: "Student Gallery ",
+      label: "Candidate",
  
       submenu: [
         
