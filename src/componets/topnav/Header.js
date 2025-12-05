@@ -20,7 +20,7 @@ function Header() {
   return (
     <div>
       {/* Desktop view */}
-      <div className="main-header" style={{ position: 'sticky', top: 0 }}>
+      <div className="main-header" style={{ position: "sticky", top: 0 }}>
         <div className="header-container d-flex justify-content-between align-items-center">
           <div className="d-flex br-header">
             <p className="header-title mb-0 me-3">
@@ -34,24 +34,22 @@ function Header() {
           </div>
 
           <ul className="d-flex mb-0 list-unstyled br-header">
-
-
-            <li className="header-item">
+            <li className="">
               <button
                 type="button"
                 onClick={handleLoginClick}
                 className="login-button d-flex align-items-center"
-
               >
                 <PiSignInBold className="br-header-icon" />
                 <span>Login</span>
               </button>
             </li>
-
-            <ImFacebook className="br-m-left br-header-icon" />
-            <FaInstagram className="br-header-icon" />
-            <FaTwitter className="br-header-icon" />
-             <FaLinkedinIn className="br-header-icon" />
+            <div className="">
+              <ImFacebook className="br-m-left br-header-icon" />
+              <FaInstagram className="br-header-icon" />
+              <FaTwitter className="br-header-icon" />
+              <FaLinkedinIn className="br-header-icon" />
+            </div>
           </ul>
         </div>
       </div>
@@ -60,34 +58,30 @@ function Header() {
       <div className="main-mobile-header">
         <div className="d-flex justify-content-between align-items-center main-header">
           <ul className="d-flex mb-0 list-unstyled br-header">
-            <li className="header-item me-3">
-              <RiUser3Fill className="br-header-icon" />
-              Register
-            </li>
-
-            <li className="header-item">
+            <li className="">
               <button
                 type="button"
                 onClick={handleLoginClick}
                 className="login-button d-flex align-items-center"
                 style={{
-                  background: 'none',
-                  border: 'none',
+                  background: "none",
+                  border: "none",
                   padding: 0,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center'
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
                 <PiSignInBold className="br-header-icon" />
-                <span>Signin</span>
+                <span>Login</span>
               </button>
             </li>
-
-            <ImFacebook className="br-m-left br-header-icon" />
-            <FaInstagram className="br-header-icon" />
-            <FaTwitter className="br-header-icon" />
-            <FaLinkedinIn className="br-header-icon" />
+            <div>
+              <ImFacebook className="br-m-left br-header-icon" />
+              <FaInstagram className="br-header-icon" />
+              <FaTwitter className="br-header-icon" />
+              <FaLinkedinIn className="br-header-icon" />
+            </div>
           </ul>
         </div>
       </div>

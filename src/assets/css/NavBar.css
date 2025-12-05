@@ -77,6 +77,10 @@ img.logo-wecd {
     .awc-title p {
         font-size: var(--br-space-200);
     }
+/* Prevent double-click on dropdown from closing navbar */
+.navbar .dropdown-menu.show {
+  display: block;
+}
 
     .awc-title p {
         display: none;
@@ -99,7 +103,7 @@ img.logo-wecd {
     .awc-subtitle {
 
         display: flex;
-        font-size: var(--br-space-300) !important;
+       
     }
 
     .subtitle {

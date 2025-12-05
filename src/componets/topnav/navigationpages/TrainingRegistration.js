@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "../../../assets/css/Trainingregistration.css";
 import FooterPage from "../../footer/FooterPage";
 
@@ -301,10 +301,28 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
   };
 
   return (
+    <>
+       <div className='TrainingRegistration-banner'>
+                      <div className='site-breadcrumb-wpr'>
+                        <h2 className='breadcrumb-title'>Our Training Registration</h2>
+                     <ul className='breadcrumb-menu clearfix'>
+                <li>
+                  <Link className="breadcrumb-home" to="/">Home</Link>
+                </li>
+              
+                <li className='px-2'>/</li>
+              
+                <li>
+                  <Link className="breadcrumb-about" to="/">Registration</Link>
+                </li>
+              </ul>
+              
+                      </div>
+                    </div>
     <div className={`ourteam-section ${isFromTrainingPage ? 'no-footer' : ''}`}>
       <Container className="mt-4">
         <div className="ourteam-box text-heading">
-          <h3 className="text-center mb-3">Training Registration</h3>
+          
 
           {showSuccess && (
             <Alert variant="success" onClose={() => setShowSuccess(false)} dismissible>
@@ -614,6 +632,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
         </Container>
       )}
     </div>
+    </>
   );
 }
 

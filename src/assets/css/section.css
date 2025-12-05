@@ -141,6 +141,7 @@
   background-position: center;
   background-repeat: no-repeat;
   padding: var(--br-space-700);
+  text-align: justify;
 }
 
 /* Responsive adjustments */

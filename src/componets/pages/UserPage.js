@@ -304,7 +304,7 @@ function UserPage() {
                 <Row className="resorce-img">
                   <Col lg={6} md={6} sm={12}>
                     <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
-                      <h1 className=" bg-opacity-50 py-2 px-4">
+                      <h1 className=" bg-opacity-50 user-left py-2">
                         <span class="hero-sub-title mb-20">
                           Professional it solution ~
                         </span>{" "}
@@ -314,7 +314,7 @@ function UserPage() {
                           Best It Solution Company
                         </span>{" "}
                       </h1>
-                      <p className=" bg-opacity-50 py-2 px-4">
+                      <p className=" bg-opacity-50 py-2 user-left">
                         We deliver innovative IT solutions to help your business
                         stay ahead in the digital worldd
                       </p>
@@ -354,7 +354,7 @@ function UserPage() {
                       </p>
                     </div>
                   </Col>
-                  <Col lg={6} md={6} sm={12}>
+                 <Col lg={6} md={6} sm={12} className="banner-img">
                     <div>
                       <i>
                         <img
@@ -364,7 +364,7 @@ function UserPage() {
                         ></img>
                       </i>
                     </div>
-                  </Col>
+                    </Col>
                 </Row>
                 <Carousel.Caption></Carousel.Caption>
               </Carousel.Item>
@@ -600,7 +600,7 @@ function UserPage() {
               lg={6}
               md={6}
               sm={12}
-              className="about-right pl-30 d-flex flex-column justify-content-center p-5"
+              className="about-right pl-30 d-flex flex-column justify-content-center"
             >
               <span className="hero-sub-title">About Us</span>
               {/* Dynamic title from API */}
@@ -637,7 +637,7 @@ function UserPage() {
                       className={index < 4 ? "box-info" : "mt-4 box-info"}
                       key={index}
                     >
-                      <div className="service-box">
+                      <div className="service-box service-btm">
                         <div className="service-icon">
                           <i className="flaticon-cloud-service">
                             <div
@@ -675,7 +675,7 @@ function UserPage() {
                       className={index < 4 ? "box-info" : "mt-4 box-info"}
                       key={index}
                     >
-                      <div className="service-box">
+                      <div className="service-box ">
                         <div className="service-icon">
                           <i className="flaticon-cloud-service">
                             <MdEngineering />

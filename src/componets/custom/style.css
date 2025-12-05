@@ -280,7 +280,15 @@ body {
   .br-login {
     margin: var(--br-space-200) var(--br-space-0) var(--br-space-0) var(--br-space-0) !important;
   }
-
+.feature-icon{
+  text-align: center;
+}
+.br-footer-box {
+  margin-top: 12px !important;
+}
+.service-btm{
+  margin-bottom: 18px;
+}
   .main-mobile-header {
     display: block;
   }
