@@ -225,7 +225,7 @@ export const AuthProvider = ({ children }) => {
         const allowedReloadPaths = [
           '/', '/home', '/CompanyProfile', '/OurTeam', '/RunningProjects', '/ServicesPage',
           '/Courses', '/Gallery', '/Feedback', '/TrainingRegistration', '/Training',
-          '/Contact', '/Login'
+          '/Contact', '/Login', '/ServicesDetails', '/Certificate'
         ].map(p => p.toLowerCase());
 
         const normalizedPath = path.toLowerCase().replace(/\/+$/, '') || '/';

@@ -316,7 +316,7 @@ function UserPage() {
                       </h1>
                       <p className=" bg-opacity-50 py-2 user-left">
                         We deliver innovative IT solutions to help your business
-                        stay ahead in the digital worldd
+                        stay ahead in the digital world
                       </p>
                     </div>
                   </Col>
@@ -444,7 +444,12 @@ function UserPage() {
                     <div className="feature-desc">
                       <h4>{item.title}</h4>
                       <p>{item.description}</p>
-                      <Link to="/service-single" className="feature-btn">
+                      {/* Updated to use Link with state prop instead of button */}
+                      <Link 
+                        to="/ServicesDetails" 
+                        state={{ serviceId: item.id }}
+                        className="feature-btn"
+                      >
                         Read More
                         <i className="ti-arrow-right">
                           <FaArrowRight />
