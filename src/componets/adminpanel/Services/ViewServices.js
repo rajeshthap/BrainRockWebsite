@@ -16,9 +16,10 @@ const ViewServices = () => {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0); // Key to force refresh images
   
-  // Pagination state
+  // Pagination & search state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Number of cards to show per page
+  const [searchTerm, setSearchTerm] = useState('');
   
   // Modal state
   const [showEditModal, setShowEditModal] = useState(false);
@@ -109,11 +110,21 @@ const ViewServices = () => {
     }
   };
 
-  // --- Pagination Logic ---
+  // Search & Pagination Logic
+  const filteredServices = searchTerm.trim() === ''
+    ? services
+    : services.filter((s) => {
+        const lower = searchTerm.toLowerCase();
+        return (
+          s.title?.toLowerCase().includes(lower) ||
+          (s.description && s.description.toLowerCase().includes(lower))
+        );
+      });
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = services.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(services.length / itemsPerPage);
+  const currentItems = filteredServices.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -302,7 +313,18 @@ const ViewServices = () => {
         <AdminHeader toggleSidebar={toggleSidebar} />
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            <h2 className="mb-4">Manage Services</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Manage Services</h2>
+              <div style={{ width: '300px' }}>
+                <input
+                  type="text"
+                  placeholder="Search by title or description..."
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                />
+              </div>
+            </div>
             
             {showAlert && (
               <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
