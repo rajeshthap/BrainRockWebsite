@@ -61,13 +61,27 @@ function RunningProjects() {
   }
 
   return (
+    <>
+      <div className='project-banner'>
+              <div className='site-breadcrumb-wpr'>
+                <h2 className='breadcrumb-title'>Our Projects</h2>
+             <ul className='breadcrumb-menu clearfix'>
+        <li>
+          <Link className="breadcrumb-home" to="/">Home</Link>
+        </li>
+      
+        <li className='px-2'>/</li>
+      
+        <li>
+          <Link className="breadcrumb-about" to="/">Project</Link>
+        </li>
+      </ul>
+      
+              </div>
+            </div>
     <div className="ourteam-section">
       <Container className="ourteam-box">
- <Row className=''>
-            <div className='our-heading-team'>
-              <h1>OUR Projects</h1>
-            </div>
-          </Row>
+
         <div className="box-wrapper">
 
           {/* repeat same UI for each project */}
@@ -116,6 +130,7 @@ function RunningProjects() {
         <FooterPage />
       </Container>
     </div>
+    </>
   );
 }
 

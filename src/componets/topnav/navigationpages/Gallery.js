@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Spinner, Alert } from 'react-bootstrap';
+import React, { useState, useEffect } from "react";
+import { Container, Row, Spinner, Alert } from "react-bootstrap";
 import "../../../assets/css/course.css";
-import FooterPage from '../../footer/FooterPage';
+import FooterPage from "../../footer/FooterPage";
+import { Link } from "react-router-dom";
 
 // Define the base URL for your API
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const API_BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
 
 function Gallery() {
   const [galleryItems, setGalleryItems] = useState([]);
@@ -17,15 +18,15 @@ function Gallery() {
       try {
         const response = await fetch(`${API_BASE_URL}/api/gallery-items/`);
         if (!response.ok) {
-          throw new Error('Failed to fetch gallery items');
+          throw new Error("Failed to fetch gallery items");
         }
         const result = await response.json();
         const itemsData = result.data || result;
 
         // Process the data to construct full image URLs
-        const processedItems = itemsData.map(item => ({
+        const processedItems = itemsData.map((item) => ({
           ...item,
-          fullImageUrl: item.image ? `${API_BASE_URL}${item.image}` : null
+          fullImageUrl: item.image ? `${API_BASE_URL}${item.image}` : null,
         }));
 
         setGalleryItems(processedItems);
@@ -40,69 +41,93 @@ function Gallery() {
   }, []);
 
   return (
-    <div className="ourteam-section">
-      <Container className='ourteam-box'>
-        <Row className='mt-5'>
-          <div className='our-heading-team'>
-            <h1>OUR Gallery</h1>
-            
-            {loading && (
-              <div className="text-center my-5">
-                <Spinner animation="border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-              </div>
-            )}
+    <>
+      <div className="gallery-banner">
+        <div className="site-breadcrumb-wpr">
+          <h2 className="breadcrumb-title">Our Gallery</h2>
+          <ul className="breadcrumb-menu clearfix">
+            <li>
+              <Link className="breadcrumb-home" to="/">
+                Home
+              </Link>
+            </li>
 
-            {error && (
-              <Alert variant="danger" className="mt-3">
-                Error: {error}
-              </Alert>
-            )}
+            <li className="px-2">/</li>
 
-            {!loading && !error && (
-              <section className="our-team-section">
-                <div className="container">
-                  <Row>
-                    {galleryItems.length === 0 ? (
-                      <div className="col-12 text-center">
-                        <p>No items in the gallery.</p>
-                      </div>
-                    ) : (
-                      galleryItems.map((item) => (
-                        <div className="col-lg-3 col-md-6 col-sm-6" key={item.id}>
-                          <div className="our-our-teams">
-                            <div className="pic">
-                              {item.fullImageUrl ? (
-                                <img
-                                  src={item.fullImageUrl}
-                                  alt={item.full_name}
-                                />
-                              ) : (
-                                <div className="no-image-placeholder">No Image</div>
-                              )}
-                            </div>
+            <li>
+              <Link className="breadcrumb-about" to="/">
+                Gallery
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div className="ourteam-section">
+        <Container className="ourteam-box">
+          <Row className="">
+            <div className="our-heading-team">
+              {loading && (
+                <div className="text-center my-5">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                </div>
+              )}
 
-                            <div className="team-content">
-                              <h3 className="title">{item.full_name}</h3>
-                              <span className="post">{item.course_name}</span>
+              {error && (
+                <Alert variant="danger" className="mt-3">
+                  Error: {error}
+                </Alert>
+              )}
+
+              {!loading && !error && (
+                <section className="our-team-section">
+                  <div className="container">
+                    <Row>
+                      {galleryItems.length === 0 ? (
+                        <div className="col-12 text-center">
+                          <p>No items in the gallery.</p>
+                        </div>
+                      ) : (
+                        galleryItems.map((item) => (
+                          <div
+                            className="col-lg-3 col-md-6 col-sm-6"
+                            key={item.id}
+                          >
+                            <div className="our-our-teams">
+                              <div className="pic">
+                                {item.fullImageUrl ? (
+                                  <img
+                                    src={item.fullImageUrl}
+                                    alt={item.full_name}
+                                  />
+                                ) : (
+                                  <div className="no-image-placeholder">
+                                    No Image
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="team-content">
+                                <h3 className="title">{item.full_name}</h3>
+                                <span className="post">{item.course_name}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))
-                    )}
-                  </Row>
-                </div>
-              </section>
-            )}
-          </div>
-        </Row>
-      </Container>
-       <Container fluid className="br-footer-box">
-        
+                        ))
+                      )}
+                    </Row>
+                  </div>
+                </section>
+              )}
+            </div>
+          </Row>
+        </Container>
+        <Container fluid className="br-footer-box">
           <FooterPage />
-      </Container>
-    </div>
+        </Container>
+      </div>
+    </>
   );
 }
 

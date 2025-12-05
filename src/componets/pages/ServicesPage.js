@@ -57,15 +57,29 @@ function ServicesPage() {
   }, []);
 
   return (
+    <>
+     <div className='Services-banner'>
+                  <div className='site-breadcrumb-wpr'>
+                    <h2 className='breadcrumb-title'>Our Services</h2>
+                 <ul className='breadcrumb-menu clearfix'>
+            <li>
+              <Link className="breadcrumb-home" to="/">Home</Link>
+            </li>
+          
+            <li className='px-2'>/</li>
+          
+            <li>
+              <Link className="breadcrumb-about" to="/">Services</Link>
+            </li>
+          </ul>
+          
+                  </div>
+                </div>
     <div className="ourteam-section ">
       <Container className="">
       <div className="ourteam-box ">
         <Container className="">
-          <Row className=''>
-                      <div className='our-heading-team'>
-                        <h1> Our Services</h1>
-                      </div>
-                    </Row>
+         
           <Row className="feature-area feature-minus-top">
             <Container>
               <div className="feature-wpr grid-3">
@@ -231,6 +245,7 @@ function ServicesPage() {
         <FooterPage />
       </Container>
     </div>
+    </>
   );
 }
 
