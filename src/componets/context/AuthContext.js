@@ -125,11 +125,14 @@ export const AuthProvider = ({ children }) => {
 
       const res = await axiosInstance.post("token/refresh/");
 
+      // Prefer res.data.user if present, otherwise use res.data itself.
+      const newUserSource = res.data.user || res.data || {};
       setUser({
-        id: res.data.user_id,
-        email: res.data.email,
-        full_name: res.data.full_name,
-        role: res.data.role,
+        id: newUserSource.id || newUserSource.user_id || newUserSource.id || null,
+        unique_id: newUserSource.unique_id || res.data.unique_id || null,
+        email: newUserSource.email || res.data.email || null,
+        full_name: newUserSource.full_name || res.data.full_name || null,
+        role: newUserSource.role || res.data.role || null,
       });
 
       setHasRefreshFailed(false);
@@ -218,7 +221,17 @@ export const AuthProvider = ({ children }) => {
         const isReload = navType === 'reload';
         const path = (typeof window !== 'undefined' && window.location.pathname) ? window.location.pathname : '/';
 
-        if (isReload && path !== '/' && path !== '/Login') {
+        // List of pages that should remain on the same URL after a hard reload.
+        const allowedReloadPaths = [
+          '/', '/home', '/CompanyProfile', '/OurTeam', '/RunningProjects', '/ServicesPage',
+          '/Courses', '/Gallery', '/Feedback', '/TrainingRegistration', '/Training',
+          '/Contact', '/Login'
+        ].map(p => p.toLowerCase());
+
+        const normalizedPath = path.toLowerCase().replace(/\/+$/, '') || '/';
+
+        // If it's a reload and the current path is NOT in allowed list and NOT the login page, redirect to root
+        if (isReload && !allowedReloadPaths.includes(normalizedPath) && normalizedPath !== '/login') {
           try {
             if (typeof window !== 'undefined') {
               window.location.replace('/');
