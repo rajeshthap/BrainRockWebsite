@@ -96,6 +96,35 @@ body {
   transform: translateY(-8px);
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
+.breadcrumb-menu li {
+  cursor: pointer;
+  transition: 0.3s;
+
+}
+.breadcrumb-home {
+  color: #007bff;   /* Blue */
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.breadcrumb-about {
+  color: orange;   /* Green */
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.breadcrumb-home:hover {
+  color: #0056b3;
+}
+
+.breadcrumb-about:hover {
+  color: #1e7e34;
+}
+
+
+.breadcrumb-menu li:hover {
+  color: #007bff;
+}
 
 .br-label {
   font-size: var(--br-space-350);

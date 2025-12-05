@@ -3,6 +3,7 @@ import axios from "axios";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import "../../../assets/css/Trainingregistration.css";
 import FooterPage from "../../footer/FooterPage";
+import { Link } from "react-router-dom";
 
 function Feedback() {
   const [formData, setFormData] = useState({
@@ -119,10 +120,28 @@ function Feedback() {
   };
 
   return (
+    <>
+     <div className='feedback-banner'>
+                      <div className='site-breadcrumb-wpr'>
+                        <h2 className='breadcrumb-title'>Our Feedback</h2>
+                     <ul className='breadcrumb-menu clearfix'>
+                <li>
+                  <Link className="breadcrumb-home" to="/">Home</Link>
+                </li>
+              
+                <li className='px-2'>/</li>
+              
+                <li>
+                  <Link className="breadcrumb-about" to="/">FeedBack</Link>
+                </li>
+              </ul>
+              
+                      </div>
+                    </div>
     <div className="ourteam-section">
-      <Container className="mt-4">
+      <Container className="">
         <div className="ourteam-box text-heading">
-          <h3 className="text-center mb-3">Feedback Form</h3>
+         
 
           {successMsg && <Alert variant="success">{successMsg}</Alert>}
 
@@ -243,6 +262,7 @@ function Feedback() {
           <FooterPage />
       </Container>
     </div>
+    </>
   );
 }
 

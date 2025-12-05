@@ -3,7 +3,7 @@ import { Col, Container, Row, Spinner, Alert } from 'react-bootstrap'
 import { AiOutlineFileDone } from 'react-icons/ai'
 import { FaArrowRight, FaPhp, FaPython, FaReact } from 'react-icons/fa'
 import "../../../assets/css/course.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DiMysql } from "react-icons/di";
 import { MdDeveloperBoard } from "react-icons/md";
 import { IoLogoHtml5 } from "react-icons/io";
@@ -55,6 +55,24 @@ function Courses() {
   }, []); // Empty dependency array means this runs once on mount
 
   return (
+    <>
+     <div className='Courses-banner'>
+                  <div className='site-breadcrumb-wpr'>
+                    <h2 className='breadcrumb-title'>Our Courses</h2>
+                 <ul className='breadcrumb-menu clearfix'>
+            <li>
+              <Link className="breadcrumb-home" to="/">Home</Link>
+            </li>
+          
+            <li className='px-2'>/</li>
+          
+            <li>
+              <Link className="breadcrumb-about" to="/">Courses</Link>
+            </li>
+          </ul>
+          
+                  </div>
+                </div>
     <div className="ourteam-section">
       <Container className='ourteam-box'>
         {loading && (
@@ -115,6 +133,7 @@ function Courses() {
           <FooterPage />
       </Container>
     </div>
+    </>
   )
 }
 

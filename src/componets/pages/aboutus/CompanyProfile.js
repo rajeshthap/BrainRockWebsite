@@ -3,6 +3,7 @@ import { Col, Container, Row } from 'react-bootstrap';
 import "../../../assets/css/aboutus.css";
 import "../../../assets/css/UserPage.css"
 import FooterPage from '../../footer/FooterPage';
+import { Link } from 'react-router-dom';
 
 function CompanyProfile() {
   const [aboutData, setAboutData] = useState({
@@ -59,11 +60,18 @@ function CompanyProfile() {
       <div className='company-banner'>
         <div className='site-breadcrumb-wpr'>
           <h2 className='breadcrumb-title'>About Company</h2>
-          <ul className='breadcrumb-menu clearfix'>
-            <li>Home</li>
-            <li className='px-2'>/</li>
-            <li>About Us</li>
-          </ul>
+       <ul className='breadcrumb-menu clearfix'>
+  <li>
+    <Link className="breadcrumb-home" to="/">Home</Link>
+  </li>
+
+  <li className='px-2'>/</li>
+
+  <li>
+    <Link className="breadcrumb-about" to="/about">About Us</Link>
+  </li>
+</ul>
+
         </div>
       </div>
 

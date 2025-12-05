@@ -21,6 +21,7 @@ function NavBar() {
           <Link to="/" className="logo-page">
             <img src={Logo} alt="logo" className="logo-wecd" />
           </Link>
+          <Link to ="/">
 
           <div className="awc-title">
             <span className="awc-subtitle">
@@ -28,7 +29,7 @@ function NavBar() {
             </span>
             <p className="sub-awc-title">I.S.O certified 9001:2015</p>
           </div>
-
+</Link>
           <Navbar.Toggle aria-controls="basic-navbar-nav" className="toggle-logo" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto justify-content-end flex-grow-1 nd-nav">

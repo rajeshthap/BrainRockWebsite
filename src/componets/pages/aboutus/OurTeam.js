@@ -52,15 +52,25 @@ function OurTeam() {
   return (
 <div className="ourteam-section">
    
+    <div className='team-banner'>
+          <div className='site-breadcrumb-wpr'>
+            <h2 className='breadcrumb-title'>Our Teams</h2>
+         <ul className='breadcrumb-menu clearfix'>
+    <li>
+      <Link className="breadcrumb-home" to="/">Home</Link>
+    </li>
   
-      <Container className='ourteam-box'>
-        <Row className=''>
-          <div className='text-center mb-5'>
-            <h1>
-              Administrative Team
-            </h1>
+    <li className='px-2'>/</li>
+  
+    <li>
+      <Link className="breadcrumb-about" to="/">Team</Link>
+    </li>
+  </ul>
+  
           </div>
-        </Row>
+        </div>
+      <Container className='ourteam-box'>
+        
 
         {loading ? (
           <div className="d-flex justify-content-center my-5">

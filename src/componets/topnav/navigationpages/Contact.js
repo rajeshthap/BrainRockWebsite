@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Alert } from "react-bootstrap";
 import "../../../assets/css/ContactForm.css";
 import FooterPage from "../../footer/FooterPage";
+import { Link } from "react-router-dom";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -159,11 +160,29 @@ function Contact() {
   };
 
   return (
+    <>
+        <div className='contact'>
+                      <div className='site-breadcrumb-wpr'>
+                        <h2 className='breadcrumb-title'>Get In Touch For Any Query</h2>
+                     <ul className='breadcrumb-menu clearfix'>
+                <li>
+                  <Link className="breadcrumb-home" to="/">Home</Link>
+                </li>
+              
+                <li className='px-2'>/</li>
+              
+                <li>
+                  <Link className="breadcrumb-about" to="/">FeedBack</Link>
+                </li>
+              </ul>
+              
+                      </div>
+                    </div>
     <div className="ourteam-section">
       <Container>
         <div className="ourteam-box">
           <div className="contact-container text-heading text-center">
-            <h3>Get In Touch For Any Query</h3>
+          
 
             {/* Alert for API response */}
             {showAlert && apiResponse && (
@@ -287,6 +306,7 @@ function Contact() {
           <FooterPage />
       </Container>
     </div>
+    </>
   );
 }
 
