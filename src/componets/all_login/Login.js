@@ -7,32 +7,28 @@ import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
   const trainingRoles = [
-  "Professional Corporate Training",
-  "Industrial Training Program",
-  "Full-Stack Web Development Training",
-  "Advanced Internship Program",
-  "On-Job Training (OJT)",
-  "JAVA/ Python",
-  "Fundamentals of Graphic Design",
-  "Advanced Creative Designing",
-  "UI/UX & Web Graphics",
-  "Video Editing & Motion Graphics",
-
-  "Digital Marketing Certification",
-  "Programming with Java",
-  "Programming with Python",
-  "WordPress Development",
-
-  "Core PHP Development",
-  "Advanced PHP & MVC Frameworks",
-
-  "C Programming",
-  "C++ Programming",
-
-  "Basic Computer Essentials (3 Months)",
-  "Advanced Computer Operations (6 Months)",
-  "Professional Computer Certification (1 Year)",
-];
+    "Professional Corporate Training",
+    "Industrial Training Program",
+    "Full-Stack Web Development Training",
+    "Advanced Internship Program",
+    "On-Job Training (OJT)",
+    "JAVA/ Python",
+    "Fundamentals of Graphic Design",
+    "Advanced Creative Designing",
+    "UI/UX & Web Graphics",
+    "Video Editing & Motion Graphics",
+    "Digital Marketing Certification",
+    "Programming with Java",
+    "Programming with Python",
+    "WordPress Development",
+    "Core PHP Development",
+    "Advanced PHP & MVC Frameworks",
+    "C Programming",
+    "C++ Programming",
+    "Basic Computer Essentials (3 Months)",
+    "Advanced Computer Operations (6 Months)",
+    "Professional Computer Certification (1 Year)",
+  ];
 
   const { login, loading: authLoading, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -55,20 +51,6 @@ export default function Login() {
       document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     }
   };
-useEffect(() => {
-  if (user) {
-    // If user's selected course (role) is in the training list
-    if (trainingRoles.includes(user.role)) {
-      navigate("/TrainingDashBoard", {
-        state: { unique_id: user.unique_id },
-        replace: true,
-      });
-      return;
-    }
-
-    // You can add more conditions for other dashboards here...
-  }
-}, [user, navigate]);
 
   // This effect runs when the component mounts to clear cookies
   useEffect(() => {
@@ -79,39 +61,39 @@ useEffect(() => {
       // When mounting the Login page, clear auth without navigating.
       logout({ redirect: false });
     }
+    
+    // Clear any location state to prevent redirects to previous pages
+    window.history.replaceState({}, document.title);
   }, []);
 
-  // This effect runs when the 'user' object is set in the context after a successful login
-useEffect(() => {
-  if (user) {
+  // Combined useEffect for handling redirection based on user role
+  useEffect(() => {
+    if (user) {
+      // First check for admin role (highest priority)
+      if (user.role === "admin") {
+        navigate("/ManageOurTeam", {
+          state: { unique_id: user.id },
+          replace: true,
+        });
+        return;
+      }
 
-    const from = location.state?.from?.pathname;
+      // Then check for training roles
+      if (trainingRoles.includes(user.role)) {
+        navigate("/TrainingDashBoard", {
+          state: { unique_id: user.unique_id },
+          replace: true,
+        });
+        return;
+      }
 
-    // If redirect origin exists
-    if (from) {
-      navigate(from, { state: { unique_id: user.id }, replace: true });
-      return;
-    }
-
-    //  NEW CONDITION (your API response role)
-    // If role === "JAVA/ Python" → go to TrainingDashBoard
-   
-
-    // Existing Role-based redirection
-    if (user.role === "admin") {
-      navigate("/WebsiteManagement", {
-        state: { unique_id: user.id },
-        replace: true,
-      });
-    } else {
+      // Default redirect to HR Dashboard for all other roles
       navigate("/HrDashBoard", {
         state: { unique_id: user.id },
         replace: true,
       });
     }
-  }
-}, [user, navigate, location]);
-
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
