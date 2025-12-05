@@ -69,7 +69,6 @@ import AddCarousel from "./componets/adminpanel/carousel/AddCarousel";
 import EditCarousel from "./componets/adminpanel/carousel/EditCarousel";
 import AddCourses from "./componets/adminpanel/courses/AddCourses";
 import EditCourses from "./componets/adminpanel/courses/EditCourses";
-import AddStudent from "./componets/adminpanel/gallery/AddStudent";
 import ManageStudent from "./componets/adminpanel/gallery/ManageStudent";
 import EditAboutUs from "./componets/adminpanel/aboutus/EditAboutUs";
 import Contact from "./componets/topnav/navigationpages/Contact";
@@ -96,7 +95,6 @@ import EditClient from "./componets/adminpanel/Client/EditClient";
 import AddProject from "./componets/adminpanel/ourproject/AddProject";
 import ManageProject from "./componets/adminpanel/ourproject/ManageProject";
 import Training from "./componets/topnav/navigationpages/Training";
-import AddCertification from "./componets/adminpanel/Candidate/AddCertification";
 import ViewCertified from "./componets/adminpanel/Candidate/ViewCertified";
 import ServicesDetails from "./componets/pages/ServicesDetails";
 import Certificate from "./componets/topnav/navigationpages/Certificate";
@@ -138,7 +136,6 @@ function AppContent() {
     "/EditCarousel",
     "/AddCourses",
     "/EditCourses",
-    "/AddStudent",
     "/ManageStudent",
     "/EditAboutUs",
     "/TrainingDashBoard",
@@ -158,7 +155,6 @@ function AppContent() {
     "/EditClient",
     "/AddProject",
     "/ManageProject",
-    "/AddCertification",
     "/ViewCertified",
 
   ]);
@@ -437,14 +433,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/AddStudent"
-          element={
-            <ProtectedRoute>
-              <AddStudent />
-            </ProtectedRoute>
-          }
-        />
+        
         <Route
           path="/ManageStudent"
           element={
@@ -576,14 +565,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/AddCertification"
-          element={
-            <ProtectedRoute>
-              <AddCertification/>
-            </ProtectedRoute>
-          }
-        />
+        
 
         <Route
           path="/ViewCertified"
