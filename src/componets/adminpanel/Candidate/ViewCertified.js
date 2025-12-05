@@ -123,8 +123,8 @@ const ViewCertified = () => {
                           <th>Certificate ID</th>
                           <th>Full Name</th>
                           <th>Father Name</th>
-                          <th>From Date</th>
-                          <th>To Date</th>
+                          <th>Start Date</th>
+                          <th>End Date</th>
                           <th>Program</th>
                           <th>Created At</th>
                         </tr>
@@ -137,8 +137,8 @@ const ViewCertified = () => {
                               <td data-th="Certificate ID">{certificate.certificate_id}</td>
                               <td data-th="Full Name">{certificate.full_name}</td>
                               <td data-th="Father Name">{certificate.father_name}</td>
-                              <td data-th="From Date">{formatDate(certificate.from_date)}</td>
-                              <td data-th="To Date">{formatDate(certificate.to_date)}</td>
+                              <td data-th="Start Date">{formatDate(certificate.from_date)}</td>
+                              <td data-th="End Date">{formatDate(certificate.to_date)}</td>
                               <td data-th="Program">{certificate.program}</td>
                               <td data-th="Created At">{formatDate(certificate.created_at)}</td>
                             </tr>

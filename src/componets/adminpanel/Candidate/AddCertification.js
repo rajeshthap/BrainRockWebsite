@@ -118,7 +118,7 @@ const AddCertification = () => {
         const errorData = await response.json().catch(() => ({ message: 'Server error' }));
         throw new Error(errorData.message || `Failed to add certification (Status: ${response.status})`);
       }
-      
+      alert("Certification added successfully");
       // Success path
       setMessage("Certification added successfully!");
       setVariant("success");
@@ -198,7 +198,7 @@ const AddCertification = () => {
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>From Date</Form.Label>
+                    <Form.Label>Start Date</Form.Label>
                     <Form.Control
                       type="date"
                       name="from_date"
@@ -210,7 +210,7 @@ const AddCertification = () => {
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>To Date</Form.Label>
+                    <Form.Label>End Date</Form.Label>
                     <Form.Control
                       type="date"
                       name="to_date"
@@ -238,7 +238,7 @@ const AddCertification = () => {
                   >
                     <option value="">Select a program</option>
                     {courses.map(course => (
-                      <option key={course.id} value={course.id}>
+                      <option key={course.id} value={course.course_name}>
                         {course.course_name}
                       </option>
                     ))}

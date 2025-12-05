@@ -47,6 +47,7 @@ function NavBar() {
              <Nav.Link href="Feedback">Feedback</Nav.Link>
              <Nav.Link href="TrainingRegistration">Registration</Nav.Link>
              <Nav.Link href="Training">Training </Nav.Link>
+               <Nav.Link href="Certificate">Certificate </Nav.Link>
            
  <Nav.Link href="/Contact">Contact Us</Nav.Link>
              
