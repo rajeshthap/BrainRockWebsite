@@ -236,7 +236,7 @@ const menuItems = [
        
         {
           label: "Registered Student",
-          path: "/CreateTeam",
+          path: "/TrainingRegistration",
           icon: <FaChartLine />,
         },
         {
