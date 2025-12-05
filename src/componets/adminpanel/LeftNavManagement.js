@@ -217,48 +217,8 @@ const menuItems = [
        
       ],
     },
-   {
-      icon: <PiUserListBold />,
-      label: "Courses",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Courses",
-          path: "/AddCourses",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Courses",
-          path: "/ViewCourses",
-          icon: <FaChartLine />,
-        },
-        
-       
-      ],
-    },
-   {
-      icon: <PiUserListBold />,
-      label: "Image Gallery ",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Image",
-          path: "/AddImage",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Image",
-          path: "/ViewImage",
-          icon: <FaChartLine />,
-        },
-      
-       
-      ],
-    },
+  
+  
    
         {
       icon: <FaTachometerAlt />,
@@ -325,33 +285,11 @@ const menuItems = [
         },
       ],
     },
-       
-       {
-      icon: <PiUserListBold />,
-      label: "Projects ",
- 
-      submenu: [
-        
-       
-        {
-          label: "Add Projects",
-          path: "/AddProjects",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Projects",
-          path: "/ViewProjects",
-          icon: <FaChartLine />,
-        }, 
-      ],
-    },   
       {
       icon: <PiUserListBold />,
       label: "IT Services ",
  
       submenu: [
-        
-       
         {
           label: "Add ItServices",
           path: "/AddItServices",
@@ -363,20 +301,7 @@ const menuItems = [
           icon: <FaChartLine />,
         }, 
       ],
-    }, 
-
-      {
-      icon: <FaTachometerAlt />,
-      label: "Online Messages",
-      path: "/WebsiteManagement",
-      active: true,
-    },  
-
-   
- 
-   
-    
-    
+    },   
   ];
 
 
