@@ -46,22 +46,22 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     const courseName = location.state?.training_name || 
                       location.state?.courseTitle || 
                       courseTitle; 
-    if (courseName) {
+    if (courseName && courseData.length > 0) {
       setFormData(prev => ({
         ...prev,
         application_for_course: courseName
       }));
       
-      if (courseData.length > 0) {
-        const matchingCategory = courseData.find(cat => 
-          cat.courses.includes(courseName)
-        );
-        if (matchingCategory) {
-          setSelectedCategory(matchingCategory.category);
-        }
+      // Fixed: Added null check for cat.courses
+      const matchingCategory = courseData.find(cat => 
+        cat.courses && Array.isArray(cat.courses) && cat.courses.includes(courseName)
+      );
+      if (matchingCategory) {
+        setSelectedCategory(matchingCategory.category);
       }
     }
   }, [location.state, courseData, courseTitle]); 
+  
   useEffect(() => {
     axios
       .get("https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/")
@@ -73,8 +73,9 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
                             location.state?.courseTitle || 
                             courseTitle;
           if (courseName) {
+            // Fixed: Added null check for cat.courses
             const matchingCategory = res.data.courses.find(cat => 
-              cat.courses.includes(courseName)
+              cat.courses && Array.isArray(cat.courses) && cat.courses.includes(courseName)
             );
             if (matchingCategory) {
               setSelectedCategory(matchingCategory.category);
@@ -291,6 +292,14 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     }
   };
 
+  // Fixed: Added safe access to courses array
+  const getCoursesForSelectedCategory = () => {
+    const category = courseData.find((c) => c.category === selectedCategory);
+    return category && category.courses && Array.isArray(category.courses) 
+      ? category.courses 
+      : [];
+  };
+
   return (
     <div className={`ourteam-section ${isFromTrainingPage ? 'no-footer' : ''}`}>
       <Container className="mt-4">
@@ -352,14 +361,12 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
                   >
                     <option value="">-- Select Course --</option>
 
-                    {selectedCategory &&
-                      courseData
-                        .find((c) => c.category === selectedCategory)
-                        ?.courses.map((course, index) => (
-                          <option key={index} value={course}>
-                            {course}
-                          </option>
-                        ))}
+                    {/* Fixed: Used the safe function to get courses */}
+                    {getCoursesForSelectedCategory().map((course, index) => (
+                      <option key={index} value={course}>
+                        {course}
+                      </option>
+                    ))}
                   </Form.Select>
                   {errors.application_for_course && (
                     <div className="invalid-feedback d-block">
