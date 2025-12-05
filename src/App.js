@@ -98,6 +98,7 @@ import ManageProject from "./componets/adminpanel/ourproject/ManageProject";
 import Training from "./componets/topnav/navigationpages/Training";
 import AddCertification from "./componets/adminpanel/Candidate/AddCertification";
 import ViewCertified from "./componets/adminpanel/Candidate/ViewCertified";
+import Certificate from "./componets/topnav/navigationpages/Certificate";
 
 
 function AppContent() {
@@ -208,6 +209,7 @@ function AppContent() {
         {/* <Route path="/Services" element={<Services />} /> */}
         <Route path="/RunningProjects" element={<RunningProjects />} />
         <Route path="/ServicesPage" element={<ServicesPage />} />
+        <Route path="/Certificate" element={<Certificate/>} />
     
 
         
