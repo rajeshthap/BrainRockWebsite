@@ -14,8 +14,11 @@ const AddItServices = () => {
   // Form state adapted for IT services
   const [formData, setFormData] = useState({
     title: "",
-    description: "", // Added description field
-    icon: null // Will hold the file object for the service icon
+    description: "",
+    icon: null,
+    modules: [ // Initialize with one empty module
+      ["", ""]
+    ]
   });
   
   // State for icon preview
@@ -56,20 +59,44 @@ const AddItServices = () => {
     const { name, value, files } = e.target;
     
     if (name === 'icon') {
-      // Handle file input for the icon
+      // Handle file input for icon
       const file = files[0];
       setFormData(prev => ({
         ...prev,
         icon: file
       }));
       
-      // Create a preview URL for the selected icon
+      // Create a preview URL for selected icon
       if (file) {
         const previewUrl = URL.createObjectURL(file);
         setIconPreview(previewUrl);
       } else {
         setIconPreview(null);
       }
+    } else if (name.startsWith('module')) {
+      // Handle module inputs
+      const moduleIndex = parseInt(name.split('-')[1]);
+      const moduleField = name.split('-')[2]; // 'title' or 'description'
+      
+      setFormData(prev => {
+        const newModules = [...prev.modules];
+        if (!newModules[moduleIndex]) {
+          // Initialize module if it doesn't exist
+          newModules[moduleIndex] = ["", ""];
+        }
+        
+        // Update the specific field in the module
+        if (moduleField === 'title') {
+          newModules[moduleIndex][0] = value;
+        } else if (moduleField === 'description') {
+          newModules[moduleIndex][1] = value;
+        }
+        
+        return {
+          ...prev,
+          modules: newModules
+        };
+      });
     } else {
       // Handle text inputs (title and description)
       setFormData(prev => ({
@@ -79,12 +106,29 @@ const AddItServices = () => {
     }
   };
 
+  // Add a new module
+  const addModule = () => {
+    setFormData(prev => ({
+      ...prev,
+      modules: [...prev.modules, ["", ""]]
+    }));
+  };
+
+  // Remove a module
+  const removeModule = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      modules: prev.modules.filter((_, i) => i !== index)
+    }));
+  };
+
   // Clear form function
   const clearForm = () => {
     setFormData({
       title: "",
-      description: "", // Clear description field
-      icon: null
+      description: "",
+      icon: null,
+      modules: [["", ""]] // Reset to one empty module
     });
     setIconPreview(null);
     setMessage("");
@@ -100,10 +144,15 @@ const AddItServices = () => {
     // Create a FormData object to send the file
     const dataToSend = new FormData();
     dataToSend.append('title', formData.title);
-    dataToSend.append('description', formData.description); // Added description to form data
+    dataToSend.append('description', formData.description);
+    
+    // Add icon if it exists
     if (formData.icon) {
       dataToSend.append('icon', formData.icon, formData.icon.name);
     }
+    
+    // Add modules as JSON string
+    dataToSend.append('modules', JSON.stringify(formData.modules));
     
     try {
       // Using the provided API endpoint for IT services
@@ -195,7 +244,7 @@ const AddItServices = () => {
               <Form.Group className="mb-3">
                 <Form.Label>Service Description</Form.Label>
                 <Form.Control
-                  as="textarea" // Use textarea for description
+                  as="textarea"
                   rows={3}
                   placeholder="Enter service description"
                   name="description"
@@ -218,6 +267,62 @@ const AddItServices = () => {
                     <img src={iconPreview} alt="Icon Preview" style={{ maxWidth: '200px', maxHeight: '200px' }} />
                   </div>
                 )}
+              </Form.Group>
+              
+              {/* Modules Section */}
+              <Form.Group className="mb-3">
+                <Form.Label>Service Modules</Form.Label>
+                <div className="modules-container">
+                  {formData.modules.map((module, index) => (
+                    <div key={index} className="module-item mb-3 p-3 border rounded">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h5>Module {index + 1}</h5>
+                        {formData.modules.length > 1 && (
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm"
+                            onClick={() => removeModule(index)}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <Form.Group className="mb-2">
+                        <Form.Label>Module Title</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder={`Enter module ${index + 1} title`}
+                          name={`module-${index}-title`}
+                          value={module[0]}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                      
+                      <Form.Group>
+                        <Form.Label>Module Description</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          placeholder={`Enter module ${index + 1} description`}
+                          name={`module-${index}-description`}
+                          value={module[1]}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                    </div>
+                  ))}
+                  
+                  <Button 
+                    variant="outline-primary" 
+                    onClick={addModule}
+                    className="mt-2"
+                  >
+                    Add Another Module
+                  </Button>
+                </div>
               </Form.Group>
               
               <Button 

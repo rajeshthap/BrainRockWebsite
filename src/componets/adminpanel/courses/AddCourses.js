@@ -18,8 +18,8 @@ const AddCourses = () => {
     description: "",
     price: "",
     duration: "",
-    icon: null, // Will hold the file object
-    modules: [] // New field for modules
+    icon: null,
+    modules: [["", ""]] // Initialize with one empty module by default
   });
   
   // State for icon preview
@@ -63,20 +63,44 @@ const AddCourses = () => {
     const { name, value, files } = e.target;
     
     if (name === 'icon') {
-      // Handle file input
+      // Handle file input for icon
       const file = files[0];
       setFormData(prev => ({
         ...prev,
         icon: file
       }));
       
-      // Create a preview URL for the selected icon
+      // Create a preview URL for selected icon
       if (file) {
         const previewUrl = URL.createObjectURL(file);
         setIconPreview(previewUrl);
       } else {
         setIconPreview(null);
       }
+    } else if (name.startsWith('module')) {
+      // Handle module inputs
+      const moduleIndex = parseInt(name.split('-')[1]);
+      const moduleField = name.split('-')[2]; // 'name' or 'description'
+      
+      setFormData(prev => {
+        const newModules = [...prev.modules];
+        if (!newModules[moduleIndex]) {
+          // Initialize module if it doesn't exist
+          newModules[moduleIndex] = ["", ""];
+        }
+        
+        // Update specific field in module
+        if (moduleField === 'name') {
+          newModules[moduleIndex][0] = value;
+        } else if (moduleField === 'description') {
+          newModules[moduleIndex][1] = value;
+        }
+        
+        return {
+          ...prev,
+          modules: newModules
+        };
+      });
     } else {
       // Handle text and number inputs
       setFormData(prev => ({
@@ -98,17 +122,27 @@ const AddCourses = () => {
     }
   };
 
-  // Handle module changes
+  // Handle module changes - NEW FUNCTION
   const handleModuleChange = (index, field, value) => {
-    const updatedModules = [...formData.modules];
-    if (!updatedModules[index]) {
-      updatedModules[index] = ["", ""];
-    }
-    updatedModules[index][field === 'name' ? 0 : 1] = value;
-    setFormData(prev => ({
-      ...prev,
-      modules: updatedModules
-    }));
+    setFormData(prev => {
+      const newModules = [...prev.modules];
+      if (!newModules[index]) {
+        // Initialize module if it doesn't exist
+        newModules[index] = ["", ""];
+      }
+      
+      // Update specific field in the module
+      if (field === 'name') {
+        newModules[index][0] = value;
+      } else if (field === 'description') {
+        newModules[index][1] = value;
+      }
+      
+      return {
+        ...prev,
+        modules: newModules
+      };
+    });
   };
 
   // Add a new module
@@ -121,11 +155,9 @@ const AddCourses = () => {
 
   // Remove a module
   const removeModule = (index) => {
-    const updatedModules = [...formData.modules];
-    updatedModules.splice(index, 1);
     setFormData(prev => ({
       ...prev,
-      modules: updatedModules
+      modules: prev.modules.filter((_, i) => i !== index)
     }));
   };
 
@@ -137,7 +169,7 @@ const AddCourses = () => {
       price: "",
       duration: "",
       icon: null,
-      modules: []
+      modules: [["", ""]] // Reset to one empty module
     });
     setIconPreview(null);
     setMessage("");
@@ -167,15 +199,16 @@ const AddCourses = () => {
     dataToSend.append('price', formData.price);
     dataToSend.append('duration', formData.duration);
     
-    // Add modules as JSON string
-    dataToSend.append('modules', JSON.stringify(formData.modules));
-    
+    // Add icon if it exists
     if (formData.icon) {
       dataToSend.append('icon', formData.icon, formData.icon.name);
     }
     
+    // Add modules as JSON string
+    dataToSend.append('modules', JSON.stringify(formData.modules));
+    
     try {
-      // Using the provided API endpoint
+      // Using the provided API endpoint for courses
       const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-items/', {
         method: 'POST',
         credentials: 'include', // Include credentials as requested
@@ -324,71 +357,60 @@ const AddCourses = () => {
                 )}
               </Form.Group>
               
-              {/* NEW: Modules Section */}
-              <Form.Group className="mb-4">
-                <Form.Label className="d-flex justify-content-between align-items-center">
-                  <span>Course Modules</span>
+              {/* Modules Section */}
+              <Form.Group className="mb-3">
+                <Form.Label>Course Modules</Form.Label>
+                <div className="modules-container">
+                  {formData.modules.map((module, index) => (
+                    <div key={index} className="module-item mb-3 p-3 border rounded">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h5>Module {index + 1}</h5>
+                        {formData.modules.length > 1 && (
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm"
+                            onClick={() => removeModule(index)}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <Form.Group className="mb-2">
+                        <Form.Label>Module Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder={`Enter module ${index + 1} name`}
+                          name={`module-${index}-name`}
+                          value={module[0]}
+                          onChange={(e) => handleModuleChange(index, 'name', e.target.value)}
+                          required
+                        />
+                      </Form.Group>
+                      
+                      <Form.Group>
+                        <Form.Label>Module Description</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          placeholder={`Enter module ${index + 1} description`}
+                          name={`module-${index}-description`}
+                          value={module[1]}
+                          onChange={(e) => handleModuleChange(index, 'description', e.target.value)}
+                          required
+                        />
+                      </Form.Group>
+                    </div>
+                  ))}
+                  
                   <Button 
                     variant="outline-primary" 
-                    size="sm" 
                     onClick={addModule}
-                    type="button"
+                    className="mt-2"
                   >
-                    <FaPlus className="me-1" /> Add Module
+                    Add Another Module
                   </Button>
-                </Form.Label>
-                
-                {formData.modules.length === 0 ? (
-                  <Card className="text-center p-3 bg-light">
-                    <p className="text-muted mb-0">No modules added yet. Click "Add Module" to get started.</p>
-                  </Card>
-                ) : (
-                  <div className="modules-container">
-                    {formData.modules.map((module, index) => (
-                      <Card key={index} className="mb-3">
-                        <Card.Body>
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <h5 className="mb-0">Module {index + 1}</h5>
-                            <Button 
-                              variant="outline-danger" 
-                              size="sm" 
-                              onClick={() => removeModule(index)}
-                              type="button"
-                            >
-                              <FaTrash />
-                            </Button>
-                          </div>
-                          <Row>
-                            <Col md={6}>
-                              <Form.Group className="mb-2">
-                                <Form.Label>Module Name</Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  placeholder="e.g., Module 1"
-                                  value={module[0]}
-                                  onChange={(e) => handleModuleChange(index, 'name', e.target.value)}
-                                  required
-                                />
-                              </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                              <Form.Group className="mb-2">
-                                <Form.Label>Module Description</Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  placeholder="e.g., Basic Introduction"
-                                  value={module[1]}
-                                  onChange={(e) => handleModuleChange(index, 'description', e.target.value)}
-                                  required
-                                />
-                              </Form.Group>
-                            </Col>
-                          </Row>
-                        </Card.Body>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                </div>
               </Form.Group>
               
               <Button 

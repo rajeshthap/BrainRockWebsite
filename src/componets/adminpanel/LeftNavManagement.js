@@ -158,16 +158,14 @@ const menuItems = [
       label: "Students Gallery",
  
       submenu: [
-        
-       
-        {
-          label: "Add Student",
-          path: "/AddStudent",
-          icon: <FaChartLine />,
-        },
         {
           label: "Manage Student",
           path: "/ManageStudent",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "View Certified Student",
+          path: "/ViewCertified",
           icon: <FaChartLine />,
         },
         
@@ -226,32 +224,6 @@ const menuItems = [
       path: "/Feedbackget",
       active: true,
     },  
-      
-      {
-      icon: <PiUserListBold />,
-      label: "Candidate",
- 
-      submenu: [
-        
-       
-        {
-          label: "Registered Student",
-          path: "/TrainingRegistration",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Add Certification",
-          path: "/AddCertification",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "View Certified Student",
-          path: "/ViewCertified",
-          icon: <FaChartLine />,
-        },
-       
-      ],
-    },
      {
       icon: <PiUserListBold />,
       label: "Our Tech Stack ",
