@@ -1,0 +1,80 @@
+/* Dashboard Card Row */
+.br-stats-row {
+  padding: 10px 0;
+}
+
+/* Main Card Style */
+.br-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-radius: 15px;
+  padding: 25px;
+  color: #fff;
+  transition: 0.3s ease-in-out;
+  box-shadow: 0px 4px 16px rgba(0,0,0,0.15);
+}
+
+.br-stat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0px 6px 20px rgba(0,0,0,0.22);
+}
+
+/* Icon Area */
+.br-stat-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.25);
+  border-radius: 12px;
+  font-size: 28px;
+}
+
+/* Text */
+.br-stat-details h5 {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 600;
+  color: #fff;
+}
+
+.br-stat-details h2 {
+  font-size: 32px;
+  margin: 5px 0 0 0;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ====== DIFFERENT CARD COLORS ====== */
+.card-blue {
+  background: linear-gradient(135deg, #1e88e5, #42a5f5);
+}
+
+.card-green {
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+}
+
+.card-orange {
+  background: linear-gradient(135deg, #fb8c00, #ffa726);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .br-stat-card {
+    padding: 18px;
+    gap: 15px;
+  }
+  .dashboard-body{
+    padding: 10px !important;
+  }
+  .br-stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+  .br-stat-details h2 {
+    font-size: 24px;
+  }
+}

@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import {
-  FaTachometerAlt,
-  FaUsers,
-
-} from "react-icons/fa";
-
-import "../../assets/css/emp_dashboard.css";
-
+import { FaUsers, FaBook, FaUserGraduate } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import LeftNavManagement from "./LeftNavManagement";
 import AdminHeader from "./AdminHeader";
+import "../../assets/css/websitemanagement.css";
 
 const WebsiteManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -19,9 +13,6 @@ const WebsiteManagement = () => {
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
 
-
-
-  // Responsive check
   useEffect(() => {
     const checkDevice = () => {
       const width = window.innerWidth;
@@ -38,7 +29,6 @@ const WebsiteManagement = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
       <LeftNavManagement
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -46,28 +36,58 @@ const WebsiteManagement = () => {
         isTablet={isTablet}
       />
 
-      {/* Main Content */}
       <div className="main-content">
-        {/* Header */}
-
         <AdminHeader toggleSidebar={toggleSidebar} />
 
-        {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
-       <div className="br-box-container"> Admin </div> 
+            <h1 className="page-title">Dashboard</h1>
+          <div className="br-box-container mt-4">
 
-          
-          {/* Stats Cards */}
+        
+            <Row className=" br-stats-row">
+              
+     
+              <Col lg={4} md={6} sm={12} className="mb-3">
+                <div className="br-stat-card card-blue">
+                  <div className="br-stat-icon">
+                    <FaBook />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Total Courses</h5>
+                    <h2>120</h2>
+                  </div>
+                </div>
+              </Col>
 
-          <Row>
-            {/* Pie Chart */}
+              {/* Card 2 */}
+              <Col lg={4} md={6} sm={12} className="mb-3">
+                <div className="br-stat-card card-green">
+                  <div className="br-stat-icon">
+                    <FaUsers />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Total Employees</h5>
+                    <h2>48</h2>
+                  </div>
+                </div>
+              </Col>
 
-            {/* Leave Announcements */}
+              {/* Card 3 */}
+              <Col lg={4} md={6} sm={12} className="mb-3">
+                <div className="br-stat-card card-orange">
+                  <div className="br-stat-icon">
+                    <FaUserGraduate />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Total Students</h5>
+                    <h2>300</h2>
+                  </div>
+                </div>
+              </Col>
 
-            <Col lg={4} md={12} sm={12}></Col>
-          </Row>
+            </Row>
 
-          {/* Existing Table + Quick Actions (same layout) */}
+          </div>
         </Container>
       </div>
     </div>
