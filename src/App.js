@@ -98,6 +98,7 @@ import ManageProject from "./componets/adminpanel/ourproject/ManageProject";
 import Training from "./componets/topnav/navigationpages/Training";
 import AddCertification from "./componets/adminpanel/Candidate/AddCertification";
 import ViewCertified from "./componets/adminpanel/Candidate/ViewCertified";
+import ServicesDetails from "./componets/pages/ServicesDetails";
 
 
 function AppContent() {
@@ -316,7 +317,7 @@ function AppContent() {
         <Route path="/CompanyProfile" element={<CompanyProfile />} />
         <Route path="/OurTeam" element={<OurTeam />} />
         <Route path="/Careers" element={<Careers />} />
-
+        <Route path="/ServicesDetails" element={<ServicesDetails />} />
         {/* Protected Routes */}
         {
           <Route
