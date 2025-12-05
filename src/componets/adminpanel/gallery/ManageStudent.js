@@ -1,46 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner,Pagination } from "react-bootstrap";
-import "../../../assets/css/emp_dashboard.css";
-import { useNavigate } from "react-router-dom";
+import { Container, Row, Col, Table, Image, Badge, Button, Pagination, Alert, Modal, Form } from "react-bootstrap";
+import { AiFillEdit } from "react-icons/ai";
+import { AiOutlineUser } from 'react-icons/ai'; // Default icon for students
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
-import { AiOutlineUser } from 'react-icons/ai'; // Default icon for students
 
-// Define the base URL for your API
+// Define base URL for your API
 const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
 const ManageStudent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  const navigate = useNavigate();
   
-  // Data state
+  // Student data state
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Edit modal state
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [currentEditItem, setCurrentEditItem] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    full_name: "",
-    course_name: "",
-    image: null
-  });
-  const [imagePreview, setImagePreview] = useState(null);
-  const [hasImageChanged, setHasImageChanged] = useState(false);
-  
-  // Alert state
-  const [showAlert, setShowAlert] = useState(false);
-  const [message, setMessage] = useState("");
-  const [variant, setVariant] = useState("success");
-  
-  // Pagination and search state
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(6);
+  const [itemsPerPage] = useState(10);
+  
+  // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [statusFilter, setStatusFilter] = useState('all'); // New state for status filter
+  
+  // Modal states
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  
   // Responsive check
   useEffect(() => {
     const checkDevice = () => {
@@ -49,71 +38,70 @@ const ManageStudent = () => {
       setIsTablet(width >= 768 && width < 1024);
       setSidebarOpen(width >= 1024);
     };
+    
     checkDevice();
     window.addEventListener("resize", checkDevice);
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  // Fetch students on component mount
+  // Fetch student data
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        // No credentials needed for GET
-        const response = await fetch(`${API_BASE_URL}/api/gallery-items/`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch students');
-        }
-        const result = await response.json();
-        const studentsData = result.data || result;
-
-        // Process the data to construct full image URLs and format dates
-        const processedStudents = studentsData.map(student => {
-          // Create a new object with all original properties
-          const processedStudent = { ...student };
-          
-          // Format the image URL
-          if (student.image) {
-            processedStudent.image = `${API_BASE_URL}${student.image}?t=${Date.now()}`;
-          }
-          
-          // Format the created_at date
-          if (student.created_at) {
-            const createdDate = new Date(student.created_at);
-            processedStudent.formatted_created_at = createdDate.toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            });
-          }
-          
-          return processedStudent;
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/course-registration/`, {
+          method: 'GET',
+          credentials: 'include',
         });
-
-        setStudents(processedStudents);
-        console.log("Processed students:", processedStudents); // Debug log
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch student data');
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          // Process data to construct full image URLs
+          const processedStudents = data.data.map(student => {
+            const processedStudent = { ...student };
+            
+            // Format image URL
+            if (student.profile_photo) {
+              processedStudent.profile_photo = `${API_BASE_URL}${student.profile_photo}?t=${Date.now()}`;
+            }
+            
+            return processedStudent;
+          });
+          
+          setStudents(processedStudents);
+        } else {
+          throw new Error(data.message || 'Failed to fetch student data');
+        }
       } catch (err) {
         setError(err.message);
-        console.error("Error fetching students:", err); // Debug log
       } finally {
         setLoading(false);
       }
     };
-
+    
     fetchStudents();
   }, []);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
-  // Filter students based on search term
-  const filteredStudents = searchTerm.trim() === '' 
-    ? students 
-    : students.filter((student) => {
-        const lowerSearch = searchTerm.toLowerCase();
-        return (
-          student.full_name?.toLowerCase().includes(lowerSearch) ||
-          student.course_name?.toLowerCase().includes(lowerSearch)
-        );
-      });
+  
+  // Filter students based on search term and status
+  const filteredStudents = students.filter((student) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    const matchesSearch = (
+      student.candidate_name?.toLowerCase().includes(lowerSearch) ||
+      student.email?.toLowerCase().includes(lowerSearch) ||
+      student.mobile_no?.toLowerCase().includes(lowerSearch) ||
+      student.application_for_course?.toLowerCase().includes(lowerSearch)
+    );
+    
+    const matchesStatus = statusFilter === 'all' || student.course_status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
   
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -122,360 +110,257 @@ const ManageStudent = () => {
   const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
-
-  // Handle delete
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this student?")) {
-      try {
-        // Create FormData to send the ID in the payload as requested
-        const dataToSend = new FormData();
-        dataToSend.append('id', id);
-
-        // Use the base endpoint for DELETE
-        const response = await fetch(`${API_BASE_URL}/api/gallery-items/`, {
-          method: 'DELETE',
-          credentials: 'include', // Credentials are necessary for DELETE
-          body: dataToSend,
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to delete student');
-        }
-        
-        // Update the state to remove the deleted item
-        setStudents(prevData => prevData.filter(item => item.id !== id));
-        
-        setMessage("Student deleted successfully!");
-        setVariant("success");
-        setShowAlert(true);
-        
-        setTimeout(() => setShowAlert(false), 3000);
-      } catch (error) {
-        console.error('Error deleting student:', error);
-        setMessage(error.message || "Failed to delete student");
-        setVariant("danger");
-        setShowAlert(true);
-        
-        setTimeout(() => setShowAlert(false), 5000);
-      }
-    }
+  
+  // Format date for display
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
+  
+  // Handle view student details
+  const handleViewStudent = (student) => {
+    setSelectedStudent(student);
+    setShowViewModal(true);
   };
 
-  // Handle edit
-  const handleEdit = (student) => {
-    setCurrentEditItem(student);
-    setEditFormData({
-      full_name: student.full_name,
-      course_name: student.course_name,
-      image: null
-    });
-    // Use the original image without the timestamp for the preview
-    const originalImageUrl = student.image ? student.image.split('?t=')[0] : null;
-    setImagePreview(originalImageUrl);
-    setHasImageChanged(false);
-    setShowEditModal(true);
+  // Handle status filter change
+  const handleStatusFilterChange = (e) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page when filter changes
   };
 
-  // Handle edit form input changes
-  const handleEditChange = (e) => {
-    const { name, value, files } = e.target;
-    
-    if (name === 'image') {
-      const file = files[0];
-      if (file) {
-        const previewUrl = URL.createObjectURL(file);
-        setImagePreview(previewUrl);
-        setHasImageChanged(true);
-        setEditFormData(prev => ({
-          ...prev,
-          [name]: file
-        }));
-      }
-    } else {
-      setEditFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  // Handle edit form submission with instant UI update
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Create a temporary object URL for the new image if it changed
-    let tempImageUrl = null;
-    if (hasImageChanged && editFormData.image) {
-      tempImageUrl = URL.createObjectURL(editFormData.image);
-    }
-    
-    // Store the original student data for potential rollback
-    const originalStudentData = students.find(s => s.id === currentEditItem.id);
-    
-    // Update the UI immediately with the new data
-    setStudents(prevData => 
-      prevData.map(item => 
-        item.id === currentEditItem.id 
-          ? {
-              ...item,
-              full_name: editFormData.full_name,
-              course_name: editFormData.course_name,
-              image: hasImageChanged ? tempImageUrl : item.image
-            } 
-          : item
-      )
-    );
-    
-    // Close the modal immediately
-    setShowEditModal(false);
-    
-    const dataToSend = new FormData();
-    dataToSend.append('id', currentEditItem.id); 
-    dataToSend.append('full_name', editFormData.full_name);
-    dataToSend.append('course_name', editFormData.course_name);
-    
-    if (hasImageChanged && editFormData.image) {
-      dataToSend.append('image', editFormData.image);
-    }
-    
-    try {
-      // Use the base endpoint for PUT
-      const response = await fetch(`${API_BASE_URL}/api/gallery-items/`, {
-        method: 'PUT',
-        credentials: 'include',
-        body: dataToSend,
-      });
-      
-      if (!response.ok) {
-        // If API fails, revert to the original data
-        setStudents(prevData => 
-          prevData.map(item => 
-            item.id === currentEditItem.id ? originalStudentData : item
-          )
-        );
-        throw new Error('Failed to update student');
-      }
-      
-      const apiResponseData = await response.json();
-      
-      // Clean up the temporary URL if we created one
-      if (tempImageUrl) {
-        URL.revokeObjectURL(tempImageUrl);
-      }
-      
-      // Final update with the permanent URL from the API
-      setStudents(prevData => 
-        prevData.map(item => 
-          item.id === currentEditItem.id 
-            ? {
-                ...item,
-                full_name: editFormData.full_name,
-                course_name: editFormData.course_name,
-                image: hasImageChanged && apiResponseData.data && apiResponseData.data.image
-                    ? `${API_BASE_URL}${apiResponseData.data.image}?t=${Date.now()}`
-                    : item.image
-              } 
-            : item
-        )
-      );
-      
-      setMessage("Student updated successfully!");
-      setVariant("success");
-      setShowAlert(true);
-      
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error('Error updating student:', error);
-      setMessage(error.message || "Failed to update student");
-      setVariant("danger");
-      setShowAlert(true);
-      
-      setTimeout(() => setShowAlert(false), 5000);
+  // Get status badge variant
+  const getStatusVariant = (status) => {
+    switch(status) {
+      case 'approved':
+      case 'completed':
+        return 'success';
+      case 'rejected':
+        return 'danger';
+      case 'pending':
+      default:
+        return 'warning';
     }
   };
 
   return (
     <div className="dashboard-container">
+      {/* Sidebar */}
       <LeftNavManagement
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         isMobile={isMobile}
         isTablet={isTablet}
       />
+
+      {/* Main Content */}
       <div className="main-content">
+        {/* Header */}
         <AdminHeader toggleSidebar={toggleSidebar} />
+
+        {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="mb-0">Manage Students</h2>
-              <div style={{ width: '300px' }}>
-                <input
-                  type="text"
-                  placeholder="Search by name or course..."
-                  className="form-control"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
+              <div className="d-flex gap-2">
+                <div style={{ width: '200px' }}>
+                  <Form.Select
+                    value={statusFilter}
+                    onChange={handleStatusFilterChange}
+                  >
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="rejected">Rejected</option>
+                  </Form.Select>
+                </div>
+                <div style={{ width: '300px' }}>
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, phone, or course..."
+                    className="form-control"
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
               </div>
             </div>
             
-            {showAlert && (
-              <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
-                {message}
+            {error && (
+              <Alert variant="danger" className="mb-4">
+                Error: {error}
               </Alert>
             )}
             
             {loading ? (
-              <div className="text-center my-5">
-                <Spinner animation="border" role="status">
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary" role="status">
                   <span className="visually-hidden">Loading...</span>
-                </Spinner>
+                </div>
+                <p className="mt-2">Loading student data...</p>
               </div>
             ) : (
               <>
-              <Row>
-                {currentItems.length === 0 ? (
-                  <Col xs={12} className="text-center my-5">
-                    <p>{searchTerm ? 'No students match your search.' : 'No students found.'}</p>
-                  </Col>
-                ) : (
-                  currentItems.map((student) => (
-                    <Col lg={4} md={6} sm={12} className="mb-4" key={student.id}>
-                      <Card className="h-100">
-                        <Card.Body>
-                          <div className="d-flex align-items-center mb-3">
-                            {/* Display the image or a default icon */}
-                            {student.image ? (
-                              <img 
-                                src={student.image} 
-                                alt={student.full_name} 
-                                style={{ width: '60px', height: '60px', marginRight: '15px', objectFit: 'cover', borderRadius: '50%' }} 
-                              />
-                            ) : (
-                              <AiOutlineUser size={60} style={{ marginRight: '15px' }} />
-                            )}
-                            <div>
-                              <Card.Title className="managetitle">{student.full_name}</Card.Title>
-                              <Card.Subtitle className="mb-2 text-muted">Course: {student.course_name}</Card.Subtitle>
-                            </div>
-                          </div>
-                          <div className="d-flex justify-content-between align-items-center">
-                            <span></span> {/* Empty span for alignment */}
-                            <div>
-                              <Button 
-                                variant="primary" 
-                                size="sm" 
-                                className="me-2"
-                                onClick={() => handleEdit(student)}
-                              >
-                                Edit
-                              </Button>
-                              <Button 
-                                variant="danger" 
-                                size="sm"
-                                onClick={() => handleDelete(student.id)}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </div>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  ))
+                <Row className="mt-3">
+                  <div className="col-md-12">
+                    <table className="temp-rwd-table">
+                      <tbody>
+                        <tr>
+                          <th>S.No</th>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th>Course</th>
+                          <th>Status</th>
+                          <th>Date</th>
+                          <th>Action</th>
+                        </tr>
+                        
+                        {currentItems.length > 0 ? (
+                          currentItems.map((student, index) => (
+                            <tr key={student.id}>
+                              <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                              <td data-th="Name">{student.candidate_name}</td>
+                              <td data-th="Email">{student.email}</td>
+                              <td data-th="Phone">{student.mobile_no}</td>
+                              <td data-th="Course">{student.application_for_course}</td>
+                              <td data-th="Status">
+                                <span className={`badge bg-${getStatusVariant(student.course_status)} me-2`}>
+                                  {student.course_status}
+                                </span>
+                              </td>
+                              <td data-th="Date">{formatDate(student.created_at)}</td>
+                              <td data-th="Action">
+                                <Button 
+                                  variant="primary" 
+                                  size="sm" 
+                                  onClick={() => handleViewStudent(student)}
+                                >
+                                  View
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="8" className="text-center">
+                              No student data available.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </Row>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="d-flex justify-content-center mt-4">
+                    <Pagination>
+                      <Pagination.Prev 
+                        onClick={() => handlePageChange(currentPage - 1)} 
+                        disabled={currentPage === 1}
+                      />
+                      {[...Array(totalPages).keys()].map(page => (
+                        <Pagination.Item 
+                          key={page + 1} 
+                          active={page + 1 === currentPage}
+                          onClick={() => handlePageChange(page + 1)}
+                        >
+                          {page + 1}
+                        </Pagination.Item>
+                      ))}
+                      <Pagination.Next 
+                        onClick={() => handlePageChange(currentPage + 1)} 
+                        disabled={currentPage === totalPages}
+                      />
+                    </Pagination>
+                  </div>
                 )}
-              </Row>
-              
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="d-flex justify-content-center mt-4">
-                  <Pagination>
-                    <Pagination.Prev 
-                      onClick={() => handlePageChange(currentPage - 1)} 
-                      disabled={currentPage === 1}
-                    />
-                    {[...Array(totalPages).keys()].map(page => (
-                      <Pagination.Item 
-                        key={page + 1} 
-                        active={page + 1 === currentPage}
-                        onClick={() => handlePageChange(page + 1)}
-                      >
-                        {page + 1}
-                      </Pagination.Item>
-                    ))}
-                    <Pagination.Next 
-                      onClick={() => handlePageChange(currentPage + 1)} 
-                      disabled={currentPage === totalPages}
-                    />
-                  </Pagination>
-                </div>
-              )}
               </>
             )}
           </div>
         </Container>
       </div>
       
-      {/* Edit Modal */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
+      {/* View Student Details Modal */}
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Edit Student</Modal.Title>
+          <Modal.Title>Student Details</Modal.Title>
         </Modal.Header>
-        <Form onSubmit={handleEditSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Full Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="full_name"
-                value={editFormData.full_name}
-                onChange={handleEditChange}
-                required
-              />
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Course Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="course_name"
-                value={editFormData.course_name}
-                onChange={handleEditChange}
-                required
-              />
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Student Image</Form.Label>
-              <Form.Control
-                type="file"
-                name="image"
-                onChange={handleEditChange}
-                accept="image/*"
-              />
-              {imagePreview && (
-                <div className="mt-3">
-                  <img 
-                    src={imagePreview} 
-                    alt="Student Preview" 
-                    style={{ maxWidth: '100px', maxHeight: '100px' }} 
-                  />
-                </div>
-              )}
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Form>
+        <Modal.Body>
+          {selectedStudent && (
+            <div>
+              <Row>
+                <Col md={6} className="mb-3">
+                  <div className="d-flex align-items-center">
+                    {/* Display profile photo or a default icon */}
+                    {selectedStudent.profile_photo ? (
+                      <img 
+                        src={selectedStudent.profile_photo} 
+                        alt={selectedStudent.candidate_name} 
+                        style={{ width: '120px', height: '120px', marginRight: '20px', objectFit: 'cover', borderRadius: '10px' }} 
+                      />
+                    ) : (
+                      <AiOutlineUser size={120} style={{ marginRight: '20px' }} />
+                    )}
+                    <div>
+                      <h5>{selectedStudent.candidate_name}</h5>
+                      <p className="text-muted">ID: {selectedStudent.applicant_id}</p>
+                    </div>
+                  </div>
+                </Col>
+                <Col md={6} className="mb-3">
+                  <p><strong>Application Date:</strong> {formatDate(selectedStudent.created_at)}</p>
+                  <p><strong>Course Status:</strong> 
+                    <span className={`badge bg-${getStatusVariant(selectedStudent.course_status)} ms-2`}>
+                      {selectedStudent.course_status}
+                    </span>
+                  </p>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={6} className="mb-3">
+                  <p><strong>Email:</strong> {selectedStudent.email}</p>
+                  <p><strong>Mobile:</strong> {selectedStudent.mobile_no}</p>
+                </Col>
+                <Col md={6} className="mb-3">
+                  <p><strong>Date of Birth:</strong> {selectedStudent.date_of_birth}</p>
+                  <p><strong>Highest Education:</strong> {selectedStudent.highest_education}</p>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={12} className="mb-3">
+                  <p><strong>Applied Course:</strong> {selectedStudent.application_for_course}</p>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={12} className="mb-3">
+                  <p><strong>School/College:</strong> {selectedStudent.school_college_name}</p>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={12} className="mb-3">
+                  <p><strong>Address:</strong> {selectedStudent.address}</p>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={12} className="mb-3">
+                  <p><strong>Guardian Name:</strong> {selectedStudent.guardian_name}</p>
+                </Col>
+              </Row>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );

@@ -82,10 +82,7 @@ const Feedbackget = () => {
     : feedbacks.filter((feedback) => {
         const lowerSearch = searchTerm.toLowerCase();
         return (
-          feedback.full_name?.toLowerCase().includes(lowerSearch) ||
           feedback.email?.toLowerCase().includes(lowerSearch) ||
-          feedback.phone?.toLowerCase().includes(lowerSearch) ||
-          feedback.subject?.toLowerCase().includes(lowerSearch) ||
           feedback.message?.toLowerCase().includes(lowerSearch)
         );
       });
@@ -98,10 +95,10 @@ const Feedbackget = () => {
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
   
-  // Format date for display
+  // Format date for display in the requested format
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return new Date(dateString).toLocaleDateString('en-US', options);
   };
   
   // Handle view feedback details
@@ -175,18 +172,30 @@ const Feedbackget = () => {
       
       if (response.ok && data.id) {
         setReplySuccess(true);
+        
+        // Get current timestamp for instant update
+        const currentTimestamp = new Date().toISOString();
+        
         // Update the feedback in the list to show it has been replied
         setFeedbacks(prevFeedbacks => 
           prevFeedbacks.map(fb => 
             fb.id === selectedFeedback.id 
-              ? { ...fb, reply: replyMessage, replied_at: new Date().toISOString() } 
+              ? { ...fb, reply: replyMessage, replied_at: currentTimestamp } 
               : fb
           )
         );
         
+        // Update selected feedback for modal display
+        setSelectedFeedback(prev => ({
+          ...prev,
+          reply: replyMessage,
+          replied_at: currentTimestamp
+        }));
+        
         // Close modal after success
         setTimeout(() => {
           setShowReplyModal(false);
+          setShowViewModal(false);
         }, 2000);
       } else {
         // Handle different error scenarios
@@ -231,7 +240,7 @@ const Feedbackget = () => {
               <div style={{ width: '300px' }}>
                 <input
                   type="text"
-                  placeholder="Search by name, email, phone, or subject..."
+                  placeholder="Search by email or message..."
                   className="form-control"
                   value={searchTerm}
                   onChange={(e) => {
@@ -263,12 +272,10 @@ const Feedbackget = () => {
                       <tbody>
                         <tr>
                           <th>S.No</th>
-                          <th>Full Name</th>
                           <th>Email</th>
-                          <th>Phone</th>
-                          <th>Subject</th>
                           <th>Message</th>
-                          <th>Date and Time</th>
+                          <th>Date</th>
+                          <th>Replied At</th>
                           <th>Action</th>
                         </tr>
                         
@@ -276,10 +283,7 @@ const Feedbackget = () => {
                           currentItems.map((feedback, index) => (
                             <tr key={feedback.id}>
                               <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                              <td data-th="Full Name">{feedback.full_name}</td>
                               <td data-th="Email">{feedback.email}</td>
-                              <td data-th="Phone">{feedback.phone}</td>
-                              <td data-th="Subject">{feedback.subject || 'N/A'}</td>
                               <td data-th="Message">
                                 <div className="message-preview">
                                   {feedback.message.length > 50 
@@ -287,7 +291,10 @@ const Feedbackget = () => {
                                     : feedback.message}
                                 </div>
                               </td>
-                              <td data-th="Date and Time">{formatDate(feedback.created_at)}</td>
+                              <td data-th="Date">{formatDate(feedback.created_at)}</td>
+                              <td data-th="Replied At">
+                                {feedback.replied_at ? formatDate(feedback.replied_at) : 'Not replied'}
+                              </td>
                               <td data-th="Action">
                                 <Button 
                                   variant="primary" 
@@ -301,7 +308,7 @@ const Feedbackget = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="8" className="text-center">
+                            <td colSpan="6" className="text-center">
                               No feedback data available.
                             </td>
                           </tr>
@@ -351,12 +358,9 @@ const Feedbackget = () => {
             <div>
               <Row>
                 <Col md={6}>
-                  <p><strong>Full Name:</strong> {selectedFeedback.full_name}</p>
                   <p><strong>Email:</strong> {selectedFeedback.email}</p>
-                  <p><strong>Phone:</strong> {selectedFeedback.phone}</p>
                 </Col>
                 <Col md={6}>
-                  <p><strong>Subject:</strong> {selectedFeedback.subject || 'N/A'}</p>
                   <p><strong>Date:</strong> {formatDate(selectedFeedback.created_at)}</p>
                   {selectedFeedback.replied_at && (
                     <p><strong>Replied At:</strong> {formatDate(selectedFeedback.replied_at)}</p>
@@ -405,10 +409,6 @@ const Feedbackget = () => {
               <Form.Group className="mb-3">
                 <Form.Label>To</Form.Label>
                 <Form.Control type="text" value={selectedFeedback.email} readOnly />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Subject</Form.Label>
-                <Form.Control type="text" value={selectedFeedback.subject || 'Feedback Reply'} readOnly />
               </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label>Original Message</Form.Label>
