@@ -77,7 +77,7 @@ function CompanyProfile() {
 
       <div className="ourteam-box">
         <Container fluid>
-          <div className="about-wpr my-5">
+          <div className="about-wpr">
             <Row>
               <Col lg={6} md={6} sm={12} className="about-box p-2">
                 <div className="about-left-content">

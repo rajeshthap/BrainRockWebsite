@@ -534,7 +534,7 @@ function UserPage() {
         </Row>
       </Container>
       <Container fluid>
-        <div className="about-wpr my-5">
+        <div className="about-wpr">
           <Row>
             <Col lg={6} md={6} sm={12} className="about-box p-2">
               <div className="about-left-content">
@@ -639,7 +639,7 @@ function UserPage() {
                       lg={3}
                       md={3}
                       sm={12}
-                      className={index < 4 ? "box-info" : "mt-4 box-info"}
+                      className={index < 4 ? "box-info" : " box-info"}
                       key={index}
                     >
                       <div className="service-box service-btm">
@@ -677,7 +677,7 @@ function UserPage() {
                       lg={3}
                       md={3}
                       sm={12}
-                      className={index < 4 ? "box-info" : "mt-4 box-info"}
+                      className={index < 4 ? "box-info" : " box-info"}
                       key={index}
                     >
                       <div className="service-box ">
@@ -709,7 +709,7 @@ function UserPage() {
                     lg={3}
                     md={3}
                     sm={12}
-                    className={index < 4 ? "box-info" : "mt-4 box-info"}
+                    className={index < 4 ? "box-info" : " box-info"}
                     key={item.id}
                   >
                     <div className="service-box">

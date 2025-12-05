@@ -6,10 +6,10 @@
 .ourteam-box {
   background-color: #fff;
   padding: 30px;
-
+   
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  margin-top:16px
+ 
 }
 .about-right{
 
@@ -309,9 +309,18 @@
     padding: 18px !important;
 
   }
-  .ourteam-box {
- 
-  padding: 0px !important;
+  .ourteam-box{
+    padding: 0px !important;
   }
+.service-box{
+  text-align: center !important;
+}
+.feature-box {
+  text-align: center !important;
   
+}
+.box-info{
+  margin-top: 12px;
+
+}  
 }

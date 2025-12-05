@@ -276,9 +276,19 @@ body {
 .managetitle{
   color: #000 !important;
 }
+.about-wpr{
+  margin-bottom: 40px;
+}
 @media only screen and (max-width: 568px) {
   .br-login {
     margin: var(--br-space-200) var(--br-space-0) var(--br-space-0) var(--br-space-0) !important;
+  }
+  .search-btn{
+    margin-top: 12px;
+  }
+  .sbt-btn-text{
+    font-size: 12px !important;
+
   }
 .feature-icon{
   text-align: center;

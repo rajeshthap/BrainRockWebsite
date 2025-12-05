@@ -46,6 +46,8 @@ function FooterPage() {
            <Link to="/OurTeam"> <li> <i><MdArrowForwardIos className='i-space' /></i>Meet Our Team</li></Link>  
              <Link to="/RunningProjects"> <li> <i><MdArrowForwardIos className='i-space' /></i>Our Projects</li></Link>   
           <Link to="/Contact"><li> <i><MdArrowForwardIos className='i-space' /></i>Contact us</li></Link>
+                    <Link to="/Feedback"><li> <i><MdArrowForwardIos className='i-space' /></i>Feedback</li></Link>
+                    <Link to="/Certificate"><li> <i><MdArrowForwardIos className='i-space' /></i>Certificate</li></Link>
             </ul>
           </div>
 

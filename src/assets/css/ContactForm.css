@@ -109,4 +109,10 @@
     flex-direction: column;
     width: 90%;
   }
+
+}
+@media (max-width: 900px) {
+    .info-box{
+      padding: 0px !important;
+    }
 }

@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import { Col, Container, Row, Spinner, Alert } from 'react-bootstrap'
-import { AiOutlineFileDone } from 'react-icons/ai'
-import { FaArrowRight, FaPhp, FaPython, FaReact } from 'react-icons/fa'
+import React, { useState, useEffect } from 'react';
+import { Col, Container, Row, Spinner, Alert } from 'react-bootstrap';
+import { AiOutlineFileDone } from 'react-icons/ai';
+import { FaArrowRight } from 'react-icons/fa6';
 import "../../../assets/css/course.css";
 import { Link, useNavigate } from "react-router-dom";
-import { DiMysql } from "react-icons/di";
-import { MdDeveloperBoard } from "react-icons/md";
-import { IoLogoHtml5 } from "react-icons/io";
-import { TbDeviceDesktop } from "react-icons/tb";
 import FooterPage from '../../footer/FooterPage';
 
-// Define the base URL for the API and media
 const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
 function Courses() {
@@ -23,20 +18,14 @@ function Courses() {
     const fetchCourses = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/course-items/`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch courses');
-        }
-        const result = await response.json();
+        if (!response.ok) throw new Error('Failed to fetch courses');
 
-        // Assuming the API returns { success: true, data: [...] } or a direct array
+        const result = await response.json();
         const coursesData = result.data || result;
 
-        // Map over the data to construct full image URLs and format prices
         const processedCourses = coursesData.map(course => ({
           ...course,
-          // Construct full icon URL, handle null icon, and add cache-busting timestamp
           icon: course.icon ? `${API_BASE_URL}${course.icon}?t=${Date.now()}` : null,
-          // Format price to Indian Rupees
           formattedPrice: new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR'
@@ -52,89 +41,84 @@ function Courses() {
     };
 
     fetchCourses();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   return (
     <>
-     <div className='Courses-banner'>
-                  <div className='site-breadcrumb-wpr'>
-                    <h2 className='breadcrumb-title'>Our Courses</h2>
-                 <ul className='breadcrumb-menu clearfix'>
-            <li>
-              <Link className="breadcrumb-home" to="/">Home</Link>
-            </li>
-          
+      <div className='Courses-banner'>
+        <div className='site-breadcrumb-wpr'>
+          <h2 className='breadcrumb-title'>Our Courses</h2>
+          <ul className='breadcrumb-menu clearfix'>
+            <li><Link className="breadcrumb-home" to="/">Home</Link></li>
             <li className='px-2'>/</li>
-          
-            <li>
-              <Link className="breadcrumb-about" to="/">Courses</Link>
-            </li>
+            <li><Link className="breadcrumb-about" to="/">Courses</Link></li>
           </ul>
-          
-                  </div>
-                </div>
-    <div className="ourteam-section">
-      <Container className='ourteam-box'>
-        {loading && (
-          <div className="text-center my-5">
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-          </div>
-        )}
-        {error && (
-          <Alert variant="danger" className="my-5">
-            {error}
-          </Alert>
-        )}
-        {!loading && !error && (
-          <Row>
-            {courses.map((course) => (
-              <Col key={course.id} lg={3} md={3} sm={12} className="box-info" >
-                <div className="service-box">
-                  <div className="service-icon text-center">
-                    {/* Conditionally render the icon image or a default icon */}
-                    {course.icon ? (
-                      <img src={course.icon} alt={course.title} style={{ width: '60px', height: '60px' }} />
-                    ) : (
-                      <i className="flaticon-cloud-service"><AiOutlineFileDone /></i>
-                    )}
-                  </div>
-                  <div className="service-desc course-sub-heading">
-                    <h4 className="heading-5">{course.title}</h4>
-                    <p>{course.description}</p>
-                    <p className="course-info">
-                      <span className="course-label">Price:</span>
-                      <span className="course-value">{course.formattedPrice}</span>
-                    </p>
-                    <p className="course-info">
-                      <span className="course-label">Duration:</span>
-                      <span className="course-value">{course.duration}</span>
-                    </p>
-                   <button
-  className="service-btn-read"
-  onClick={() => navigate("/Training", { state: { courseId: course.id } })}
->
-  Read More
-  <i className="ti-arrow-right"><FaArrowRight /></i>
-</button>
+        </div>
+      </div>
 
-                  </div>
-                </div>
-              </Col>
-            ))}
-          </Row>
-        )}
+      <div className="ourteam-section">
+        <Container className='ourteam-box'>
 
-      
-      </Container>
-       <Container fluid className="br-footer-box">
-        
+          {loading && (
+            <div className="text-center my-5">
+              <Spinner animation="border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+            </div>
+          )}
+
+          {error && (
+            <Alert variant="danger" className="my-5">{error}</Alert>
+          )}
+
+          {!loading && !error && (
+            <Row className="g-4">
+              {courses.map((course) => (
+                <Col key={course.id} lg={3} md={4} sm={6} xs={12}>
+                  <div className="service-box equal-card">
+                    <div className="service-icon text-center">
+                      {course.icon ? (
+                        <img src={course.icon} alt={course.title} style={{ width: "60px", height: "60px" }} />
+                      ) : (
+                        <AiOutlineFileDone size={50} />
+                      )}
+                    </div>
+
+                    <div className="service-desc course-sub-heading">
+                      <h4 className="heading-5">{course.title}</h4>
+                      <p>{course.description}</p>
+
+                      <p className="course-info">
+                        <span className="course-label">Price:</span>
+                        <span className="course-value">{course.formattedPrice}</span>
+                      </p>
+
+                      <p className="course-info">
+                        <span className="course-label">Duration:</span>
+                        <span className="course-value">{course.duration}</span>
+                      </p>
+
+                      <button
+                        className="service-btn-read"
+                        onClick={() => navigate("/Training", { state: { courseId: course.id } })}
+                      >
+                        Read More <FaArrowRight />
+                      </button>
+                    </div>
+                  </div>
+                </Col>
+              ))}
+            </Row>
+          )}
+
+        </Container>
+
+        <Container fluid className="br-footer-box">
           <FooterPage />
-      </Container>
-    </div>
+        </Container>
+      </div>
     </>
-  )
+  );
 }
 
 export default Courses;

@@ -249,8 +249,8 @@ function Feedback() {
               </Col>
             </Row>
 
-            <div className="text-center">
-              <Button type="submit" className="mt-4" variant="primary">
+            <div className="text-center sbt-btn">
+              <Button type="submit" className="mt-4 sbt-btn-text" variant="primary">
                 Submit Feedback
               </Button>
             </div>
