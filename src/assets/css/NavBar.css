@@ -77,14 +77,13 @@ img.logo-wecd {
     .awc-title p {
         font-size: var(--br-space-200);
     }
-/* Prevent double-click on dropdown from closing navbar */
-.navbar .dropdown-menu.show {
-  display: block;
-}
 
-    .awc-title p {
-        display: none;
+    /* Prevent double-click on dropdown from closing navbar */
+    .navbar .dropdown-menu.show {
+        display: block;
     }
+
+
 
     .awc-title {
         margin-top: 4px;
@@ -103,7 +102,7 @@ img.logo-wecd {
     .awc-subtitle {
 
         display: flex;
-       
+
     }
 
     .subtitle {
