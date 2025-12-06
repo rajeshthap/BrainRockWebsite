@@ -1,194 +1,286 @@
 import React, { useState, useEffect } from "react";
-import { Container, Alert } from "react-bootstrap";
-import "../../../assets/css/ContactForm.css";
+import {
+  Container,
+  Card,
+  Row,
+  Col,
+  Spinner,
+  Alert,
+  Modal,
+  Button,
+  Form,
+} from "react-bootstrap";
+import "../../../assets/css/career.css";
 import FooterPage from "../../footer/FooterPage";
 import { Link } from "react-router-dom";
 
 function Career() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
-  });
+  const [jobs, setJobs] = useState([]);
+  const [jobLoading, setJobLoading] = useState(true);
+  const [jobError, setJobError] = useState(null);
 
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [apiResponse, setApiResponse] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  
-  // State for company details
-  const [companyDetails, setCompanyDetails] = useState({
-    address: "",
-    email: "",
-    phone: ""
-  });
-  const [detailsLoading, setDetailsLoading] = useState(true);
-  const [detailsError, setDetailsError] = useState(null);
+  // Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState("");
 
-  // Fetch company details on component mount
+  // Form Fields
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [resume, setResume] = useState(null);
+
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState(null);
+  const [formSuccess, setFormSuccess] = useState(null);
+  const [resumeError, setResumeError] = useState(null);
+
+  // Fetch Jobs
   useEffect(() => {
-    const fetchCompanyDetails = async () => {
-      try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/company-details/');
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch company details');
-        }
-        
-        const result = await response.json();
-        
-        // Handle the actual API response format
-        if (result.success && result.data && result.data.length > 0) {
-          // Get the first item from the data array
-          const companyInfo = result.data[0];
-          
-          setCompanyDetails({
-            address: companyInfo.address,
-            email: companyInfo.email,
-            phone: companyInfo.phone
-          });
-        } else {
-          throw new Error('Invalid response format');
-        }
-      } catch (error) {
-        console.error('Error fetching company details:', error);
-        setDetailsError(error.message);
-      } finally {
-        setDetailsLoading(false);
-      }
-    };
-
-    fetchCompanyDetails();
+    fetch(
+      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/"
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load job openings");
+        return res.json();
+      })
+      .then((data) => setJobs(data))
+      .catch((err) => setJobError(err.message))
+      .finally(() => setJobLoading(false));
   }, []);
 
-  // live validation
-  const validateField = (name, value) => {
-    let error = "";
-
-    if (!value.trim()) {
-      error = "* This field is required";
-    } else {
-      if (name === "email" && !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
-        error = "* Invalid email format";
-      }
-      if (name === "phone" && !/^[0-9]{10}$/.test(value.replace(/[^0-9]/g, ''))) {
-        error = "* Enter valid 10 digit mobile no";
-      }
-    }
-
-    setErrors((prev) => ({ ...prev, [name]: error }));
+  // Open Modal
+  const handleApplyClick = (jobId) => {
+    setSelectedJobId(jobId);
+    setShowModal(true);
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  // PDF Validation
+  const handleResumeChange = (e) => {
+    const file = e.target.files[0];
 
-    validateField(name, value); // LIVE validation
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setShowAlert(false);
-    
-    let newErrors = {};
-    Object.keys(formData).forEach((key) => {
-      if (!formData[key].trim()) {
-        newErrors[key] = "* This field is required";
-      }
-    });
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setLoading(false);
+    if (!file) {
+      setResume(null);
+      setResumeError(null);
       return;
     }
 
-    try {
-      // Prepare data for API
-      const apiData = {
-        full_name: formData.name,
-        email: formData.email,
-        phone: formData.phone.startsWith('+') ? formData.phone : `+91-${formData.phone}`,
-        subject: formData.subject,
-        message: formData.message
-      };
-
-      // Send data to API
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/contact-us/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit form');
-      }
-
-      const result = await response.json();
-      
-      // Show success message
-      setApiResponse({
-        success: true,
-        message: "Your message has been sent successfully!"
-      });
-      setShowAlert(true);
-      
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-      });
-      setErrors({});
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      setApiResponse({
-        success: false,
-        message: "Failed to send your message. Please try again later."
-      });
-      setShowAlert(true);
-    } finally {
-      setLoading(false);
+    if (file.type !== "application/pdf") {
+      setResume(null);
+      setResumeError("Only PDF files are allowed.");
+      return;
     }
+
+    setResume(file);
+    setResumeError(null);
+  };
+
+  // Submit Form
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (resumeError) return;
+
+    setFormLoading(true);
+    setFormError(null);
+    setFormSuccess(null);
+
+    const formData = new FormData();
+    formData.append("job_id", selectedJobId);
+    formData.append("full_name", fullName);
+    formData.append("email", email);
+    formData.append("phone", phone);
+    if (resume) formData.append("resume", resume);
+
+    fetch(
+      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-application/",
+      {
+        method: "POST",
+        body: formData,
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error || data.message === "error") {
+          setFormError("Submission failed. Please check details.");
+        } else {
+          setFormSuccess("Application submitted successfully!");
+          setFullName("");
+          setEmail("");
+          setPhone("");
+          setResume(null);
+          setResumeError(null);
+        }
+      })
+      .catch(() => setFormError("Something went wrong!"))
+      .finally(() => setFormLoading(false));
   };
 
   return (
     <>
-        <div className='contact'>
-                      <div className='site-breadcrumb-wpr'>
-                        <h2 className='breadcrumb-title'>New Job Openings</h2>
-                     <ul className='breadcrumb-menu clearfix'>
-                <li>
-                  <Link className="breadcrumb-home" to="/">Home</Link>
-                </li>
-              
-                <li className='px-2'>/</li>
-              
-                <li>
-                  <Link className="breadcrumb-about" to="/">FeedBack</Link>
-                </li>
-              </ul>
-              
-                      </div>
-                    </div>
-    <div className="ourteam-section">
-      <Container>
-        <div className="ourteam-box">
-         
+      <div className="contact">
+        <div className="site-breadcrumb-wpr">
+          <h2 className="breadcrumb-title">New Job Openings</h2>
+          <ul className="breadcrumb-menu clearfix">
+            <li>
+              <Link className="breadcrumb-home" to="/">
+                Home
+              </Link>
+            </li>
+            <li className="px-2">/</li>
+            <li>
+              <Link className="breadcrumb-about" to="/">
+                Openings
+              </Link>
+            </li>
+          </ul>
         </div>
-      </Container>
-       <Container fluid className="br-footer-box">
-        
+      </div>
+
+      <div className="ourteam-section mt-4">
+        <Container>
+          <div className="ourteam-box">
+            {jobLoading && (
+              <div className="text-center py-5">
+                <Spinner animation="border" />
+              </div>
+            )}
+
+            {jobError && (
+              <Alert variant="danger" className="text-center">
+                {jobError}
+              </Alert>
+            )}
+
+            <Row>
+              {jobs.map((job) => (
+                <Col lg={4} md={6} sm={12} key={job.id} className="mb-4">
+                  <Card className="br-career-card shadow-sm">
+                    <Card.Body className="br-career-body">
+                      <Card.Title className="br-career-title">
+                        {job.title}
+                      </Card.Title>
+
+                      <p className="br-career-info">
+                        {job.department}-{job.location}
+                      </p>
+
+                      <p>
+                        <strong>Employment:</strong> {job.employment_type}
+                      </p>
+                      <p>
+                        <strong>Salary:</strong> {job.salary_range}
+                      </p>
+                      <p>
+                        <strong>Experience:</strong> {job.experience_level}
+                      </p>
+                      <p>
+                        <strong>Education:</strong> {job.education}
+                      </p>
+
+                      <p className="mt-2">
+                        <strong>Skills:</strong>
+                        <br />
+                        {job.skills.join(", ")}
+                      </p>
+
+                      <p>
+                        <strong>Deadline:</strong> {job.application_deadline}
+                      </p>
+
+                      <div className="job-opening-btn">
+                        <Button
+                          className="btn btn-primary job-view-btn"
+                          onClick={() => handleApplyClick(job.job_id)}
+                        >
+                          Apply Now
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </div>
+        </Container>
+
+        <Container fluid className="br-footer-box mt-3">
           <FooterPage />
-      </Container>
-    </div>
+        </Container>
+      </div>
+
+      {/* MODAL */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton className="br-career-modal">
+          <Modal.Title className="br-job-apply">Apply for Job</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {formError && <Alert variant="danger">{formError}</Alert>}
+          {formSuccess && <Alert variant="success">{formSuccess}</Alert>}
+
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-2">
+              <Form.Label>Full Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="br-label"
+                placeholder="Enter full name"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-2">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="br-label"
+                placeholder="enter email ID"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-2">
+              <Form.Label>Phone</Form.Label>
+              <Form.Control
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                className="br-label"
+                placeholder="enter phone number"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-2">
+              <Form.Label>
+                Resume <span className="resume-pdf">(PDF Only)</span>
+              </Form.Label>
+              <Form.Control
+                type="file"
+                accept="application/pdf"
+                onChange={handleResumeChange}
+                className="br-label"
+              />
+              {resumeError && (
+                <small className="text-danger">{resumeError}</small>
+              )}
+            </Form.Group>
+            <div className="text-center">
+              <Button
+                type="submit"
+                className="btn btn-primary job-view-btn"
+                disabled={formLoading || resumeError}
+              >
+                {formLoading ? "Submitting..." : "Submit Application"}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </>
   );
 }
