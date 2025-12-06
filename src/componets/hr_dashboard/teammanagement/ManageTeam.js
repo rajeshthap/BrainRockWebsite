@@ -170,7 +170,7 @@ const ManageTeam = () => {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
           }),
-          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/project-list/', {
+          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourproject-items/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
@@ -646,8 +646,8 @@ const ManageTeam = () => {
                                   >
                                     <option value="">Select Project</option>
                                     {getAvailableProjects().map(project => (
-                                      <option key={project.project_id} value={project.project_id}>
-                                        {project.project_name}
+                                      <option key={project.project_id} value={project.company_name}>
+                                        {project.company_name}
                                       </option>
                                     ))}
                                   </Form.Select>

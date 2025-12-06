@@ -157,7 +157,7 @@ const CreateTeam = () => {
               }
             ),
             fetch(
-              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/project-list/",
+              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourproject-items/",
               {
                 method: "GET",
                 credentials: "include",
@@ -508,10 +508,10 @@ const handleSubmit = async (e) => {
                         <option value="">Select Project</option>
                         {filteredProjects.map((project) => (
                           <option
-                            key={project.project_id}
-                            value={project.project_id}
+                            key={project.id}
+                            value={project.company_name}
                           >
-                            {project.project_name}
+                            {project.company_name}
                           </option>
                         ))}
                       </Form.Select>
