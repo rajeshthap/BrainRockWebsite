@@ -13,29 +13,29 @@ const Certificate = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    
+
     if (!certificateNumber.trim()) {
       setError('Please enter a certificate number');
       return;
     }
-    
+
     setLoading(true);
     setError('');
     setNotFound(false);
     setCertificateData(null);
-    
+
     try {
       // First, fetch all certificates
       const allCertificatesResponse = await axios.get(
         "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/certificate/"
       );
-      
+
       if (allCertificatesResponse.data.success && allCertificatesResponse.data.data.length > 0) {
         // Find the certificate that matches the input certificate number
         const foundCertificate = allCertificatesResponse.data.data.find(
           cert => cert.certificate_number === certificateNumber
         );
-        
+
         if (foundCertificate) {
           setCertificateData(foundCertificate);
         } else {
@@ -73,13 +73,13 @@ const Certificate = () => {
           </ul>
         </div>
       </div>
-      
+
       <div className="ourteam-section">
         <Container className="">
-          <div className="ourteam-box text-heading">
+          <div className="ourteam-box mt-4 mb-3 text-heading">
             <h2 className="text-center mb-4">Verify Your Certificate</h2>
             <p className="text-center mb-4">Enter your certificate number to verify its authenticity</p>
-            
+
             <Form onSubmit={handleSearch} className="mb-5">
               <Row className="justify-content-center">
                 <Col md={8}>
@@ -97,9 +97,9 @@ const Certificate = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4} className="d-flex align-items-end search-btn">
-                  <Button 
-                    type="submit" 
-                    className="w-80" 
+                  <Button
+                    type="submit"
+                    className="w-80"
                     variant="primary"
                     disabled={loading}
                   >
@@ -113,15 +113,15 @@ const Certificate = () => {
                 </Col>
               </Row>
             </Form>
-            
+
             {error && <Alert variant="danger">{error}</Alert>}
-            
+
             {notFound && (
               <Alert variant="warning">
                 No certificate found with number: {certificateNumber}. Please check the number and try again.
               </Alert>
             )}
-            
+
             {certificateData && (
               <Card className="certificate-card mb-4">
                 <Card.Header as="h5" className="text-center bg-primary text-white">
@@ -151,7 +151,7 @@ const Certificate = () => {
           </div>
         </Container>
       </div>
-      
+
       <Container fluid className="br-footer-box">
         <FooterPage />
       </Container>

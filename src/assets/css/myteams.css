@@ -24,9 +24,9 @@
   font-size: 1.25rem;
   font-weight: 600;
 }
-.card-title{
+/* .card-title{
     color: white;
-}
+} */
 .team-id-badge {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
@@ -58,7 +58,7 @@
 .team-detail-label {
   display: block;
   font-weight: 600;
-  color: #white;
+  color: white;
   margin-bottom: 0.25rem;
   font-size: 0.875rem;
 }

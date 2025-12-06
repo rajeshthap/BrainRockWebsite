@@ -63,7 +63,7 @@ function Gallery() {
         </div>
       </div>
       <div className="ourteam-section">
-        <Container className="ourteam-box">
+        <Container className="ourteam-box mt-4 mb-3">
 
           <div className="our-heading-team">
             {loading && (
