@@ -72,55 +72,52 @@ function RunningProjects() {
           </ul>
         </div>
       </div>
+      <div className="ourteam-section" style={{ overflow: 'hidden', }}>
+        <Container className="ourteam-box" style={{ maxWidth: '100%', padding: '0 15px' }}>
+          <Row style={{ margin: '0 -15px' }}>
+            {projects.map((project) => (
+              <Col key={project.id} lg={3} md={6} sm={12} className="mb-4" style={{ padding: '0 15px' }}>
+                <figure className="shape-box shape-box_half" style={{ margin: '0', overflow: 'hidden' }}>
+                  <img
+                    src={
+                      project.company_logo
+                        ? `${API_BASE_URL}${project.company_logo}`
+                        : "https://via.placeholder.com/400x300?text=No+Image"
+                    }
+                    alt=""
+                    style={{ width: '100%', height: 'auto' }}
+                  />
 
-      <div className="ourteam-section">
-        <Container className="ourteam-box">
+                  <div className="brk-abs-overlay z-index-0 bg-black opacity-60"></div>
 
-          {/* FIXED RESPONSIVE STRUCTURE */}
-       <Row>
-  {projects.map((project) => (
-    <Col key={project.id} lg={3} md={6} sm={12} className="mb-4">
-      <figure className="shape-box shape-box_half">
-        <img
-          src={
-            project.company_logo
-              ? `${API_BASE_URL}${project.company_logo}`
-              : "https://via.placeholder.com/400x300?text=No+Image"
-          }
-          alt=""
-        />
+                  <figcaption>
+                    <div className="show-cont">
+                      <h4 className="card-main-title">
+                        {project.company_name || "No Title"}
+                      </h4>
+                    </div>
 
-        <div className="brk-abs-overlay z-index-0 bg-black opacity-60"></div>
+                    <p className="card-content">
+                      {project.description
+                        ? project.description
+                        : project.technology_used?.length
+                          ? project.technology_used.join(", ")
+                          : "No description available"}
+                    </p>
+                  </figcaption>
 
-        <figcaption>
-          <div className="show-cont">
-            <h4 className="card-main-title">
-              {project.company_name || "No Title"}
-            </h4>
-          </div>
-
-          <p className="card-content">
-            {project.description
-              ? project.description
-              : project.technology_used?.length
-              ? project.technology_used.join(", ")
-              : "No description available"}
-          </p>
-        </figcaption>
-
-        <span className="after"></span>
-      </figure>
-    </Col>
-  ))}
-</Row>
-
-
-        </Container>
-
-        <Container fluid className="br-footer-box">
-          <FooterPage />
+                  <span className="after"></span>
+                </figure>
+              </Col>
+            ))}
+          </Row>
         </Container>
       </div>
+
+      <Container fluid className="br-footer-box">
+        <FooterPage />
+      </Container>
+
     </>
   );
 }
