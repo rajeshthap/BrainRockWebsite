@@ -126,6 +126,13 @@
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
+.career-banner {
+  background-image: url('../../assets/images/career.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: var(--br-space-700);
+}
 
 .contact {
   background-image: url('../../assets/images/contactus.jpg');

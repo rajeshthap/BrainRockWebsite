@@ -117,7 +117,7 @@ function Career() {
 
   return (
     <>
-      <div className="contact">
+      <div className="career-banner">
         <div className="site-breadcrumb-wpr">
           <h2 className="breadcrumb-title">New Job Openings</h2>
           <ul className="breadcrumb-menu clearfix">
