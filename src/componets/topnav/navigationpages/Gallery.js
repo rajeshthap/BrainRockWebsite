@@ -64,64 +64,64 @@ function Gallery() {
       </div>
       <div className="ourteam-section">
         <Container className="ourteam-box">
-          <Row className="">
-            <div className="our-heading-team">
-              {loading && (
-                <div className="text-center my-5">
-                  <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </Spinner>
-                </div>
-              )}
 
-              {error && (
-                <Alert variant="danger" className="mt-3">
-                  Error: {error}
-                </Alert>
-              )}
+          <div className="our-heading-team">
+            {loading && (
+              <div className="text-center my-5">
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              </div>
+            )}
 
-              {!loading && !error && (
-                <section className="our-team-section">
-                  <div className="container">
-                    <Row>
-                      {galleryItems.length === 0 ? (
-                        <div className="col-12 text-center">
-                          <p>No items in the gallery.</p>
-                        </div>
-                      ) : (
-                        galleryItems.map((item) => (
-                          <div
-                            className="col-lg-3 col-md-6 col-sm-6"
-                            key={item.id}
-                          >
-                            <div className="our-our-teams">
-                              <div className="pic">
-                                {item.fullImageUrl ? (
-                                  <img
-                                    src={item.fullImageUrl}
-                                    alt={item.full_name}
-                                  />
-                                ) : (
-                                  <div className="no-image-placeholder">
-                                    No Image
-                                  </div>
-                                )}
-                              </div>
+            {error && (
+              <Alert variant="danger" className="mt-3">
+                Error: {error}
+              </Alert>
+            )}
 
-                              <div className="team-content">
-                                <h3 className="title">{item.full_name}</h3>
-                                <span className="post">{item.course_name}</span>
-                              </div>
+            {!loading && !error && (
+              <section className="our-team-section">
+                <div className="container">
+                  <Row>
+                    {galleryItems.length === 0 ? (
+                      <div className="col-12 text-center">
+                        <p>No items in the gallery.</p>
+                      </div>
+                    ) : (
+                      galleryItems.map((item) => (
+                        <div
+                          className="col-lg-3 col-md-6 col-sm-6"
+                          key={item.id}
+                        >
+                          <div className="our-our-teams">
+                            <div className="pic">
+                              {item.fullImageUrl ? (
+                                <img
+                                  src={item.fullImageUrl}
+                                  alt={item.full_name}
+                                />
+                              ) : (
+                                <div className="no-image-placeholder">
+                                  No Image
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="team-content">
+                              <h3 className="title">{item.full_name}</h3>
+                              <span className="post">{item.course_name}</span>
                             </div>
                           </div>
-                        ))
-                      )}
-                    </Row>
-                  </div>
-                </section>
-              )}
-            </div>
-          </Row>
+                        </div>
+                      ))
+                    )}
+                  </Row>
+                </div>
+              </section>
+            )}
+          </div>
+
         </Container>
         <Container fluid className="br-footer-box">
           <FooterPage />
