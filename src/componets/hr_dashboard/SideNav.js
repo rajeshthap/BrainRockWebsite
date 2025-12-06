@@ -103,21 +103,21 @@ const menuItems = [
         },
         
        
-        {
-          label: "Role & Access Management",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+        // {
+        //   label: "Role & Access Management",
+        //   path: "/EmployeeManagement",
+        //   icon: <FaChartLine />,
+        // },
         {
           label: "Employee Transfer / Promotion",
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        {
-          label: "Employee Exit & Clearance",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+        // {
+        //   label: "Employee Exit & Clearance",
+        //   path: "/EmployeeManagement",
+        //   icon: <FaChartLine />,
+        // },
       ],
     },
   // {
@@ -238,36 +238,20 @@ const menuItems = [
           path: "/EmpList",
           icon: <FaChartLine />,
         },
-        {
-          label: "Payroll Processing",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+    
         {
           label: "Payslip Generation",
           path: "/PayslipGenerator",
           icon: <FaChartLine />,
         },
-        {
-          label: "Deductions & Allowances",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Tax Calculation (TDS, PF, ESI)",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Bonus / Incentives",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Payroll Reports",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+       
+       
+       
+        // {
+        //   label: "Payroll Reports",
+        //   path: "/EmployeeManagement",
+        //   icon: <FaChartLine />,
+        // },
        
       ],
     },
@@ -289,17 +273,17 @@ const menuItems = [
           path: "/EmployeeManagement",
           icon: <FaChartLine />,
         },
-        {
-          label: "Department Heads",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+        // {
+        //   label: "Department Heads",
+        //   path: "/EmployeeManagement",
+        //   icon: <FaChartLine />,
+        // },
        
-        {
-          label: "Department Performance Overview",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+        // {
+        //   label: "Department Performance Overview",
+        //   path: "/EmployeeManagement",
+        //   icon: <FaChartLine />,
+        // },
        
        
        
@@ -347,78 +331,47 @@ const menuItems = [
        
       ],
     },
-   {
-      icon: <GrDocumentPerformance />,
-      label: "Performance",
+  //  {
+  //     icon: <GrDocumentPerformance />,
+  //     label: "Performance",
  
-      submenu: [
-        {
-          label: "Performance Goals / KPIs",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Appraisal Forms",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Feedback & Ratings",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Training & Development",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Promotion Recommendations",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Performance Reports",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+  //     submenu: [
+  //       {
+  //         label: "Performance Goals / KPIs",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Appraisal Forms",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Feedback & Ratings",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Training & Development",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Promotion Recommendations",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
+  //       {
+  //         label: "Performance Reports",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaChartLine />,
+  //       },
        
        
        
-      ],
-    },
-    {
-      icon: <IoDocumentsOutline />,
-      label: "Documents",
- 
-      submenu: [
-        {
-          label: "Employee Documents",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Templates (Offer Letter, Appraisal Form)",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "FUpload / Download Files",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Document Expiry Alerts",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-       
-       
-       
-       
-       
-      ],
-    },
+  //     ],
+  //   },
+   
    {
       icon: <IoIosNotifications />,
       label: "Notifications",
@@ -452,120 +405,92 @@ const menuItems = [
       ],
     },
  
-     {
-      icon: <AiOutlineFile />,
-      label: "Reports",
+    //  {
+    //   icon: <AiOutlineFile />,
+    //   label: "Reports",
  
-      submenu: [
-        {
-          label: "Attendance Reports",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Leave Reports",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Payroll Reports",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Recruitment Reports",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Department Reports",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Employee Summary Reports",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+    //   submenu: [
+    //     {
+    //       label: "Attendance Reports",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Leave Reports",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Payroll Reports",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Recruitment Reports",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Department Reports",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Employee Summary Reports",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
        
        
        
        
        
-      ],
-    },
-      {
-      icon: <RiSettings2Line />,
-      label: "Settings",
+    //   ],
+    // },
+    //   {
+    //   icon: <RiSettings2Line />,
+    //   label: "Settings",
  
-      submenu: [
-        {
-          label: "Company Profile",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Role Permissions",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Workflow Settings",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Leave Policy Configuration",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Attendance Rules",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Payroll Configuration",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
+    //   submenu: [
+    //     {
+    //       label: "Company Profile",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Role Permissions",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Workflow Settings",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Leave Policy Configuration",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Attendance Rules",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
+    //     {
+    //       label: "Payroll Configuration",
+    //       path: "/EmployeeManagement",
+    //       icon: <FaChartLine />,
+    //     },
        
        
        
        
        
-      ],
-    },
+    //   ],
+    // },
  
-       {
-      icon: <CgProfile />,
-      label: " Profile (User’s Own)",
- 
-      submenu: [
-        {
-          label: "View / Edit Profile",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Change Password",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Upload Profile Picture",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-        {
-          label: "Notification Preferences",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-       
-       
-      ],
-    },
+      
   ];
 
 
