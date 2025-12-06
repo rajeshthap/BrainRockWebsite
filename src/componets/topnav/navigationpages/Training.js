@@ -82,6 +82,23 @@ const Training = () => {
 
   return (
     <div className="ourteam-section">
+       <div className='Trainingimg-banner'>
+                <div className='site-breadcrumb-wpr'>
+                  <h2 className='breadcrumb-title'>Our Training</h2>
+               <ul className='breadcrumb-menu clearfix'>
+          <li>
+            <Link className="breadcrumb-home" to="/">Home</Link>
+          </li>
+        
+          <li className='px-2'>/</li>
+        
+          <li>
+            <Link className="breadcrumb-about" to="/">Training</Link>
+          </li>
+        </ul>
+        
+                </div>
+              </div>
       <Container className="ourteam-box-training">
         <div className="my-3 main-mt-0">
           {/* Top Registration Button */}
