@@ -60,10 +60,10 @@
 }
 
 .hero-sub-title {
-    font-size: 2.2rem;
+    font-size:18px;
     line-height: 1;
     display: inline-block;
-    color: var(--awc-white);
+    color: var(--br-white);
     margin-bottom: 15px;
     font-weight: 600;
 }

@@ -19,7 +19,7 @@ function FooterPage() {
         <Col lg={4} md={6} sm={6}>
           <div className='footer-widget about-us'>
            <Link to="/"> <div className='footer-logo mb-30'><img src={Logo} alt="logo" className="logo-wecd" /></div></Link>
-            <p>32 New Park Road, Gandhi Gram Near Kanwali Road Dehradun, Uttarakhand</p>
+            <p>BCS is one of the most reliable website development and industrial internship provider in entire Dehradun, Uttarakhand. </p>
             <div className='subscribe-area'>
               <Form className=''>
                 <span className='btn-shape'></span>

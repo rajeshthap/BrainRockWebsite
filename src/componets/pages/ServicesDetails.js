@@ -104,6 +104,23 @@ const ServicesDetails = () => {
   // Render the component with fetched data
   return (
     <div className="ourteam-section">
+      <div className='serviceimg-banner'>
+                <div className='site-breadcrumb-wpr'>
+                  <h2 className='breadcrumb-title'>Our Services</h2>
+               <ul className='breadcrumb-menu clearfix'>
+          <li>
+            <Link className="breadcrumb-home" to="/">Home</Link>
+          </li>
+        
+          <li className='px-2'>/</li>
+        
+          <li>
+            <Link className="breadcrumb-about" to="/">Services</Link>
+          </li>
+        </ul>
+        
+                </div>
+              </div>
       <Container className="ourteam-box">
         <div className="my-3 main-mt-0">
           {/* Title Section */}

@@ -77,10 +77,15 @@ img.logo-wecd {
     .awc-title p {
         font-size: var(--br-space-200);
     }
-
+.nav-link {
+   
+    font-size: var(--br-space-400);
+    padding: 8px;
+}
     /* Prevent double-click on dropdown from closing navbar */
     .navbar .dropdown-menu.show {
         display: block;
+        background-color: #a5969621;
     }
 
 
