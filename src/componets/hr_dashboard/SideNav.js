@@ -295,36 +295,29 @@ const menuItems = [
       submenu: [
         {
           label: "Job Openings",
-          path: "/EmployeeManagement",
+          path: "/JobOpenings",
           icon: <FaChartLine />,
         },
         {
           label: "Candidate Applications",
-          path: "/EmployeeManagement",
+          path: "/JobApplications",
           icon: <FaChartLine />,
         },
         {
           label: "Interview Scheduling",
-          path: "/EmployeeManagement",
+          path: "/InterviewSch",
           icon: <FaChartLine />,
         },
         {
           label: "Shortlisting & Hiring",
-          path: "/EmployeeManagement",
+          path: "/Shortlisting",
           icon: <FaChartLine />,
         },
         {
           label: "Offer Letters",
-          path: "/EmployeeManagement",
+          path: "/OfferLetters",
           icon: <FaChartLine />,
         },
-        {
-          label: "Onboarding Process",
-          path: "/EmployeeManagement",
-          icon: <FaChartLine />,
-        },
-       
-       
        
       ],
     },
