@@ -45,7 +45,7 @@ function NavBar() {
 
               <Nav.Link as={Link} to="/" onClick={closeMenu}>Home</Nav.Link>
 
-              <NavDropdown title="About Us" id="AboutUs" onClick={(e) => e.stopPropagation()}>
+              <NavDropdown title="About Us" id="AboutUs" onClick={(e) => e.stopPropagation()} className="about-drop">
                 <NavDropdown.Item as={Link} to="/CompanyProfile" onClick={closeMenu}>
                   Company Profile
                 </NavDropdown.Item>
@@ -66,7 +66,7 @@ function NavBar() {
               </Nav.Link>
               <Nav.Link as={Link} to="/Certificate" onClick={closeMenu}>Certificate</Nav.Link>
               <Nav.Link as={Link} to="/Contact" onClick={closeMenu}>Contact Us</Nav.Link>
-
+ <Nav.Link as={Link} to="/Career" onClick={closeMenu}>Career</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

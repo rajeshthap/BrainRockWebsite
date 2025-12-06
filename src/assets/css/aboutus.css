@@ -6,27 +6,31 @@
 .ourteam-box {
   background-color: #fff;
   padding: 30px;
-   
+
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
- 
+
 }
-.ourteam-box-training{
+
+.ourteam-box-training {
   background-color: #fff;
   padding: 30px;
-   margin-top: 12px !important;
+  margin-top: 12px !important;
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
- 
+
 }
-.about-right{
+
+.about-right {
 
   text-align: justify;
 }
-.about-right{
+
+.about-right {
   padding: 12px;
 
 }
+
 .ourteam-box:hover {
   transform: translateY(-5px);
   box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
@@ -44,6 +48,7 @@
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
+
 .project-banner {
   background-image: url('../../assets/images/project-banner.jpg');
   background-size: cover;
@@ -51,6 +56,7 @@
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
+
 .team-banner {
   background-image: url('../../assets/images/team-banner.jpg');
   background-size: cover;
@@ -58,6 +64,7 @@
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
+
 .Services-banner {
   background-image: url('../../assets/images/IT-Services.jpg');
   background-size: cover;
@@ -65,6 +72,7 @@
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
+
 .Courses-banner {
   background-image: url('../../assets/images/Courses.jpg');
   background-size: cover;
@@ -72,6 +80,7 @@
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
+
 .feedback-banner {
   background-image: url('../../assets/images/Feedback.jpg');
   background-size: cover;
@@ -79,6 +88,7 @@
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
+
 .gallery-banner {
   background-image: url('../../assets/images/Our-Gallery.jpg');
   background-size: cover;
@@ -86,27 +96,31 @@
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
-.TrainingRegistration-banner{
-   background-image: url('../../assets/images/Training-Registration.jpg');
+
+.TrainingRegistration-banner {
+  background-image: url('../../assets/images/Training-Registration.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
-.Training{
-   background-image: url('../../assets/images/traning.jpg');
+
+.Training {
+  background-image: url('../../assets/images/traning.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
-.contact{
-   background-image: url('../../assets/images/contactus.jpg');
+
+.contact {
+  background-image: url('../../assets/images/contactus.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
+
 .site-breadcrumb-wpr {
   position: relative;
   z-index: 1;
@@ -178,6 +192,7 @@
   justify-content: center;
   display: flex;
 }
+
 /* ============================
    OUR TEAM PAGE CSS
    ============================ */
@@ -186,7 +201,7 @@
 .team-card {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: all 0.3s ease;
   position: relative;
@@ -227,7 +242,7 @@
   background: rgba(255, 255, 255, 0.95);
   padding: 12px 0;
   border-radius: 6px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 
   display: flex;
   justify-content: center;
@@ -290,19 +305,23 @@
   margin-bottom: 5px;
   font-weight: 500;
 }
- .about-right{
-    padding: 18px !important;
 
-  }
+.about-right {
+  padding: 18px !important;
+
+}
+
 /* RESPONSIVE */
 @media(max-width: 768px) {
   .team-card-img {
     height: 220px;
   }
-  .service-icon{
+
+  .service-icon {
     text-align: center;
 
   }
+
   .testimonial-bg {
     text-align: justify !important;
     padding: 0px !important;
@@ -313,22 +332,28 @@
   .team-card-img {
     height: 200px;
   }
-  .about-right{
+
+  .about-right {
     padding: 18px !important;
 
   }
-  .ourteam-box{
-    padding: 0px !important;
-  }
-.service-box{
-  text-align: center !important;
-}
-.feature-box {
-  text-align: center !important;
-  
-}
-.box-info{
-  margin-top: 12px;
 
-}  
+  .ourteam-box {
+    padding: 12px !important;
+    margin-top: 12px;
+  }
+
+  .service-box {
+    text-align: center !important;
+  }
+
+  .feature-box {
+    text-align: center !important;
+
+  }
+
+  .box-info {
+    margin-top: 12px;
+
+  }
 }

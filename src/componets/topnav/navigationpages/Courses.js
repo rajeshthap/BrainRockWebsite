@@ -57,7 +57,7 @@ function Courses() {
       </div>
 
       <div className="ourteam-section">
-        <Container className='ourteam-box'>
+        <Container className='ourteam-box' style={{ maxWidth: '100%', overflow: 'hidden' }}>
 
           {loading && (
             <div className="text-center my-5">
@@ -72,10 +72,15 @@ function Courses() {
           )}
 
           {!loading && !error && (
-            <Row className="g-4">
+            <Row className="g-4" style={{ margin: '0' }}>
               {courses.map((course) => (
-                <Col key={course.id} lg={3} md={4} sm={6} xs={12}>
-                  <div className="service-box equal-card">
+                <Col key={course.id} lg={3} md={4} sm={6} xs={12} style={{ padding: '10px' }}>
+                  <div className="service-box equal-card" style={{ 
+                    height: 'auto', 
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
                     <div className="service-icon text-center">
                       {course.icon ? (
                         <img src={course.icon} alt={course.title} style={{ width: "60px", height: "60px" }} />
@@ -84,9 +89,13 @@ function Courses() {
                       )}
                     </div>
 
-                    <div className="service-desc course-sub-heading">
+                    <div className="service-desc course-sub-heading" style={{ 
+                      flex: '1 0 auto',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
                       <h4 className="heading-5">{course.title}</h4>
-                      <p>{course.description}</p>
+                      <p style={{ flex: '1 0 auto' }}>{course.description}</p>
 
                       <p className="course-info">
                         <span className="course-label">Price:</span>
@@ -110,9 +119,7 @@ function Courses() {
               ))}
             </Row>
           )}
-
         </Container>
-
         <Container fluid className="br-footer-box">
           <FooterPage />
         </Container>
