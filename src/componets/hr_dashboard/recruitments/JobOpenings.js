@@ -142,115 +142,139 @@ const JobOpenings = () => {
   };
 
   // Submit job form (POST or PUT)
-  const handleSubmitJob = async (e) => {
-    e.preventDefault();
+const handleSubmitJob = async (e) => {
+  e.preventDefault();
 
-    // Filter out empty strings from array fields
-    const cleanData = {
-      ...formData,
-      responsibilities: formData.responsibilities.filter((r) => r.trim()),
-      requirements: formData.requirements.filter((r) => r.trim()),
-      skills: formData.skills.filter((s) => s.trim()),
-    };
-
-    try {
-      const url = editingJobId
-        ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/${editingJobId}/`
-        : "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/";
-
-      const method = editingJobId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(cleanData),
-      });
-
-      if (!response.ok) throw new Error("Failed to save job");
-
-      setMessage(
-        editingJobId ? "Job updated successfully!" : "Job posted successfully!"
-      );
-      setVariant("success");
-      setShowAlert(true);
-      setShowModal(false);
-      fetchJobs();
-
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error("Error saving job:", error);
-      setMessage("Failed to save job");
-      setVariant("danger");
-      setShowAlert(true);
-    }
+  // Filter out empty strings from array fields
+  const cleanData = {
+    ...formData,
+    responsibilities: formData.responsibilities.filter((r) => r.trim()),
+    requirements: formData.requirements.filter((r) => r.trim()),
+    skills: formData.skills.filter((s) => s.trim()),
   };
+
+  try {
+    // Always use the base endpoint for both POST and PUT
+    const url = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/";
+    const method = editingJobId ? "PUT" : "POST";
+
+    // Create FormData to send job_id in payload
+    const dataToSend = new FormData();
+    
+    // Add job_id to payload if editing
+    if (editingJobId) {
+      const currentJob = jobs.find(job => job.id === editingJobId);
+      dataToSend.append('job_id', currentJob.job_id);
+    }
+    
+    // Add all other fields
+    Object.keys(cleanData).forEach(key => {
+      if (Array.isArray(cleanData[key])) {
+        dataToSend.append(key, JSON.stringify(cleanData[key]));
+      } else {
+        dataToSend.append(key, cleanData[key]);
+      }
+    });
+
+    const response = await fetch(url, {
+      method,
+      credentials: "include",
+      body: dataToSend, // Send as FormData instead of JSON
+    });
+
+    if (!response.ok) throw new Error("Failed to save job");
+
+    setMessage(
+      editingJobId ? "Job updated successfully!" : "Job posted successfully!"
+    );
+    setVariant("success");
+    setShowAlert(true);
+    setShowModal(false);
+    fetchJobs();
+
+    setTimeout(() => setShowAlert(false), 3000);
+  } catch (error) {
+    console.error("Error saving job:", error);
+    setMessage("Failed to save job");
+    setVariant("danger");
+    setShowAlert(true);
+  }
+};
 
   // Delete job
-  const handleDeleteJob = async (jobId) => {
-    if (!window.confirm("Are you sure you want to delete this job?")) return;
+const handleDeleteJob = async (jobId) => {
+  if (!window.confirm("Are you sure you want to delete this job?")) return;
 
-    try {
-      const response = await fetch(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/${jobId}/`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
+  try {
+    // Find the job to get its job_id
+    const jobToDelete = jobs.find(job => job.id === jobId);
+    
+    // Create FormData to send job_id in payload
+    const dataToSend = new FormData();
+    dataToSend.append('job_id', jobToDelete.job_id);
 
-      if (!response.ok) throw new Error("Failed to delete job");
+    // Use the base endpoint without ID in the path
+    const response = await fetch(
+      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/",
+      {
+        method: "DELETE",
+        credentials: "include",
+        body: dataToSend, // Send job_id in the payload
+      }
+    );
 
-      setMessage("Job deleted successfully!");
-      setVariant("success");
-      setShowAlert(true);
-      fetchJobs();
+    if (!response.ok) throw new Error("Failed to delete job");
 
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error("Error deleting job:", error);
-      setMessage("Failed to delete job");
-      setVariant("danger");
-      setShowAlert(true);
-    }
-  };
+    setMessage("Job deleted successfully!");
+    setVariant("success");
+    setShowAlert(true);
+    fetchJobs();
+
+    setTimeout(() => setShowAlert(false), 3000);
+  } catch (error) {
+    console.error("Error deleting job:", error);
+    setMessage("Failed to delete job");
+    setVariant("danger");
+    setShowAlert(true);
+  }
+};
 
   // Change job status
-  const handleStatusChange = async (jobId, newStatus) => {
-    try {
-      const job = jobs.find((j) => j.id === jobId);
-      const response = await fetch(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            job_id: job.job_id,
-            status: newStatus 
-          }),
-        }
-      );
+const handleStatusChange = async (jobId, newStatus) => {
+  try {
+    // Find the job to get its job_id
+    const job = jobs.find((j) => j.id === jobId);
+    
+    // Create FormData to send job_id in payload
+    const dataToSend = new FormData();
+    dataToSend.append('job_id', job.job_id);
+    dataToSend.append('status', newStatus);
 
-      if (!response.ok) throw new Error("Failed to update status");
+    // Use the base endpoint without ID in the path
+    const response = await fetch(
+      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/",
+      {
+        method: "PUT",
+        credentials: "include",
+        body: dataToSend, // Send job_id in the payload
+      }
+    );
 
-      setMessage("Status updated successfully!");
-      setVariant("success");
-      setShowAlert(true);
-      fetchJobs();
+    if (!response.ok) throw new Error("Failed to update status");
 
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error("Error updating status:", error);
-      setMessage("Failed to update status");
-      setVariant("danger");
-      setShowAlert(true);
-    }
-  };
+    setMessage("Status updated successfully!");
+    setVariant("success");
+    setShowAlert(true);
+    fetchJobs();
+
+    setTimeout(() => setShowAlert(false), 3000);
+  } catch (error) {
+    console.error("Error updating status:", error);
+    setMessage("Failed to update status");
+    setVariant("danger");
+    setShowAlert(true);
+  }
+};
 
   const getStatusBadge = (status) => {
     const variants = {

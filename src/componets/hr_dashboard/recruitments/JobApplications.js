@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Container, Table, Button, Modal, Form, Alert, Badge } from "react-bootstrap";
+import { Container, Row, Button, Modal, Form, Alert, Badge, Pagination, Spinner } from "react-bootstrap";
 import "../../../assets/css/Profile.css";
 import SideNav from "../SideNav";
 import HrHeader from "../HrHeader";
+
+// Define base URL for your API
+const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
 const JobApplications = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -12,9 +15,13 @@ const JobApplications = () => {
   const [message, setMessage] = useState("");
   const [variant, setVariant] = useState("success");
   const [showAlert, setShowAlert] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   // Form state for viewing/editing application
   const [formData, setFormData] = useState({
+    application_id: "",
     full_name: "",
     email: "",
     phone: "",
@@ -30,7 +37,7 @@ const JobApplications = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-application/",
+        `${API_BASE_URL}/api/job-application/`,
         {
           method: "GET",
           credentials: "include",
@@ -66,17 +73,48 @@ const JobApplications = () => {
     }));
   };
 
-  // Open modal for viewing/editing application
-  const handleViewApplication = (app) => {
-    setEditingApplicationId(app.id);
-    setFormData({
-      full_name: app.full_name,
-      email: app.email,
-      phone: app.phone,
-      status: app.status,
-      job_id: app.job_id,
-    });
-    setShowModal(true);
+  // Handle status change directly from table
+  const handleStatusChange = async (applicationId, application_id, newStatus) => {
+    try {
+      // Create FormData to send application_id in payload
+      const dataToSend = new FormData();
+      dataToSend.append('application_id', application_id);
+      dataToSend.append('status', newStatus);
+
+      // Use base endpoint for status updates
+      const response = await fetch(
+        `${API_BASE_URL}/api/job-application/`,
+        {
+          method: "PUT",
+          credentials: "include",
+          body: dataToSend,
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update status");
+
+      // Update the application in state
+      setApplications(prev => 
+        prev.map(app => 
+          app.id === applicationId 
+            ? { ...app, status: newStatus }
+            : app
+        )
+      );
+
+      setMessage("Status updated successfully!");
+      setVariant("success");
+      setShowAlert(true);
+
+      setTimeout(() => setShowAlert(false), 3000);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      setMessage("Failed to update status");
+      setVariant("danger");
+      setShowAlert(true);
+      
+      setTimeout(() => setShowAlert(false), 5000);
+    }
   };
 
   // Submit application form (PUT)
@@ -84,15 +122,22 @@ const JobApplications = () => {
     e.preventDefault();
 
     try {
+      // Create FormData to send application_id in payload
+      const dataToSend = new FormData();
+      dataToSend.append('application_id', formData.application_id);
+      dataToSend.append('full_name', formData.full_name);
+      dataToSend.append('email', formData.email);
+      dataToSend.append('phone', formData.phone);
+      dataToSend.append('status', formData.status);
+      dataToSend.append('job_id', formData.job_id);
+
+      // Use base endpoint for updates
       const response = await fetch(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-application/${editingApplicationId}/`,
+        `${API_BASE_URL}/api/job-application/`,
         {
           method: "PUT",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
+          body: dataToSend,
         }
       );
 
@@ -113,21 +158,23 @@ const JobApplications = () => {
     }
   };
 
-  // Delete application using job_id
-  const handleDeleteApplication = async (applicationId, jobId) => {
+  // Delete application
+  const handleDeleteApplication = async (applicationId, application_id) => {
     if (!window.confirm("Are you sure you want to delete this application?"))
       return;
 
     try {
+      // Create FormData to send application_id in payload
+      const dataToSend = new FormData();
+      dataToSend.append('application_id', application_id);
+
+      // Use base endpoint for delete
       const response = await fetch(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-application/${applicationId}/`,
+        `${API_BASE_URL}/api/job-application/`,
         {
           method: "DELETE",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ job_id: jobId }),
+          body: dataToSend,
         }
       );
 
@@ -152,10 +199,22 @@ const JobApplications = () => {
       applied: "info",
       shortlisted: "primary",
       rejected: "danger",
-      selected: "success",
     };
     return variants[status] || "secondary";
   };
+
+  // Filter and paginate applications
+  const filteredApplications = applications.filter(app =>
+    app.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.job_id?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
+  const paginatedApplications = filteredApplications.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="dashboard-container">
@@ -181,61 +240,130 @@ const JobApplications = () => {
               </Alert>
             )}
 
+            <div className="mb-3">
+              <Form.Control
+                    type="text"
+                    placeholder="Search by applicant name, email, or job ID..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+            </div>
+
             {loading ? (
-              <p>Loading applications...</p>
-            ) : applications.length === 0 ? (
-              <p className="text-muted">No job applications received yet.</p>
+              <div className="d-flex justify-content-center">
+                <Spinner animation="border" />
+              </div>
+            ) : filteredApplications.length === 0 ? (
+              <p className="text-muted">No job applications found.</p>
             ) : (
-              <Table striped bordered hover responsive>
-                <thead>
-                  <tr>
-                    <th>Applicant Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Job ID</th>
-                    <th>Status</th>
-                    <th>Applied Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {applications.map((app) => (
-                    <tr key={app.id}>
-                      <td>{app.full_name}</td>
-                      <td>{app.email}</td>
-                      <td>{app.phone}</td>
-                      <td>{app.job_id}</td>
-                      <td>
-                        <Badge bg={getStatusBadge(app.status)}>
-                          {app.status}
-                        </Badge>
-                      </td>
-                      <td>
-                        {new Date(app.applied_at).toLocaleDateString()}
-                      </td>
-                      <td>
-                        <Button
-                          variant="info"
-                          size="sm"
-                          className="me-2"
-                          onClick={() => handleViewApplication(app)}
+              <>
+                <Row className="mt-3">
+                  <div className="col-md-12">
+                    <table className="temp-rwd-table">
+                      <tbody>
+                        <tr>
+                          <th>S.No</th>
+                          <th>Application ID</th>
+                          <th>Applicant Name</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th>Job ID</th>
+                          <th>Status</th>
+                          <th>Applied Date</th>
+                          <th>Resume</th>
+                          <th>Actions</th>
+                        </tr>
+
+                        {paginatedApplications.map((app, index) => (
+                          <tr key={app.id}>
+                            <td data-th="S.No">
+                              {(currentPage - 1) * itemsPerPage + index + 1}
+                            </td>
+                            <td data-th="Application ID">{app.application_id}</td>
+                            <td data-th="Applicant Name">{app.full_name}</td>
+                            <td data-th="Email">{app.email}</td>
+                            <td data-th="Phone">{app.phone}</td>
+                            <td data-th="Job ID">{app.job_id}</td>
+                            <td data-th="Status">
+                              <Form.Select
+                                value={app.status}
+                                onChange={(e) => handleStatusChange(app.id, app.application_id, e.target.value)}
+                                size="sm"
+                                style={{ width: "120px" }}
+                              >
+                                <option value="applied">Applied</option>
+                                <option value="shortlisted">Shortlisted</option>
+                                <option value="rejected">Rejected</option>
+                              </Form.Select>
+                            </td>
+                            <td data-th="Applied Date">
+                              {new Date(app.applied_at).toLocaleDateString()}
+                            </td>
+                            <td data-th="Resume">
+                              {app.resume ? (
+                                <Button
+                                  variant="outline-info"
+                                  size="sm"
+                                  onClick={() => window.open(`${API_BASE_URL}${app.resume}`, '_blank')}
+                                >
+                                  View Resume
+                                </Button>
+                              ) : (
+                                <span className="text-muted">No Resume</span>
+                              )}
+                            </td>
+                            <td data-th="Actions">
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => handleDeleteApplication(app.id, app.application_id)}
+                              >
+                                Delete
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Row>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="d-flex justify-content-center align-items-center mt-4">
+                    <Pagination>
+                      <Pagination.Prev
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={currentPage === 1}
+                      />
+
+                      {[...Array(totalPages)].map((_, index) => (
+                        <Pagination.Item
+                          key={index + 1}
+                          active={index + 1 === currentPage}
+                          onClick={() => setCurrentPage(index + 1)}
                         >
-                          View/Edit
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() =>
-                            handleDeleteApplication(app.id, app.job_id)
-                          }
-                        >
-                          Delete
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+                          {index + 1}
+                        </Pagination.Item>
+                      ))}
+
+                      <Pagination.Next
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                          )
+                        }
+                        disabled={currentPage === totalPages}
+                      />
+                    </Pagination>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </Container>
@@ -248,6 +376,16 @@ const JobApplications = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmitApplication}>
+            <Form.Group className="mb-3">
+              <Form.Label>Application ID</Form.Label>
+              <Form.Control
+                type="text"
+                name="application_id"
+                value={formData.application_id}
+                disabled
+              />
+            </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>Full Name</Form.Label>
               <Form.Control
@@ -290,7 +428,6 @@ const JobApplications = () => {
               >
                 <option value="applied">Applied</option>
                 <option value="shortlisted">Shortlisted</option>
-                <option value="selected">Selected</option>
                 <option value="rejected">Rejected</option>
               </Form.Select>
             </Form.Group>
