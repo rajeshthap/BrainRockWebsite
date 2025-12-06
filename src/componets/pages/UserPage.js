@@ -295,7 +295,7 @@ function UserPage() {
 
   return (
     <div className="container-fluid p-0">
-      <div className="craousal-main">
+      <div className="craousal-main" style={{ overflow: 'hidden' }}>
         <Carousel className="resorce-craousal" interval={3000} pause={false}>
           {loading ? (
             // Show loading state or fallback content while fetching data
@@ -354,7 +354,7 @@ function UserPage() {
                       </p>
                     </div>
                   </Col>
-                 <Col lg={6} md={6} sm={12} className="banner-img">
+                  <Col lg={6} md={6} sm={12} className="banner-img">
                     <div>
                       <i>
                         <img
@@ -364,7 +364,7 @@ function UserPage() {
                         ></img>
                       </i>
                     </div>
-                    </Col>
+                  </Col>
                 </Row>
                 <Carousel.Caption></Carousel.Caption>
               </Carousel.Item>
@@ -445,8 +445,8 @@ function UserPage() {
                       <h4>{item.title}</h4>
                       <p>{item.description}</p>
                       {/* Updated to use Link with state prop instead of button */}
-                      <Link 
-                        to="/ServicesDetails" 
+                      <Link
+                        to="/ServicesDetails"
                         state={{ serviceId: item.id }}
                         className="feature-btn"
                       >
