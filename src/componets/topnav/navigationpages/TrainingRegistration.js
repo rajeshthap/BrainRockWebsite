@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Spinner, InputGroup } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "../../../assets/css/Trainingregistration.css";
 import FooterPage from "../../footer/FooterPage";
 
 function TrainingRegistration({ courseTitle, courseDuration }) {
   const location = useLocation();
   const [courseData, setCourseData] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [maxDate, setMaxDate] = useState(""); 
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  
+  // Password visibility states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const isFromTrainingPage = (location.state && 
     (location.state.training_name || location.state.courseTitle)) || 
@@ -51,14 +55,6 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
         ...prev,
         application_for_course: courseName
       }));
-      
-      // Fixed: Added null check for cat.courses
-      const matchingCategory = courseData.find(cat => 
-        cat.courses && Array.isArray(cat.courses) && cat.courses.includes(courseName)
-      );
-      if (matchingCategory) {
-        setSelectedCategory(matchingCategory.category);
-      }
     }
   }, [location.state, courseData, courseTitle]); 
   
@@ -66,19 +62,21 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     axios
       .get("https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/")
       .then((res) => {
-        if (res.data && Array.isArray(res.data.courses)) {
+        if (res.data && res.data.success && Array.isArray(res.data.courses)) {
           setCourseData(res.data.courses);
           
           const courseName = location.state?.training_name || 
                             location.state?.courseTitle || 
                             courseTitle;
           if (courseName) {
-            // Fixed: Added null check for cat.courses
-            const matchingCategory = res.data.courses.find(cat => 
-              cat.courses && Array.isArray(cat.courses) && cat.courses.includes(courseName)
+            const matchingCourse = res.data.courses.find(course => 
+              course.course_name === courseName
             );
-            if (matchingCategory) {
-              setSelectedCategory(matchingCategory.category);
+            if (matchingCourse) {
+              setFormData(prev => ({
+                ...prev,
+                application_for_course: courseName
+              }));
             }
           }
         }
@@ -141,30 +139,9 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     validateField(name, newValue);
   };
 
-  const handleCategoryChange = (e) => {
-    const cat = e.target.value;
-    setSelectedCategory(cat);
-
-    setFormData({
-      ...formData,
-      application_for_course: "",
-    });
-
-    setErrors((prev) => ({ 
-      ...prev, 
-      application_for_course: "",
-      category: "" 
-    }));
-  };
-
   const validateFormBeforeSubmit = () => {
     let temp = {};
     let isValid = true;
-
-    if (!selectedCategory) {
-      temp.category = "Please select category";
-      isValid = false;
-    }
     
     if (!formData.application_for_course) {
       temp.application_for_course = "Please select course";
@@ -213,7 +190,16 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     for (const key in formData) {
       payload.append(key, formData[key]);
     }
-    payload.append("category", selectedCategory);
+
+    // Find the selected course to get additional details
+    const selectedCourse = courseData.find(course => 
+      course.course_name === formData.application_for_course
+    );
+    
+    if (selectedCourse) {
+      payload.append("course_id", selectedCourse.course_id);
+      payload.append("duration", selectedCourse.duration);
+    }
 
     console.log("Submitting form data:");
     for (let [key, value] of payload.entries()) {
@@ -245,7 +231,6 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
         profile_photo: null,
       });
 
-      setSelectedCategory("");
       setErrors({});
       
       setTimeout(() => setShowSuccess(false), 5000);
@@ -261,6 +246,16 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
       if (error.response && error.response.data) {
         const apiErrors = {};
         
+        // Handle field-specific errors like email and mobile_no
+        if (error.response.data.email) {
+          apiErrors.email = error.response.data.email[0];
+        }
+        
+        if (error.response.data.mobile_no) {
+          apiErrors.mobile_no = error.response.data.mobile_no[0];
+        }
+        
+        // Handle other possible error structures
         if (error.response.data.errors) {
           Object.keys(error.response.data.errors).forEach(field => {
             if (Array.isArray(error.response.data.errors[field]) && error.response.data.errors[field].length > 0) {
@@ -272,10 +267,6 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
           setShowError(true);
         } else if (typeof error.response.data === 'string') {
           setErrorMessage(error.response.data);
-          setShowError(true);
-        } else {
-          // Unknown structure
-          setErrorMessage("Registration failed. Please try again.");
           setShowError(true);
         }
         
@@ -290,14 +281,6 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Fixed: Added safe access to courses array
-  const getCoursesForSelectedCategory = () => {
-    const category = courseData.find((c) => c.category === selectedCategory);
-    return category && category.courses && Array.isArray(category.courses) 
-      ? category.courses 
-      : [];
   };
 
   return (
@@ -340,35 +323,9 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
           <Form onSubmit={handleSubmit}>
             <Row>
-              {/* CATEGORY */}
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label className="br-label">
-                    Select training<span className="br-span-star">*</span>
-                  </Form.Label>
-                  <Form.Select
-                    value={selectedCategory}
-                    onChange={handleCategoryChange}
-                    className={`br-form-control ${errors.category ? "is-invalid" : ""}`}
-                  >
-                    <option value="">-- Select training --</option>
-                    {courseData.map((item) => (
-                      <option key={item.id} value={item.category}>
-                        {item.category}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  {errors.category && (
-                    <div className="invalid-feedback d-block">
-                      {errors.category}
-                    </div>
-                  )}
-                </Form.Group>
-              </Col>
-
               {/* COURSE */}
-              <Col md={6}>
-                <Form.Group className="mb-3">
+              <Col md={6} className="mt-3">
+                <Form.Group className="">
                   <Form.Label className="br-label">
                     Select Course <span className="br-span-star">*</span>
                   </Form.Label>
@@ -377,14 +334,11 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
                     name="application_for_course"
                     value={formData.application_for_course}
                     onChange={handleChange}
-                    disabled={!selectedCategory}
                   >
                     <option value="">-- Select Course --</option>
-
-                    {/* Fixed: Used the safe function to get courses */}
-                    {getCoursesForSelectedCategory().map((course, index) => (
-                      <option key={index} value={course}>
-                        {course}
+                    {courseData.map((course) => (
+                      <option key={course.id} value={course.course_name}>
+                        {course.course_name} ({course.duration})
                       </option>
                     ))}
                   </Form.Select>
@@ -491,16 +445,25 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
                   <Form.Label className="br-label">
                     Password <span className="br-span-star">*</span>
                   </Form.Label>
-                  <Form.Control
-                    type="password"
-                    className={`br-form-control ${errors.password ? "is-invalid" : ""}`}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Enter your password"
-                  />
+                  <InputGroup>
+                    <Form.Control
+                      type={showPassword ? "text" : "password"}
+                      className={`br-form-control ${errors.password ? "is-invalid" : ""}`}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter your password"
+                    />
+                    <Button 
+                      variant="outline-secondary" 
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="password-toggle-btn"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </Button>
+                  </InputGroup>
                   {errors.password && (
-                    <div className="invalid-feedback">
+                    <div className="invalid-feedback d-block">
                       {errors.password}
                     </div>
                   )}
@@ -513,16 +476,25 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
                   <Form.Label className="br-label">
                     Confirm Password <span className="br-span-star">*</span>
                   </Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="confirm_password"
-                    className={`br-form-control ${errors.confirm_password ? "is-invalid" : ""}`}
-                    value={formData.confirm_password}
-                    onChange={handleChange}
-                    placeholder="Confirm your password"
-                  />
+                  <InputGroup>
+                    <Form.Control
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirm_password"
+                      className={`br-form-control ${errors.confirm_password ? "is-invalid" : ""}`}
+                      value={formData.confirm_password}
+                      onChange={handleChange}
+                      placeholder="Confirm your password"
+                    />
+                    <Button 
+                      variant="outline-secondary" 
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="password-toggle-btn"
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </Button>
+                  </InputGroup>
                   {errors.confirm_password && (
-                    <div className="invalid-feedback">
+                    <div className="invalid-feedback d-block">
                       {errors.confirm_password}
                     </div>
                   )}
