@@ -55,7 +55,7 @@ function Courses() {
           </ul>
         </div>
       </div>
-      <Container className='ourteam-box' style={{ overflow: 'hidden' }}>
+      <Container className='ourteam-box mt-4 mb-3' style={{ overflow: 'hidden' }}>
         <div className="ourteam-section">
 
 

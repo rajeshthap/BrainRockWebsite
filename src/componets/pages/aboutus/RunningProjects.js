@@ -35,13 +35,14 @@ function RunningProjects() {
 
   if (loading) {
     return (
-      <div className="ourteam-section text-center">
-        <Container className="ourteam-box">
+      <Container className="ourteam-box ">
+        <div className=" text-center">
+
           <Spinner animation="border" role="status">
             <span className="visually-hidden">Loading...</span>
           </Spinner>
-        </Container>
-      </div>
+
+        </div></Container>
     );
   }
 
@@ -76,7 +77,7 @@ function RunningProjects() {
       </div>
       <Container className="ourteam-section" style={{ overflow: 'hidden', }}>
         <div >
-          <Container className="ourteam-box mt-3" style={{ maxWidth: '100%', padding: '0 15px' }}>
+          <Container className="ourteam-box mt-3 mb-3" style={{ maxWidth: '100%', padding: '0 15px' }}>
             <Row style={{ margin: '0 -15px' }}>
               {projects.map((project) => (
                 <Col key={project.id} lg={4} md={6} sm={12} className="mb-4 mt-3" style={{ padding: '0 15px' }}>

@@ -17,7 +17,7 @@ function Contact() {
   const [loading, setLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
-  
+
   // State for company details
   const [companyDetails, setCompanyDetails] = useState({
     address: "",
@@ -32,18 +32,18 @@ function Contact() {
     const fetchCompanyDetails = async () => {
       try {
         const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/company-details/');
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch company details');
         }
-        
+
         const result = await response.json();
-        
+
         // Handle the actual API response format
         if (result.success && result.data && result.data.length > 0) {
           // Get the first item from the data array
           const companyInfo = result.data[0];
-          
+
           setCompanyDetails({
             address: companyInfo.address,
             email: companyInfo.email,
@@ -92,7 +92,7 @@ function Contact() {
     e.preventDefault();
     setLoading(true);
     setShowAlert(false);
-    
+
     let newErrors = {};
     Object.keys(formData).forEach((key) => {
       if (!formData[key].trim()) {
@@ -130,14 +130,14 @@ function Contact() {
       }
 
       const result = await response.json();
-      
+
       // Show success message
       setApiResponse({
         success: true,
         message: "Your message has been sent successfully!"
       });
       setShowAlert(true);
-      
+
       // Reset form
       setFormData({
         name: "",
@@ -161,151 +161,151 @@ function Contact() {
 
   return (
     <>
-        <div className='contact'>
-                      <div className='site-breadcrumb-wpr'>
-                        <h2 className='breadcrumb-title'>Get In Touch For Any Query</h2>
-                     <ul className='breadcrumb-menu clearfix'>
-                <li>
-                  <Link className="breadcrumb-home" to="/">Home</Link>
-                </li>
-              
-                <li className='px-2'>/</li>
-              
-                <li>
-                  <Link className="breadcrumb-about" to="/">FeedBack</Link>
-                </li>
-              </ul>
-              
+      <div className='contact'>
+        <div className='site-breadcrumb-wpr'>
+          <h2 className='breadcrumb-title'>Get In Touch For Any Query</h2>
+          <ul className='breadcrumb-menu clearfix'>
+            <li>
+              <Link className="breadcrumb-home" to="/">Home</Link>
+            </li>
+
+            <li className='px-2'>/</li>
+
+            <li>
+              <Link className="breadcrumb-about" to="/">FeedBack</Link>
+            </li>
+          </ul>
+
+        </div>
+      </div>
+      <div className="ourteam-section">
+        <Container>
+          <div className="ourteam-box mt-4 mb-3">
+            <div className="contact-container text-heading text-center">
+
+
+              {/* Alert for API response */}
+              {showAlert && apiResponse && (
+                <Alert
+                  variant={apiResponse.success ? "success" : "danger"}
+                  className="mb-4"
+                  onClose={() => setShowAlert(false)}
+                  dismissible
+                >
+                  {apiResponse.message}
+                </Alert>
+              )}
+
+              <div className="contact-wrapper">
+                {/* LEFT INFO SECTION */}
+                <div className="contact-left">
+                  {detailsLoading ? (
+                    <div className="info-box">
+                      <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
                       </div>
                     </div>
-    <div className="ourteam-section">
-      <Container>
-        <div className="ourteam-box">
-          <div className="contact-container text-heading text-center">
-          
-
-            {/* Alert for API response */}
-            {showAlert && apiResponse && (
-              <Alert 
-                variant={apiResponse.success ? "success" : "danger"} 
-                className="mb-4"
-                onClose={() => setShowAlert(false)}
-                dismissible
-              >
-                {apiResponse.message}
-              </Alert>
-            )}
-
-            <div className="contact-wrapper">
-              {/* LEFT INFO SECTION */}
-              <div className="contact-left">
-                {detailsLoading ? (
-                  <div className="info-box">
-                    <div className="spinner-border text-primary" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                  </div>
-                ) : detailsError ? (
-                  <div className="info-box">
-                    <div className="icon">⚠️</div>
-                    <h4>Error</h4>
-                    <p>{detailsError}</p>
-                  </div>
-                ) : (
-                  <>
+                  ) : detailsError ? (
                     <div className="info-box">
-                      <div className="icon">📍</div>
-                      <h4>Our Head Office</h4>
-                      <p>{companyDetails.address}</p>
+                      <div className="icon">⚠️</div>
+                      <h4>Error</h4>
+                      <p>{detailsError}</p>
                     </div>
+                  ) : (
+                    <>
+                      <div className="info-box">
+                        <div className="icon">📍</div>
+                        <h4>Our Head Office</h4>
+                        <p>{companyDetails.address}</p>
+                      </div>
 
-                    <div className="info-box">
-                      <div className="icon">📞</div>
-                      <h4>Call for Help</h4>
-                      <p>{companyDetails.phone}</p>
-                    </div>
+                      <div className="info-box">
+                        <div className="icon">📞</div>
+                        <h4>Call for Help</h4>
+                        <p>{companyDetails.phone}</p>
+                      </div>
 
-                    <div className="info-box">
-                      <div className="icon">📧</div>
-                      <h4>Email for Information</h4>
-                      <p>{companyDetails.email}</p>
-                    </div>
-                  </>
-                )}
-              </div>
+                      <div className="info-box">
+                        <div className="icon">📧</div>
+                        <h4>Email for Information</h4>
+                        <p>{companyDetails.email}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
 
-              {/* RIGHT FORM SECTION */}
-              <div className="contact-right">
-                <form onSubmit={handleSubmit}>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Your Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={errors.name ? "error-input" : ""}
-                    disabled={loading}
-                  />
-                  {errors.name && <p className="error-text">{errors.name}</p>}
+                {/* RIGHT FORM SECTION */}
+                <div className="contact-right">
+                  <form onSubmit={handleSubmit}>
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Your Name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className={errors.name ? "error-input" : ""}
+                      disabled={loading}
+                    />
+                    {errors.name && <p className="error-text">{errors.name}</p>}
 
-                  <input
-                    type="text"
-                    name="email"
-                    placeholder="Enter Email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={errors.email ? "error-input" : ""}
-                    disabled={loading}
-                  />
-                  {errors.email && <p className="error-text">{errors.email}</p>}
+                    <input
+                      type="text"
+                      name="email"
+                      placeholder="Enter Email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={errors.email ? "error-input" : ""}
+                      disabled={loading}
+                    />
+                    {errors.email && <p className="error-text">{errors.email}</p>}
 
-                  <input
-                    type="text"
-                    name="phone"
-                    placeholder="Enter Mobile No"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className={errors.phone ? "error-input" : ""}
-                    disabled={loading}
-                  />
-                  {errors.phone && <p className="error-text">{errors.phone}</p>}
+                    <input
+                      type="text"
+                      name="phone"
+                      placeholder="Enter Mobile No"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className={errors.phone ? "error-input" : ""}
+                      disabled={loading}
+                    />
+                    {errors.phone && <p className="error-text">{errors.phone}</p>}
 
-                  <input
-                    type="text"
-                    name="subject"
-                    placeholder="Subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    className={errors.subject ? "error-input" : ""}
-                    disabled={loading}
-                  />
-                  {errors.subject && <p className="error-text">{errors.subject}</p>}
+                    <input
+                      type="text"
+                      name="subject"
+                      placeholder="Subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className={errors.subject ? "error-input" : ""}
+                      disabled={loading}
+                    />
+                    {errors.subject && <p className="error-text">{errors.subject}</p>}
 
-                  <textarea
-                    name="message"
-                    placeholder="Message"
-                    rows="4"
-                    value={formData.message}
-                    onChange={handleChange}
-                    className={errors.message ? "error-input" : ""}
-                    disabled={loading}
-                  ></textarea>
-                  {errors.message && <p className="error-text">{errors.message}</p>}
+                    <textarea
+                      name="message"
+                      placeholder="Message"
+                      rows="4"
+                      value={formData.message}
+                      onChange={handleChange}
+                      className={errors.message ? "error-input" : ""}
+                      disabled={loading}
+                    ></textarea>
+                    {errors.message && <p className="error-text">{errors.message}</p>}
 
-                  <button className="send-btn" type="submit" disabled={loading}>
-                    {loading ? "Sending..." : "Send Message"}
-                  </button>
-                </form>
+                    <button className="send-btn" type="submit" disabled={loading}>
+                      {loading ? "Sending..." : "Send Message"}
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </Container>
-       <Container fluid className="br-footer-box">
-        
+        </Container>
+        <Container fluid className="br-footer-box">
+
           <FooterPage />
-      </Container>
-    </div>
+        </Container>
+      </div>
     </>
   );
 }

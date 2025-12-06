@@ -50,27 +50,27 @@ function OurTeam() {
   const defaultImage = "https://i.ibb.co/8x9xK4H/team.jpg";
 
   return (
-<div className="ourteam-section">
-   
-    <div className='team-banner'>
-          <div className='site-breadcrumb-wpr'>
-            <h2 className='breadcrumb-title'>Our Teams</h2>
-         <ul className='breadcrumb-menu clearfix'>
-    <li>
-      <Link className="breadcrumb-home" to="/">Home</Link>
-    </li>
-  
-    <li className='px-2'>/</li>
-  
-    <li>
-      <Link className="breadcrumb-about" to="/">Team</Link>
-    </li>
-  </ul>
-  
-          </div>
+    <div className="ourteam-section">
+
+      <div className='team-banner'>
+        <div className='site-breadcrumb-wpr'>
+          <h2 className='breadcrumb-title'>Our Teams</h2>
+          <ul className='breadcrumb-menu clearfix'>
+            <li>
+              <Link className="breadcrumb-home" to="/">Home</Link>
+            </li>
+
+            <li className='px-2'>/</li>
+
+            <li>
+              <Link className="breadcrumb-about" to="/">Team</Link>
+            </li>
+          </ul>
+
         </div>
-      <Container className='ourteam-box'>
-        
+      </div>
+      <Container className='ourteam-box mt-4 mb-3'>
+
 
         {loading ? (
           <div className="d-flex justify-content-center my-5">
@@ -79,40 +79,40 @@ function OurTeam() {
         ) : error ? (
           <Alert variant="danger">{error}</Alert>
         ) : (
-          <section className="our-team-section">
+          <section className="our-team-section  ">
             <div className="container">
               <Row className="justify-content-center">
 
                 {teamMembers.length > 0 ? (
                   teamMembers.map((member, index) => (
                     <Col key={index} lg={3} md={6} sm={6} className="mb-4">
-   <div className="team-card">
-  <div className="team-card-img">
-    <img
-      src={member.image || defaultImage}
-      alt={member.full_name || "Team Member"}
-      onError={(e) => {
-        e.target.onerror = null; 
-        e.target.src = defaultImage;
-      }}
-    />
+                      <div className="team-card">
+                        <div className="team-card-img">
+                          <img
+                            src={member.image || defaultImage}
+                            alt={member.full_name || "Team Member"}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = defaultImage;
+                            }}
+                          />
 
-    {/* Hover Overlay for Social Icons */}
-    <div className="team-overlay">
-      <ul className="team-social">
-        <li><a href="#"><i className="fab fa-twitter"></i></a></li>
-        <li><a href="#"><i className="fab fa-facebook-f"></i></a></li>
-        <li><a href="#"><i className="fab fa-linkedin-in"></i></a></li>
-        <li><a href="#"><i className="fab fa-instagram"></i></a></li>
-      </ul>
-    </div>
-  </div>
+                          {/* Hover Overlay for Social Icons */}
+                          <div className="team-overlay">
+                            <ul className="team-social">
+                              <li><a href="#"><i className="fab fa-twitter"></i></a></li>
+                              <li><a href="#"><i className="fab fa-facebook-f"></i></a></li>
+                              <li><a href="#"><i className="fab fa-linkedin-in"></i></a></li>
+                              <li><a href="#"><i className="fab fa-instagram"></i></a></li>
+                            </ul>
+                          </div>
+                        </div>
 
-  <div className="team-card-info">
-    <h3>{member.full_name}</h3>
-    <p>{member.designation}</p>
-  </div>
-</div>
+                        <div className="team-card-info">
+                          <h3>{member.full_name}</h3>
+                          <p>{member.designation}</p>
+                        </div>
+                      </div>
 
 
                     </Col>

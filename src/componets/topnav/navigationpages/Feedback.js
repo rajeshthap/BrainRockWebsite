@@ -42,7 +42,7 @@ function Feedback() {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     validateField(name, value);
-    
+
     // Clear error messages when user starts typing
     if (errorMsg) setErrorMsg("");
   };
@@ -84,15 +84,15 @@ function Feedback() {
       setErrors({});
     } catch (error) {
       console.error("Feedback submission error:", error);
-      
+
       // Handle API errors for duplicate email
       if (error.response && error.response.data && error.response.data.errors) {
         const apiErrors = {};
-        
+
         if (error.response.data.errors.email && Array.isArray(error.response.data.errors.email)) {
           apiErrors.email = "Email already exists. Please use a different email.";
         }
-        
+
         if (Object.keys(apiErrors).length > 0) {
           setErrors(prev => ({ ...prev, ...apiErrors }));
         }
@@ -119,120 +119,120 @@ function Feedback() {
 
   return (
     <>
-     <div className='feedback-banner'>
-                      <div className='site-breadcrumb-wpr'>
-                        <h2 className='breadcrumb-title'>Our Feedback</h2>
-                     <ul className='breadcrumb-menu clearfix'>
-                <li>
-                  <Link className="breadcrumb-home" to="/">Home</Link>
-                </li>
-              
-                <li className='px-2'>/</li>
-              
-                <li>
-                  <Link className="breadcrumb-about" to="/">FeedBack</Link>
-                </li>
-              </ul>
-              
-                      </div>
-                    </div>
-    <div className="ourteam-section">
-      <Container className="">
-        <div className="ourteam-box text-heading">
-          {/* Success Alert */}
-          {successMsg && (
-            <Alert variant="success" dismissible onClose={() => setSuccessMsg("")}>
-              {successMsg}
-            </Alert>
-          )}
+      <div className='feedback-banner'>
+        <div className='site-breadcrumb-wpr'>
+          <h2 className='breadcrumb-title'>Our Feedback</h2>
+          <ul className='breadcrumb-menu clearfix'>
+            <li>
+              <Link className="breadcrumb-home" to="/">Home</Link>
+            </li>
 
-          {/* Error Alert */}
-          {errorMsg && (
-            <Alert variant="danger" dismissible onClose={() => setErrorMsg("")}>
-              {errorMsg}
-            </Alert>
-          )}
+            <li className='px-2'>/</li>
 
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              {/* Email */}
-              <Col md={12} className="mt-3">
-                <Form.Group>
-                  <Form.Label className="br-label">
-                    Email <span className="br-span-star">*</span>
-                  </Form.Label>
-                  <Form.Control
-                    type="email"
-                    className="br-form-control"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter your email"
-                    disabled={isSubmitting}
-                    isInvalid={!!errors.email} // Show invalid state when there's an error
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.email}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
+            <li>
+              <Link className="breadcrumb-about" to="/">FeedBack</Link>
+            </li>
+          </ul>
 
-              {/* Message */}
-              <Col md={12} className="mt-3">
-                <Form.Group>
-                  <Form.Label className="br-label">
-                    Message <span className="br-span-star">*</span>
-                  </Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={6}
-                    className="br-form-control"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Enter your message"
-                    disabled={isSubmitting}
-                    isInvalid={!!errors.message} // Show invalid state when there's an error
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.message}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <div className="text-center">
-              <Button 
-                type="submit" 
-                className="mt-4" 
-                variant="primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Spinner 
-                      as="span" 
-                      animation="border" 
-                      size="sm" 
-                      role="status" 
-                      aria-hidden="true"
-                      className="me-2"
-                    />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit Feedback"
-                )}
-              </Button>
-            </div>
-          </Form>
         </div>
-      </Container>
-       <Container fluid className="br-footer-box">
-        
+      </div>
+      <div className="ourteam-section">
+        <Container className="">
+          <div className="ourteam-box mt-4 mb-3 text-heading">
+            {/* Success Alert */}
+            {successMsg && (
+              <Alert variant="success" dismissible onClose={() => setSuccessMsg("")}>
+                {successMsg}
+              </Alert>
+            )}
+
+            {/* Error Alert */}
+            {errorMsg && (
+              <Alert variant="danger" dismissible onClose={() => setErrorMsg("")}>
+                {errorMsg}
+              </Alert>
+            )}
+
+            <Form onSubmit={handleSubmit}>
+              <Row>
+                {/* Email */}
+                <Col md={12} className="mt-3">
+                  <Form.Group>
+                    <Form.Label className="br-label">
+                      Email <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="email"
+                      className="br-form-control"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                      disabled={isSubmitting}
+                      isInvalid={!!errors.email} // Show invalid state when there's an error
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.email}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
+
+                {/* Message */}
+                <Col md={12} className="mt-3">
+                  <Form.Group>
+                    <Form.Label className="br-label">
+                      Message <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={6}
+                      className="br-form-control"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder="Enter your message"
+                      disabled={isSubmitting}
+                      isInvalid={!!errors.message} // Show invalid state when there's an error
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.message}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <div className="text-center">
+                <Button
+                  type="submit"
+                  className="mt-4"
+                  variant="primary"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
+                      />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Feedback"
+                  )}
+                </Button>
+              </div>
+            </Form>
+          </div>
+        </Container>
+        <Container fluid className="br-footer-box">
+
           <FooterPage />
-      </Container>
-    </div>
+        </Container>
+      </div>
     </>
   );
 }
