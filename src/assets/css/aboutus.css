@@ -339,8 +339,12 @@
   }
 
   .ourteam-box {
-    padding: 12px !important;
+    padding: 0px !important;
     margin-top: 12px;
+  }
+
+  .contact-left {
+    margin-top: 14px !important;
   }
 
   .service-box {
