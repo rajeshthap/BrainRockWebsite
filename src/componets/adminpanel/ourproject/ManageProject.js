@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner, Badge,Pagination } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner, Badge, Pagination } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 import { AiOutlineUser } from 'react-icons/ai'; // Default icon for projects
 
-// Define the base URL for your API
+// Define base URL for your API
 const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
 const ManageProject = () => {
@@ -17,21 +17,28 @@ const ManageProject = () => {
   
   // Data state
   const [projects, setProjects] = useState([]);
+  const [firms, setFirms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [firmsLoading, setFirmsLoading] = useState(true);
   const [error, setError] = useState(null);
   
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentEditProject, setCurrentEditProject] = useState(null);
   const [editFormData, setEditFormData] = useState({
+    title: "",
+    description: "",
     company_name: "",
     technology_used: [],
-    company_logo: null
+    company_logo: null,
+    firm_id: "",
+    firm_name: "",
+    project_budget: ""
   });
   const [logoPreview, setLogoPreview] = useState(null);
   const [hasLogoChanged, setHasLogoChanged] = useState(false);
   
-  // State for technology input field in the edit form
+  // State for technology input field in edit form
   const [techInput, setTechInput] = useState("");
 
   // Alert state
@@ -57,27 +64,61 @@ const ManageProject = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
+  // Fetch firms on component mount
+  useEffect(() => {
+    const fetchFirms = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/firm/`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch firms');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          setFirms(result.data);
+        } else {
+          throw new Error('API returned unsuccessful response');
+        }
+      } catch (error) {
+        console.error('Error fetching firms:', error);
+        setError(error.message || "Failed to fetch firms");
+        setVariant("danger");
+        setShowAlert(true);
+      } finally {
+        setFirmsLoading(false);
+      }
+    };
+
+    fetchFirms();
+  }, []);
+
   // Fetch projects on component mount
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`);
+        const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
+          credentials: 'include'
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
         }
         const result = await response.json();
         const projectsData = result.data || result;
 
-        // Process the data to construct full image URLs and format dates
+        // Process data to construct full image URLs and format dates
         const processedProjects = projectsData.map(project => {
           const processedProject = { ...project };
           
-          // Format the logo URL
+          // Format logo URL
           if (project.company_logo) {
             processedProject.company_logo = `${API_BASE_URL}${project.company_logo}?t=${Date.now()}`;
           }
           
-          // Format the created_at date
+          // Format created_at date
           if (project.created_at) {
             const createdDate = new Date(project.created_at);
             processedProject.formatted_created_at = createdDate.toLocaleDateString('en-US', {
@@ -85,6 +126,15 @@ const ManageProject = () => {
               month: 'short',
               day: 'numeric'
             });
+          }
+          
+          // Format budget
+          if (project.project_budget) {
+            processedProject.formatted_budget = new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'INR',
+              minimumFractionDigits: 0
+            }).format(project.project_budget);
           }
           
           return processedProject;
@@ -111,7 +161,9 @@ const ManageProject = () => {
     : projects.filter((project) => {
         const lowerSearch = searchTerm.toLowerCase();
         return (
+          project.title?.toLowerCase().includes(lowerSearch) ||
           project.company_name?.toLowerCase().includes(lowerSearch) ||
+          project.firm_name?.toLowerCase().includes(lowerSearch) ||
           project.technology_used?.some(tech => tech.toLowerCase().includes(lowerSearch))
         );
       });
@@ -124,48 +176,54 @@ const ManageProject = () => {
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-  // Handle delete
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this project?")) {
-      try {
-        const dataToSend = new FormData();
-        dataToSend.append('id', id);
+ // Handle delete
+const handleDelete = async (id, project_id) => {
+  if (window.confirm("Are you sure you want to delete this project?")) {
+    try {
+      const dataToSend = new FormData();
+      // ONLY send project_id in payload as requested
+      dataToSend.append('project_id', project_id);
 
-        const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
-          method: 'DELETE',
-          credentials: 'include',
-          body: dataToSend,
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to delete project');
-        }
-        
-        setProjects(prevData => prevData.filter(item => item.id !== id));
-        
-        setMessage("Project deleted successfully!");
-        setVariant("success");
-        setShowAlert(true);
-        
-        setTimeout(() => setShowAlert(false), 3000);
-      } catch (error) {
-        console.error('Error deleting project:', error);
-        setMessage(error.message || "Failed to delete project");
-        setVariant("danger");
-        setShowAlert(true);
-        
-        setTimeout(() => setShowAlert(false), 5000);
+      const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
+        method: 'DELETE',
+        credentials: 'include',
+        body: dataToSend,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete project');
       }
+      
+      setProjects(prevData => prevData.filter(item => item.id !== id));
+      
+      setMessage("Project deleted successfully!");
+      setVariant("success");
+      setShowAlert(true);
+      
+      setTimeout(() => setShowAlert(false), 3000);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      setMessage(error.message || "Failed to delete project");
+      setVariant("danger");
+      setShowAlert(true);
+      
+      setTimeout(() => setShowAlert(false), 5000);
     }
-  };
+  }
+};
 
   // Handle edit
   const handleEdit = (project) => {
     setCurrentEditProject(project);
     setEditFormData({
-      company_name: project.company_name,
+      title: project.title || "",
+      description: project.description || "",
+      company_name: project.company_name || "",
       technology_used: project.technology_used || [],
-      company_logo: null
+      company_logo: null,
+      firm_id: project.firm_id || "",
+      firm_name: project.firm_name || "",
+      project_budget: project.project_budget || ""
     });
     const originalLogoUrl = project.company_logo ? project.company_logo.split('?t=')[0] : null;
     setLogoPreview(originalLogoUrl);
@@ -174,34 +232,42 @@ const ManageProject = () => {
   };
 
   // Handle edit form input changes
-  const handleEditChange = (e) => {
-    const { name, value, files } = e.target;
-    
-    if (name === 'company_logo') {
-      const file = files[0];
-      if (file) {
-        const previewUrl = URL.createObjectURL(file);
-        setLogoPreview(previewUrl);
-        setHasLogoChanged(true);
-        setEditFormData(prev => ({
-          ...prev,
-          [name]: file
-        }));
-      }
-    } else {
+const handleEditChange = (e) => {
+  const { name, value, files } = e.target;
+  
+  if (name === 'company_logo') {
+    const file = files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setLogoPreview(previewUrl);
+      setHasLogoChanged(true);
       setEditFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: file
       }));
     }
-  };
+  } else if (name === 'firm_id') {
+    // When firm_id changes, also update firm_name
+    const selectedFirm = firms.find(firm => firm.firm_id === value);
+    setEditFormData(prev => ({
+      ...prev,
+      firm_id: value,
+      firm_name: selectedFirm ? selectedFirm.firm_name : ""
+    }));
+  } else {
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+};
 
-  // Handle technology input in the edit form
+  // Handle technology input in edit form
   const handleTechInputChange = (e) => {
     setTechInput(e.target.value);
   };
 
-  // Add technology to the array in the edit form
+  // Add technology to array in edit form
   const addTechnology = () => {
     if (techInput.trim() && !editFormData.technology_used.includes(techInput.trim())) {
       setEditFormData(prev => ({
@@ -212,7 +278,7 @@ const ManageProject = () => {
     }
   };
 
-  // Remove technology from the array in the edit form
+  // Remove technology from the array in edit form
   const removeTechnology = (techToRemove) => {
     setEditFormData(prev => ({
       ...prev,
@@ -221,92 +287,109 @@ const ManageProject = () => {
   };
 
   // Handle edit form submission
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
+const handleEditSubmit = async (e) => {
+  e.preventDefault();
+  
+  let tempLogoUrl = null;
+  if (hasLogoChanged && editFormData.company_logo) {
+    tempLogoUrl = URL.createObjectURL(editFormData.company_logo);
+  }
+  
+  const originalProjectData = projects.find(p => p.id === currentEditProject.id);
+  
+  // Update UI immediately
+  setProjects(prevData => 
+    prevData.map(item => 
+      item.id === currentEditProject.id 
+        ? {
+            ...item,
+            title: editFormData.title,
+            description: editFormData.description,
+            company_name: editFormData.company_name,
+            technology_used: editFormData.technology_used,
+            company_logo: hasLogoChanged ? tempLogoUrl : item.company_logo,
+            firm_id: editFormData.firm_id,
+            firm_name: editFormData.firm_name,
+            project_budget: editFormData.project_budget
+          } 
+        : item
+    )
+  );
+  
+  setShowEditModal(false);
+  
+  const dataToSend = new FormData();
+  // MANDATORY: Send project_id in payload
+  dataToSend.append('project_id', currentEditProject.project_id); 
+  dataToSend.append('title', editFormData.title);
+  dataToSend.append('description', editFormData.description);
+  dataToSend.append('company_name', editFormData.company_name);
+  dataToSend.append('technology_used', JSON.stringify(editFormData.technology_used));
+  dataToSend.append('firm_id', editFormData.firm_id);
+  dataToSend.append('firm_name', editFormData.firm_name);
+  dataToSend.append('project_budget', editFormData.project_budget);
+  
+  if (hasLogoChanged && editFormData.company_logo) {
+    dataToSend.append('company_logo', editFormData.company_logo);
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: dataToSend,
+    });
     
-    let tempLogoUrl = null;
-    if (hasLogoChanged && editFormData.company_logo) {
-      tempLogoUrl = URL.createObjectURL(editFormData.company_logo);
+    if (!response.ok) {
+      // Revert to original data if update fails
+      setProjects(prevData => 
+        prevData.map(item => 
+          item.id === currentEditProject.id ? originalProjectData : item
+        )
+      );
+      throw new Error('Failed to update project');
     }
     
-    const originalProjectData = projects.find(p => p.id === currentEditProject.id);
+    const apiResponseData = await response.json();
     
-    // Update UI immediately
+    if (tempLogoUrl) {
+      URL.revokeObjectURL(tempLogoUrl);
+    }
+    
     setProjects(prevData => 
       prevData.map(item => 
         item.id === currentEditProject.id 
           ? {
               ...item,
+              title: editFormData.title,
+              description: editFormData.description,
               company_name: editFormData.company_name,
               technology_used: editFormData.technology_used,
-              company_logo: hasLogoChanged ? tempLogoUrl : item.company_logo
+              company_logo: hasLogoChanged && apiResponseData.data && apiResponseData.data.company_logo
+                  ? `${API_BASE_URL}${apiResponseData.data.company_logo}?t=${Date.now()}`
+                  : item.company_logo,
+              firm_id: editFormData.firm_id,
+              firm_name: editFormData.firm_name,
+              project_budget: editFormData.project_budget
             } 
           : item
       )
     );
     
-    setShowEditModal(false);
+    setMessage("Project updated successfully!");
+    setVariant("success");
+    setShowAlert(true);
     
-    const dataToSend = new FormData();
-    dataToSend.append('id', currentEditProject.id); 
-    dataToSend.append('company_name', editFormData.company_name);
-    dataToSend.append('technology_used', JSON.stringify(editFormData.technology_used));
+    setTimeout(() => setShowAlert(false), 3000);
+  } catch (error) {
+    console.error('Error updating project:', error);
+    setMessage(error.message || "Failed to update project");
+    setVariant("danger");
+    setShowAlert(true);
     
-    if (hasLogoChanged && editFormData.company_logo) {
-      dataToSend.append('company_logo', editFormData.company_logo);
-    }
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
-        method: 'PUT',
-        credentials: 'include',
-        body: dataToSend,
-      });
-      
-      if (!response.ok) {
-        setProjects(prevData => 
-          prevData.map(item => 
-            item.id === currentEditProject.id ? originalProjectData : item
-          )
-        );
-        throw new Error('Failed to update project');
-      }
-      
-      const apiResponseData = await response.json();
-      
-      if (tempLogoUrl) {
-        URL.revokeObjectURL(tempLogoUrl);
-      }
-      
-      setProjects(prevData => 
-        prevData.map(item => 
-          item.id === currentEditProject.id 
-            ? {
-                ...item,
-                company_name: editFormData.company_name,
-                technology_used: editFormData.technology_used,
-                company_logo: hasLogoChanged && apiResponseData.data && apiResponseData.data.company_logo
-                    ? `${API_BASE_URL}${apiResponseData.data.company_logo}?t=${Date.now()}`
-                    : item.company_logo
-              } 
-            : item
-        )
-      );
-      
-      setMessage("Project updated successfully!");
-      setVariant("success");
-      setShowAlert(true);
-      
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error('Error updating project:', error);
-      setMessage(error.message || "Failed to update project");
-      setVariant("danger");
-      setShowAlert(true);
-      
-      setTimeout(() => setShowAlert(false), 5000);
-    }
-  };
+    setTimeout(() => setShowAlert(false), 5000);
+  }
+};
 
   return (
     <div className="dashboard-container">
@@ -325,7 +408,7 @@ const ManageProject = () => {
               <div style={{ width: '300px' }}>
                 <input
                   type="text"
-                  placeholder="Search by company or technology..."
+                  placeholder="Search by project, company, firm, or technology..."
                   className="form-control"
                   value={searchTerm}
                   onChange={(e) => {
@@ -371,11 +454,29 @@ const ManageProject = () => {
                               <AiOutlineUser size={60} style={{ marginRight: '15px' }} />
                             )}
                             <div>
-                              <Card.Title className="managetitle">{project.company_name}</Card.Title>
+                              <Card.Title className="managetitle">{project.title}</Card.Title>
                               <Card.Subtitle className="mb-2 text-muted">
-                                Technologies: {project.technology_used.join(', ')}
+                                Company: {project.company_name}
                               </Card.Subtitle>
                             </div>
+                          </div>
+                          <Card.Text className="mb-2">{project.description}</Card.Text>
+                          <div className="mb-2">
+                            <small className="text-muted">Firm: {project.firm_name}</small>
+                          </div>
+                          <div className="mb-2">
+                            <small className="text-muted">Budget: {project.formatted_budget || `$${project.project_budget}`}</small>
+                          </div>
+                          <div className="mb-3">
+                            {project.technology_used && project.technology_used.map((tech, index) => (
+                              <Badge 
+                                key={index} 
+                                bg="info" 
+                                className="me-1 mb-1"
+                              >
+                                {tech}
+                              </Badge>
+                            ))}
                           </div>
                           <div className="d-flex justify-content-between align-items-center">
                             <span></span>
@@ -391,7 +492,7 @@ const ManageProject = () => {
                               <Button 
                                 variant="danger" 
                                 size="sm"
-                                onClick={() => handleDelete(project.id)}
+                                onClick={() => handleDelete(project.id, project.project_id)}
                               >
                                 Delete
                               </Button>
@@ -442,11 +543,74 @@ const ManageProject = () => {
         <Form onSubmit={handleEditSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Company Name</Form.Label>
+              <Form.Label>Project Name</Form.Label>
               <Form.Control
                 type="text"
-                name="company_name"
-                value={editFormData.company_name}
+                name="title"
+                value={editFormData.title}
+                onChange={handleEditChange}
+                required
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="description"
+                value={editFormData.description}
+                onChange={handleEditChange}
+                required
+              />
+            </Form.Group>
+            
+            <Row>
+              <Col lg={6} md={6} sm={12}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Company Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="company_name"
+                    value={editFormData.company_name}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col lg={6} md={6} sm={12}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Firm</Form.Label>
+                  <Form.Select
+                    name="firm_id"
+                    value={editFormData.firm_id}
+                    onChange={handleEditChange}
+                    required
+                    disabled={firmsLoading}
+                  >
+                    <option value="">Select a firm</option>
+                    {firms.map(firm => (
+                      <option key={firm.id} value={firm.firm_id}>
+                        {firm.firm_name}
+                      </option>
+                    ))}
+                  </Form.Select>
+                  {firmsLoading && (
+                    <Form.Text className="text-muted">
+                      Loading firms...
+                    </Form.Text>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Project Budget</Form.Label>
+              <Form.Control
+                type="number"
+                step="0.01"
+                name="project_budget"
+                value={editFormData.project_budget}
                 onChange={handleEditChange}
                 required
               />

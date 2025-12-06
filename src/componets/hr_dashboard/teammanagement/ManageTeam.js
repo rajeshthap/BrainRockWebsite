@@ -646,8 +646,8 @@ const ManageTeam = () => {
                                   >
                                     <option value="">Select Project</option>
                                     {getAvailableProjects().map(project => (
-                                      <option key={project.project_id} value={project.company_name}>
-                                        {project.company_name}
+                                      <option key={project.project_id} value={project.title}>
+                                        {project.title}
                                       </option>
                                     ))}
                                   </Form.Select>

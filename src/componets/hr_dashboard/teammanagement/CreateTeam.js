@@ -509,9 +509,9 @@ const handleSubmit = async (e) => {
                         {filteredProjects.map((project) => (
                           <option
                             key={project.id}
-                            value={project.company_name}
+                            value={project.title}
                           >
-                            {project.company_name}
+                            {project.title}
                           </option>
                         ))}
                       </Form.Select>

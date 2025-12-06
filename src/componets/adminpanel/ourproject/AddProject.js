@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 
+// Define the base URL for your API
+const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+
 const AddProject = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -13,10 +16,18 @@ const AddProject = () => {
   
   // Form state
   const [formData, setFormData] = useState({
+    title: "", // Project name
+    description: "",
     company_name: "",
     technology_used: [],
-    company_logo: null // Will hold the file object
+    company_logo: null, // Will hold file object
+    firm_id: "",
+    project_budget: ""
   });
+  
+  // State for firm data
+  const [firms, setFirms] = useState([]);
+  const [firmsLoading, setFirmsLoading] = useState(true);
   
   // State for logo preview
   const [logoPreview, setLogoPreview] = useState(null);
@@ -43,6 +54,38 @@ const AddProject = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
+  // Fetch firms on component mount
+  useEffect(() => {
+    const fetchFirms = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/firm/`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch firms');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          setFirms(result.data);
+        } else {
+          throw new Error('API returned unsuccessful response');
+        }
+      } catch (error) {
+        console.error('Error fetching firms:', error);
+        setMessage(error.message || "Failed to fetch firms");
+        setVariant("danger");
+        setShowAlert(true);
+      } finally {
+        setFirmsLoading(false);
+      }
+    };
+
+    fetchFirms();
+  }, []);
+
   // Cleanup object URL to avoid memory leaks
   useEffect(() => {
     return () => {
@@ -66,7 +109,7 @@ const AddProject = () => {
         company_logo: file
       }));
       
-      // Create a preview URL for the selected logo
+      // Create a preview URL for selected logo
       if (file) {
         const previewUrl = URL.createObjectURL(file);
         setLogoPreview(previewUrl);
@@ -87,7 +130,7 @@ const AddProject = () => {
     setTechInput(e.target.value);
   };
 
-  // Add technology to the array
+  // Add technology to array
   const addTechnology = () => {
     if (techInput.trim() && !formData.technology_used.includes(techInput.trim())) {
       setFormData(prev => ({
@@ -98,7 +141,7 @@ const AddProject = () => {
     }
   };
 
-  // Remove technology from the array
+  // Remove technology from array
   const removeTechnology = (techToRemove) => {
     setFormData(prev => ({
       ...prev,
@@ -117,9 +160,13 @@ const AddProject = () => {
   // Clear form function
   const clearForm = () => {
     setFormData({
+      title: "",
+      description: "",
       company_name: "",
       technology_used: [],
-      company_logo: null
+      company_logo: null,
+      firm_id: "",
+      project_budget: ""
     });
     setTechInput("");
     setLogoPreview(null);
@@ -133,20 +180,28 @@ const AddProject = () => {
     setIsSubmitting(true);
     setShowAlert(false); // Hide any previous alerts
     
-    // Create a FormData object to send the file
+    // Create a FormData object to send file
     const dataToSend = new FormData();
+    dataToSend.append('title', formData.title); // Project name
+    dataToSend.append('description', formData.description);
     dataToSend.append('company_name', formData.company_name);
     
     // Convert technology array to JSON string
     dataToSend.append('technology_used', JSON.stringify(formData.technology_used));
+    
+    // Send firm_id as requested
+    dataToSend.append('firm_id', formData.firm_id);
+    
+    // Convert budget to number
+    dataToSend.append('project_budget', parseFloat(formData.project_budget));
     
     if (formData.company_logo) {
       dataToSend.append('company_logo', formData.company_logo, formData.company_logo.name);
     }
     
     try {
-      // Using the provided API endpoint
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourproject-items/', {
+      // Using provided API endpoint
+      const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
         method: 'POST',
         credentials: 'include', // Include credentials as requested
         body: dataToSend,
@@ -162,7 +217,7 @@ const AddProject = () => {
       setMessage("Project added successfully!");
       setVariant("success");
       setShowAlert(true);
-      clearForm(); // Clear the form on success
+      clearForm(); // Clear form on success
       
       // Hide success alert after 3 seconds
       setTimeout(() => setShowAlert(false), 3000);
@@ -174,7 +229,7 @@ const AddProject = () => {
       
       // Provide a more specific message for network errors
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        errorMessage = "Network error: Could not connect to the server. Please check the API endpoint.";
+        errorMessage = "Network error: Could not connect to the server. Please check API endpoint.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -219,19 +274,90 @@ const AddProject = () => {
             )}
             
             <Row>
-              <Col lg={6} md={8} sm={12}>
+              <Col lg={8} md={10} sm={12}>
                 <Form onSubmit={handleSubmit}>
+                  <Row>
+                    <Col lg={6} md={6} sm={12}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Project Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Enter project name"
+                          name="title"
+                          value={formData.title}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col lg={6} md={6} sm={12}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Company Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Enter company name"
+                          name="company_name"
+                          value={formData.company_name}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  
                   <Form.Group className="mb-3">
-                    <Form.Label>Company Name</Form.Label>
+                    <Form.Label>Description</Form.Label>
                     <Form.Control
-                      type="text"
-                      placeholder="Enter company name"
-                      name="company_name"
-                      value={formData.company_name}
+                      as="textarea"
+                      rows={3}
+                      placeholder="Enter project description"
+                      name="description"
+                      value={formData.description}
                       onChange={handleChange}
                       required
                     />
                   </Form.Group>
+                  
+                  <Row>
+                    <Col lg={6} md={6} sm={12}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Firm</Form.Label>
+                        <Form.Select
+                          name="firm_id"
+                          value={formData.firm_id}
+                          onChange={handleChange}
+                          required
+                          disabled={firmsLoading}
+                        >
+                          <option value="">Select a firm</option>
+                          {firms.map(firm => (
+                            <option key={firm.id} value={firm.firm_id}>
+                              {firm.firm_name}
+                            </option>
+                          ))}
+                        </Form.Select>
+                        {firmsLoading && (
+                          <Form.Text className="text-muted">
+                            Loading firms...
+                          </Form.Text>
+                        )}
+                      </Form.Group>
+                    </Col>
+                    <Col lg={6} md={6} sm={12}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Project Budget</Form.Label>
+                        <Form.Control
+                          type="number"
+                          step="0.01"
+                          placeholder="Enter project budget"
+                          name="project_budget"
+                          value={formData.project_budget}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
                   
                   <Form.Group className="mb-3">
                     <Form.Label>Technologies Used</Form.Label>

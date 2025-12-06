@@ -98,6 +98,8 @@ import Training from "./componets/topnav/navigationpages/Training";
 import ViewCertified from "./componets/adminpanel/Candidate/ViewCertified";
 import ServicesDetails from "./componets/pages/ServicesDetails";
 import Certificate from "./componets/topnav/navigationpages/Certificate";
+import ManageFirm from "./componets/adminpanel/addfirm/ManageFirm";
+import AddFirm from "./componets/adminpanel/addfirm/AddFirm";
 
 
 function AppContent() {
@@ -156,7 +158,8 @@ function AppContent() {
     "/AddProject",
     "/ManageProject",
     "/ViewCertified",
-
+    "/AddFirm",
+    "/ManageFirm",
   ]);
 
   const hiddenFooter1 = new Set([
@@ -572,6 +575,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ViewCertified/>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/AddFirm"
+          element={
+            <ProtectedRoute>
+              <AddFirm/>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ManageFirm"
+          element={
+            <ProtectedRoute>
+              <ManageFirm/>
             </ProtectedRoute>
           }
         />

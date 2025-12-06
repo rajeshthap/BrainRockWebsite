@@ -194,6 +194,27 @@ const menuItems = [
        
       ],
     },
+       {
+      icon: <PiUserListBold />,
+      label: "Firm Management",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Firm",
+          path: "/AddFirm",
+          icon: <FaChartLine />,
+        },
+        {
+          label: "Manage Firm",
+          path: "/ManageFirm",
+          icon: <FaChartLine />,
+        },
+        
+       
+      ],
+    },
      {
       icon: <PiUserListBold />,
       label: "Add Design & Dev",
