@@ -339,8 +339,12 @@
     position: relative;
     z-index: 1;
     overflow: hidden;
+    margin-bottom: -34px !important;
+} 
+.about-wpr{
+  margin-bottom: 40px;
+  margin-top: 54px;
 }
-
 .feature-box::before {
     position: absolute;
     content: '';

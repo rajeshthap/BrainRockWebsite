@@ -92,7 +92,7 @@ function OurTeam() {
       src={member.image || defaultImage}
       alt={member.full_name || "Team Member"}
       onError={(e) => {
-        e.target.onerror = null;
+        e.target.onerror = null; 
         e.target.src = defaultImage;
       }}
     />
