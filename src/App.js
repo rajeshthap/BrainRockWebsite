@@ -100,6 +100,12 @@ import ServicesDetails from "./componets/pages/ServicesDetails";
 import Certificate from "./componets/topnav/navigationpages/Certificate";
 import ManageFirm from "./componets/adminpanel/addfirm/ManageFirm";
 import AddFirm from "./componets/adminpanel/addfirm/AddFirm";
+import InterviewSch from "./componets/hr_dashboard/recruitments/InterviewSch";
+import JobApplications from "./componets/hr_dashboard/recruitments/JobApplications";
+import JobOpenings from "./componets/hr_dashboard/recruitments/JobOpenings";
+import OfferLetters from "./componets/hr_dashboard/recruitments/OfferLetters";
+import Shortlisting from "./componets/hr_dashboard/recruitments/Shortlisting";
+import Career from "./componets/topnav/navigationpages/Career";
 
 
 function AppContent() {
@@ -160,6 +166,11 @@ function AppContent() {
     "/ViewCertified",
     "/AddFirm",
     "/ManageFirm",
+    "/JobApplications",
+    "/JobOpenings",
+    "/OfferLetters",
+    "/Shortlisting",
+    "/InterviewSch",
   ]);
 
   const hiddenFooter1 = new Set([
@@ -317,7 +328,7 @@ function AppContent() {
         />
         <Route path="/CompanyProfile" element={<CompanyProfile />} />
         <Route path="/OurTeam" element={<OurTeam />} />
-        <Route path="/Careers" element={<Careers />} />
+        <Route path="/Career" element={<Career />} />
         <Route path="/ServicesDetails" element={<ServicesDetails />} />
         {/* Protected Routes */}
         {
@@ -400,6 +411,46 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <LeaveManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/OfferLetters"
+          element={
+            <ProtectedRoute>
+              <OfferLetters />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Shortlisting"
+          element={
+            <ProtectedRoute>
+              <Shortlisting />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/JobOpenings"
+          element={
+            <ProtectedRoute>
+              <JobOpenings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/JobApplications"
+          element={
+            <ProtectedRoute>
+              <JobApplications />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/InterviewSch"
+          element={
+            <ProtectedRoute>
+              <InterviewSch />
             </ProtectedRoute>
           }
         />
