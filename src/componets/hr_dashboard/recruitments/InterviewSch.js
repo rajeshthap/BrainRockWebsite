@@ -272,6 +272,10 @@ function InterviewSch() {
 
   // Render interviews table
   const renderInterviewsTable = (items) => {
+    // Show action column only for HR in pending tab, hide for employees and in pass/fail tabs
+    const showActionColumn = (userRole === "admin" || userRole === "hr" || userRole === "HR") && resultFilter === "pending";
+    const colSpanValue = showActionColumn ? "10" : "9";
+
     return (
       <table className="temp-rwd-table">
         <tbody>
@@ -285,7 +289,7 @@ function InterviewSch() {
             <th>Interviewer</th>
             <th>Scheduled Date</th>
             <th>Status</th>
-            <th>Action</th>
+            {showActionColumn && <th>Action</th>}
           </tr>
           {items.length > 0 ? (
             items.map((interview, index) => {
@@ -311,25 +315,27 @@ function InterviewSch() {
                       {interview.result || 'Pending'}
                     </Badge>
                   </td>
-                  <td data-th="Action">
-                    {isEditable ? (
-                      <Button 
-                        variant="warning" 
-                        size="sm"
-                        onClick={() => handleEditInterview(interview)}
-                      >
-                        Edit
-                      </Button>
-                    ) : (
-                      <span>-</span>
-                    )}
-                  </td>
+                  {showActionColumn && (
+                    <td data-th="Action">
+                      {isEditable ? (
+                        <Button 
+                          variant="warning" 
+                          size="sm"
+                          onClick={() => handleEditInterview(interview)}
+                        >
+                          Edit
+                        </Button>
+                      ) : (
+                        <span>-</span>
+                      )}
+                    </td>
+                  )}
                 </tr>
               );
             })
           ) : (
             <tr>
-              <td colSpan="10" className="text-center">
+              <td colSpan={colSpanValue} className="text-center">
                 No interviews available.
               </td>
             </tr>
@@ -800,6 +806,9 @@ function InterviewSch() {
             <div>
               {selectedDateInterviews.map((interview) => {
                 const applicationDetails = getApplicationDetails(interview.application_id);
+                const isEditable = (userRole === "admin" || userRole === "hr" || userRole === "HR") && 
+                                 (!interview.result || interview.result === "pending");
+                
                 return (
                   <Card key={interview.id || interview.interview_id} className="mb-3">
                     <Card.Body>
@@ -835,6 +844,20 @@ function InterviewSch() {
                               onClick={() => window.open(`${API_BASE_URL}${applicationDetails.resume}`, '_blank')}
                             >
                               View Candidate Resume
+                            </Button>
+                          </Col>
+                        )}
+                        {/* Edit Button for HR/Manager on Pending Interviews */}
+                        {isEditable && (
+                          <Col md={12} className="mt-3">
+                            <Button 
+                              variant="warning"
+                              onClick={() => {
+                                handleEditInterview(interview);
+                                setShowModal(false);
+                              }}
+                            >
+                              Edit Interview
                             </Button>
                           </Col>
                         )}
