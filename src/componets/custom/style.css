@@ -88,27 +88,32 @@ body {
   font-size: var(--br-space-250);
   color: #ff0000;
 }
+
 .team-card:hover img {
   transform: scale(1.08);
 }
 
 .team-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
+
 .breadcrumb-menu li {
   cursor: pointer;
   transition: 0.3s;
 
 }
+
 .breadcrumb-home {
-  color: #007bff;   /* Blue */
+  color: #007bff;
+  /* Blue */
   font-weight: 600;
   cursor: pointer;
 }
 
 .breadcrumb-about {
-  color: orange;   /* Green */
+  color: orange;
+  /* Green */
   font-weight: 600;
   cursor: pointer;
 }
@@ -150,31 +155,46 @@ body {
 }
 
 .br-basic-info h1 {
-  font-size: var(--br-space-400);
+  font-size: var(--br-space-800);
   font-weight: 600;
   color: #0b51b7;
   margin-bottom: var(--br-space-700);
 }
 
+.login-box {
+  background: #f8fafb;
+}
+
+.login-box h1 {
+  color: #0b51b7;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: var(--br-space-700);
+}
+
 .br-box-container {
-  background: #FFFFFF;
+
   border: 1px solid #E2E8F0;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.05);
   border-radius: var(--br-space-400);
   padding: var(--br-space-800);
   margin-bottom: var(--br-space-1000);
 }
-.reject-st-btn{
-  font-size: var(--br-space-250);
-    width: 68px;
-}
-.suc-st-btn{
+
+.reject-st-btn {
   font-size: var(--br-space-250);
   width: 68px;
 }
-.leave-app-pending{
-    font-size: var(--br-space-250);
+
+.suc-st-btn {
+  font-size: var(--br-space-250);
+  width: 68px;
 }
+
+.leave-app-pending {
+  font-size: var(--br-space-250);
+}
+
 .br-page-no {
   background-color: #f0f0f0;
   color: black;
@@ -188,10 +208,12 @@ body {
   border: 1px solid #0d6efd;
   margin-right: 8px;
 }
+
 .pagination-title {
- color:#0b51b7;
+  color: #0b51b7;
   font-size: 18px;
 }
+
 .br-submit-btn {
   background-color: #0b51b7;
   color: #fff;
@@ -204,40 +226,39 @@ body {
   margin-top: 12px;
 }
 
-.br-registration-heading h1 {
-  font-size: 18px;
-  font-weight: 600;
 
-}
 
 
 .forgot-btn {
   font-size: 12px;
 }
+
 .progress-filename {
   display: inline-block;
-  max-width: 120px;      
+  max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
 }
 
-.accept-btn{
+.accept-btn {
   font-size: 12px;
   background-color: #00553c;
- border: none !important;
+  border: none !important;
 }
-.reject-btn{
+
+.reject-btn {
   font-size: 12px;
   background-color: #ff0000;
-   border: none !important;
-  
+  border: none !important;
+
 }
-.cancel-btn{
+
+.cancel-btn {
   font-size: 12px;
   background-color: #808090;
-   border: none !important;
+  border: none !important;
 }
 
 
@@ -253,6 +274,7 @@ body {
 .react-datepicker-wrapper {
   display: flex !important;
 }
+
 .employee-selection-container {
   max-height: 300px;
   overflow-y: auto;
@@ -260,51 +282,62 @@ body {
   border-radius: 0.375rem;
   padding: 10px;
 }
- 
+
 .employee-card {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
- 
+
 .employee-card:hover {
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
- 
+
 .selected-employee {
   background-color: #e7f5ff;
 }
-.managetitle{
+
+.managetitle {
   color: #000 !important;
 }
-.about-wpr{
+
+.about-wpr {
   margin-bottom: 40px;
 }
+
 .about-drop.nav-item.show.dropdown {
   font-size: 12px !important;
 }
-.dropdown-item{
-font-size: 12px;
+
+.dropdown-item {
+  font-size: 12px;
 }
+
 @media only screen and (max-width: 568px) {
   .br-login {
     margin: var(--br-space-200) var(--br-space-0) var(--br-space-0) var(--br-space-0) !important;
   }
-  .search-btn{
+
+  .search-btn {
     margin-top: 12px;
   }
-  .sbt-btn-text{
+
+  .sbt-btn-text {
     font-size: 12px !important;
 
   }
-.feature-icon{
-  text-align: center;
-}
-.br-footer-box {
-  margin-top: 12px !important;
-}
-.service-btm{
-  margin-bottom: 18px;
-}
+
+  .feature-icon {
+    text-align: center;
+  }
+
+  .br-footer-box {
+    margin-top: 12px !important;
+  }
+
+  .service-btm {
+    margin-bottom: 18px;
+  }
+
   .main-mobile-header {
     display: block;
   }
