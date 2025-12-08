@@ -5,6 +5,10 @@
     background-repeat: no-repeat;
 }
 
+.flaticon-cloud img {
+    border-radius: 10px !important;
+}
+
 .resprce-main-title {
     display: flex;
     justify-content: space-around;
@@ -60,7 +64,7 @@
 }
 
 .hero-sub-title {
-    font-size:18px;
+    font-size: 18px;
     line-height: 1;
     display: inline-block;
     color: var(--br-white);
