@@ -22,19 +22,19 @@ function CompanyProfile() {
           throw new Error('Failed to fetch data');
         }
         const result = await response.json();
-        
+
         // The API returns data in the format {success: true, data: [{...}]}
         if (result.success && result.data && result.data.length > 0) {
           // Get the first item from the array
           const item = result.data[0];
-          
+
           // Process the data to construct full image URL if exists
           const processedData = {
             title: item.title,
             description: item.description,
             image: item.image ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.image}` : null
           };
-          
+
           setAboutData(processedData);
         }
         setLoading(false);
@@ -60,17 +60,17 @@ function CompanyProfile() {
       <div className='company-banner'>
         <div className='site-breadcrumb-wpr'>
           <h2 className='breadcrumb-title'>About Company</h2>
-       <ul className='breadcrumb-menu clearfix'>
-  <li>
-    <Link className="breadcrumb-home" to="/">Home</Link>
-  </li>
+          <ul className='breadcrumb-menu clearfix'>
+            <li>
+              <Link className="breadcrumb-home" to="/">Home</Link>
+            </li>
 
-  <li className='px-2'>/</li>
+            <li className='px-2'>/</li>
 
-  <li>
-    <Link className="breadcrumb-about" to="/about">About Us</Link>
-  </li>
-</ul>
+            <li>
+              <Link className="breadcrumb-about" to="/about">About Us</Link>
+            </li>
+          </ul>
 
         </div>
       </div>
@@ -90,7 +90,7 @@ function CompanyProfile() {
                           className="img-fluid about-1 mt-30"
                         />
                       ) : (
-                        <div className="img-fluid about-1 mt-30 d-flex align-items-center justify-content-center bg-light" style={{height: '200px'}}>
+                        <div className="img-fluid about-1 mt-30 d-flex align-items-center justify-content-center bg-light" style={{ height: '200px' }}>
                           <span className="text-muted">No image available</span>
                         </div>
                       )}
@@ -103,7 +103,7 @@ function CompanyProfile() {
                           className="img-fluid about-2"
                         />
                       ) : (
-                        <div className="img-fluid about-2 d-flex align-items-center justify-content-center bg-light" style={{height: '200px'}}>
+                        <div className="img-fluid about-2 d-flex align-items-center justify-content-center bg-light" style={{ height: '200px' }}>
                           <span className="text-muted">No image available</span>
                         </div>
                       )}
@@ -118,7 +118,7 @@ function CompanyProfile() {
                           className="img-fluid about-3"
                         />
                       ) : (
-                        <div className="img-fluid about-3 d-flex align-items-center justify-content-center bg-light" style={{height: '200px'}}>
+                        <div className="img-fluid about-3 d-flex align-items-center justify-content-center bg-light" style={{ height: '200px' }}>
                           <span className="text-muted">No image available</span>
                         </div>
                       )}
@@ -138,12 +138,12 @@ function CompanyProfile() {
             </Row>
           </div>
         </Container>
-       <Container fluid className="br-footer-box">
-        <Container>
-          <FooterPage /></Container>
-      </Container>
+
       </div>
-      
+      <Container fluid className="br-footer-box">
+
+        <FooterPage />
+      </Container>
     </div>
   )
 }
