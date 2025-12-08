@@ -41,7 +41,7 @@ const SalaryCalculation = ({ employee }) => {
     baseURL: `${BASE_URL}/api/`,
     withCredentials: true,
   }), [BASE_URL]);
-  const isAdmin = user && user.role === 'admin';
+  const isAdmin = user && user.role === 'hr';
   // Function to determine if a leave is without pay
   const isWithoutPay = (leave) => {
     // Check if leave type is 'without pay' or 'without_pay'

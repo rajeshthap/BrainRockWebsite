@@ -26,27 +26,13 @@ import { AuthContext } from "../context/AuthContext";
 const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     const { logout } = useContext(AuthContext);
     const { user } = useContext(AuthContext);
-const emp_id = user?.unique_id;  // This is the correct value
+    const emp_id = user?.unique_id;  // This is the correct value
+    const userRole = user?.role?.toLowerCase(); // Get role directly from context
 
-    const [userRole, setUserRole] = useState(null);
-  const [openSubmenu, setOpenSubmenu] = useState(null);
-  const toggleSubmenu = (index) => {
-    setOpenSubmenu(openSubmenu === index ? null : index);
-  };
-  
- useEffect(() => {
-  if (!emp_id) return;  // prevent calling undefined
-
-  axios
-    .get(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${emp_id}`,{
-      withCredentials:true
-    })
-    .then((res) => {
-      const role = res.data?.role || res.data?.employee_role || null;
-      setUserRole(role);
-    })
-    .catch((err) => console.log("SideNav Error:", err));
-}, [emp_id]);
+    const [openSubmenu, setOpenSubmenu] = useState(null);
+    const toggleSubmenu = (index) => {
+      setOpenSubmenu(openSubmenu === index ? null : index);
+    };
 
 
 const menuItems = [
@@ -60,26 +46,25 @@ const menuItems = [
      {
       icon: <PiUserListBold />,
       label: "Team Managment",
- 
       submenu: [
-        
-       
         {
           label: "Create Team",
           path: "/CreateTeam",
           icon: <FaChartLine />,
+          allowedRoles: ["hr", "manager"],
         },
         {
           label: "Manage Team",
           path: "/ManageTeam",
           icon: <FaChartLine />,
+          allowedRoles: ["hr", "manager"],
         },
         {
           label: "My Team",
           path: "/MyTeam",
           icon: <FaChartLine />,
+          allowedRoles: ["employee"],
         },
-       
       ],
     },
   // {
@@ -91,7 +76,7 @@ const menuItems = [
     {
       icon: <PiUserListBold />,
       label: "Employee Management",
- 
+      allowedRoles: ["hr", "manager"],
       submenu: [
         {
           label: "Employee Directory",
@@ -508,10 +493,10 @@ const menuItems = [
         <Nav className="sidebar-nav flex-column">
           
         {menuItems
-  .filter(item =>
-    item.allowedRoles ? item.allowedRoles.includes(userRole) : true
-  )
-  .map((item, index) => (
+          .filter(item =>
+            item.allowedRoles ? item.allowedRoles.includes(userRole) : true
+          )
+          .map((item, index) => (
     <div key={index}>
       {/* If submenu exists */}
       {item.submenu ? (
@@ -540,7 +525,11 @@ const menuItems = [
       {item.submenu && (
         <Collapse in={openSubmenu === index}>
           <div className="submenu-container">
-            {item.submenu.map((subItem, subIndex) => (
+            {item.submenu
+              .filter(subItem =>
+                subItem.allowedRoles ? subItem.allowedRoles.includes(userRole) : true
+              )
+              .map((subItem, subIndex) => (
               <Link
                 key={subIndex}
                 to={subItem.path}
@@ -588,7 +577,11 @@ const menuItems = [
 
   <Offcanvas.Body className="br-offcanvas">
     <Nav className="flex-column">
-      {menuItems.map((item, index) => (
+      {menuItems
+        .filter(item =>
+          item.allowedRoles ? item.allowedRoles.includes(userRole) : true
+        )
+        .map((item, index) => (
         <div key={index}>
           {item.submenu ? (
             <Nav.Link
@@ -615,7 +608,11 @@ const menuItems = [
           {item.submenu && (
             <Collapse in={openSubmenu === index}>
               <div className="submenu-container">
-                {item.submenu.map((subItem, subIndex) => (
+                {item.submenu
+                  .filter(subItem =>
+                    subItem.allowedRoles ? subItem.allowedRoles.includes(userRole) : true
+                  )
+                  .map((subItem, subIndex) => (
                   <Link
                     key={subIndex}
                     to={subItem.path}
