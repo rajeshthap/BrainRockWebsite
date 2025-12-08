@@ -278,7 +278,7 @@ const EmpList = () => {
   const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
   // Check if user is an employee (not admin)
-  const isEmployee = user && user.role !== 'admin';
+  const isEmployee = user && user.role !== 'hr';
   
   // If user is an employee, find their own data from the employees list
   const employeeData = useMemo(() => {
