@@ -7,6 +7,7 @@ import {
   Spinner,
   Row,
   Col,
+  Badge,
 } from "react-bootstrap";
 import axios from "axios";
 
@@ -15,7 +16,8 @@ const CreateMeetingModal = ({
   onHide, 
   user, 
   onMeetingCreated,
-  existingMeeting = null 
+  existingMeeting = null,
+  authToken
 }) => {
   const [meetingForm, setMeetingForm] = useState({
     meeting_title: "",
@@ -23,6 +25,7 @@ const CreateMeetingModal = ({
     end_date_time: "",
     meeting_type: "online",
     meeting_link: "",
+    meeting_location: "",
     agenda: "",
     employee_ids: [],
     meeting_recurrence: "none",
@@ -33,30 +36,55 @@ const CreateMeetingModal = ({
   const [submittingMeeting, setSubmittingMeeting] = useState(false);
   const [meetingError, setMeetingError] = useState("");
   const [meetingSuccess, setMeetingSuccess] = useState("");
-  const [participantInput, setParticipantInput] = useState(""); // For UI input of participants
+  const [employees, setEmployees] = useState([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+
+  // Fetch employee data when component mounts
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setLoadingEmployees(true);
+      try {
+        const response = await axios.get(
+          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/",
+          {
+            withCredentials: true
+          }
+        );
+        
+        setEmployees(response.data || []);
+      } catch (err) {
+        console.error("Error fetching employees:", err);
+        setMeetingError("Failed to load employee list. Please refresh and try again.");
+      } finally {
+        setLoadingEmployees(false);
+      }
+    };
+
+    if (show && authToken) {
+      fetchEmployees();
+    }
+  }, [show, authToken]);
 
   // If editing an existing meeting, populate form
   useEffect(() => {
     if (existingMeeting) {
       setMeetingForm({
-        meeting_title: existingMeeting.title || "",
-        start_date_time: existingMeeting.start_time 
-          ? new Date(existingMeeting.start_time).toISOString().slice(0, 16) 
+        meeting_title: existingMeeting.meeting_title || "",
+        start_date_time: existingMeeting.start_date_time 
+          ? new Date(existingMeeting.start_date_time).toISOString().slice(0, 16) 
           : "",
         end_date_time: existingMeeting.end_time 
           ? new Date(existingMeeting.end_time).toISOString().slice(0, 16) 
           : "",
         meeting_type: existingMeeting.meeting_type || "online",
         meeting_link: existingMeeting.meeting_link || "",
+        meeting_location: existingMeeting.meeting_location || "",
         agenda: existingMeeting.agenda || "",
         employee_ids: existingMeeting.employee_ids || [],
         meeting_recurrence: existingMeeting.meeting_recurrence || "none",
         notification_before: existingMeeting.notification_before || "1hour",
         meeting_priority: existingMeeting.meeting_priority || "medium"
       });
-      
-      // Set participant input for display
-      setParticipantInput(existingMeeting.employee_ids ? existingMeeting.employee_ids.join(", ") : "");
     } else {
       // Reset form for new meeting
       setMeetingForm({
@@ -65,13 +93,13 @@ const CreateMeetingModal = ({
         end_date_time: "",
         meeting_type: "online",
         meeting_link: "",
+        meeting_location: "",
         agenda: "",
         employee_ids: [],
         meeting_recurrence: "none",
         notification_before: "1hour",
         meeting_priority: "medium"
       });
-      setParticipantInput("");
     }
   }, [existingMeeting, show]);
 
@@ -84,19 +112,20 @@ const CreateMeetingModal = ({
     });
   };
 
-  // Handle participants input change
-  const handleParticipantsChange = (e) => {
-    setParticipantInput(e.target.value);
-    
-    // Parse the comma-separated input into an array
-    const participants = e.target.value
-      .split(",")
-      .map(p => p.trim())
-      .filter(p => p !== "");
-    
+  // Handle multi-select for employees
+  const handleEmployeeSelection = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
     setMeetingForm({
       ...meetingForm,
-      employee_ids: participants
+      employee_ids: selectedOptions
+    });
+  };
+
+  // Remove employee from selection
+  const removeEmployee = (employeeId) => {
+    setMeetingForm({
+      ...meetingForm,
+      employee_ids: meetingForm.employee_ids.filter(id => id !== employeeId)
     });
   };
 
@@ -108,37 +137,53 @@ const CreateMeetingModal = ({
     setMeetingSuccess("");
 
     try {
-      // Prepare meeting data for API
       const meetingData = {
-        ...meetingForm,
-        // Convert date strings to proper format
+        meeting_title: meetingForm.meeting_title,
         start_date_time: new Date(meetingForm.start_date_time).toISOString(),
         end_date_time: new Date(meetingForm.end_date_time).toISOString(),
+        meeting_type: meetingForm.meeting_type,
+        agenda: meetingForm.agenda,
+        employee_ids: meetingForm.employee_ids,
+        meeting_recurrence: meetingForm.meeting_recurrence,
+        notification_before: meetingForm.notification_before,
+        meeting_priority: meetingForm.meeting_priority
+      };
+
+      if (meetingForm.meeting_type === "online") {
+        meetingData.meeting_link = meetingForm.meeting_link;
+      } else {
+        meetingData.meeting_location = meetingForm.meeting_location;
+      }
+
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
       };
 
       let response;
       if (existingMeeting) {
-        // Update existing meeting
         response = await axios.put(
           `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meetings/${existingMeeting.id}/`,
-          meetingData
+          meetingData,
+          config
         );
       } else {
-        // Create new meeting
         response = await axios.post(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meetings/",
-          meetingData
+          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meeting-schedule/",
+          meetingData,
+          config
         );
       }
 
       setMeetingSuccess(existingMeeting ? "Meeting updated successfully!" : "Meeting created successfully!");
       
-      // Call the callback to refresh meeting data in parent component
       if (onMeetingCreated) {
         onMeetingCreated();
       }
       
-      // Close modal after a short delay to show success message
       setTimeout(() => {
         onHide();
       }, 1500);
@@ -148,6 +193,12 @@ const CreateMeetingModal = ({
     } finally {
       setSubmittingMeeting(false);
     }
+  };
+
+  // Get employee name by ID
+  const getEmployeeName = (id) => {
+    const employee = employees.find(emp => emp.emp_id === id);
+    return employee ? employee.full_name : id;
   };
 
   return (
@@ -223,19 +274,6 @@ const CreateMeetingModal = ({
             </Col>
           </Row>
 
-          {meetingForm.meeting_type === "offline" && (
-            <Form.Group className="mb-3">
-              <Form.Label>Meeting Location *</Form.Label>
-              <Form.Control
-                type="text"
-                name="meeting_location"
-                value={meetingForm.meeting_location || ""}
-                onChange={handleMeetingFormChange}
-                required={meetingForm.meeting_type === "offline"}
-              />
-            </Form.Group>
-          )}
-
           {meetingForm.meeting_type === "online" && (
             <Form.Group className="mb-3">
               <Form.Label>Meeting Link</Form.Label>
@@ -244,6 +282,21 @@ const CreateMeetingModal = ({
                 name="meeting_link"
                 value={meetingForm.meeting_link}
                 onChange={handleMeetingFormChange}
+                placeholder="https://zoom.com/meet/abc"
+              />
+            </Form.Group>
+          )}
+
+          {meetingForm.meeting_type === "offline" && (
+            <Form.Group className="mb-3">
+              <Form.Label>Conference Room *</Form.Label>
+              <Form.Control
+                type="text"
+                name="meeting_location"
+                value={meetingForm.meeting_location}
+                onChange={handleMeetingFormChange}
+                placeholder="Conference Room A"
+                required={meetingForm.meeting_type === "offline"}
               />
             </Form.Group>
           )}
@@ -256,20 +309,62 @@ const CreateMeetingModal = ({
               name="agenda"
               value={meetingForm.agenda}
               onChange={handleMeetingFormChange}
+              placeholder="Discuss sprint backlog"
             />
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Participants (Employee IDs)</Form.Label>
-            <Form.Control
-              type="text"
-              value={participantInput}
-              onChange={handleParticipantsChange}
-              placeholder="Enter employee IDs separated by commas (e.g., EMP/2025/001, EMP/2025/002)"
-            />
-            <Form.Text className="text-muted">
-              Enter employee IDs separated by commas
-            </Form.Text>
+            <Form.Label>Participants *</Form.Label>
+            {loadingEmployees ? (
+              <div className="text-center py-3">
+                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                <span className="ms-2">Loading employees...</span>
+              </div>
+            ) : (
+              <>
+                <Form.Select
+                  multiple
+                  value={meetingForm.employee_ids}
+                  onChange={handleEmployeeSelection}
+                  style={{ height: '120px' }}
+                  required
+                >
+                  {employees.map((employee) => (
+                    <option key={employee.emp_id} value={employee.emp_id}>
+                      {employee.emp_id} - {employee.full_name}
+                    </option>
+                  ))}
+                </Form.Select>
+                <Form.Text className="text-muted">
+                  Hold Ctrl (or Cmd on Mac) to select multiple employees
+                </Form.Text>
+              </>
+            )}
+            
+            {/* Display selected employees as badges */}
+            {meetingForm.employee_ids.length > 0 && (
+              <div className="mt-3">
+                <Form.Label className="mb-2">Selected Participants:</Form.Label>
+                <div className="d-flex flex-wrap gap-2">
+                  {meetingForm.employee_ids.map((id) => (
+                    <Badge 
+                      key={id} 
+                      bg="primary" 
+                      className="d-flex align-items-center"
+                    >
+                      {getEmployeeName(id)}
+                      <span 
+                        className="ms-2" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => removeEmployee(id)}
+                      >
+                        &times;
+                      </span>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </Form.Group>
 
           <Row>
