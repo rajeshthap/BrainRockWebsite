@@ -163,6 +163,16 @@ const HrDashBoard = () => {
     
     return "btn-secondary";
   };
+const [showPostModal, setShowPostModal] = useState(false);
+const [postAuthor] = useState("Kamal Hassan"); // logged-in user
+const [postDepartment] = useState("Human Resource HR Team");
+
+const [postTitle, setPostTitle] = useState("");
+const [postDescription, setPostDescription] = useState("");
+const [postQuote, setPostQuote] = useState("");
+const [postImage, setPostImage] = useState(null);
+const [imagePreview, setImagePreview] = useState(null);
+
 
   // HR Stats Data - using API data
   const statsData = [
@@ -245,10 +255,11 @@ const HrDashBoard = () => {
               sm={12}
               className="d-flex gap-2 br-post-top-btn align-items-center"
             >
-              <span>
-                <BsFillFilePostFill className="br-post-top-icon" />
-                Post
-              </span>
+             <span onClick={() => setShowPostModal(true)} style={{cursor:"pointer"}}>
+  <BsFillFilePostFill className="br-post-top-icon" />
+  Post
+</span>
+
               <span className="border-start ps-2">
                 <LuFileBadge2 className="br-post-top-icon" />
                 Badge
@@ -323,6 +334,136 @@ const HrDashBoard = () => {
               </Row>
             </Col>
             <Col lg={5} md={12} sm={12} className="mb-3">
+            {/* ================= POST MODAL ================= */}
+<Modal
+  show={showPostModal}
+  onHide={() => setShowPostModal(false)}
+  centered
+  size="lg"
+>
+  <Modal.Header closeButton>
+    <Modal.Title>Create New Post</Modal.Title>
+  </Modal.Header>
+
+  <Modal.Body>
+    {/* Post Author Section */}
+    <div className="d-flex align-items-center mb-4">
+      <div
+        style={{
+          width: "55px",
+          height: "55px",
+          borderRadius: "50%",
+          backgroundColor: "#e0e0e0",
+          overflow: "hidden",
+        }}
+      >
+        {/* Profile Image (static or from API) */}
+        <img
+          src="https://via.placeholder.com/55"
+          alt="profile"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </div>
+
+      <div className="ms-3">
+        <h6 className="fw-bold mb-0">{postAuthor}</h6>
+        <small className="text-muted">{postDepartment}</small>
+      </div>
+    </div>
+
+    {/* Title */}
+    <div className="mb-3">
+      <label className="form-label fw-bold">Post Title</label>
+      <input
+        type="text"
+        className="form-control"
+        placeholder="Enter title"
+        value={postTitle}
+        onChange={(e) => setPostTitle(e.target.value)}
+      />
+    </div>
+
+    {/* Description */}
+    <div className="mb-3">
+      <label className="form-label fw-bold">Description</label>
+      <textarea
+        className="form-control"
+        rows="4"
+        placeholder="Write something..."
+        value={postDescription}
+        onChange={(e) => setPostDescription(e.target.value)}
+      ></textarea>
+    </div>
+
+    {/* Quote Field */}
+    <div className="mb-3">
+      <label className="form-label fw-bold">Quote (Optional)</label>
+      <textarea
+        className="form-control"
+        rows="3"
+        placeholder='e.g. "To be yourself in a world..."'
+        value={postQuote}
+        onChange={(e) => setPostQuote(e.target.value)}
+      ></textarea>
+    </div>
+
+    {/* Image Upload */}
+    <div className="mb-3">
+      <label className="form-label fw-bold">Upload Image</label>
+      <input
+        type="file"
+        className="form-control"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          setPostImage(file);
+          if (file) setImagePreview(URL.createObjectURL(file));
+        }}
+      />
+    </div>
+
+    {/* Preview */}
+    {imagePreview && (
+      <div className="mb-3 text-center">
+        <img
+          src={imagePreview}
+          alt="preview"
+          style={{
+            width: "250px",
+            height: "auto",
+            borderRadius: "10px",
+            border: "1px solid #ddd",
+          }}
+        />
+      </div>
+    )}
+  </Modal.Body>
+
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowPostModal(false)}>
+      Cancel
+    </Button>
+
+    <Button
+      variant="primary"
+      onClick={() => {
+        console.log("Post Submitted:", {
+          postAuthor,
+          postDepartment,
+          postTitle,
+          postDescription,
+          postQuote,
+          postImage,
+        });
+        setShowPostModal(false);
+      }}
+    >
+      Submit Post
+    </Button>
+  </Modal.Footer>
+</Modal>
+
+
               <FeedBackPost />
             </Col>
             <Col lg={4} md={12} sm={12} className="mb-3">

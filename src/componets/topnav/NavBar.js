@@ -1,16 +1,47 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import Logo from "../../assets/images/brainrock_logo.png";
 import { Link } from "react-router-dom";
 import "../../assets/css/NavBar.css";
 import Header from "./Header";
+import axios from "axios";
 
 function NavBar() {
   const [expanded, setExpanded] = useState(false);
 
   const closeMenu = () => setExpanded(false);
+    const [showCareer, setShowCareer] = useState(false);
+useEffect(() => {
+  const fetchJobOpenings = async () => {
+    try {
+      const res = await axios.get(
+        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/"
+      );
+
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        
+        // Check if at least one job is NOT closed
+        const hasOpenJob = res.data.some(job => {
+          const status = job.status?.toLowerCase(); // safe check
+          return status !== "closed";
+        });
+
+        setShowCareer(hasOpenJob);
+      } else {
+        setShowCareer(false);
+      }
+    } catch (error) {
+      console.error("Job API Error:", error);
+      setShowCareer(false);
+    }
+  };
+
+  fetchJobOpenings();
+}, []);
+
 
   return (
+
     <>
       <Header />
 
@@ -66,7 +97,11 @@ function NavBar() {
               </Nav.Link>
               <Nav.Link as={Link} to="/Certificate" onClick={closeMenu}>Certificate</Nav.Link>
               <Nav.Link as={Link} to="/Contact" onClick={closeMenu}>Contact Us</Nav.Link>
- <Nav.Link as={Link} to="/Career" onClick={closeMenu}>Career</Nav.Link>
+ {showCareer && (
+        <Nav.Link as={Link} to="/Career" onClick={closeMenu}>
+          Career
+        </Nav.Link>
+      )}
             </Nav>
           </Navbar.Collapse>
         </Container>
