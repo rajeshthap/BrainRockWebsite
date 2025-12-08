@@ -43,7 +43,14 @@ function Career() {
         if (!res.ok) throw new Error("Failed to load job openings");
         return res.json();
       })
-      .then((data) => setJobs(data))
+      .then((data) => {
+        // ⭐ FILTER: show only jobs that are active (status not “closed” / “inactive”)
+        const activeJobs = data.filter((job) => {
+          const s = job.status?.toLowerCase();
+          return s === "active" || s === "open" || s === "published";
+        });
+        setJobs(activeJobs);
+      })
       .catch((err) => setJobError(err.message))
       .finally(() => setJobLoading(false));
   }, []);
@@ -57,19 +64,16 @@ function Career() {
   // PDF Validation
   const handleResumeChange = (e) => {
     const file = e.target.files[0];
-
     if (!file) {
       setResume(null);
       setResumeError(null);
       return;
     }
-
     if (file.type !== "application/pdf") {
       setResume(null);
       setResumeError("Only PDF files are allowed.");
       return;
     }
-
     setResume(file);
     setResumeError(null);
   };
@@ -77,7 +81,6 @@ function Career() {
   // Submit Form
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (resumeError) return;
 
     setFormLoading(true);
@@ -104,6 +107,7 @@ function Career() {
           setFormError("Submission failed. Please check details.");
         } else {
           setFormSuccess("Application submitted successfully!");
+          // Reset form
           setFullName("");
           setEmail("");
           setPhone("");
@@ -138,7 +142,7 @@ function Career() {
 
       <div className="ourteam-section mt-4">
         <Container>
-          <div className="ourteam-box ">
+          <div className="ourteam-box">
             {jobLoading && (
               <div className="text-center py-5">
                 <Spinner animation="border" />
@@ -151,41 +155,38 @@ function Career() {
               </Alert>
             )}
 
+            {!jobLoading && jobs.length === 0 && !jobError && (
+              <Alert variant="info" className="text-center">
+                No active job openings available.
+              </Alert>
+            )}
+
             <Row>
               {jobs.map((job) => (
-                <Col lg={4} md={6} sm={12} key={job.id} className="pb-3 mt-4 mb-2">
+                 <Col lg={4} md={6} sm={12} key={job.id} className="pb-3 mt-4 mb-2">
                   <Card className="br-career-card shadow-sm">
                     <Card.Body className="br-career-body">
-                      <div className="br-career-title">
-                        {job.title}
-                      </div>
+                      <div className="br-career-title">{job.title}</div>
 
                       <p className="br-career-info">
-                        {job.department}-{job.location}
+                        {job.department} — {job.location}
                       </p>
 
-                      <p>
-                        <strong>Employment:</strong> {job.employment_type}
-                      </p>
-                      <p>
-                        <strong>Salary:</strong> {job.salary_range}
-                      </p>
-                      <p>
-                        <strong>Experience:</strong> {job.experience_level}
-                      </p>
-                      <p>
-                        <strong>Education:</strong> {job.education}
-                      </p>
+                      <p><strong>Employment:</strong> {job.employment_type}</p>
+                      <p><strong>Salary:</strong> {job.salary_range}</p>
+                      <p><strong>Experience:</strong> {job.experience_level}</p>
+                      <p><strong>Education:</strong> {job.education}</p>
 
-                      <p className="mt-2">
-                        <strong>Skills:</strong>
-                        <br />
-                        {job.skills.join(", ")}
-                      </p>
+                      {job.skills && (
+                        <p className="mt-2">
+                          <strong>Skills:</strong><br/>
+                          {job.skills.join(", ")}
+                        </p>
+                      )}
 
-                      <p>
-                        <strong>Deadline:</strong> {job.application_deadline}
-                      </p>
+                      {job.application_deadline && (
+                        <p><strong>Deadline:</strong> {job.application_deadline}</p>
+                      )}
 
                       <div className="job-opening-btn">
                         <Button
@@ -208,7 +209,7 @@ function Career() {
         </Container>
       </div>
 
-      {/* MODAL */}
+      {/* APPLY Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton className="br-career-modal">
           <Modal.Title className="br-job-apply">Apply for Job</Modal.Title>
@@ -239,7 +240,7 @@ function Career() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="br-label"
-                placeholder="enter email ID"
+                placeholder="Enter email"
               />
             </Form.Group>
 
@@ -251,7 +252,7 @@ function Career() {
                 onChange={(e) => setPhone(e.target.value)}
                 required
                 className="br-label"
-                placeholder="enter phone number"
+                placeholder="Enter phone"
               />
             </Form.Group>
 
@@ -269,6 +270,7 @@ function Career() {
                 <small className="text-danger">{resumeError}</small>
               )}
             </Form.Group>
+
             <div className="text-center">
               <Button
                 type="submit"
