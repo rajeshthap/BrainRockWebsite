@@ -241,6 +241,7 @@ const menuItems = [
      {
       icon: <PiUsersThreeBold />,
       label: "Departments",
+      allowedRoles: ["hr", "manager"],
  
       submenu: [
 
