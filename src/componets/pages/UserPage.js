@@ -721,12 +721,12 @@ function UserPage() {
                       <div className="service-desc">
                         <h4 className="heading-5">{item.title}</h4>
                         <p>{item.description}</p>
-                        <button className="service-btn">
+                        {/* <button className="service-btn">
                           Read More
                           <i className="ti-arrow-right">
                             <FaArrowRight />
                           </i>
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   </Col>

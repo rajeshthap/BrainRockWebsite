@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MdOutlineMail } from "react-icons/md";
 import { MdOutlinePhoneAndroid } from "react-icons/md";
 import { FaInstagram, FaLinkedinIn, FaTwitter } from "react-icons/fa";
@@ -25,11 +25,11 @@ function Header() {
           <div className="d-flex br-header">
             <p className="header-title mb-0 me-3">
               <MdOutlineMail className="br-header-icon" />
-              info@gmail.com
+              admin@brainrock.in
             </p>
             <p className="header-subtitle mb-0">
               <MdOutlinePhoneAndroid className="br-header-icon" />
-              +91 987654321
+              91-8193991148
             </p>
           </div>
 
@@ -44,12 +44,42 @@ function Header() {
                 <span>Login</span>
               </button>
             </li>
-            <div className="">
-              <ImFacebook className="br-m-left br-header-icon" />
-              <FaInstagram className="br-header-icon" />
-              <FaTwitter className="br-header-icon" />
-              <FaLinkedinIn className="br-header-icon" />
-            </div>
+           <div className="">
+  <Link
+    to="https://www.facebook.com/BrainRock.in" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="br-social-link"
+  >
+    <ImFacebook className="br-m-left br-header-icon" />
+  </Link>
+  <Link to=
+  "https://www.instagram.com/accounts/login/?next=%2Fbrain_rockdotin%2F&source=omni_redirect" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="br-social-link"
+  >
+    <FaInstagram className="br-header-icon" />
+  </Link>
+  <Link to=
+    "https://x.com/brainrockdotin" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="br-social-link"
+  >
+    <FaTwitter className="br-header-icon" />
+  </Link>
+  <Link to=
+  "https://www.linkedin.com/in/brain-rock-377a69168/" 
+  target="_blank" 
+  rel="noopener noreferrer"
+  className="br-social-link"
+>
+  <FaLinkedinIn className="br-header-icon" />
+</Link>
+
+ 
+</div>
           </ul>
         </div>
       </div>
@@ -76,12 +106,41 @@ function Header() {
                 <span>Login</span>
               </button>
             </li>
-            <div>
-              <ImFacebook className="br-m-left br-header-icon" />
-              <FaInstagram className="br-header-icon" />
-              <FaTwitter className="br-header-icon" />
-              <FaLinkedinIn className="br-header-icon" />
-            </div>
+                    <div className="">
+  <Link
+    to="https://www.facebook.com/BrainRock.in" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="br-social-link"
+  >
+    <ImFacebook className="br-m-left br-header-icon" />
+  </Link>
+  <Link  
+    to="https://www.instagram.com/accounts/login/?next=%2Fbrain_rockdotin%2F&source=omni_redirect" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="br-social-link"
+  >
+    <FaInstagram className="br-header-icon" />
+  </Link>
+  <Link
+    to="https://x.com/brainrockdotin" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="br-social-link"
+  >
+    <FaTwitter className="br-header-icon" />
+  </Link>
+  <Link
+    to="https://www.linkedin.com/in/brain-rock-377a69168/" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="br-social-link"
+  >
+    <FaLinkedinIn className="br-header-icon" />
+  </Link>
+ 
+</div>
           </ul>
         </div>
       </div>

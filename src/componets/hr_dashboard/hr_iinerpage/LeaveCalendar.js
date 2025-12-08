@@ -40,12 +40,34 @@ function LeaveCalendar() {
   const [options, setOptions] = useState([]);
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [leave_days, setLeave_days] = useState(1);
+  
+  // Add the missing state variable for disabled leaves
+  const [disabledLeaves, setDisabledLeaves] = useState([]);
+  const [currentMonthComplete, setCurrentMonthComplete] = useState(false);
 
   const tooltipRef = useRef(null);
   const { user } = useContext(AuthContext);
 
   const employee_id = user?.unique_id;
   const role = user?.role;
+
+  // Function to check if current month is complete
+  const checkIfCurrentMonthComplete = () => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // Get the last day of the current month
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    
+    // If today is the last day of the month, the month is complete
+    return today.getDate() === lastDayOfMonth.getDate();
+  };
+
+  // Update the currentMonthComplete state when component mounts
+  useEffect(() => {
+    setCurrentMonthComplete(checkIfCurrentMonthComplete());
+  }, []);
 
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
@@ -82,6 +104,7 @@ useEffect(() => {
         { value: "without_pay", label: "Without Pay (WOP)" },
         { value: "earned_leave", label: "Earned Leave (EL)" },
         { value: "paid_leave", label: "Medical Leave (MDL)" },
+        { value: "floater_leave", label: "Floater leave (FL)" },
       ];
  
       // Add gender-specific options based on employee's gender
@@ -98,6 +121,23 @@ useEffect(() => {
       }
  
       setOptions(leaveOptions);
+      
+      // Check if floater leave should be disabled based on month completion
+      const isMonthComplete = checkIfCurrentMonthComplete();
+      setCurrentMonthComplete(isMonthComplete);
+      
+      if (isMonthComplete) {
+        // If month is complete, remove floater_leave from disabled leaves
+        setDisabledLeaves(prev => prev.filter(leave => leave !== "floater_leave"));
+      } else {
+        // If month is not complete, add floater_leave to disabled leaves
+        setDisabledLeaves(prev => {
+          if (!prev.includes("floater_leave")) {
+            return [...prev, "floater_leave"];
+          }
+          return prev;
+        });
+      }
     })
     .catch(() => {
       // Fallback options when gender can't be determined
@@ -105,8 +145,24 @@ useEffect(() => {
         { value: "casual_leave", label: "Casual Leave (CL)" },
         { value: "without_pay", label: "Without Pay (WOP)" },
         { value: "earned_leave", label: "Earned Leave (EL)" },
-        { value: "paid_leave", label: "Medical Leave (ML)" },
+        { value: "paid_leave", label: "Medical Leave (MDL)" },
+        { value: "floater_leave", label: "Floater leave (FL)" },
       ]);
+      
+      // Also handle floater leave for fallback case
+      const isMonthComplete = checkIfCurrentMonthComplete();
+      setCurrentMonthComplete(isMonthComplete);
+      
+      if (isMonthComplete) {
+        setDisabledLeaves(prev => prev.filter(leave => leave !== "floater_leave"));
+      } else {
+        setDisabledLeaves(prev => {
+          if (!prev.includes("floater_leave")) {
+            return [...prev, "floater_leave"];
+          }
+          return prev;
+        });
+      }
     });
 }, [employee_id]);
 
@@ -267,10 +323,43 @@ useEffect(() => {
       
       // Refresh leave requests
       fetchLeaveRequests();
-    } catch (err) {
-      console.error("ACTION ERROR ===>", err.response || err);
-      showNotification(`Failed to ${action} leave request`, "error");
+    } 
+    catch (err) {
+  console.error("SUBMIT ERROR ===>", err.response || err);
+
+  if (err.response && err.response.data) {
+    const errorData = err.response.data;
+    let rawMessage = "";
+
+    if (errorData.non_field_errors) {
+      rawMessage = errorData.non_field_errors[0];
+    } else {
+      rawMessage = JSON.stringify(errorData);
     }
+
+    // SHOW CLEAN NOTIFICATION
+    showNotification(rawMessage, "error");
+
+    // AUTO-DISABLE INVALID LEAVE TYPE
+    if (rawMessage.toLowerCase().includes("floater")) {
+      setDisabledLeaves((prev) => [...prev, "floater_leave"]);
+    }
+    if (rawMessage.toLowerCase().includes("maternity")) {
+      setDisabledLeaves((prev) => [...prev, "maternity_leave"]);
+    }
+    if (rawMessage.toLowerCase().includes("paternity")) {
+      setDisabledLeaves((prev) => [...prev, "paternity_leave"]);
+    }
+    if (rawMessage.toLowerCase().includes("insufficient")) {
+      setDisabledLeaves((prev) => [...prev, leaveType]);
+    }
+  } else {
+    showNotification("Submission failed. Please check console.", "error");
+  }
+
+  setIsSubmitting(false);
+}
+
   };
 
   // Function to fetch all leave requests
@@ -341,6 +430,11 @@ useEffect(() => {
                   {leaveBalance.earned_leave ?? 0}
                 </span>
                 |&nbsp;
+                 <strong className="leave-item leave-el">FL:</strong>
+                <span className="leave-value leave-el">
+                  {leaveBalance.floater_leave ?? 0}
+                </span>
+                |&nbsp;
                 <strong className="leave-item leave-pl">ML:</strong>
                 <span className="leave-value leave-pl">
                   {leaveBalance.paid_leave ?? 0}
@@ -409,18 +503,26 @@ useEffect(() => {
                   <div>
                     <label>Leave Type</label>
 
-                    <select
-                     
-                      value={leaveType}
-                      onChange={(e) => setLeaveType(e.target.value)}
-                      className="form-control"
-                    >
-                      {options.map((opt, idx) => (
-                        <option key={idx} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
+                 <select
+  value={leaveType}
+  onChange={(e) => setLeaveType(e.target.value)}
+  className="form-control"
+>
+  {options.map((opt) => (
+    <option
+      key={opt.value}
+      value={opt.value}
+      disabled={
+        disabledLeaves.includes(opt.value) ||
+        (opt.value !== "without_pay" && leaveBalance && leaveBalance[opt.value] === 0) ||
+        (opt.value === "floater_leave" && !currentMonthComplete)
+      }
+    >
+      {opt.label} {opt.value === "floater_leave" && !currentMonthComplete ? "" : ""}
+    </option>
+  ))}
+</select>
+
 
                    
                   </div>

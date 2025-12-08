@@ -106,7 +106,7 @@ const SalaryStructure = () => {
   const { user } = useContext(AuthContext);
   
   // Check if user is an admin
-  const isAdmin = user && user.role === 'admin';
+  const isAdmin = user && user.role === 'hr';
   
   // State for API data
   const [employees, setEmployees] = useState([]);
