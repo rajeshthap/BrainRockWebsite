@@ -8,6 +8,8 @@ import {
   Tabs,
   Tab,
   Button,
+  Dropdown,
+  DropdownButton,
 } from "react-bootstrap";
 import axios from "axios";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -50,6 +52,10 @@ const ApplyLeaveCalendar = () => {
   const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
 
+  // NEW: Filter states for different views
+  const [leaveFilter, setLeaveFilter] = useState(userRole === 'employee' ? 'approved' : 'absent');
+  const [allEmployeesData, setAllEmployeesData] = useState([]);
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   /* ---------------------------------------
@@ -76,6 +82,7 @@ const ApplyLeaveCalendar = () => {
       } else {
         // For admin/HR, collect all employees' leave history
         allLeaveHistory = [];
+        setAllEmployeesData(res.data.employees || []);
         res.data.employees.forEach(emp => {
           if (emp.leave_history && emp.leave_history.length > 0) {
             // Add employee name and role to each leave entry
@@ -89,9 +96,31 @@ const ApplyLeaveCalendar = () => {
         });
       }
 
-      // Only include approved leaves (actual absences)
-      const events = allLeaveHistory
-        .filter(item => item.status === "approved")
+      // Process events based on the current filter
+      let filteredHistory = [];
+      
+      if (userRole === 'employee') {
+        // For employees, filter by status
+        if (leaveFilter === 'approved') {
+          filteredHistory = allLeaveHistory.filter(item => item.status === "approved");
+        } else if (leaveFilter === 'pending') {
+          filteredHistory = allLeaveHistory.filter(item => item.status === "pending");
+        } else {
+          filteredHistory = allLeaveHistory; // All leaves
+        }
+      } else {
+        // For HR, show either absent or present
+        if (leaveFilter === 'absent') {
+          filteredHistory = allLeaveHistory.filter(item => item.status === "approved");
+        } else {
+          // For present, we need to create events for employees who are NOT on approved leave
+          // We'll handle this differently below
+          filteredHistory = [];
+        }
+      }
+
+      // Create events for the filtered history
+      let events = filteredHistory
         .map((item) => {
           // Handle multiple dates for a single leave request
           const eventsForDates = item.dates.map(dateStr => {
@@ -102,7 +131,7 @@ const ApplyLeaveCalendar = () => {
               start: eventDate,
               end: eventDate,
               allDay: true,
-              color: "#28a745", // Green for approved leaves
+              color: item.status === "approved" ? "#28a745" : item.status === "pending" ? "#ffc107" : "#dc3545", // Different colors for different statuses
               type: "leave",
               data: item,
             };
@@ -111,6 +140,49 @@ const ApplyLeaveCalendar = () => {
           return eventsForDates;
         })
         .flat(); // Flatten the array of arrays
+
+      // For HR viewing present employees (only for HR, not employees)
+      if (userRole !== 'employee' && leaveFilter === 'present') {
+        // Get all unique dates in the current view
+        const allDates = [];
+        const startDate = moment(date).startOf(currentView === 'month' ? 'month' : currentView === 'week' ? 'week' : 'day');
+        const endDate = moment(date).endOf(currentView === 'month' ? 'month' : currentView === 'week' ? 'week' : 'day');
+        
+        // Generate all dates in the current view
+        for (let m = moment(startDate); m.isSameOrBefore(endDate); m.add(1, 'days')) {
+          allDates.push(m.format('YYYY-MM-DD'));
+        }
+        
+        // For each date, find employees who are NOT on approved leave
+        allDates.forEach(dateStr => {
+          // Get all employees who are on approved leave on this date
+          const absentEmployees = new Set();
+          allLeaveHistory
+            .filter(item => item.status === "approved" && item.dates.includes(dateStr))
+            .forEach(item => absentEmployees.add(item.employee_id));
+          
+          // Find all employees who are NOT absent
+          res.data.employees
+            .filter(emp => !absentEmployees.has(emp.employee))
+            .forEach(emp => {
+              events.push({
+                id: `present-${emp.employee}-${dateStr}`,
+                title: `${emp.leave_balance.employee_name} - Present`,
+                start: new Date(dateStr),
+                end: new Date(dateStr),
+                allDay: true,
+                color: "#007bff", // Blue for present
+                type: "present",
+                data: {
+                  employee_name: emp.leave_balance.employee_name,
+                  employee_id: emp.employee,
+                  status: "present",
+                  date: dateStr
+                },
+              });
+            });
+        });
+      }
 
       setLeaveEvents(events);
       setFilteredLeave(events);
@@ -155,7 +227,7 @@ const ApplyLeaveCalendar = () => {
   useEffect(() => {
     fetchLeaveData();
     fetchMeetingData();
-  }, [employee_id, userRole]);
+  }, [employee_id, userRole, leaveFilter]);
 
   /* ===========================================================
          FILTER EVENTS BASED ON CURRENT DATE + VIEW
@@ -210,6 +282,10 @@ const ApplyLeaveCalendar = () => {
     if (event.type === "meeting") {
       setSelectedMeeting(event.data);
       setShowCreateMeetingModal(true);
+    } else if (event.type === "present") {
+      // For present events, we'll show a simple modal with employee info
+      setSelectedData(event.data);
+      setShowModal(true);
     } else {
       setSelectedData(event.data);
       setShowModal(true);
@@ -346,14 +422,110 @@ const ApplyLeaveCalendar = () => {
           <Tabs defaultActiveKey={defaultActiveKey} className="mb-3 br-tabs">
             {/* ============== LEAVE CALENDAR ============== */}
             {userRole !== 'employee' && (
-              <Tab eventKey="leave" title="Absent Employees">
+              <Tab eventKey="leave" title="Employee Attendance">
                 <div className="br-box-container">
+                  {/* Filter buttons for HR */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div className="d-flex gap-2">
+                      <Button
+                        variant={leaveFilter === 'absent' ? 'primary' : 'outline-primary'}
+                        onClick={() => setLeaveFilter('absent')}
+                      >
+                        Absent
+                      </Button>
+                      <Button
+                        variant={leaveFilter === 'present' ? 'primary' : 'outline-primary'}
+                        onClick={() => setLeaveFilter('present')}
+                      >
+                        Present
+                      </Button>
+                    </div>
+                  </div>
 
-                  {/* Legend - MODIFIED: Only show approved leaves */}
+                  {/* Legend */}
+                  <div className="d-flex flex-wrap gap-4 mb-3">
+                    {leaveFilter === 'absent' && (
+                      <div className="legend-item">
+                        <span className="legend-color" style={{ background: "#28a745" }}></span>
+                        Absent (Approved Leave)
+                      </div>
+                    )}
+                    {leaveFilter === 'present' && (
+                      <div className="legend-item">
+                        <span className="legend-color" style={{ background: "#007bff" }}></span>
+                        Present
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="calendar-wrapper shadow-sm">
+                    {loading ? (
+                      <div className="calendar-loading">
+                        <Spinner animation="border" />
+                      </div>
+                    ) : (
+                      <Calendar
+                        localizer={localizer}
+                        events={filteredLeave}
+                        startAccessor="start"
+                        endAccessor="end"
+                        onSelectEvent={handleSelectEvent}
+                        views={["month", "week", "day"]}
+                        onNavigate={handleNavigate}
+                        onView={handleViewChange}
+                        eventPropGetter={eventStyleGetter}
+                        components={{
+                          toolbar: CustomToolbar
+                        }}
+                        popup
+                      />
+                    )}
+                  </div>
+                </div>
+              </Tab>
+            )}
+
+            {/* ============== EMPLOYEE LEAVE TAB ============== */}
+            {userRole === 'employee' && (
+              <Tab eventKey="leave" title="My Leaves">
+                <div className="br-box-container">
+                  {/* Filter buttons for employees - ONLY show Approved, Pending, and All */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div className="d-flex gap-2">
+                      <Button
+                        variant={leaveFilter === 'approved' ? 'primary' : 'outline-primary'}
+                        onClick={() => setLeaveFilter('approved')}
+                      >
+                        Approved
+                      </Button>
+                      <Button
+                        variant={leaveFilter === 'pending' ? 'primary' : 'outline-primary'}
+                        onClick={() => setLeaveFilter('pending')}
+                      >
+                        Pending
+                      </Button>
+                      <Button
+                        variant={leaveFilter === 'all' ? 'primary' : 'outline-primary'}
+                        onClick={() => setLeaveFilter('all')}
+                      >
+                        All
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Legend */}
                   <div className="d-flex flex-wrap gap-4 mb-3">
                     <div className="legend-item">
                       <span className="legend-color" style={{ background: "#28a745" }}></span>
-                      Absent (Approved Leave)
+                      Approved
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-color" style={{ background: "#ffc107" }}></span>
+                      Pending
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-color" style={{ background: "#dc3545" }}></span>
+                      Rejected
                     </div>
                   </div>
 
@@ -439,19 +611,33 @@ const ApplyLeaveCalendar = () => {
       {/* -------- Event Details Modal -------- */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{selectedData?.leave_type ? 'Absence Details' : 'Meeting Details'}</Modal.Title>
+          <Modal.Title>
+            {selectedData?.status === 'present' 
+              ? 'Employee Details' 
+              : selectedData?.leave_type 
+                ? 'Leave Details' 
+                : 'Meeting Details'}
+          </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           {selectedData && (
             <>
+              {selectedData.status === 'present' && (
+                <>
+                  <p><b>Employee:</b> {selectedData.employee_name || 'N/A'}</p>
+                  <p><b>Status:</b> Present</p>
+                  <p><b>Date:</b> {selectedData.date}</p>
+                </>
+              )}
+
               {selectedData.leave_type && (
                 <>
                   <p><b>Employee:</b> {selectedData.employee_name || 'N/A'}</p>
                   <p><b>Role:</b> {selectedData.employee_role || 'N/A'}</p>
                   <p><b>Leave Type:</b> {selectedData.leave_type}</p>
                   <p><b>Status:</b> {selectedData.status}</p>
-                  <p><b>Reason:</b> {selectedData.reason}</p>
+                  <p><b>Reason:</b> {selectedData.reason || 'N/A'}</p>
                   <p><b>Dates:</b> {selectedData.dates.join(', ')}</p>
                   <p><b>Leave Days:</b> {selectedData.leave_days}</p>
                 </>

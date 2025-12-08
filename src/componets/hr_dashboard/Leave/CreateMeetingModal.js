@@ -1,4 +1,3 @@
-// CreateMeetingModal.js
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -20,68 +19,61 @@ const CreateMeetingModal = ({
 }) => {
   const [meetingForm, setMeetingForm] = useState({
     meeting_title: "",
-    meeting_date_and_time: "",
-    end_time: "",
-    meeting_type: "Online",
-    meeting_location: "",
+    start_date_time: "",
+    end_date_time: "",
+    meeting_type: "online",
     meeting_link: "",
     agenda: "",
-    organized_by: user?.name || "",
-    participants: "",
-    meeting_recurrence: "None",
-    notification: "1 hour",
-    meeting_URL: "",
-    meeting_priority: "Medium",
-    meeting_status: "Scheduled",
+    employee_ids: [],
+    meeting_recurrence: "none",
+    notification_before: "1hour",
+    meeting_priority: "medium"
   });
   
   const [submittingMeeting, setSubmittingMeeting] = useState(false);
   const [meetingError, setMeetingError] = useState("");
   const [meetingSuccess, setMeetingSuccess] = useState("");
+  const [participantInput, setParticipantInput] = useState(""); // For UI input of participants
 
-  // If editing an existing meeting, populate the form
+  // If editing an existing meeting, populate form
   useEffect(() => {
     if (existingMeeting) {
       setMeetingForm({
         meeting_title: existingMeeting.title || "",
-        meeting_date_and_time: existingMeeting.start_time 
+        start_date_time: existingMeeting.start_time 
           ? new Date(existingMeeting.start_time).toISOString().slice(0, 16) 
           : "",
-        end_time: existingMeeting.end_time 
+        end_date_time: existingMeeting.end_time 
           ? new Date(existingMeeting.end_time).toISOString().slice(0, 16) 
           : "",
-        meeting_type: existingMeeting.meeting_type || "Online",
-        meeting_location: existingMeeting.meeting_location || "",
+        meeting_type: existingMeeting.meeting_type || "online",
         meeting_link: existingMeeting.meeting_link || "",
         agenda: existingMeeting.agenda || "",
-        organized_by: existingMeeting.organized_by || user?.name || "",
-        participants: existingMeeting.participants || "",
-        meeting_recurrence: existingMeeting.meeting_recurrence || "None",
-        notification: existingMeeting.notification || "1 hour",
-        meeting_URL: existingMeeting.meeting_URL || "",
-        meeting_priority: existingMeeting.meeting_priority || "Medium",
-        meeting_status: existingMeeting.meeting_status || "Scheduled",
+        employee_ids: existingMeeting.employee_ids || [],
+        meeting_recurrence: existingMeeting.meeting_recurrence || "none",
+        notification_before: existingMeeting.notification_before || "1hour",
+        meeting_priority: existingMeeting.meeting_priority || "medium"
       });
+      
+      // Set participant input for display
+      setParticipantInput(existingMeeting.employee_ids ? existingMeeting.employee_ids.join(", ") : "");
     } else {
       // Reset form for new meeting
       setMeetingForm({
         meeting_title: "",
-        meeting_date_and_time: "",
-        end_time: "",
-        meeting_type: "Online",
-        meeting_location: "",
+        start_date_time: "",
+        end_date_time: "",
+        meeting_type: "online",
         meeting_link: "",
         agenda: "",
-        organized_by: user?.name || "",
-        participants: "",
-        meeting_recurrence: "None",
-        notification: "1 hour",
-        meeting_URL: "",
-        meeting_priority: "Medium",
-        meeting_status: "Scheduled",
+        employee_ids: [],
+        meeting_recurrence: "none",
+        notification_before: "1hour",
+        meeting_priority: "medium"
       });
+      setParticipantInput("");
     }
-  }, [existingMeeting, show, user]);
+  }, [existingMeeting, show]);
 
   // Handle form input changes
   const handleMeetingFormChange = (e) => {
@@ -89,6 +81,22 @@ const CreateMeetingModal = ({
     setMeetingForm({
       ...meetingForm,
       [name]: value,
+    });
+  };
+
+  // Handle participants input change
+  const handleParticipantsChange = (e) => {
+    setParticipantInput(e.target.value);
+    
+    // Parse the comma-separated input into an array
+    const participants = e.target.value
+      .split(",")
+      .map(p => p.trim())
+      .filter(p => p !== "");
+    
+    setMeetingForm({
+      ...meetingForm,
+      employee_ids: participants
     });
   };
 
@@ -100,13 +108,12 @@ const CreateMeetingModal = ({
     setMeetingSuccess("");
 
     try {
-      // Prepare the meeting data for API
+      // Prepare meeting data for API
       const meetingData = {
         ...meetingForm,
-        employee_id: user?.unique_id,
-        // Convert date strings to proper format if needed
-        meeting_date_and_time: new Date(meetingForm.meeting_date_and_time).toISOString(),
-        end_time: new Date(meetingForm.end_time).toISOString(),
+        // Convert date strings to proper format
+        start_date_time: new Date(meetingForm.start_date_time).toISOString(),
+        end_date_time: new Date(meetingForm.end_date_time).toISOString(),
       };
 
       let response;
@@ -182,8 +189,8 @@ const CreateMeetingModal = ({
                   onChange={handleMeetingFormChange}
                   required
                 >
-                  <option value="Online">Online</option>
-                  <option value="Offline">Offline</option>
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
                 </Form.Select>
               </Form.Group>
             </Col>
@@ -195,8 +202,8 @@ const CreateMeetingModal = ({
                 <Form.Label>Start Date & Time *</Form.Label>
                 <Form.Control
                   type="datetime-local"
-                  name="meeting_date_and_time"
-                  value={meetingForm.meeting_date_and_time}
+                  name="start_date_time"
+                  value={meetingForm.start_date_time}
                   onChange={handleMeetingFormChange}
                   required
                 />
@@ -207,8 +214,8 @@ const CreateMeetingModal = ({
                 <Form.Label>End Time *</Form.Label>
                 <Form.Control
                   type="datetime-local"
-                  name="end_time"
-                  value={meetingForm.end_time}
+                  name="end_date_time"
+                  value={meetingForm.end_date_time}
                   onChange={handleMeetingFormChange}
                   required
                 />
@@ -216,46 +223,29 @@ const CreateMeetingModal = ({
             </Col>
           </Row>
 
-          {meetingForm.meeting_type === "Offline" && (
+          {meetingForm.meeting_type === "offline" && (
             <Form.Group className="mb-3">
               <Form.Label>Meeting Location *</Form.Label>
               <Form.Control
                 type="text"
                 name="meeting_location"
-                value={meetingForm.meeting_location}
+                value={meetingForm.meeting_location || ""}
                 onChange={handleMeetingFormChange}
-                required={meetingForm.meeting_type === "Offline"}
+                required={meetingForm.meeting_type === "offline"}
               />
             </Form.Group>
           )}
 
-          {meetingForm.meeting_type === "Online" && (
-            <>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Meeting Link</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="meeting_link"
-                      value={meetingForm.meeting_link}
-                      onChange={handleMeetingFormChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Meeting URL</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="meeting_URL"
-                      value={meetingForm.meeting_URL}
-                      onChange={handleMeetingFormChange}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </>
+          {meetingForm.meeting_type === "online" && (
+            <Form.Group className="mb-3">
+              <Form.Label>Meeting Link</Form.Label>
+              <Form.Control
+                type="text"
+                name="meeting_link"
+                value={meetingForm.meeting_link}
+                onChange={handleMeetingFormChange}
+              />
+            </Form.Group>
           )}
 
           <Form.Group className="mb-3">
@@ -269,31 +259,18 @@ const CreateMeetingModal = ({
             />
           </Form.Group>
 
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Organized By</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="organized_by"
-                  value={meetingForm.organized_by}
-                  onChange={handleMeetingFormChange}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Participants</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="participants"
-                  value={meetingForm.participants}
-                  onChange={handleMeetingFormChange}
-                  placeholder="Enter participant names separated by commas"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
+          <Form.Group className="mb-3">
+            <Form.Label>Participants (Employee IDs)</Form.Label>
+            <Form.Control
+              type="text"
+              value={participantInput}
+              onChange={handleParticipantsChange}
+              placeholder="Enter employee IDs separated by commas (e.g., EMP/2025/001, EMP/2025/002)"
+            />
+            <Form.Text className="text-muted">
+              Enter employee IDs separated by commas
+            </Form.Text>
+          </Form.Group>
 
           <Row>
             <Col md={4}>
@@ -304,27 +281,27 @@ const CreateMeetingModal = ({
                   value={meetingForm.meeting_recurrence}
                   onChange={handleMeetingFormChange}
                 >
-                  <option value="None">None</option>
-                  <option value="Daily">Daily</option>
-                  <option value="Weekly">Weekly</option>
-                  <option value="Monthly">Monthly</option>
-                  <option value="Custom">Custom</option>
+                  <option value="none">None</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="custom">Custom</option>
                 </Form.Select>
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group className="mb-3">
-                <Form.Label>Notification</Form.Label>
+                <Form.Label>Notification Before</Form.Label>
                 <Form.Select
-                  name="notification"
-                  value={meetingForm.notification}
+                  name="notification_before"
+                  value={meetingForm.notification_before}
                   onChange={handleMeetingFormChange}
                 >
-                  <option value="15 minutes">15 minutes</option>
-                  <option value="30 minutes">30 minutes</option>
-                  <option value="1 hour">1 hour</option>
-                  <option value="2 hours">2 hours</option>
-                  <option value="1 day">1 day</option>
+                  <option value="15minutes">15 minutes</option>
+                  <option value="30minutes">30 minutes</option>
+                  <option value="1hour">1 hour</option>
+                  <option value="2hours">2 hours</option>
+                  <option value="1day">1 day</option>
                 </Form.Select>
               </Form.Group>
             </Col>
@@ -336,28 +313,13 @@ const CreateMeetingModal = ({
                   value={meetingForm.meeting_priority}
                   onChange={handleMeetingFormChange}
                 >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
                 </Form.Select>
               </Form.Group>
             </Col>
           </Row>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Meeting Status</Form.Label>
-            <Form.Select
-              name="meeting_status"
-              value={meetingForm.meeting_status}
-              onChange={handleMeetingFormChange}
-            >
-              <option value="Scheduled">Scheduled</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </Form.Select>
-          </Form.Group>
-
           <div className="d-flex justify-content-end gap-2">
             <Button 
               variant="secondary" 
