@@ -7,7 +7,35 @@
   font-weight: 600;
   margin-bottom: 20px;
 }
-
+.interview-indicator {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #4a6fdc;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+ 
+.has-interview {
+  position: relative;
+  background-color: #f0f4ff !important;
+}
+ 
+.interview-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+ 
+.interview-item {
+  border-left: 4px solid #4a6fdc;
+}
 /* -------- Table Layout -------- */
 .table-responsive {
   overflow-x: auto;

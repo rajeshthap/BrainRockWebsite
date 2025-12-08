@@ -4,7 +4,7 @@ import "react-calendar/dist/Calendar.css";
 import "../../../assets/css/LeaveCalendar.css";
 import SideNav from "../SideNav";
 import HrHeader from "../HrHeader";
-import { Container, Modal, Button, Card, Row, Col, Spinner, Alert, Badge, Form, ButtonGroup } from "react-bootstrap";
+import { Container, Modal, Button, Card, Row, Col, Spinner, Alert, Badge, Form, ButtonGroup, Pagination } from "react-bootstrap";
 import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
 
@@ -38,6 +38,12 @@ function InterviewSch() {
   const [variant, setVariant] = useState("success");
   const [showAlert, setShowAlert] = useState(false);
   const [apiError, setApiError] = useState(null); // New state for API errors
+  
+  // Table view states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showTableView, setShowTableView] = useState(false);
   
   // Get user info from auth context
   const { user } = useContext(AuthContext);
@@ -241,6 +247,96 @@ function InterviewSch() {
       }).length;
     }
     return 0;
+  };
+
+  // Filter interviews by search term
+  const getFilteredData = () => {
+    let data = filteredInterviews;
+
+    if (searchTerm.trim() === "") {
+      return data;
+    }
+
+    const lowerSearch = searchTerm.toLowerCase();
+
+    return data.filter(
+      (item) =>
+        item.applicant_name?.toLowerCase().includes(lowerSearch) ||
+        item.interview_id?.toString().toLowerCase().includes(lowerSearch) ||
+        item.application_id?.toString().toLowerCase().includes(lowerSearch) ||
+        item.job_id?.toString().toLowerCase().includes(lowerSearch) ||
+        item.emp_full_name?.toLowerCase().includes(lowerSearch) ||
+        item.round?.toLowerCase().includes(lowerSearch)
+    );
+  };
+
+  // Render interviews table
+  const renderInterviewsTable = (items) => {
+    return (
+      <table className="temp-rwd-table">
+        <tbody>
+          <tr>
+            <th>S.No</th>
+            <th>Interview ID</th>
+            <th>Applicant Name</th>
+            <th>Round</th>
+            <th>Job ID</th>
+            <th>Type</th>
+            <th>Interviewer</th>
+            <th>Scheduled Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+          {items.length > 0 ? (
+            items.map((interview, index) => {
+              const isEditable = (userRole === "admin" || userRole === "hr" || userRole === "HR") && 
+                               (!interview.result || interview.result === "pending");
+              
+              return (
+                <tr key={interview.id || interview.interview_id}>
+                  <td data-th="S.No">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
+                  <td data-th="Interview ID">{interview.interview_id || 'N/A'}</td>
+                  <td data-th="Applicant Name">{interview.applicant_name || 'N/A'}</td>
+                  <td data-th="Round">{interview.round || 'N/A'}</td>
+                  <td data-th="Job ID">{interview.job_id || 'N/A'}</td>
+                  <td data-th="Type">{interview.interview_type || 'N/A'}</td>
+                  <td data-th="Interviewer">{interview.emp_full_name || 'N/A'}</td>
+                  <td data-th="Scheduled Date">
+                    {formatDateTime(interview.start_date_time || interview.datetime)}
+                  </td>
+                  <td data-th="Status">
+                    <Badge bg={interview.result === 'pass' ? 'success' : interview.result === 'fail' ? 'danger' : 'warning'}>
+                      {interview.result || 'Pending'}
+                    </Badge>
+                  </td>
+                  <td data-th="Action">
+                    {isEditable ? (
+                      <Button 
+                        variant="warning" 
+                        size="sm"
+                        onClick={() => handleEditInterview(interview)}
+                      >
+                        Edit
+                      </Button>
+                    ) : (
+                      <span>-</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
+          ) : (
+            <tr>
+              <td colSpan="10" className="text-center">
+                No interviews available.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    );
   };
 
   // Get today's date
@@ -488,6 +584,13 @@ function InterviewSch() {
     }
   };
 
+  // Calculate pagination data
+  const filteredData = getFilteredData();
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
   return (
     <div className="dashboard-container" style={{ display: 'flex', minHeight: '100vh' }}>
       <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -530,24 +633,39 @@ function InterviewSch() {
             {/* Filter Section - For Both HR/Admin and Employees */}
             {((userRole === "admin" || userRole === "hr" || userRole === "HR") || (userRole === "employee" && employeeId)) && (
               <div className="mb-4">
-                <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-3 flex-wrap">
                   <strong>Filter by Status:</strong>
                   <ButtonGroup>
                     <Button 
                       variant={resultFilter === "pending" ? "primary" : "outline-primary"}
-                      onClick={() => setResultFilter("pending")}
+                      onClick={() => {
+                        setResultFilter("pending");
+                        setShowTableView(true);
+                        setCurrentPage(1);
+                        setSearchTerm("");
+                      }}
                     >
                       Pending ({countByStatus("pending")})
                     </Button>
                     <Button 
                       variant={resultFilter === "pass" ? "success" : "outline-success"}
-                      onClick={() => setResultFilter("pass")}
+                      onClick={() => {
+                        setResultFilter("pass");
+                        setShowTableView(true);
+                        setCurrentPage(1);
+                        setSearchTerm("");
+                      }}
                     >
                       Pass ({countByStatus("pass")})
                     </Button>
                     <Button 
                       variant={resultFilter === "fail" ? "danger" : "outline-danger"}
-                      onClick={() => setResultFilter("fail")}
+                      onClick={() => {
+                        setResultFilter("fail");
+                        setShowTableView(true);
+                        setCurrentPage(1);
+                        setSearchTerm("");
+                      }}
                     >
                       Fail ({countByStatus("fail")})
                     </Button>
@@ -594,102 +712,80 @@ function InterviewSch() {
               </div>
             </div>
 
-            {/* Interview Schedules List */}
-            <div className="previous-requests">
-              <h2>Interview Schedules</h2>
-              
-              {loading ? (
-                <div className="d-flex justify-content-center">
-                  <Spinner animation="border" />
+            {/* Interview Schedules Table View */}
+            {showTableView && (
+              <div className="br-box-container mt-5">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h2 className="mb-0">Interview Schedules - {resultFilter.charAt(0).toUpperCase() + resultFilter.slice(1)}</h2>
+                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      placeholder="Search interviews..."
+                      className="form-control"
+                      style={{ width: "300px" }}
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                    />
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setShowTableView(false);
+                        setSearchTerm("");
+                        setCurrentPage(1);
+                      }}
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      Close
+                    </Button>
+                  </div>
                 </div>
-              ) : error ? (
-                <Alert variant="danger">{error}</Alert>
-              ) : filteredInterviews.length > 0 ? (
-                <div className="interview-list">
-                  {filteredInterviews.map((interview) => {
-                    const applicationDetails = getApplicationDetails(interview.application_id);
-                    // Check if interview is editable (HR only and pending status)
-                    const isEditable = (userRole === "admin" || userRole === "hr" || userRole === "HR") && 
-                                     (!interview.result || interview.result === "pending");
-                    
-                    return (
-                      <div key={interview.id || interview.interview_id} className="interview-item card mb-3">
-                        <div className="card-body">
-                          <div className="d-flex justify-content-between align-items-start">
-                            <div>
-                              <h5 className="card-title">{interview.applicant_name}</h5>
-                              <p className="card-text mb-2">
-                                <strong>Round:</strong> <Badge bg="info">{interview.round}</Badge>
-                              </p>
-                            </div>
-                            <div>
-                              <Badge bg={interview.result === 'pass' ? 'success' : interview.result === 'fail' ? 'danger' : 'warning'}>
-                                {interview.result || 'Pending'}
-                              </Badge>
-                            </div>
-                          </div>
-                          <hr />
-                          <p className="card-text mb-2">
-                            <strong>Interview ID:</strong> {interview.interview_id || 'N/A'}<br />
-                            <strong>Application ID:</strong> {interview.application_id}<br />
-                            <strong>Job ID:</strong> {interview.job_id}<br />
-                            <strong>Interview Type:</strong> {interview.interview_type}<br />
-                            <strong>Interviewer:</strong> {interview.emp_full_name} ({interview.emp_id})<br />
-                            <strong>Status:</strong> {interview.status}
-                          </p>
-                          <p className="card-text mb-0">
-                            <strong>Scheduled:</strong> {formatDateTime(interview.start_date_time || interview.datetime)}<br />
-                            <strong>End Time:</strong> {formatDateTime(interview.end_date_time || interview.datetime)}
-                          </p>
-                          
-                          {/* HR Edit Button - Only for pending interviews */}
-                          {isEditable && (
-                            <div className="mt-3">
-                              <Button 
-                                variant="warning" 
-                                size="sm"
-                                onClick={() => handleEditInterview(interview)}
-                              >
-                                Edit Interview
-                              </Button>
-                            </div>
-                          )}
-                          
-                          {userRole === "employee" && applicationDetails && (
-                            <div className="mt-3 p-3 bg-light rounded">
-                              <h6 className="mb-2"><strong>Applicant Details:</strong></h6>
-                              <p className="mb-1"><strong>Name:</strong> {applicationDetails.full_name}</p>
-                              <p className="mb-1"><strong>Email:</strong> {applicationDetails.email}</p>
-                              <p className="mb-1"><strong>Phone:</strong> {applicationDetails.phone}</p>
-                              <p className="mb-1"><strong>Applied Date:</strong> {new Date(applicationDetails.applied_at).toLocaleDateString()}</p>
-                              {applicationDetails.resume && (
-                                <Button 
-                                  variant="primary" 
-                                  size="sm"
-                                  onClick={() => window.open(`${API_BASE_URL}${applicationDetails.resume}`, '_blank')}
-                                  className="mt-2"
-                                >
-                                  View Candidate Resume
-                                </Button>
-                              )}
-                            </div>
-                          )}
-                        </div>
+
+                {loading ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-2">Loading interviews...</p>
+                  </div>
+                ) : (
+                  <>
+                    <Row className="mt-3">
+                      <div className="col-md-12">
+                        {renderInterviewsTable(currentItems)}
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <Alert variant="info">
-                  {!employeeId && userRole === "employee"
-                    ? "Unable to load employee ID. Please log in again."
-                    : userRole === "employee" 
-                    ? `No interviews with status: ${resultFilter} allocated to you.` 
-                    : `No interviews found with result status: ${resultFilter}.`
-                  }
-                </Alert>
-              )}
-            </div>
+                    </Row>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.Prev
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                          />
+                          {[...Array(totalPages).keys()].map((page) => (
+                            <Pagination.Item
+                              key={page + 1}
+                              active={page + 1 === currentPage}
+                              onClick={() => setCurrentPage(page + 1)}
+                            >
+                              {page + 1}
+                            </Pagination.Item>
+                          ))}
+                          <Pagination.Next
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                          />
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </Container>
       </div>
