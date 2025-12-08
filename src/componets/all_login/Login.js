@@ -127,7 +127,7 @@ export default function Login() {
 
               <Form onSubmit={handleSubmit}>
                 <Row className="mt-3">
-                  <Col lg={6} md={6} sm={12} className="d-flex justify-content-center align-items-center">
+                  <Col lg={6} md={6} sm={12} className="d-flex justify-content-center align-items-center login-img">
                     <img src={DevoteeImg} className="img-fluid" alt="Login" />
                   </Col>
                   <Col lg={6} md={6} sm={12} className="p-4">

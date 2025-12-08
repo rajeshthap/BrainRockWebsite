@@ -415,3 +415,10 @@
     flex-direction: column;
   }
 }
+
+@media only screen and (max-width: 568px) {
+  .login-img {
+    display: none !important;
+  }
+
+}
