@@ -156,9 +156,9 @@ function Career() {
                 <Col lg={4} md={6} sm={12} key={job.id} className="mb-4">
                   <Card className="br-career-card shadow-sm">
                     <Card.Body className="br-career-body">
-                      <Card.Title className="br-career-title">
+                      <div className="br-career-title">
                         {job.title}
-                      </Card.Title>
+                      </div>
 
                       <p className="br-career-info">
                         {job.department}-{job.location}
