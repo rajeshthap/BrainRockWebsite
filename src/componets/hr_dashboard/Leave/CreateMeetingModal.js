@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Modal,
   Form,
@@ -8,6 +8,9 @@ import {
   Row,
   Col,
   Badge,
+  InputGroup,
+  FormControl,
+  ListGroup,
 } from "react-bootstrap";
 import axios from "axios";
 
@@ -38,32 +41,132 @@ const CreateMeetingModal = ({
   const [meetingSuccess, setMeetingSuccess] = useState("");
   const [employees, setEmployees] = useState([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [authDebug, setAuthDebug] = useState(null);
+  const searchInputRef = useRef(null);
 
   // Fetch employee data when component mounts
   useEffect(() => {
     const fetchEmployees = async () => {
       setLoadingEmployees(true);
+      setAuthDebug({
+        hasToken: !!authToken,
+        tokenLength: authToken ? authToken.length : 0,
+        tokenStart: authToken ? authToken.substring(0, 20) + "..." : "none"
+      });
+      
       try {
-        const response = await axios.get(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/",
-          {
-            withCredentials: true
-          }
-        );
+        // Try multiple authentication approaches
+        let response;
         
-        setEmployees(response.data || []);
+        // Method 1: Using Bearer token only
+        try {
+          response = await axios.get(
+            "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/",
+            {
+              headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          console.log("Success with Bearer token only");
+        } catch (err) {
+          console.log("Bearer token failed, trying with credentials");
+          
+          // Method 2: Using withCredentials only
+          try {
+            response = await axios.get(
+              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/",
+              {
+                withCredentials: true
+              }
+            );
+            console.log("Success with credentials only");
+          } catch (err2) {
+            console.log("Credentials only failed, trying both");
+            
+            // Method 3: Using both
+            response = await axios.get(
+              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/",
+              {
+                withCredentials: true,
+                headers: {
+                  'Authorization': `Bearer ${authToken}`,
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+            console.log("Trying with both methods");
+          }
+        }
+        
+        console.log("Final API Response:", response.data);
+        
+        // Handle the specific API response format
+        if (response.data && Array.isArray(response.data)) {
+          setEmployees(response.data);
+          console.log("Employees loaded successfully:", response.data.length);
+        } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+          setEmployees(response.data.data);
+          console.log("Employees loaded from data.data:", response.data.data.length);
+        } else {
+          console.error("Unexpected response format:", response.data);
+          setEmployees([]);
+        }
       } catch (err) {
         console.error("Error fetching employees:", err);
-        setMeetingError("Failed to load employee list. Please refresh and try again.");
+        
+        // Enhanced error logging
+        if (err.response) {
+          console.error("Error status:", err.response.status);
+          console.error("Error data:", err.response.data);
+          console.error("Error headers:", err.response.headers);
+          
+          if (err.response.status === 401) {
+            setMeetingError("Authentication failed. Please check your credentials and try again.");
+          } else if (err.response.status === 403) {
+            setMeetingError("Access denied. You don't have permission to view employee list.");
+          } else if (err.response.status === 500) {
+            setMeetingError("Server error. Please try again later.");
+          } else {
+            setMeetingError(`Failed to load employees: ${err.response.status} error`);
+          }
+        } else if (err.request) {
+          console.error("No response received:", err.request);
+          setMeetingError("No response from server. Please check your network connection.");
+        } else {
+          console.error("Request setup error:", err.message);
+          setMeetingError("Failed to load employee list. Please refresh and try again.");
+        }
       } finally {
         setLoadingEmployees(false);
       }
     };
 
-    if (show && authToken) {
+    if (show) {
       fetchEmployees();
     }
   }, [show, authToken]);
+
+  // Filter employees based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredEmployees([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const filtered = employees.filter(employee => 
+      employee.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.emp_id.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    setFilteredEmployees(filtered);
+    setShowSearchResults(true);
+  }, [searchTerm, employees]);
 
   // If editing an existing meeting, populate form
   useEffect(() => {
@@ -112,13 +215,30 @@ const CreateMeetingModal = ({
     });
   };
 
-  // Handle multi-select for employees
-  const handleEmployeeSelection = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-    setMeetingForm({
-      ...meetingForm,
-      employee_ids: selectedOptions
-    });
+  // Handle search input changes
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    // Always show results when typing (unless empty)
+    if (value.trim() !== "") {
+      setShowSearchResults(true);
+    } else {
+      setShowSearchResults(false);
+    }
+  };
+
+  // Add employee to selection
+  const addEmployee = (employee) => {
+    // Check if employee is already selected
+    if (!meetingForm.employee_ids.includes(employee.emp_id)) {
+      setMeetingForm({
+        ...meetingForm,
+        employee_ids: [...meetingForm.employee_ids, employee.emp_id]
+      });
+    }
+    setSearchTerm("");
+    setShowSearchResults(false);
   };
 
   // Remove employee from selection
@@ -201,6 +321,20 @@ const CreateMeetingModal = ({
     return employee ? employee.full_name : id;
   };
 
+  // Handle click outside to close search results
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <Modal 
       show={show} 
@@ -214,6 +348,8 @@ const CreateMeetingModal = ({
       </Modal.Header>
 
       <Modal.Body>
+        
+        
         {meetingError && <Alert variant="danger">{meetingError}</Alert>}
         {meetingSuccess && <Alert variant="success">{meetingSuccess}</Alert>}
         
@@ -321,48 +457,85 @@ const CreateMeetingModal = ({
                 <span className="ms-2">Loading employees...</span>
               </div>
             ) : (
-              <>
-                <Form.Select
-                  multiple
-                  value={meetingForm.employee_ids}
-                  onChange={handleEmployeeSelection}
-                  style={{ height: '120px' }}
-                  required
-                >
-                  {employees.map((employee) => (
-                    <option key={employee.emp_id} value={employee.emp_id}>
-                      {employee.emp_id} - {employee.full_name}
-                    </option>
-                  ))}
-                </Form.Select>
-                <Form.Text className="text-muted">
-                  Hold Ctrl (or Cmd on Mac) to select multiple employees
-                </Form.Text>
-              </>
-            )}
-            
-            {/* Display selected employees as badges */}
-            {meetingForm.employee_ids.length > 0 && (
-              <div className="mt-3">
-                <Form.Label className="mb-2">Selected Participants:</Form.Label>
-                <div className="d-flex flex-wrap gap-2">
-                  {meetingForm.employee_ids.map((id) => (
-                    <Badge 
-                      key={id} 
-                      bg="primary" 
-                      className="d-flex align-items-center"
-                    >
-                      {getEmployeeName(id)}
-                      <span 
-                        className="ms-2" 
+              <div ref={searchInputRef} className="position-relative">
+                <InputGroup className="mb-3">
+                  <FormControl
+                    placeholder="Search by employee name or ID..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    onFocus={() => setShowSearchResults(true)}
+                  />
+                </InputGroup>
+                
+                {/* Search Results Dropdown */}
+                {showSearchResults && filteredEmployees.length > 0 && (
+                  <ListGroup 
+                    className="position-absolute w-100" 
+                    style={{ 
+                      maxHeight: '200px', 
+                      overflowY: 'auto',
+                      zIndex: 1050,
+                      top: '100%',
+                      left: 0,
+                      border: '1px solid #dee2e6',
+                      borderTop: 'none',
+                      borderRadius: '0 0 0.375rem 0.375rem'
+                    }}
+                  >
+                    {filteredEmployees.map((employee) => (
+                      <ListGroup.Item 
+                        key={employee.emp_id} 
+                        action 
+                        onClick={() => addEmployee(employee)}
                         style={{ cursor: 'pointer' }}
-                        onClick={() => removeEmployee(id)}
                       >
-                        &times;
-                      </span>
-                    </Badge>
-                  ))}
-                </div>
+                        {employee.emp_id} - {employee.full_name}
+                      </ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                )}
+                
+                {/* No results message */}
+                {showSearchResults && searchTerm.trim() !== "" && filteredEmployees.length === 0 && (
+                  <div 
+                    className="position-absolute w-100 p-2 bg-white border"
+                    style={{ 
+                      zIndex: 1050,
+                      top: '100%',
+                      left: 0,
+                      border: '1px solid #dee2e6',
+                      borderTop: 'none',
+                      borderRadius: '0 0 0.375rem 0.375rem'
+                    }}
+                  >
+                    No employees found matching "{searchTerm}"
+                  </div>
+                )}
+                
+                {/* Display selected employees as badges */}
+                {meetingForm.employee_ids.length > 0 && (
+                  <div className="mt-3">
+                    <Form.Label className="mb-2">Selected Participants:</Form.Label>
+                    <div className="d-flex flex-wrap gap-2">
+                      {meetingForm.employee_ids.map((id) => (
+                        <Badge 
+                          key={id} 
+                          bg="primary" 
+                          className="d-flex align-items-center"
+                        >
+                          {getEmployeeName(id)}
+                          <span 
+                            className="ms-2" 
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => removeEmployee(id)}
+                          >
+                            &times;
+                          </span>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </Form.Group>
