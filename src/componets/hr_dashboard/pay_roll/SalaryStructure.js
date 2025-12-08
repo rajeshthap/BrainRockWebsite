@@ -107,6 +107,7 @@ const SalaryStructure = () => {
   
   // Check if user is an admin
   const isAdmin = user && user.role === 'hr';
+  const isEmployee = user && user.role === 'employee';
   
   // State for API data
   const [employees, setEmployees] = useState([]);
@@ -891,7 +892,7 @@ const handleDownload = () => {
                                   setTimeout(() => calculateSalaryStructure(annualCTC), 0);
                                 }
                               }}
-                              disabled={!isAdmin}
+                              disabled={!(isAdmin || isEmployee)}
                             >
                               <option value="government">Government</option>
                               <option value="other">Other</option>
