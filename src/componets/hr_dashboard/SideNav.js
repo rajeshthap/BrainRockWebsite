@@ -282,22 +282,24 @@ const menuItems = [
           label: "Job Openings",
           path: "/JobOpenings",
           icon: <FaChartLine />,
+           allowedRoles: ["hr", "manager"],
         },
         {
           label: "Candidate Applications",
           path: "/JobApplications",
           icon: <FaChartLine />,
+           allowedRoles: ["hr", "manager"],
         },
         {
           label: "Interview Scheduling",
           path: "/InterviewSch",
           icon: <FaChartLine />,
         },
-        {
-          label: "Shortlisting & Hiring",
-          path: "/Shortlisting",
-          icon: <FaChartLine />,
-        },
+        // {
+        //   label: "Shortlisting & Hiring",
+        //   path: "/Shortlisting",
+        //   icon: <FaChartLine />,
+        // },
         {
           label: "Offer Letters",
           path: "/OfferLetters",
