@@ -138,7 +138,7 @@ function Career() {
 
       <div className="ourteam-section mt-4">
         <Container>
-          <div className="ourteam-box">
+          <div className="ourteam-box ">
             {jobLoading && (
               <div className="text-center py-5">
                 <Spinner animation="border" />
@@ -153,7 +153,7 @@ function Career() {
 
             <Row>
               {jobs.map((job) => (
-                <Col lg={4} md={6} sm={12} key={job.id} className="mb-4">
+                <Col lg={4} md={6} sm={12} key={job.id} className="pb-3 mt-4 mb-2">
                   <Card className="br-career-card shadow-sm">
                     <Card.Body className="br-career-body">
                       <div className="br-career-title">
