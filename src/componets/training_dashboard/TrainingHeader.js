@@ -21,6 +21,9 @@ import axios from "axios";
 
 import { AuthContext } from "../context/AuthContext";
 
+// Base URL used by the backend for media/API
+const BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+
 // 1. Accept searchTerm and setSearchTerm as props
 function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const { user, logout } = useContext(AuthContext);
@@ -53,16 +56,38 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const [userDetails, setUserDetails] = useState({
     first_name: "",
     last_name: "",
+    candidate_name: "",
     profile_photo: null,
   });
 
   // Fetch user details when component mounts or user changes
   useEffect(() => {
     const fetchUserDetails = async () => {
+      // First try to fetch course-registration (applicant) data
+      try {
+        const resp = await axios.get(`${BASE_URL}/api/course-registration/?applicant_id=APP/2025/161006`, {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" }
+        });
+
+        if (resp.data && resp.data.success && resp.data.data) {
+          const d = resp.data.data;
+          setUserDetails(prev => ({
+            ...prev,
+            candidate_name: d.candidate_name || "",
+            profile_photo: d.profile_photo || null,
+          }));
+          return; // got applicant data — no need to continue
+        }
+      } catch (err) {
+        console.warn("Applicant fetch failed, will try employee-details as fallback:", err);
+      }
+
+      // Fallback: fetch employee details if user is available
       if (user && user.unique_id) {
         try {
           const response = await axios.get(
-            `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${user.unique_id}`,
+            `${BASE_URL}/api/employee-details/?emp_id=${user.unique_id}`,
             {
               withCredentials: true,
               headers: { "Content-Type": "application/json" }
@@ -70,11 +95,12 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
           );
           
           if (response.data) {
-            setUserDetails({
+            setUserDetails(prev => ({
+              ...prev,
               first_name: response.data.first_name || "",
               last_name: response.data.last_name || "",
               profile_photo: response.data.profile_photo || null,
-            });
+            }));
           }
         } catch (error) {
           console.error("Error fetching user details:", error);
@@ -94,6 +120,8 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
 
   // Get user display name
   const getDisplayName = () => {
+    // Prefer applicant/candidate name if available
+    if (userDetails.candidate_name) return userDetails.candidate_name;
     if (userDetails.first_name && userDetails.last_name) {
       return `${userDetails.first_name} ${userDetails.last_name}`;
     } else if (userDetails.first_name) {
@@ -107,7 +135,7 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   // Get user photo URL
   const getUserPhotoUrl = () => {
     if (userDetails.profile_photo) {
-      return `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${userDetails.profile_photo}`;
+      return `${BASE_URL}${userDetails.profile_photo.startsWith('/') ? userDetails.profile_photo : `/${userDetails.profile_photo}`}`;
     }
     // Fallback to a default avatar with user initials
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(getDisplayName())}&background=0d6efd&color=fff&size=40`;

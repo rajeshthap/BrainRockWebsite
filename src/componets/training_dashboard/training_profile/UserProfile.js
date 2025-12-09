@@ -5,6 +5,8 @@ import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalenda
 import "../../../assets/css/emp_dashboard.css";
 import TrainingHeader from "../TrainingHeader";
 import TrainingLeftnav from "../TrainingLeftnav";
+// Base URL for media and API resources
+const BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
 const UserProfile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -80,6 +82,12 @@ const UserProfile = () => {
     if (!dateString) return "N/A";
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  // Build absolute URL for profile photos returned by API
+  const buildPhotoUrl = (path) => {
+    if (!path) return null;
+    return `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
   };
 
   // Handle form changes
@@ -170,9 +178,9 @@ const UserProfile = () => {
                       <div className="profile-header d-flex align-items-center gap-4 mb-4">
                         <div className="profile-photo">
                           {profileData.profile_photo ? (
-                            <img 
-                              src={`https://mahadevaaya.com${profileData.profile_photo}`} 
-                              alt="Profile" 
+                            <img
+                              src={buildPhotoUrl(profileData.profile_photo)}
+                              alt="Profile"
                               className="rounded-circle"
                               style={{ width: '120px', height: '120px', objectFit: 'cover' }}
                             />
@@ -188,15 +196,6 @@ const UserProfile = () => {
                           <div className="d-flex align-items-center gap-2 mb-1">
                             <FaIdCard className="text-muted" />
                             <span className="text-muted">ID: {profileData.applicant_id}</span>
-                          </div>
-                          <div className="d-flex align-items-center gap-2">
-                            <span className="me-2">Status:</span>
-                            <Button 
-                              className={`btn-sm ${getButtonColor(profileData.course_status)}`}
-                              disabled
-                            >
-                              {profileData.course_status}
-                            </Button>
                           </div>
                         </div>
                       </div>
