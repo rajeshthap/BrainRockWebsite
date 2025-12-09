@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner,Pagination } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner, Pagination } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
@@ -29,6 +29,7 @@ const EditCourses = () => {
     description: "",
     price: "",
     duration: "",
+    course_type: "basic", // Added course_type with default value
     icon: null,
     modules: [] // Add modules to form data
   });
@@ -159,6 +160,7 @@ const EditCourses = () => {
       description: course.description,
       price: course.price,
       duration: course.duration,
+      course_type: course.course_type || "basic", // Get course_type from course or default to "basic"
       icon: null,
       modules: course.modules || [] // Initialize modules from course data
     });
@@ -234,6 +236,7 @@ const EditCourses = () => {
     dataToSend.append('description', editFormData.description);
     dataToSend.append('price', editFormData.price);
     dataToSend.append('duration', editFormData.duration);
+    dataToSend.append('course_type', editFormData.course_type); // Add course_type to form data
     
     // Add modules as JSON string
     dataToSend.append('modules', JSON.stringify(editFormData.modules));
@@ -270,6 +273,7 @@ const EditCourses = () => {
                 description: editFormData.description,
                 price: editFormData.price,
                 duration: editFormData.duration,
+                course_type: editFormData.course_type, // Update course_type
                 modules: editFormData.modules,
                 // Use the preview URL immediately if icon was changed
                 // This ensures the new image shows up instantly
@@ -394,7 +398,14 @@ const EditCourses = () => {
                             )}
                             <div>
                               <Card.Title className="managetitle">{course.title}</Card.Title>
-                              <Card.Subtitle className="mb-2 text-muted">Duration: {course.duration}</Card.Subtitle>
+                              <Card.Subtitle className="mb-2 text-muted">
+                                Duration: {course.duration}
+                                {course.course_type && (
+                                  <span className="ms-2 badge bg-info">
+                                    {course.course_type.charAt(0).toUpperCase() + course.course_type.slice(1)}
+                                  </span>
+                                )}
+                              </Card.Subtitle>
                             </div>
                           </div>
                           <Card.Text>{course.description}</Card.Text>
@@ -486,7 +497,7 @@ const EditCourses = () => {
             </Form.Group>
             
             <Row>
-              <Col lg={6} md={6} sm={12}>
+              <Col lg={4} md={6} sm={12}>
                 <Form.Group className="mb-3">
                   <Form.Label>Price ($)</Form.Label>
                   <Form.Control
@@ -499,7 +510,7 @@ const EditCourses = () => {
                   />
                 </Form.Group>
               </Col>
-              <Col lg={6} md={6} sm={12}>
+              <Col lg={4} md={6} sm={12}>
                 <Form.Group className="mb-3">
                   <Form.Label>Duration</Form.Label>
                   <Form.Control
@@ -509,6 +520,21 @@ const EditCourses = () => {
                     onChange={handleEditChange}
                     required
                   />
+                </Form.Group>
+              </Col>
+              <Col lg={4} md={6} sm={12}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Course Type</Form.Label>
+                  <Form.Select
+                    name="course_type"
+                    value={editFormData.course_type}
+                    onChange={handleEditChange}
+                    required
+                  >
+                    <option value="basic">Basic</option>
+                    <option value="medium">Medium</option>
+                    <option value="advance">Advance</option>
+                  </Form.Select>
                 </Form.Group>
               </Col>
             </Row>

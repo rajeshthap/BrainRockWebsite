@@ -18,6 +18,7 @@ const AddCourses = () => {
     description: "",
     price: "",
     duration: "",
+    course_type: "basic", // Added course_type with default value
     icon: null,
     modules: [["", ""]] // Initialize with one empty module by default
   });
@@ -168,6 +169,7 @@ const AddCourses = () => {
       description: "",
       price: "",
       duration: "",
+      course_type: "basic", // Reset to default value
       icon: null,
       modules: [["", ""]] // Reset to one empty module
     });
@@ -198,6 +200,7 @@ const AddCourses = () => {
     dataToSend.append('description', formData.description);
     dataToSend.append('price', formData.price);
     dataToSend.append('duration', formData.duration);
+    dataToSend.append('course_type', formData.course_type); // Added course_type to form data
     
     // Add icon if it exists
     if (formData.icon) {
@@ -313,7 +316,7 @@ const AddCourses = () => {
               </Form.Group>
               
               <Row>
-                <Col lg={6} md={6} sm={12}>
+                <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3">
                     <Form.Label>Price ($)</Form.Label>
                     <Form.Control
@@ -327,7 +330,7 @@ const AddCourses = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col lg={6} md={6} sm={12}>
+                <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3">
                     <Form.Label>Duration</Form.Label>
                     <Form.Control
@@ -338,6 +341,21 @@ const AddCourses = () => {
                       onChange={handleChange}
                       required
                     />
+                  </Form.Group>
+                </Col>
+                <Col lg={4} md={6} sm={12}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Course Type</Form.Label>
+                    <Form.Select
+                      name="course_type"
+                      value={formData.course_type}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="basic">Basic</option>
+                      <option value="medium">Medium</option>
+                      <option value="advance">Advance</option>
+                    </Form.Select>
                   </Form.Group>
                 </Col>
               </Row>
