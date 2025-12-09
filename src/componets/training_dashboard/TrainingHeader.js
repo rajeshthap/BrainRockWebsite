@@ -182,9 +182,7 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
                     <FaUserCircle className="me-2" /> Profile
                   </Dropdown.Item>
 
-                  <Dropdown.Item>
-                    <FaCog className="me-2" /> Settings
-                  </Dropdown.Item>
+                 
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={logout}>
                     <FaSignOutAlt className="me-2" /> Logout

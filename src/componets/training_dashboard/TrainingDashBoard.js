@@ -48,17 +48,13 @@ const TrainingDashBoard = () => {
   const getBannerContent = () => {
     switch (activeTab) {
       case "all":
-        return { title: "All Courses", desc: "Browse your enrolled courses." };
+        return { title: "My Lists ", desc: "Your saved course collections." };
       case "lists":
-        return { title: "My Lists", desc: "Your saved course collections." };
-      case "wishlist":
-        return { title: "Wishlist", desc: "Your favourite saved courses." };
-      case "archived":
-        return { title: "Archived", desc: "Courses you have archived." };
-      case "tools":
-        return { title: "Learning Tools", desc: "Improve your learning habits." };
-      default:
-        return { title: "My Learning", desc: "Keep learning & growing." };
+        return { title: "All Courses", desc: "Browse your enrolled courses." };
+      
+    
+     
+    
     }
   };
 
@@ -179,14 +175,9 @@ const TrainingDashBoard = () => {
         );
 
       case "lists":
-        return <h2>My Lists</h2>;
+        return <h2>All Cources</h2>;
 
-      case "archived":
-        return <h2>Archived Courses</h2>;
-
-      case "tools":
-        return <h2>Learning Tools</h2>;
-
+     
       default:
         return null;
     }
@@ -211,11 +202,9 @@ const TrainingDashBoard = () => {
           </div>
 
           <div className="td-tabs">
-            <button className={`tab-btn ${activeTab === "all" ? "active" : ""}`} onClick={() => setActiveTab("all")}>All courses</button>
-            <button className={`tab-btn ${activeTab === "lists" ? "active" : ""}`} onClick={() => setActiveTab("lists")}>My Lists</button>
-            <button className={`tab-btn ${activeTab === "wishlist" ? "active" : ""}`} onClick={() => setActiveTab("wishlist")}>Wishlist</button>
-            <button className={`tab-btn ${activeTab === "archived" ? "active" : ""}`} onClick={() => setActiveTab("archived")}>Archived</button>
-            <button className={`tab-btn ${activeTab === "tools" ? "active" : ""}`} onClick={() => setActiveTab("tools")}>Learning tools</button>
+            <button className={`tab-btn ${activeTab === "all" ? "active" : ""}`} onClick={() => setActiveTab("all")}>My Lists</button>
+            <button className={`tab-btn ${activeTab === "lists" ? "active" : ""}`} onClick={() => setActiveTab("lists")}>All courses</button>
+      
           </div>
 
           <div className="tab-content-wrapper">{renderTabContent()}</div>

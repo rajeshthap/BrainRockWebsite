@@ -27,24 +27,14 @@ const menuItems = [
       path: "/TrainingDashBoard",
       active: true,
     },
-     {
-      icon: <FaTachometerAlt />,
-      label: "My Learning",
-      path: "#",
-      active: true,
-    },
+   
      {
       icon: <FaTachometerAlt />,
       label: "Refer a Friend",
       path: "#",
       active: true,
     },
-    {
-      icon: <FaTachometerAlt />,
-      label: "Teach On BrainRock",
-      path: "#",
-      active: true,
-    },
+   
      {
       icon: <FaTachometerAlt />,
       label: "Notifications",
