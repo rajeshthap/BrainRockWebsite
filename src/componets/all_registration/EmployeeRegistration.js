@@ -29,6 +29,7 @@ import axios from "axios";
 const EmployeeRegistration = () => {
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [, setLoading] = useState(false);
   const [isMobile] = useState(false);
@@ -192,6 +193,24 @@ const EmployeeRegistration = () => {
     };
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const res = await axios.get(
+          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/branch-names/",
+          { withCredentials: true }
+        );
+        if (res.data.success && Array.isArray(res.data.data)) {
+          setBranches(res.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching branches:", err);
+      }
+    };
+    fetchBranches();
+  }, []);
+
   useEffect(() => {
     if (!formData.department) {
       setDesignations([]);
@@ -1362,9 +1381,7 @@ const EmployeeRegistration = () => {
                     <Form.Label className="br-label">
                       Branch Name <span className="br-span-star">*</span>
                     </Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter Branch Name"
+                    <Form.Select
                       className="br-form-control"
                       name="branch_name"
                       value={formData.branch_name}
@@ -1372,7 +1389,14 @@ const EmployeeRegistration = () => {
                       isInvalid={!!errors.branch_name}
                       required
                       ref={formRefs.branch_name}
-                    />
+                    >
+                      <option value="">-- Select Branch --</option>
+                      {branches.map((branch, index) => (
+                        <option key={index} value={branch.branch_name}>
+                          {branch.branch_name}
+                        </option>
+                      ))}
+                    </Form.Select>
                     <Form.Control.Feedback type="br-alert">
                       {errors.branch_name}
                     </Form.Control.Feedback>
