@@ -92,7 +92,7 @@ const menuItems = [
         // },
         {
           label: "Employee Transfer / Promotion",
-          path: "/EmployeeManagement",
+          path: "/EmployeeTransfer",
           icon: <FaChartLine />,
         },
         // {
