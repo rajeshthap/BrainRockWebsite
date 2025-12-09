@@ -1,0 +1,255 @@
+/* profile.css */
+
+/* Profile Page Styles */
+.profile-page {
+  padding: 20px;
+}
+
+/* Profile Header Card */
+.profile-header-card {
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: none;
+}
+
+.profile-photo-container {
+  position: relative;
+}
+
+.profile-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #f0f0f0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-photo-placeholder {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #6c757d;
+  border: 5px solid #f0f0f0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-photo-overlay {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #0d6efd;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.profile-photo-container:hover .profile-photo-overlay {
+  opacity: 1;
+}
+
+.profile-name {
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.profile-bio {
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Profile Details Card */
+.profile-details-card {
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: none;
+}
+
+.profile-tabs {
+  border-bottom: 2px solid #f0f0f0;
+  padding: 0 20px;
+}
+
+.profile-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 15px 20px;
+  border-radius: 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.profile-tabs .nav-link:hover {
+  color: #0d6efd;
+}
+
+.profile-tabs .nav-link.active {
+  color: #0d6efd;
+  background-color: transparent;
+}
+
+.profile-tabs .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #0d6efd;
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  background-color: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.info-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #0d6efd;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info-content h6 {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 5px;
+}
+
+.info-content p {
+  margin: 0;
+  color: #212529;
+}
+
+/* Edit Profile Modal */
+.edit-profile-modal .modal-header {
+  border-bottom: none;
+}
+
+.edit-profile-modal .modal-footer {
+  border-top: none;
+}
+
+.edit-profile-modal .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+}
+
+.edit-profile-modal .form-control {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+.edit-profile-modal .form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Loading State */
+.profile-loading-card {
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .profile-photo,
+  .profile-photo-placeholder {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .profile-tabs .nav-link {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .info-item {
+    padding: 10px;
+  }
+}
+
+/* Success Alert Animation */
+.alert-success {
+  animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* Button Hover Effects */
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.btn-secondary {
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Badge Styles */
+.badge {
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 20px;
+}

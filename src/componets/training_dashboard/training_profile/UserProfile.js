@@ -1,10 +1,13 @@
+// UserProfile.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Button, Card, Modal } from "react-bootstrap";
-import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaIdCard, FaEdit } from "react-icons/fa";
+import { Container, Row, Col, Button, Card, Modal, Badge, Alert } from "react-bootstrap";
+import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaIdCard, FaEdit, FaCheck, FaTimes, FaCamera, FaSave, FaArrowLeft } from "react-icons/fa";
 import "../../../assets/css/emp_dashboard.css";
 import TrainingHeader from "../TrainingHeader";
 import TrainingLeftnav from "../TrainingLeftnav";
+import "../../../assets/css/trainingprofile.css";
+
 // Base URL for media and API resources
 const BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
@@ -16,6 +19,8 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({});
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [activeTab, setActiveTab] = useState('personal');
   const navigate = useNavigate();
   
 
@@ -29,9 +34,9 @@ const UserProfile = () => {
           headers: { 'Content-Type': 'application/json' }
         });
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! Status: ${response.status}`);
+        // }
         
         const result = await response.json();
         if (result.success) {
@@ -63,18 +68,18 @@ const UserProfile = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Function to determine button color based on status
-  const getButtonColor = (status) => {
-    if (!status) return "btn-secondary";
+  // Function to determine status badge color
+  const getStatusBadge = (status) => {
+    if (!status) return <Badge bg="secondary"></Badge>;
     
     const statusLower = status.toLowerCase();
-    if (statusLower.includes("active")) return "btn-primary";
-    if (statusLower.includes("approved")) return "btn-success";
-    if (statusLower.includes("processed")) return "btn-info";
-    if (statusLower.includes("pending")) return "btn-warning";
-    if (statusLower.includes("rejected")) return "btn-danger";
+    if (statusLower.includes("active")) return <Badge bg="success">Active</Badge>;
+    if (statusLower.includes("approved")) return <Badge bg="success">Approved</Badge>;
+    if (statusLower.includes("processed")) return <Badge bg="info">Processed</Badge>;
+    if (statusLower.includes("pending")) return <Badge bg="warning">Pending</Badge>;
+    if (statusLower.includes("rejected")) return <Badge bg="danger">Rejected</Badge>;
     
-    return "btn-secondary";
+    return <Badge bg="secondary">{status}</Badge>;
   };
 
   // Format date
@@ -115,6 +120,8 @@ const UserProfile = () => {
       if (result.success) {
         setProfileData(result.data);
         setShowEditModal(false);
+        setShowSuccessAlert(true);
+        setTimeout(() => setShowSuccessAlert(false), 3000);
       }
     } catch (error) {
       console.error("Failed to update profile:", error);
@@ -136,10 +143,25 @@ const UserProfile = () => {
         {/* Header */}
         <TrainingHeader toggleSidebar={toggleSidebar} />
 
+        {/* Success Alert */}
+        {showSuccessAlert && (
+          <Alert variant="success" className="position-fixed top-0 start-50 translate-middle-x mt-3" style={{ zIndex: 1050 }}>
+            <FaCheck className="me-2" />
+            Profile updated successfully!
+          </Alert>
+        )}
+
         {/* Dashboard Body */}
-        <Container fluid className="dashboard-body">
+        <Container fluid className="dashboard-body profile-page">
           <Row className="align-items-center mb-4">
             <Col lg={6} md={12} sm={12}>
+              <Button 
+                variant="outline-secondary" 
+                className="mb-3 d-flex align-items-center gap-2"
+                onClick={() => navigate(-1)}
+              >
+                <FaArrowLeft /> Back
+              </Button>
               <h1 className="page-title">User Profile</h1>
             </Col>
             <Col
@@ -161,159 +183,246 @@ const UserProfile = () => {
           <Row>
             <Col lg={12} md={12} sm={12}>
               {loading ? (
-                <Card className="stat-card">
+                <Card className="stat-card profile-loading-card">
                   <Card.Body>
-                    <div className="text-center py-4">
+                    <div className="text-center py-5">
                       <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Loading...</span>
                       </div>
-                      <p className="mt-2">Loading profile data...</p>
+                      <p className="mt-3">Loading profile data...</p>
                     </div>
                   </Card.Body>
                 </Card>
               ) : profileData ? (
-                <Card className="stat-card">
-                  <Card.Body>
-                    <div className="profile-container">
-                      <div className="profile-header d-flex align-items-center gap-4 mb-4">
-                        <div className="profile-photo">
+                <>
+                  {/* Profile Header Card */}
+                  <Card className="profile-header-card mb-4">
+                    <Card.Body className="p-4">
+                      <div className="profile-header d-flex flex-column flex-md-row align-items-center gap-4">
+                        <div className="profile-photo-container position-relative">
                           {profileData.profile_photo ? (
                             <img
                               src={buildPhotoUrl(profileData.profile_photo)}
                               alt="Profile"
-                              className="rounded-circle"
-                              style={{ width: '120px', height: '120px', objectFit: 'cover' }}
+                              className="profile-photo"
                             />
                           ) : (
-                            <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
-                                 style={{ width: '120px', height: '120px', color: 'white', fontSize: '2rem' }}>
+                            <div className="profile-photo-placeholder">
                               <FaUser />
                             </div>
                           )}
-                        </div>
-                        <div className="profile-info">
-                          <h2 className="profile-name">{profileData.candidate_name}</h2>
-                          <div className="d-flex align-items-center gap-2 mb-1">
-                            <FaIdCard className="text-muted" />
-                            <span className="text-muted">ID: {profileData.applicant_id}</span>
+                          <div className="profile-photo-overlay">
+                            <FaCamera />
                           </div>
                         </div>
+                        <div className="profile-info flex-grow-1 text-center text-md-start">
+                          <h2 className="profile-name">{profileData.candidate_name}</h2>
+                          <div className="d-flex flex-column flex-md-row align-items-center gap-2 mb-2">
+                            <div className="d-flex align-items-center gap-2">
+                              <FaIdCard className="text-muted" />
+                              <span className="text-muted">ID: {profileData.applicant_id}</span>
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                              {/* <span className="text-muted">Status:</span> */}
+                              {getStatusBadge(profileData.status)}
+                            </div>
+                          </div>
+                          <p className="profile-bio">
+                            Student at {profileData.school_college_name || "BrainRock Institute"}
+                          </p>
+                        </div>
                       </div>
+                    </Card.Body>
+                  </Card>
 
-                      <div className="profile-details">
-                        <Row>
-                          <Col lg={6} md={12} sm={12} className="mb-3">
-                            <h5 className="section-title">Personal Information</h5>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaUser />
+                  {/* Profile Details Tabs */}
+                  <Card className="profile-details-card">
+                    <Card.Header className="bg-white border-bottom-0 p-0">
+                      <ul className="nav nav-tabs profile-tabs">
+                        <li className="nav-item">
+                          <button 
+                            className={`nav-link ${activeTab === 'personal' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('personal')}
+                          >
+                            Personal Information
+                          </button>
+                        </li>
+                        <li className="nav-item">
+                          <button 
+                            className={`nav-link ${activeTab === 'contact' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('contact')}
+                          >
+                            Contact Details
+                          </button>
+                        </li>
+                        <li className="nav-item">
+                          <button 
+                            className={`nav-link ${activeTab === 'education' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('education')}
+                          >
+                            Education
+                          </button>
+                        </li>
+                        <li className="nav-item">
+                          <button 
+                            className={`nav-link ${activeTab === 'course' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('course')}
+                          >
+                            Course Information
+                          </button>
+                        </li>
+                      </ul>
+                    </Card.Header>
+                    <Card.Body className="p-4">
+                      {/* Personal Information Tab */}
+                      {activeTab === 'personal' && (
+                        <div className="tab-content">
+                          <Row>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaUser />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Full Name</h6>
+                                  <p>{profileData.candidate_name}</p>
+                                </div>
                               </div>
-                              <div>
-                                <div className="detail-label">Full Name</div>
-                                <div className="detail-value">{profileData.candidate_name}</div>
+                            </Col>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaCalendarAlt />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Date of Birth</h6>
+                                  <p>{formatDate(profileData.date_of_birth)}</p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaCalendarAlt />
+                            </Col>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaMapMarkerAlt />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Address</h6>
+                                  <p>{profileData.address}</p>
+                                </div>
                               </div>
-                              <div>
-                                <div className="detail-label">Date of Birth</div>
-                                <div className="detail-value">{formatDate(profileData.date_of_birth)}</div>
+                            </Col>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaUser />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Guardian Name</h6>
+                                  <p>{profileData.guardian_name}</p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaMapMarkerAlt />
+                            </Col>
+                          </Row>
+                        </div>
+                      )}
+
+                      {/* Contact Details Tab */}
+                      {activeTab === 'contact' && (
+                        <div className="tab-content">
+                          <Row>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaEnvelope />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Email</h6>
+                                  <p>{profileData.email}</p>
+                                </div>
                               </div>
-                              <div>
-                                <div className="detail-label">Address</div>
-                                <div className="detail-value">{profileData.address}</div>
+                            </Col>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaPhone />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Mobile Number</h6>
+                                  <p>{profileData.mobile_no}</p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaUser />
+                            </Col>
+                          </Row>
+                        </div>
+                      )}
+
+                      {/* Education Tab */}
+                      {activeTab === 'education' && (
+                        <div className="tab-content">
+                          <Row>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaGraduationCap />
+                                </div>
+                                <div className="info-content">
+                                  <h6>School/College</h6>
+                                  <p>{profileData.school_college_name}</p>
+                                </div>
                               </div>
-                              <div>
-                                <div className="detail-label">Guardian Name</div>
-                                <div className="detail-value">{profileData.guardian_name}</div>
+                            </Col>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaGraduationCap />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Highest Education</h6>
+                                  <p>{profileData.highest_education}</p>
+                                </div>
                               </div>
-                            </div>
-                          </Col>
-                          
-                          <Col lg={6} md={12} sm={12} className="mb-3">
-                            <h5 className="section-title">Contact & Education</h5>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaEnvelope />
+                            </Col>
+                          </Row>
+                        </div>
+                      )}
+
+                      {/* Course Information Tab */}
+                      {activeTab === 'course' && (
+                        <div className="tab-content">
+                          <Row>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaGraduationCap />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Applied Course</h6>
+                                  <p>{profileData.application_for_course}</p>
+                                </div>
                               </div>
-                              <div>
-                                <div className="detail-label">Email</div>
-                                <div className="detail-value">{profileData.email}</div>
+                            </Col>
+                            <Col lg={6} md={12} sm={12} className="mb-4">
+                              <div className="info-item">
+                                <div className="info-icon">
+                                  <FaCalendarAlt />
+                                </div>
+                                <div className="info-content">
+                                  <h6>Application Date</h6>
+                                  <p>{formatDate(profileData.created_at)}</p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaPhone />
-                              </div>
-                              <div>
-                                <div className="detail-label">Mobile Number</div>
-                                <div className="detail-value">{profileData.mobile_no}</div>
-                              </div>
-                            </div>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaGraduationCap />
-                              </div>
-                              <div>
-                                <div className="detail-label">School/College</div>
-                                <div className="detail-value">{profileData.school_college_name}</div>
-                              </div>
-                            </div>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaGraduationCap />
-                              </div>
-                              <div>
-                                <div className="detail-label">Highest Education</div>
-                                <div className="detail-value">{profileData.highest_education}</div>
-                              </div>
-                            </div>
-                          </Col>
-                        </Row>
-                        
-                        <Row>
-                          <Col lg={12} md={12} sm={12}>
-                            <h5 className="section-title">Course Information</h5>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaGraduationCap />
-                              </div>
-                              <div>
-                                <div className="detail-label">Applied Course</div>
-                                <div className="detail-value">{profileData.application_for_course}</div>
-                              </div>
-                            </div>
-                            <div className="detail-item d-flex align-items-start gap-3 mb-3">
-                              <div className="detail-icon">
-                                <FaCalendarAlt />
-                              </div>
-                              <div>
-                                <div className="detail-label">Application Date</div>
-                                <div className="detail-value">{formatDate(profileData.created_at)}</div>
-                              </div>
-                            </div>
-                          </Col>
-                        </Row>
-                      </div>
-                    </div>
-                  </Card.Body>
-                </Card>
+                            </Col>
+                          </Row>
+                        </div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </>
               ) : (
                 <Card className="stat-card">
                   <Card.Body>
-                    <div className="text-center py-4">
+                    <div className="text-center py-5">
+                      <FaTimes className="text-danger mb-3" style={{ fontSize: '3rem' }} />
                       <h4>No profile data found</h4>
                       <p className="text-muted">Please check your applicant ID or try again later.</p>
                     </div>
@@ -333,10 +442,12 @@ const UserProfile = () => {
         size="lg"
         className="edit-profile-modal"
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Profile</Modal.Title>
+        <Modal.Header closeButton className="bg-primary text-white">
+          <Modal.Title className="d-flex align-items-center gap-2">
+            <FaEdit /> Edit Profile
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="p-4">
           <form onSubmit={handleSubmit}>
             <Row>
               <Col lg={6} md={12} sm={12} className="mb-3">
@@ -434,10 +545,10 @@ const UserProfile = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Cancel
+            <FaTimes className="me-2" /> Cancel
           </Button>
           <Button variant="primary" onClick={handleSubmit}>
-            Save Changes
+            <FaSave className="me-2" /> Save Changes
           </Button>
         </Modal.Footer>
       </Modal>
