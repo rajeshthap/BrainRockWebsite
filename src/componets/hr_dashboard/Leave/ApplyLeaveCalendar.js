@@ -195,34 +195,63 @@ const ApplyLeaveCalendar = () => {
   };
 
   /* ---------------------------------------
-      Fetch Meeting Data
+      Fetch Meeting Data (UPDATED)
   ----------------------------------------- */
-  const fetchMeetingData = async () => {
-    try {
-      setLoading(true);
+const fetchMeetingData = async () => {
+  try {
+    setLoading(true);
+    console.log("Fetching meeting data...");
 
-      const res = await axios.get(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meetings/?employee_id=${employee_id}`
-      );
+    // Updated API endpoint with credentials
+    const res = await axios.get(
+      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meeting-schedule/`,
+      { withCredentials: true }
+    );
 
-      const events = res.data.meetings.map((m) => ({
-        id: m.id,
-        title: `Meeting: ${m.title}`,
-        start: new Date(m.start_time),
-        end: new Date(m.end_time),
+    console.log("Meeting API response:", res.data);
+
+    // Check if response has the expected structure
+    if (!res.data || !res.data.success || !Array.isArray(res.data.data)) {
+      console.error("Meeting API response has unexpected structure:", res.data);
+      setError("Invalid meeting data format received from server.");
+      return;
+    }
+
+    // Extract the meetings array from the response
+    const meetingsData = res.data.data;
+
+    // Map the new API response structure to calendar events
+    const events = meetingsData.map((m) => {
+      // Ensure we have valid dates
+      const startDate = new Date(m.start_date_time);
+      const endDate = new Date(m.end_date_time);
+      
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error("Invalid date in meeting data:", m);
+        return null;
+      }
+      
+      return {
+        id: m.id || `meeting-${m.meeting_title}-${m.start_date_time}`,
+        title: `Meeting: ${m.meeting_title}`,
+        start: startDate,
+        end: endDate,
         color: "#007bff",
         type: "meeting",
-        data: m,
-      }));
+        data: m, // Store the entire meeting object
+      };
+    }).filter(event => event !== null); // Filter out any invalid events
 
-      setMeetingEvents(events);
-      setFilteredMeeting(events);
-    } catch (err) {
-      setError("Failed to load meeting schedule.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    console.log("Processed meeting events:", events);
+    setMeetingEvents(events);
+    setFilteredMeeting(events);
+  } catch (err) {
+    setError("Failed to load meeting schedule.");
+    console.error("Error fetching meeting data:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchLeaveData();
@@ -336,18 +365,6 @@ const ApplyLeaveCalendar = () => {
       handleNavigate(new Date());
     };
 
-    const handleMonthChange = (e) => {
-      const newDate = new Date(date);
-      newDate.setMonth(parseInt(e.target.value));
-      handleNavigate(newDate);
-    };
-
-    const handleYearChange = (e) => {
-      const newDate = new Date(date);
-      newDate.setFullYear(parseInt(e.target.value));
-      handleNavigate(newDate);
-    };
-
     // Generate month options
     const months = moment.months();
     const currentMonth = date.getMonth();
@@ -401,9 +418,6 @@ const ApplyLeaveCalendar = () => {
             Day
           </button>
         </div>
-        
-        {/* Month/Year Selectors */}
-       
       </div>
     );
   };
@@ -419,6 +433,12 @@ const ApplyLeaveCalendar = () => {
         <HrHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="py-3 px-2 px-md-4">
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
+          
           <Tabs defaultActiveKey={defaultActiveKey} className="mb-3 br-tabs">
             {/* ============== LEAVE CALENDAR ============== */}
             {userRole !== 'employee' && (
@@ -643,11 +663,23 @@ const ApplyLeaveCalendar = () => {
                 </>
               )}
 
-              {selectedData.title && (
+              {selectedData.meeting_title && (
                 <>
-                  <p><b>Meeting Title:</b> {selectedData.title}</p>
-                  <p><b>Start:</b> {new Date(selectedData.start_time).toLocaleString()}</p>
-                  <p><b>End:</b> {new Date(selectedData.end_time).toLocaleString()}</p>
+                  <p><b>Meeting Title:</b> {selectedData.meeting_title}</p>
+                  <p><b>Start:</b> {new Date(selectedData.start_date_time).toLocaleString()}</p>
+                  <p><b>End:</b> {new Date(selectedData.end_date_time).toLocaleString()}</p>
+                  <p><b>Meeting Type:</b> {selectedData.meeting_type}</p>
+                  <p><b>Meeting Link:</b> 
+                    {selectedData.meeting_link ? (
+                      <a href={selectedData.meeting_link} target="_blank" rel="noopener noreferrer">
+                        {selectedData.meeting_link}
+                      </a>
+                    ) : 'N/A'}
+                  </p>
+                  <p><b>Agenda:</b> {selectedData.agenda || 'N/A'}</p>
+                  <p><b>Priority:</b> {selectedData.meeting_priority || 'N/A'}</p>
+                  <p><b>Recurrence:</b> {selectedData.meeting_recurrence || 'N/A'}</p>
+                  <p><b>Notification Before:</b> {selectedData.notification_before || 'N/A'}</p>
                 </>
               )}
             </>
