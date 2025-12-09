@@ -176,8 +176,9 @@ const CreateMeetingModal = ({
         start_date_time: existingMeeting.start_date_time 
           ? new Date(existingMeeting.start_date_time).toISOString().slice(0, 16) 
           : "",
-        end_date_time: existingMeeting.end_time 
-          ? new Date(existingMeeting.end_time).toISOString().slice(0, 16) 
+        // Fixed: Changed from end_time to end_date_time
+        end_date_time: existingMeeting.end_date_time 
+          ? new Date(existingMeeting.end_date_time).toISOString().slice(0, 16) 
           : "",
         meeting_type: existingMeeting.meeting_type || "online",
         meeting_link: existingMeeting.meeting_link || "",
@@ -275,6 +276,11 @@ const CreateMeetingModal = ({
         meetingData.meeting_location = meetingForm.meeting_location;
       }
 
+      // Add meeting_id to payload if updating an existing meeting
+      if (existingMeeting) {
+        meetingData.meeting_id = existingMeeting.meeting_id;
+      }
+
       const config = {
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -285,12 +291,14 @@ const CreateMeetingModal = ({
 
       let response;
       if (existingMeeting) {
+        // Update meeting - use the general endpoint and include meeting_id in payload
         response = await axios.put(
-          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meetings/${existingMeeting.id}/`,
+          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meetings/",
           meetingData,
           config
         );
       } else {
+        // Create new meeting
         response = await axios.post(
           "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meeting-schedule/",
           meetingData,
@@ -348,8 +356,6 @@ const CreateMeetingModal = ({
       </Modal.Header>
 
       <Modal.Body>
-        
-        
         {meetingError && <Alert variant="danger">{meetingError}</Alert>}
         {meetingSuccess && <Alert variant="success">{meetingSuccess}</Alert>}
         
