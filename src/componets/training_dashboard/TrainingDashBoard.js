@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Container } from "react-bootstrap";
 import "../../assets/css/trainingdashboard.css";
 
@@ -7,31 +7,138 @@ import TrainingLeftnav from "./TrainingLeftnav";
 import { VideoPlayer } from "@graphland/react-video-player";
 import { useNavigate } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
+import { AuthContext } from "../context/AuthContext";
 
 const TrainingDashBoard = () => {
+  const { user } = useContext(AuthContext);
+  const applicantId = user?.unique_id; // Default applicant ID if user is not available
+  console.log("user_id:", applicantId);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [wishlist, setWishlist] = useState([]); // ⭐ Wishlist state added
-  const [difficultyFilter, setDifficultyFilter] = useState("all"); // Filter for difficulty levels
-
+  const [wishlist, setWishlist] = useState([]);
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [allCourses, setAllCourses] = useState([]); // State to store all courses
+  const [userCourses, setUserCourses] = useState([]); // State to store user's registered courses
+  const [courseItems, setCourseItems] = useState([]); // State to store course items from new API
+  const [userRegistrationData, setUserRegistrationData] = useState(null); // State to store user registration data
+ 
   const navigate = useNavigate();
 
-  // ⭐ Redirect Function
+  // Redirect Function
   const openVideoPage = (course) => {
     navigate("/TrainingVideoPlayer", {
       state: {
-        title: course.title,
-        video: course.video,
-        poster: course.poster
+        title: course.title || course.course_name,
+        video: course.video || "https://www.w3schools.com/html/mov_bbb.mp4",
+        poster: course.icon || course.poster || "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"
       }
     });
   };
 
-  // ⭐ Add to Wishlist function
+  // Add to Wishlist function
   const addToWishlist = (course) => {
     setWishlist((prev) => [...prev, course]);
   };
+
+  // Fetch course items from new API
+  useEffect(() => {
+    const fetchCourseItems = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-items/');
+        const data = await response.json();
+        if (data.success) {
+          setCourseItems(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching course items:', error);
+      }
+    };
+
+    fetchCourseItems();
+  }, []);
+
+  // Fetch all courses
+  useEffect(() => {
+    const fetchAllCourses = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/');
+        const data = await response.json();
+        if (data.success) {
+          setAllCourses(data.courses);
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchAllCourses();
+  }, []);
+
+  // Fetch user's registered courses
+  useEffect(() => {
+    const fetchUserCourses = async () => {
+      try {
+        const response = await fetch(
+          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/?applicant_id=APP/2025/161006`,
+          {
+            method: "GET",
+           
+          }
+        );
+
+        const data = await response.json();
+        console.log("API Response:", data); // Log the response for debugging
+        
+        // Check if the API returned a successful response with data
+        if (data && data.success && data.data) {
+          // Store the registration data
+          setUserRegistrationData(data.data);
+          
+          // Create a course object with the required properties
+          const userCourse = {
+            id: data.data.id,
+            application_for_course: data.data.application_for_course,
+            course_name: data.data.application_for_course,
+            title: data.data.application_for_course,
+            course_status: data.data.course_status,
+            candidate_name: data.data.candidate_name,
+            guardian_name: data.data.guardian_name,
+            address: data.data.address,
+            date_of_birth: data.data.date_of_birth,
+            profile_photo: data.data.profile_photo,
+            email: data.data.email,
+            mobile_no: data.data.mobile_no,
+            school_college_name: data.data.school_college_name,
+            highest_education: data.data.highest_education,
+            applicant_id: data.data.applicant_id,
+            created_at: data.data.created_at,
+            updated_at: data.data.updated_at,
+            // Add default values for properties not in the API response
+            progress: 0,
+            rating: 0,
+            duration: "30 Days",
+            course_id: data.data.id
+          };
+          
+          // Set the user courses array with the course object
+          setUserCourses([userCourse]);
+        } else {
+          // If no data is returned, set an empty array
+          setUserCourses([]);
+          setUserRegistrationData(null);
+        }
+      } catch (error) {
+        console.error('Error fetching user courses:', error);
+        setUserCourses([]);
+        setUserRegistrationData(null);
+      }
+    };
+
+    if (applicantId) {
+      fetchUserCourses();
+    }
+  }, [applicantId]);
 
   useEffect(() => {
     const checkDevice = () => {
@@ -62,7 +169,6 @@ const TrainingDashBoard = () => {
   const AllCoursesUI = () => (
     <div className="all-courses-wrapper">
       <div className="weekly-streak-card">
-       
         <div className="ws-row">
           <div className="ws-col">
             <strong>0 weeks</strong>
@@ -89,101 +195,132 @@ const TrainingDashBoard = () => {
         </div>
       </div>
 
-      {/* COURSE CARD CLICKABLE */}
-      <div className="course-card-container"  style={{ cursor: "pointer" }} >
-        <div className="course-card" >
-          <div onClick={() => openVideoPage({
-            title: "How to Make a Responsive Website in React JS",
-            video: "https://www.w3schools.com/html/mov_bbb.mp4",
-            poster: "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"
-          })}>
-            <div className="course-video">
-              {/* Replaced VideoPlayer with just the poster image */}
-              <img 
-                src="https://i.ibb.co/4Y6HcRD/reactjs-banner.png" 
-                alt="How to Make a Responsive Website in React JS"
-                style={{ width: "100%", height: "220px", objectFit: "cover" }}
-              />
+      {/* USER'S REGISTERED COURSES */}
+      <div className="course-cards-container">
+        {userCourses.length > 0 ? (
+          userCourses.map(course => (
+            <div className="course-card-container" key={course.id} style={{ cursor: "pointer" }}>
+              <div className="course-card">
+                <div onClick={() => openVideoPage(course)}>
+                  <div className="course-video">
+                    {/* Using the profile photo if available, otherwise use default poster */}
+                    <img 
+                      src={course.profile_photo ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${course.profile_photo}` : "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"} 
+                      alt={course.application_for_course || course.course_name || course.title}
+                      style={{ width: "100%", height: "220px", objectFit: "cover" }}
+                    />
+                  </div>
+
+                  <div className="course-info-text">
+                    <h3 className="course-title">{course.application_for_course || course.course_name || course.title}</h3>
+                    <p className="course-instructor">
+                      {course.course_status ? `Status: ${course.course_status}` : "Duration: " + (course.duration || "N/A")}
+                    </p>
+                    {course.course_id && (
+                      <p className="course-instructor">Course ID: {course.course_id}</p>
+                    )}
+                    <button
+                      className="wishlist-btn-show" style={{ cursor: "pointer",}}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToWishlist(course);
+                      }}
+                    >
+                      <i className="">
+                        <FaHeart />
+                      </i>
+                    </button>
+                    <div className="course-meta">
+                      <span className="progress-text">
+                        {course.progress ? `${course.progress}% complete` : "0% complete"}
+                      </span>
+                      <div className="rating">
+                        {course.rating ? "⭐".repeat(course.rating) + "☆".repeat(5-course.rating) : "⭐⭐⭐☆☆"}
+                      </div>
+                    </div>
+
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: course.progress ? `${course.progress}%` : "0%" }}
+                      ></div>
+                    </div>
+
+                    <div className="course-footer">
+                      <span className="rate-text">Leave a rating</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="course-info-text">
-              <h3 className="course-title">How to Make a Responsive Website in React JS</h3>
-              <p className="course-instructor">Software Engineer</p>
-              <button
-                className="wishlist-btn-show" style={{ cursor: "pointer",}}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addToWishlist({
-                    title: "How to Make a Responsive Website in React JS",
-                    video: "https://www.w3schools.com/html/mov_bbb.mp4",
-                    poster: "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"
-                  });
-                }}
-              >
-                <i className="">
-                  <FaHeart />
-                </i>
-              </button>
-              <div className="course-meta">
-                <span className="progress-text">88% complete</span>
-                <div className="rating">⭐⭐⭐☆☆</div>
-              </div>
-
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: "88%" }}></div>
-              </div>
-
-              <div className="course-footer">
-                <span className="rate-text">Leave a rating</span>
-              </div>
+          ))
+        ) : (
+          <div className="no-courses-message">
+            <p>No courses registered yet. Browse our recommended courses to get started!</p>
+          </div>
+        )}
+      </div>
+      
+      {/* USER REGISTRATION DETAILS */}
+      {userRegistrationData && (
+        <div className="user-registration-details" style={{ marginTop: "30px", padding: "20px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
+          <h3>Your Registration Details</h3>
+          <div className="registration-info" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "15px" }}>
+            <div>
+              <strong>Applicant ID:</strong> {userRegistrationData.applicant_id}
+            </div>
+            <div>
+              <strong>Course:</strong> {userRegistrationData.application_for_course}
+            </div>
+            <div>
+              <strong>Status:</strong> {userRegistrationData.course_status}
+            </div>
+            <div>
+              <strong>Name:</strong> {userRegistrationData.candidate_name}
+            </div>
+            <div>
+              <strong>Guardian Name:</strong> {userRegistrationData.guardian_name}
+            </div>
+            <div>
+              <strong>Address:</strong> {userRegistrationData.address}
+            </div>
+            <div>
+              <strong>Date of Birth:</strong> {userRegistrationData.date_of_birth}
+            </div>
+            <div>
+              <strong>Email:</strong> {userRegistrationData.email}
+            </div>
+            <div>
+              <strong>Mobile:</strong> {userRegistrationData.mobile_no}
+            </div>
+            <div>
+              <strong>School/College:</strong> {userRegistrationData.school_college_name}
+            </div>
+            <div>
+              <strong>Education:</strong> {userRegistrationData.highest_education}
+            </div>
+            <div>
+              <strong>Registration Date:</strong> {new Date(userRegistrationData.created_at).toLocaleDateString()}
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
-  // ⭐ Recommended Courses UI Component
+  // Recommended Courses UI Component
   const RecommendedCoursesUI = () => {
-    const recommendedCourses = [
-      {
-        id: 1,
-        title: "Advanced React Patterns",
-        instructor: "React Expert",
-        video: "https://www.w3schools.com/html/mov_bbb.mp4",
-        poster: "https://i.ibb.co/4Y6HcRD/reactjs-banner.png",
-        progress: 65,
-        rating: 4,
-        difficulty: "advanced",
-        mrp: 2999,
-        discountPrice: 999
-      },
-      {
-        id: 2,
-        title: "Node.js Complete Guide",
-        instructor: "Backend Developer",
-        video: "https://www.w3schools.com/html/mov_bbb.mp4",
-        poster: "https://i.ibb.co/4Y6HcRD/reactjs-banner.png",
-        progress: 30,
-        rating: 5,
-        difficulty: "medium",
-        mrp: 1999,
-        discountPrice: 699
-      },
-      {
-        id: 3,
-        title: "CSS Grid and Flexbox",
-        instructor: "UI/UX Designer",
-        video: "https://www.w3schools.com/html/mov_bbb.mp4",
-        poster: "https://i.ibb.co/4Y6HcRD/reactjs-banner.png",
-        progress: 0,
-        rating: 4,
-        difficulty: "basic",
-        mrp: 1499,
-        discountPrice: 499
-      },
-     
-    ];
+    // Add default properties to all courses from API
+    const coursesWithDefaults = courseItems.map(course => ({
+      ...course,
+      title: course.title,
+      video: "https://www.w3schools.com/html/mov_bbb.mp4",
+      poster: course.icon,
+      progress: 0,
+      rating: 4,
+      difficulty: "basic",
+      price: course.price
+    }));
 
     const isInWishlist = (courseId) => {
       return wishlist.some(item => item.id === courseId);
@@ -191,8 +328,8 @@ const TrainingDashBoard = () => {
 
     // Filter courses based on difficulty
     const filteredCourses = difficultyFilter === "all" 
-      ? recommendedCourses 
-      : recommendedCourses.filter(course => course.difficulty === difficultyFilter);
+      ? coursesWithDefaults 
+      : coursesWithDefaults.filter(course => course.difficulty === difficultyFilter);
 
     // Function to get difficulty badge styling
     const getDifficultyBadgeClass = (difficulty) => {
@@ -211,8 +348,8 @@ const TrainingDashBoard = () => {
     return (
       <div className="recommended-courses-wrapper">
         <div className="recommended-courses-header">
-          <h2>Recommended Courses</h2>
-          <p>Based on your interests and learning history</p>
+          <h2>All Courses</h2>
+          <p>Explore our wide range of courses</p>
         </div>
         
         {/* Difficulty Filter */}
@@ -265,7 +402,9 @@ const TrainingDashBoard = () => {
                       {course.difficulty.charAt(0).toUpperCase() + course.difficulty.slice(1)}
                     </span>
                   </div>
-                  <p className="recommended-course-instructor">{course.instructor}</p>
+                  <p className="recommended-course-instructor">
+                    {course.description || `Duration: ${course.duration}`}
+                  </p>
                   
                   <div className="recommended-course-meta">
                     <span className="recommended-progress-text">
@@ -285,11 +424,7 @@ const TrainingDashBoard = () => {
                   )}
 
                   <div className="course-pricing">
-                    <span className="discount-price">₹{course.discountPrice}</span>
-                    <span className="mrp-price">₹{course.mrp}</span>
-                    <span className="discount-percentage">
-                      {Math.round((1 - course.discountPrice/course.mrp) * 100)}% OFF
-                    </span>
+                    <span className="price">₹{course.price}</span>
                   </div>
 
                   <div className="recommended-course-footer">
@@ -300,7 +435,19 @@ const TrainingDashBoard = () => {
                 </div>
               </div>
               
-           
+              {/* <button
+                className={`recommended-wishlist-btn ${isInWishlist(course.id) ? "in-wishlist" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isInWishlist(course.id)) {
+                    setWishlist(prev => prev.filter(item => item.id !== course.id));
+                  } else {
+                    addToWishlist(course);
+                  }
+                }}
+              >
+                <FaHeart />
+              </button> */}
             </div>
           ))}
         </div>
@@ -312,11 +459,8 @@ const TrainingDashBoard = () => {
     switch (activeTab) {
       case "all":
         return <AllCoursesUI />;
-
-     
       case "lists":
         return <RecommendedCoursesUI />;
-
       default:
         return null;
     }
@@ -334,7 +478,6 @@ const TrainingDashBoard = () => {
         <TrainingHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="dashboard-body">
-
           <div className="top-banner">
             <h1 className="td-heading">{banner.title}</h1>
             <p className="td-subtext">{banner.desc}</p>
@@ -346,7 +489,6 @@ const TrainingDashBoard = () => {
           </div>
 
           <div className="tab-content-wrapper">{renderTabContent()}</div>
-
         </Container>
       </div>
     </div>
