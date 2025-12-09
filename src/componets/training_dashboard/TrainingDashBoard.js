@@ -11,17 +11,22 @@ import { AuthContext } from "../context/AuthContext";
 
 const TrainingDashBoard = () => {
   const { user } = useContext(AuthContext);
-  const applicantId = user?.unique_id; // Default applicant ID if user is not available
-  console.log("user_id:", applicantId);
+  const applicantId = user?.unique_id; // Get applicant ID from AuthContext
+  
+  // Console log to track unique ID after login
+  console.log("TrainingDashBoard Component - User object:", user);
+  console.log("TrainingDashBoard Component - Unique ID (applicantId):", applicantId);
+  
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [wishlist, setWishlist] = useState([]);
   const [difficultyFilter, setDifficultyFilter] = useState("all");
-  const [allCourses, setAllCourses] = useState([]); // State to store all courses
-  const [userCourses, setUserCourses] = useState([]); // State to store user's registered courses
+  const [userCourses, setUserCourses] = useState([]); // State to store user's registered courses with details
   const [courseItems, setCourseItems] = useState([]); // State to store course items from new API
   const [userRegistrationData, setUserRegistrationData] = useState(null); // State to store user registration data
+  const [allRegistrations, setAllRegistrations] = useState([]); // State to store all registrations
+  const [loading, setLoading] = useState(true); // Loading state
  
   const navigate = useNavigate();
 
@@ -41,12 +46,13 @@ const TrainingDashBoard = () => {
     setWishlist((prev) => [...prev, course]);
   };
 
-  // Fetch course items from new API
+  // Fetch course items from API
   useEffect(() => {
     const fetchCourseItems = async () => {
       try {
         const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-items/');
         const data = await response.json();
+        console.log("Course Items API Response:", data);
         if (data.success) {
           setCourseItems(data.data);
         }
@@ -58,87 +64,135 @@ const TrainingDashBoard = () => {
     fetchCourseItems();
   }, []);
 
-  // Fetch all courses
+  // Fetch all course registrations
   useEffect(() => {
-    const fetchAllCourses = async () => {
-      try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/');
-        const data = await response.json();
-        if (data.success) {
-          setAllCourses(data.courses);
-        }
-      } catch (error) {
-        console.error('Error fetching courses:', error);
-      }
-    };
-
-    fetchAllCourses();
-  }, []);
-
-  // Fetch user's registered courses
-  useEffect(() => {
-    const fetchUserCourses = async () => {
+    console.log("useEffect triggered - applicantId:", applicantId);
+    
+    const fetchAllRegistrations = async () => {
+      console.log("fetchAllRegistrations called - applicantId:", applicantId);
+      
       try {
         const response = await fetch(
-          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/?applicant_id=APP/2025/161006`,
+          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`,
           {
             method: "GET",
-           
+            credentials: 'include' // Include credentials in the request
           }
         );
 
         const data = await response.json();
-        console.log("API Response:", data); // Log the response for debugging
+        console.log("All Registrations API Response:", data); // Log the response for debugging
         
         // Check if the API returned a successful response with data
         if (data && data.success && data.data) {
-          // Store the registration data
-          setUserRegistrationData(data.data);
+          // Store all registrations
+          setAllRegistrations(data.data);
           
-          // Create a course object with the required properties
-          const userCourse = {
-            id: data.data.id,
-            application_for_course: data.data.application_for_course,
-            course_name: data.data.application_for_course,
-            title: data.data.application_for_course,
-            course_status: data.data.course_status,
-            candidate_name: data.data.candidate_name,
-            guardian_name: data.data.guardian_name,
-            address: data.data.address,
-            date_of_birth: data.data.date_of_birth,
-            profile_photo: data.data.profile_photo,
-            email: data.data.email,
-            mobile_no: data.data.mobile_no,
-            school_college_name: data.data.school_college_name,
-            highest_education: data.data.highest_education,
-            applicant_id: data.data.applicant_id,
-            created_at: data.data.created_at,
-            updated_at: data.data.updated_at,
-            // Add default values for properties not in the API response
-            progress: 0,
-            rating: 0,
-            duration: "30 Days",
-            course_id: data.data.id
-          };
+          // Filter registrations for the current user
+          const userRegistrations = data.data.filter(registration => {
+            console.log("Comparing:", registration.applicant_id, "with:", applicantId);
+            return registration.applicant_id === applicantId;
+          });
           
-          // Set the user courses array with the course object
-          setUserCourses([userCourse]);
+          console.log("Filtered user registrations:", userRegistrations);
+          
+          // If user has registrations, update the state
+          if (userRegistrations.length > 0) {
+            // Log the application_for_course field for each matching registration
+            userRegistrations.forEach(registration => {
+              console.log("Matched applicant_id:", registration.applicant_id, "with application_for_course:", registration.application_for_course);
+            });
+            
+            // Set the registration data to the first registration
+            setUserRegistrationData(userRegistrations[0]);
+          } else {
+            // If no registrations for the user, set empty states
+            console.log("No registrations found for applicantId:", applicantId);
+            setUserRegistrationData(null);
+          }
         } else {
-          // If no data is returned, set an empty array
-          setUserCourses([]);
+          // If no data is returned, set empty states
+          console.log("API response invalid or no data");
           setUserRegistrationData(null);
+          setAllRegistrations([]);
         }
       } catch (error) {
         console.error('Error fetching user courses:', error);
-        setUserCourses([]);
         setUserRegistrationData(null);
+        setAllRegistrations([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (applicantId) {
-      fetchUserCourses();
+      fetchAllRegistrations();
+    } else {
+      console.log("applicantId is not available yet");
+      setLoading(false);
     }
   }, [applicantId]);
+
+  // Match user registrations with course details
+  useEffect(() => {
+    if (courseItems.length > 0 && allRegistrations.length > 0) {
+      // Filter registrations for the current user
+      const userRegistrations = allRegistrations.filter(registration => 
+        registration.applicant_id === applicantId
+      );
+      
+      console.log("User registrations for matching:", userRegistrations);
+      console.log("Available course items:", courseItems);
+      
+      if (userRegistrations.length > 0) {
+        // Get the course names that the user has registered for
+        const registeredCourseNames = userRegistrations.map(reg => {
+          console.log("Registration application_for_course:", reg.application_for_course);
+          return reg.application_for_course;
+        });
+        console.log("Registered course names:", registeredCourseNames);
+        
+        // Find matching courses from the course-items API
+        const matchedCourses = courseItems.filter(course => {
+          console.log("Comparing course title:", course.title, "with registered names:", registeredCourseNames);
+          return registeredCourseNames.includes(course.title);
+        });
+        
+        console.log("Matched courses:", matchedCourses);
+        
+        // Enhance the matched courses with registration data
+        const enhancedCourses = matchedCourses.map(course => {
+          const registration = userRegistrations.find(reg => reg.application_for_course === course.title);
+          return {
+            ...course,
+            registration_id: registration.id,
+            applicant_id: registration.applicant_id,
+            course_status: registration.course_status,
+            candidate_name: registration.candidate_name,
+            guardian_name: registration.guardian_name,
+            address: registration.address,
+            date_of_birth: registration.date_of_birth,
+            profile_photo: registration.profile_photo,
+            email: registration.email,
+            mobile_no: registration.mobile_no,
+            school_college_name: registration.school_college_name,
+            highest_education: registration.highest_education,
+            created_at: registration.created_at,
+            updated_at: registration.updated_at,
+            // Add default values for properties not in the API response
+            progress: 0,
+            rating: 0,
+            duration: course.duration || "30 Days"
+          };
+        });
+        
+        console.log("Enhanced courses with registration data:", enhancedCourses);
+        setUserCourses(enhancedCourses);
+      } else {
+        setUserCourses([]);
+      }
+    }
+  }, [courseItems, allRegistrations, applicantId]);
 
   useEffect(() => {
     const checkDevice = () => {
@@ -197,27 +251,38 @@ const TrainingDashBoard = () => {
 
       {/* USER'S REGISTERED COURSES */}
       <div className="course-cards-container">
-        {userCourses.length > 0 ? (
+        {loading ? (
+          <div className="text-center my-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : userCourses.length > 0 ? (
           userCourses.map(course => (
             <div className="course-card-container" key={course.id} style={{ cursor: "pointer" }}>
               <div className="course-card">
                 <div onClick={() => openVideoPage(course)}>
                   <div className="course-video">
-                    {/* Using the profile photo if available, otherwise use default poster */}
+                    {/* Using course icon if available, otherwise use profile photo, then default poster */}
                     <img 
-                      src={course.profile_photo ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${course.profile_photo}` : "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"} 
-                      alt={course.application_for_course || course.course_name || course.title}
+                      src={course.icon ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${course.icon}` : 
+                          course.profile_photo ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${course.profile_photo}` : 
+                          "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"} 
+                      alt={course.title}
                       style={{ width: "100%", height: "220px", objectFit: "cover" }}
                     />
                   </div>
 
                   <div className="course-info-text">
-                    <h3 className="course-title">{course.application_for_course || course.course_name || course.title}</h3>
+                    <h3 className="course-title">{course.title}</h3>
                     <p className="course-instructor">
                       {course.course_status ? `Status: ${course.course_status}` : "Duration: " + (course.duration || "N/A")}
                     </p>
-                    {course.course_id && (
-                      <p className="course-instructor">Course ID: {course.course_id}</p>
+                    {course.price && (
+                      <p className="course-instructor">Price: ₹{course.price}</p>
+                    )}
+                    {course.course_type && (
+                      <p className="course-instructor">Type: {course.course_type}</p>
                     )}
                     <button
                       className="wishlist-btn-show" style={{ cursor: "pointer",}}
@@ -318,7 +383,8 @@ const TrainingDashBoard = () => {
       poster: course.icon,
       progress: 0,
       rating: 4,
-      difficulty: "basic",
+      // Use course_type from API or default to "basic"
+      difficulty: course.course_type || "basic",
       price: course.price
     }));
 
@@ -326,19 +392,19 @@ const TrainingDashBoard = () => {
       return wishlist.some(item => item.id === courseId);
     };
 
-    // Filter courses based on difficulty
+    // Filter courses based on course_type from API
     const filteredCourses = difficultyFilter === "all" 
       ? coursesWithDefaults 
-      : coursesWithDefaults.filter(course => course.difficulty === difficultyFilter);
+      : coursesWithDefaults.filter(course => course.course_type === difficultyFilter);
 
     // Function to get difficulty badge styling
-    const getDifficultyBadgeClass = (difficulty) => {
-      switch(difficulty) {
+    const getDifficultyBadgeClass = (courseType) => {
+      switch(courseType) {
         case "basic":
           return "difficulty-badge basic";
         case "medium":
           return "difficulty-badge medium";
-        case "advanced":
+        case "advance": // Changed from "advanced" to "advance" to match API
           return "difficulty-badge advanced";
         default:
           return "difficulty-badge";
@@ -352,7 +418,7 @@ const TrainingDashBoard = () => {
           <p>Explore our wide range of courses</p>
         </div>
         
-        {/* Difficulty Filter */}
+        {/* Difficulty Filter - Updated to match API values */}
         <div className="difficulty-filter">
           <button 
             className={`filter-btn ${difficultyFilter === "all" ? "active" : ""}`}
@@ -373,8 +439,8 @@ const TrainingDashBoard = () => {
             Medium
           </button>
           <button 
-            className={`filter-btn ${difficultyFilter === "advanced" ? "active" : ""}`}
-            onClick={() => setDifficultyFilter("advanced")}
+            className={`filter-btn ${difficultyFilter === "advance" ? "active" : ""}`} // Changed from "advanced" to "advance"
+            onClick={() => setDifficultyFilter("advance")}
           >
             Advanced
           </button>
@@ -398,8 +464,9 @@ const TrainingDashBoard = () => {
                 <div className="recommended-course-info">
                   <div className="course-header">
                     <h3 className="recommended-course-title">{course.title}</h3>
-                    <span className={getDifficultyBadgeClass(course.difficulty)}>
-                      {course.difficulty.charAt(0).toUpperCase() + course.difficulty.slice(1)}
+                    {/* Use course_type from API for badge */}
+                    <span className={getDifficultyBadgeClass(course.course_type)}>
+                      {course.course_type ? course.course_type.charAt(0).toUpperCase() + course.course_type.slice(1) : "Basic"}
                     </span>
                   </div>
                   <p className="recommended-course-instructor">
