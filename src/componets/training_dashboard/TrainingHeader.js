@@ -178,7 +178,7 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => navigate("/HrProfile")}>
+                  <Dropdown.Item onClick={() => navigate("/UserProfile")}>
                     <FaUserCircle className="me-2" /> Profile
                   </Dropdown.Item>
 

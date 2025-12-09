@@ -394,6 +394,268 @@
   color: #555;
   margin-top: 4px;
 }
+/* ============================
+   RECOMMENDED COURSES SECTION
+============================= */
+
+.recommended-courses-wrapper {
+  padding: 20px 0;
+}
+
+.recommended-courses-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.recommended-courses-header p {
+  color: #666;
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+/* ============================
+   FILTER BUTTONS
+============================= */
+.difficulty-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.filter-btn {
+  padding: 8px 14px;
+  background: #f3f3f3;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.filter-btn:hover {
+  background: #e6e6e6;
+}
+
+.filter-btn.active {
+  background: #5624d0;
+  color: white;
+  border-color: #5624d0;
+}
+
+/* ============================
+   COURSES GRID
+============================= */
+.recommended-courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 20px;
+}
+
+/* ============================
+   COURSE CARD
+============================= */
+.recommended-course-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  overflow: hidden;
+  position: relative;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.recommended-course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.recommended-course-video img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+/* ============================
+   COURSE INFO
+============================= */
+.recommended-course-info {
+  padding: 15px;
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recommended-course-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.recommended-course-instructor {
+  font-size: 14px;
+  color: #777;
+  margin: 8px 0;
+}
+
+/* ============================
+   DIFFICULTY BADGES
+============================= */
+.difficulty-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: white;
+}
+
+.difficulty-badge.basic {
+  background: #2ecc71;
+}
+
+.difficulty-badge.medium {
+  background: #f1c40f;
+}
+
+.difficulty-badge.advanced {
+  background: #e74c3c;
+}
+
+/* ============================
+   META — PROGRESS + RATING
+============================= */
+.recommended-course-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.recommended-progress-text {
+  font-size: 14px;
+  color: #444;
+}
+
+.recommended-rating {
+  font-size: 14px;
+  color: #5624d0;
+}
+
+.star-filled {
+  color: #f1c40f;
+}
+
+.star-empty {
+  color: #ccc;
+}
+
+/* ============================
+   PROGRESS BAR
+============================= */
+.recommended-progress-bar {
+  background: #eee;
+  height: 6px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.recommended-progress-fill {
+  background: #5624d0;
+  height: 100%;
+  border-radius: 5px;
+}
+
+/* ============================
+   PRICE SECTION
+============================= */
+.course-pricing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.discount-price {
+  font-size: 18px;
+  font-weight: bold;
+  color: #5624d0;
+}
+
+.mrp-price {
+  text-decoration: line-through;
+  color: #777;
+  font-size: 14px;
+}
+
+.discount-percentage {
+  font-size: 13px;
+  color: #2ecc71;
+  font-weight: 700;
+}
+
+/* ============================
+   FOOTER BUTTON
+============================= */
+.recommended-course-footer {
+  margin-top: 12px;
+}
+
+.recommended-continue-btn {
+  background: #5624d0;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.recommended-continue-btn:hover {
+  background: #421aa0;
+}
+
+/* ============================
+   WISHLIST BUTTON
+============================= */
+.recommended-wishlist-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: white;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  color: #999;
+  transition: 0.3s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.recommended-wishlist-btn:hover {
+  color: #d63031;
+}
+
+.recommended-wishlist-btn.in-wishlist {
+  color: #e74c3c;
+}
+
+/* ============================
+   RESPONSIVE
+============================= */
+@media (max-width: 768px) {
+  .recommended-courses-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recommended-course-card {
+    margin-bottom: 15px;
+  }
+}
 
 /* -------- Responsive -------- */
 @media (max-width: 768px) {

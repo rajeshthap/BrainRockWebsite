@@ -107,6 +107,7 @@ import OfferLetters from "./componets/hr_dashboard/recruitments/OfferLetters";
 import Shortlisting from "./componets/hr_dashboard/recruitments/Shortlisting";
 import Career from "./componets/topnav/navigationpages/Career";
 import EmployeeTransfer from "./componets/hr_dashboard/hr_iinerpage/EmployeeTransfer";
+import UserProfile from "./componets/training_dashboard/training_profile/UserProfile";
 
 function AppContent() {
   const location = useLocation();
@@ -172,6 +173,7 @@ function AppContent() {
     "/Shortlisting",
     "/InterviewSch",
     "/EmployeeTransfer",
+    "/UserProfile"
   ]);
 
   const hiddenFooter1 = new Set([
@@ -232,6 +234,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <LeaveStatus />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/UserProfile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
             </ProtectedRoute>
           }
         />
