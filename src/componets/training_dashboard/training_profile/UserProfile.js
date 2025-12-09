@@ -218,10 +218,7 @@ const UserProfile = () => {
                         <div className="profile-info flex-grow-1 text-center text-md-start">
                           <h2 className="profile-name">{profileData.candidate_name}</h2>
                           <div className="d-flex flex-column flex-md-row align-items-center gap-2 mb-2">
-                            <div className="d-flex align-items-center gap-2">
-                              <FaIdCard className="text-muted" />
-                              <span className="text-muted">ID: {profileData.applicant_id}</span>
-                            </div>
+                           
                             <div className="d-flex align-items-center gap-2">
                               {/* <span className="text-muted">Status:</span> */}
                               {getStatusBadge(profileData.status)}
