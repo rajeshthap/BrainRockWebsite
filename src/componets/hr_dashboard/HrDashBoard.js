@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Card, Table, Modal } from "react-bootstrap";
+import { Container, Row, Col, Button, Card, Table, Modal, Form, Badge, InputGroup } from "react-bootstrap";
 import {
   FaTachometerAlt,
   FaUsers,
@@ -7,6 +7,9 @@ import {
   FaGift,
   FaUserCheck,
   FaTimes,
+  FaHeart,
+  FaRegHeart,
+  FaSearch,
 } from "react-icons/fa";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { Tooltip, ResponsiveContainer } from "recharts";
@@ -43,6 +46,22 @@ const HrDashBoard = () => {
   });
   const [statsLoading, setStatsLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Post related states
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [postLoading, setPostLoading] = useState(true);
+  const [postError, setPostError] = useState("");
+  const [postSuccess, setPostSuccess] = useState("");
+  const [postAuthor, setPostAuthor] = useState("Kamal Hassan"); // logged-in user
+  const [postDepartment] = useState("Human Resource HR Team");
+  const [postTitle, setPostTitle] = useState("");
+  const [postDescription, setPostDescription] = useState("");
+  const [postQuote, setPostQuote] = useState("");
+  const [postImage, setPostImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [postContent, setPostContent] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch employee count data
   useEffect(() => {
@@ -130,6 +149,42 @@ const HrDashBoard = () => {
     fetchBirthdays();
   }, []);
 
+  // Fetch posts
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-post/', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Ensure liked_by_users is always an array
+          const processedPosts = data.data.map(post => ({
+            ...post,
+            liked_by_users: post.liked_by_users || []
+          }));
+          
+          setPosts(processedPosts);
+        }
+      } catch (error) {
+        console.error("Failed to fetch posts:", error);
+        setPostError("Failed to load posts. Please try again.");
+      } finally {
+        setPostLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
   // Responsive check
   useEffect(() => {
     const checkDevice = () => {
@@ -163,16 +218,197 @@ const HrDashBoard = () => {
     
     return "btn-secondary";
   };
-const [showPostModal, setShowPostModal] = useState(false);
-const [postAuthor] = useState("Kamal Hassan"); // logged-in user
-const [postDepartment] = useState("Human Resource HR Team");
 
-const [postTitle, setPostTitle] = useState("");
-const [postDescription, setPostDescription] = useState("");
-const [postQuote, setPostQuote] = useState("");
-const [postImage, setPostImage] = useState(null);
-const [imagePreview, setImagePreview] = useState(null);
+  // Handle post submission
+  const handlePostSubmit = async (e) => {
+    e.preventDefault();
+    setPostError("");
+    setPostSuccess("");
+    
+    try {
+      // Create post data according to API format
+      const postData = {
+        content: postContent,
+        image: postImage
+      };
+      
+      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-post/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setPostSuccess("Post created successfully!");
+        setPostContent("");
+        setPostImage(null);
+        setImagePreview(null);
+        setPostTitle("");
+        setPostDescription("");
+        setPostQuote("");
+        
+        // Refresh posts
+        const fetchPosts = async () => {
+          try {
+            const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-post/', {
+              method: 'GET',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              // Ensure liked_by_users is always an array
+              const processedPosts = data.data.map(post => ({
+                ...post,
+                liked_by_users: post.liked_by_users || []
+              }));
+              
+              setPosts(processedPosts);
+            }
+          } catch (error) {
+            console.error("Failed to fetch posts:", error);
+          }
+        };
+        
+        fetchPosts();
+        
+        setTimeout(() => {
+          setShowPostModal(false);
+        }, 1500);
+      } else {
+        setPostError(data.message || "Failed to create post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Failed to create post:", error);
+      setPostError("Failed to create post. Please try again.");
+    }
+  };
 
+ // Handle like/unlike - Fixed version
+const handleLike = async (postId) => {
+  try {
+    // Find the post to check if it's already liked
+    const post = posts.find(p => p.post_id === postId);
+    if (!post) return;
+    
+    // Check if user has already liked this post
+    const isLiked = post.liked_by_users && post.liked_by_users.includes(postAuthor);
+    
+    // Determine action based on current like status
+    const action = isLiked ? 'delete' : 'like';
+    
+    console.log("Sending request with action:", action); // Debug log
+    
+    const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/post-like/', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ 
+        post_id: postId,
+        action: action  // Send 'like' or 'delete' based on current state
+      })
+    });
+    
+    if (!response.ok) {
+      // Try to get error details from response
+      const errorText = await response.text();
+      console.error("API Error Response:", errorText);
+      
+      // If we get "Already liked" error when trying to unlike, just update UI locally
+      if (isLiked && errorText.includes("Already liked")) {
+        console.log("Already liked error on unlike, updating UI locally");
+        setPosts(prevPosts => 
+          prevPosts.map(p => {
+            if (p.post_id === postId) {
+              const likedByUsers = p.liked_by_users || [];
+              return {
+                ...p,
+                like_count: Math.max((p.like_count || 0) - 1, 0),
+                liked_by_users: likedByUsers.filter(id => id !== postAuthor)
+              };
+            }
+            return p;
+          })
+        );
+        return; // Don't throw error, just update UI
+      }
+      
+      throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log("Like API Response:", data); // Debug log
+    
+    if (data.success) {
+      // Update posts with new like count
+      setPosts(prevPosts => 
+        prevPosts.map(p => {
+          if (p.post_id === postId) {
+            // Ensure liked_by_users is always an array
+            const likedByUsers = p.liked_by_users || [];
+            
+            // If user liked the post
+            if (action === 'like') {
+              return {
+                ...p,
+                like_count: (p.like_count || 0) + 1,
+                liked_by_users: [...likedByUsers, postAuthor]
+              };
+            } 
+            // If user unliked the post
+            else if (action === 'delete') {
+              return {
+                ...p,
+                like_count: Math.max((p.like_count || 0) - 1, 0),
+                liked_by_users: likedByUsers.filter(id => id !== postAuthor)
+              };
+            }
+          }
+          return p;
+        })
+      );
+    } else {
+      console.error("Like operation failed:", data.message || "Unknown error");
+    }
+  } catch (error) {
+    console.error("Failed to like/unlike post:", error);
+  }
+};
+
+  // Filter posts based on search term
+  const filteredPosts = posts.filter(post => {
+    if (!searchTerm) return true;
+    
+    // Since we're not fetching employee details separately, we'll use the post_id for search
+    return (
+      post.post_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (post.content && post.content.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  });
+
+  // Format date
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
 
   // HR Stats Data - using API data
   const statsData = [
@@ -255,10 +491,10 @@ const [imagePreview, setImagePreview] = useState(null);
               sm={12}
               className="d-flex gap-2 br-post-top-btn align-items-center"
             >
-             <span onClick={() => setShowPostModal(true)} style={{cursor:"pointer"}}>
-  <BsFillFilePostFill className="br-post-top-icon" />
-  Post
-</span>
+              <span onClick={() => setShowPostModal(true)} style={{cursor:"pointer"}}>
+                <BsFillFilePostFill className="br-post-top-icon" />
+                Post
+              </span>
 
               <span className="border-start ps-2">
                 <LuFileBadge2 className="br-post-top-icon" />
@@ -334,137 +570,252 @@ const [imagePreview, setImagePreview] = useState(null);
               </Row>
             </Col>
             <Col lg={5} md={12} sm={12} className="mb-3">
-            {/* ================= POST MODAL ================= */}
-<Modal
-  show={showPostModal}
-  onHide={() => setShowPostModal(false)}
-  centered
-  size="lg"
->
-  <Modal.Header closeButton>
-    <Modal.Title>Create New Post</Modal.Title>
-  </Modal.Header>
+              {/* POST MODAL */}
+              <Modal
+                show={showPostModal}
+                onHide={() => setShowPostModal(false)}
+                centered
+                size="lg"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Create New Post</Modal.Title>
+                </Modal.Header>
 
-  <Modal.Body>
-    {/* Post Author Section */}
-    <div className="d-flex align-items-center mb-4">
-      <div
-        style={{
-          width: "55px",
-          height: "55px",
-          borderRadius: "50%",
-          backgroundColor: "#e0e0e0",
-          overflow: "hidden",
-        }}
-      >
-        {/* Profile Image (static or from API) */}
-        <img
-          src="https://via.placeholder.com/55"
-          alt="profile"
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </div>
+                <Modal.Body>
+                  {postError && <div className="alert alert-danger">{postError}</div>}
+                  {postSuccess && <div className="alert alert-success">{postSuccess}</div>}
+                  
+                  {/* Post Author Section */}
+                  <div className="d-flex align-items-center mb-4">
+                    <div
+                      style={{
+                        width: "55px",
+                        height: "55px",
+                        borderRadius: "50%",
+                        backgroundColor: "#e0e0e0",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {/* Profile Image (static) */}
+                      <img
+                        src="https://via.placeholder.com/55"
+                        alt="profile"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    </div>
 
-      <div className="ms-3">
-        <h6 className="fw-bold mb-0">{postAuthor}</h6>
-        <small className="text-muted">{postDepartment}</small>
-      </div>
-    </div>
+                    <div className="ms-3">
+                      <h6 className="fw-bold mb-0">{postAuthor}</h6>
+                      <small className="text-muted">{postDepartment}</small>
+                    </div>
+                  </div>
 
-    {/* Title */}
-    <div className="mb-3">
-      <label className="form-label fw-bold">Post Title</label>
-      <input
-        type="text"
-        className="form-control"
-        placeholder="Enter title"
-        value={postTitle}
-        onChange={(e) => setPostTitle(e.target.value)}
-      />
-    </div>
+                  <Form onSubmit={handlePostSubmit}>
+                    {/* Title */}
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">Post Title</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter title"
+                        value={postTitle}
+                        onChange={(e) => setPostTitle(e.target.value)}
+                      />
+                    </div>
 
-    {/* Description */}
-    <div className="mb-3">
-      <label className="form-label fw-bold">Description</label>
-      <textarea
-        className="form-control"
-        rows="4"
-        placeholder="Write something..."
-        value={postDescription}
-        onChange={(e) => setPostDescription(e.target.value)}
-      ></textarea>
-    </div>
+                    {/* Description */}
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">Description</label>
+                      <textarea
+                        className="form-control"
+                        rows="4"
+                        placeholder="Write something..."
+                        value={postDescription}
+                        onChange={(e) => setPostDescription(e.target.value)}
+                      ></textarea>
+                    </div>
 
-    {/* Quote Field */}
-    <div className="mb-3">
-      <label className="form-label fw-bold">Quote (Optional)</label>
-      <textarea
-        className="form-control"
-        rows="3"
-        placeholder='e.g. "To be yourself in a world..."'
-        value={postQuote}
-        onChange={(e) => setPostQuote(e.target.value)}
-      ></textarea>
-    </div>
+                    {/* Quote Field */}
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">Quote (Optional)</label>
+                      <textarea
+                        className="form-control"
+                        rows="3"
+                        placeholder='e.g. "To be yourself in a world..."'
+                        value={postQuote}
+                        onChange={(e) => setPostQuote(e.target.value)}
+                      ></textarea>
+                    </div>
 
-    {/* Image Upload */}
-    <div className="mb-3">
-      <label className="form-label fw-bold">Upload Image</label>
-      <input
-        type="file"
-        className="form-control"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          setPostImage(file);
-          if (file) setImagePreview(URL.createObjectURL(file));
-        }}
-      />
-    </div>
+                    {/* Image Upload */}
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">Upload Image</label>
+                      <input
+                        type="file"
+                        className="form-control"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          setPostImage(file);
+                          if (file) setImagePreview(URL.createObjectURL(file));
+                        }}
+                      />
+                    </div>
 
-    {/* Preview */}
-    {imagePreview && (
-      <div className="mb-3 text-center">
-        <img
-          src={imagePreview}
-          alt="preview"
-          style={{
-            width: "250px",
-            height: "auto",
-            borderRadius: "10px",
-            border: "1px solid #ddd",
-          }}
-        />
-      </div>
-    )}
-  </Modal.Body>
+                    {/* Preview */}
+                    {imagePreview && (
+                      <div className="mb-3 text-center">
+                        <img
+                          src={imagePreview}
+                          alt="preview"
+                          style={{
+                            width: "250px",
+                            height: "auto",
+                            borderRadius: "10px",
+                            border: "1px solid #ddd",
+                          }}
+                        />
+                      </div>
+                    )}
 
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowPostModal(false)}>
-      Cancel
-    </Button>
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button variant="secondary" onClick={() => setShowPostModal(false)}>
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          console.log("Post Submitted:", {
+                            postAuthor,
+                            postDepartment,
+                            postTitle,
+                            postDescription,
+                            postQuote,
+                            postImage,
+                          });
+                          setShowPostModal(false);
+                        }}
+                      >
+                        Submit Post
+                      </Button>
+                    </div>
+                  </Form>
+                </Modal.Body>
+              </Modal>
 
-    <Button
-      variant="primary"
-      onClick={() => {
-        console.log("Post Submitted:", {
-          postAuthor,
-          postDepartment,
-          postTitle,
-          postDescription,
-          postQuote,
-          postImage,
-        });
-        setShowPostModal(false);
-      }}
-    >
-      Submit Post
-    </Button>
-  </Modal.Footer>
-</Modal>
+              {/* Posts Section */}
+              <Card className="mb-3">
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0">Posts</h5>
+                  <InputGroup className="w-50">
+                    <InputGroup.Text>
+                      <FaSearch />
+                    </InputGroup.Text>
+                    <Form.Control
+                      placeholder="Search by post ID or content..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </InputGroup>
+                </Card.Header>
+                <Card.Body className="p-0">
+                  {postLoading ? (
+                    <div className="text-center py-4">
+                      <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  ) : filteredPosts.length > 0 ? (
+                    <div className="posts-container">
+                      {filteredPosts.map((post) => {
+                        // Ensure liked_by_users is always an array
+                        const likedByUsers = post.liked_by_users || [];
+                        const isLiked = likedByUsers.includes(postAuthor);
+                        
+                        return (
+                          <div key={post.id} className="post-item p-3 border-bottom">
+                            <div className="d-flex align-items-start gap-3">
+                              {/* Author Avatar - Using placeholder since we're not fetching employee details */}
+                              <div
+                                style={{
+                                  width: "45px",
+                                  height: "45px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#e0e0e0",
+                                  overflow: "hidden",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  color: "white",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {post.created_by ? post.created_by.substring(0, 2).toUpperCase() : "U"}
+                              </div>
 
+                              {/* Post Content */}
+                              <div className="flex-grow-1">
+                                <div className="d-flex justify-content-between align-items-start">
+                                  <div>
+                                    <h6 className="mb-1 fw-bold">
+                                      {post.created_by || "Unknown User"}
+                                    </h6>
+                                    <small className="text-muted">
+                                      Posted • {formatDate(post.created_at)}
+                                    </small>
+                                  </div>
+                                  <Badge bg="primary" className="post-id-badge">
+                                    {post.post_id}
+                                  </Badge>
+                                </div>
 
-              <FeedBackPost />
+                                <p className="mt-2">{post.content}</p>
+
+                                {post.image && (
+                                  <div className="mt-2">
+                                    <img
+                                      src={post.image}
+                                      alt="Post"
+                                      style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "300px",
+                                        borderRadius: "8px",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                  </div>
+                                )}
+
+                                {/* Like Button */}
+                                <div className="d-flex align-items-center gap-2 mt-3">
+                                  <Button
+                                    variant="link"
+                                    className="p-0 d-flex align-items-center gap-1"
+                                    onClick={() => handleLike(post.post_id)}
+                                  >
+                                    {isLiked ? (
+                                      <FaHeart className="text-danger" />
+                                    ) : (
+                                      <FaRegHeart />
+                                    )}
+                                    <span>{post.like_count || 0}</span>
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-muted">
+                        {searchTerm ? "No posts found matching your search." : "No posts available."}
+                      </p>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
             </Col>
             <Col lg={4} md={12} sm={12} className="mb-3">
               {/* Dynamic Birthday Card */}
@@ -475,7 +826,7 @@ const [imagePreview, setImagePreview] = useState(null);
                     <div className="birthday-text">
                       <h6 className="birthday-title">Loading Birthdays...</h6>
                     </div>
-                  </div>Kamal Hassan
+                  </div>
                 </Card>
               ) : birthdays.length > 0 ? (
                 <Card className="birthday-card d-flex flex-column">
@@ -535,17 +886,6 @@ const [imagePreview, setImagePreview] = useState(null);
               <LeaveBalance />
             </Col>
           </Row>
-          {/* Stats Cards */}
-
-          <Row>
-            {/* Pie Chart */}
-
-            {/* Leave Announcements */}
-
-            <Col lg={4} md={12} sm={12}></Col>
-          </Row>
-
-          {/* Existing Table + Quick Actions (same layout) */}
         </Container>
       </div>
 
