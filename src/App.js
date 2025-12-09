@@ -108,7 +108,7 @@ import Shortlisting from "./componets/hr_dashboard/recruitments/Shortlisting";
 import Career from "./componets/topnav/navigationpages/Career";
 import EmployeeTransfer from "./componets/hr_dashboard/hr_iinerpage/EmployeeTransfer";
 import UserProfile from "./componets/training_dashboard/training_profile/UserProfile";
-
+import AllStudentsData from "./componets/adminpanel/Candidate/AllStudentsData";
 function AppContent() {
   const location = useLocation();
 
@@ -173,7 +173,8 @@ function AppContent() {
     "/Shortlisting",
     "/InterviewSch",
     "/EmployeeTransfer",
-    "/UserProfile"
+    "/UserProfile",
+    "/AllStudentsData",
   ]);
 
   const hiddenFooter1 = new Set([
@@ -479,6 +480,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <AddCarousel />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/AllStudentsData"
+          element={
+            <ProtectedRoute>
+              <AllStudentsData />
             </ProtectedRoute>
           }
         />
