@@ -6,11 +6,6 @@ import DevoteeImg from "../../assets/images/login.svg";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
-  const trainingRoles = [
-    "Python",
-    "React",
-  ];
-
   const { login, loading: authLoading, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,6 +16,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [showModifyAlert, setShowModifyAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [courses, setCourses] = useState([]);
 
   // Function to clear all cookies
   const clearAllCookies = () => {
@@ -32,6 +28,23 @@ export default function Login() {
       document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     }
   };
+
+  // Fetch courses from API
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/');
+        const data = await response.json();
+        if (data.success && data.courses) {
+          setCourses(data.courses);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   // This effect runs when the component mounts to clear cookies
   useEffect(() => {
@@ -59,8 +72,12 @@ export default function Login() {
         return;
       }
 
-      // Then check for training roles
-      if (trainingRoles.includes(user.role)) {
+      // Check if user role matches any course name
+      const matchingCourse = courses.find(course => 
+        course.course_name.toLowerCase() === user.role.toLowerCase()
+      );
+
+      if (matchingCourse) {
         navigate("/TrainingDashBoard", {
           state: { unique_id: user.unique_id },
           replace: true,
@@ -74,7 +91,7 @@ export default function Login() {
         replace: true,
       });
     }
-  }, [user, navigate]);
+  }, [user, navigate, courses]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
