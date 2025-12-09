@@ -10,6 +10,8 @@ import {
   FaHeart,
   FaRegHeart,
   FaSearch,
+  FaThumbsDown,
+  FaRegThumbsDown,
 } from "react-icons/fa";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { Tooltip, ResponsiveContainer } from "recharts";
@@ -53,6 +55,7 @@ const HrDashBoard = () => {
   const [postLoading, setPostLoading] = useState(true);
   const [postError, setPostError] = useState("");
   const [postSuccess, setPostSuccess] = useState("");
+  const [likeLoading, setLikeLoading] = useState({});
   const [postAuthor, setPostAuthor] = useState(""); // Removed static "Kamal Hassan"
   const [postDepartment] = useState("Human Resource HR Team");
   const [postTitle, setPostTitle] = useState("");
@@ -66,34 +69,7 @@ const HrDashBoard = () => {
   // Employee data state
   const [employees, setEmployees] = useState({});
   const [employeesLoading, setEmployeesLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null); // Added to store current user info
   const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/";
-
-  // Fetch current user data
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await fetch(`${baseUrl}api/current-user/`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setCurrentUser(data);
-        setPostAuthor(data.full_name || data.username || "User");
-      } catch (error) {
-        // If we can't fetch user data, just use a generic value
-        setPostAuthor("User");
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
 
   // Fetch employee data
   useEffect(() => {
@@ -236,12 +212,15 @@ const HrDashBoard = () => {
         const data = await response.json();
         
         if (data.success) {
-          // Ensure liked_by_users is always an array
+          // Normalize post fields: liked/unliked arrays and counts
           const processedPosts = data.data.map(post => ({
             ...post,
-            liked_by_users: post.liked_by_users || []
+            liked_by_users: post.liked_by_users || [],
+            unliked_by_users: post.unliked_by_users || [],
+            like_count: typeof post.like_count === 'number' ? post.like_count : (post.like_count ? Number(post.like_count) : 0),
+            unlike_count: typeof post.unlike_count === 'number' ? post.unlike_count : (post.unlike_count ? Number(post.unlike_count) : 0),
           }));
-          
+
           setPosts(processedPosts);
         }
       } catch (error) {
@@ -342,10 +321,13 @@ const HrDashBoard = () => {
             const data = await response.json();
             
             if (data.success) {
-              // Ensure liked_by_users is always an array
+              // Normalize post fields: liked/unliked arrays and counts
               const processedPosts = data.data.map(post => ({
                 ...post,
-                liked_by_users: post.liked_by_users || []
+                liked_by_users: post.liked_by_users || [],
+                unliked_by_users: post.unliked_by_users || [],
+                like_count: typeof post.like_count === 'number' ? post.like_count : (post.like_count ? Number(post.like_count) : 0),
+                unlike_count: typeof post.unlike_count === 'number' ? post.unlike_count : (post.unlike_count ? Number(post.unlike_count) : 0),
               }));
               
               setPosts(processedPosts);
@@ -369,128 +351,153 @@ const HrDashBoard = () => {
     }
   };
 
-  // Handle like/unlike - Updated to update UI immediately
+  // Handle Like: only perform like action (no toggling). Use POST API.
   const handleLike = async (postId) => {
-    // Find the post to check if it's already liked
+    if (likeLoading[postId]) return;
     const post = posts.find(p => p.post_id === postId);
     if (!post) return;
-    
-    // Check if user has already liked this post
+
     const isLiked = post.liked_by_users && post.liked_by_users.includes(postAuthor);
-    
-    // Update UI immediately
-    setPosts(prevPosts => 
-      prevPosts.map(p => {
-        if (p.post_id === postId) {
-          const likedByUsers = p.liked_by_users || [];
-          
-          // If user liked the post
-          if (!isLiked) {
-            return {
-              ...p,
-              like_count: (p.like_count || 0) + 1,
-              liked_by_users: [...likedByUsers, postAuthor]
-            };
-          } 
-          // If user unliked the post
-          else {
+    // If already liked, do nothing (user must click Unlike to remove)
+    if (isLiked) return;
+
+    setLikeLoading(prev => ({ ...prev, [postId]: true }));
+
+    // Optimistic update: add like, remove any existing unlike by this user
+    setPosts(prev => prev.map(p => {
+      if (p.post_id === postId) {
+        return {
+          ...p,
+          like_count: (p.like_count || 0) + 1,
+          liked_by_users: [...(p.liked_by_users || []), postAuthor],
+          unliked_by_users: (p.unliked_by_users || []).filter(u => u !== postAuthor),
+          unlike_count: Math.max((p.unlike_count || 0) - 1, 0)
+        };
+      }
+      return p;
+    }));
+
+    try {
+      const response = await fetch(`${baseUrl}api/post-like/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ post_id: postId, action: 'like' })
+      });
+
+      if (!response.ok) {
+        // Revert optimistic update
+        setPosts(prev => prev.map(p => {
+          if (p.post_id === postId) {
             return {
               ...p,
               like_count: Math.max((p.like_count || 0) - 1, 0),
-              liked_by_users: likedByUsers.filter(id => id !== postAuthor)
+              liked_by_users: (p.liked_by_users || []).filter(u => u !== postAuthor)
             };
           }
+          return p;
+        }));
+      } else {
+        const data = await response.json().catch(() => null);
+        if (data && data.success) {
+          const updated = data.post || data.data || null;
+          if (updated) {
+            setPosts(prev => prev.map(p => p.post_id === (updated.post_id || postId) ? { ...p, ...updated, liked_by_users: updated.liked_by_users || p.liked_by_users || [], unliked_by_users: updated.unliked_by_users || p.unliked_by_users || [], like_count: updated.like_count ?? p.like_count, unlike_count: updated.unlike_count ?? p.unlike_count } : p));
+          }
+        }
+      }
+    } catch (err) {
+      // Revert optimistic update on exception
+      setPosts(prev => prev.map(p => {
+        if (p.post_id === postId) {
+          return {
+            ...p,
+            like_count: Math.max((p.like_count || 0) - 1, 0),
+            liked_by_users: (p.liked_by_users || []).filter(u => u !== postAuthor)
+          };
         }
         return p;
-      })
-    );
-    
+      }));
+    } finally {
+      setLikeLoading(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  // Handle Unlike: only perform unlike action (no toggling). Use DELETE API.
+  const handleUnlike = async (postId) => {
+    if (likeLoading[postId]) return;
+    const post = posts.find(p => p.post_id === postId);
+    if (!post) return;
+
+    const isUnliked = post.unliked_by_users && post.unliked_by_users.includes(postAuthor);
+    // If already unliked, do nothing
+    if (isUnliked) return;
+
+    setLikeLoading(prev => ({ ...prev, [postId]: true }));
+
+    // Optimistic update: add unlike, remove any existing like by this user
+    setPosts(prev => prev.map(p => {
+      if (p.post_id === postId) {
+        return {
+          ...p,
+          unlike_count: (p.unlike_count || 0) + 1,
+          unliked_by_users: [...(p.unliked_by_users || []), postAuthor],
+          liked_by_users: (p.liked_by_users || []).filter(u => u !== postAuthor),
+          like_count: Math.max((p.like_count || 0) - 1, 0)
+        };
+      }
+      return p;
+    }));
+
     try {
-      let response;
-      
-      if (isLiked) {
-        // Use DELETE method for unlike with post_id in payload
-        response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/post-like/', {
-          method: 'DELETE',
-          credentials: 'include',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ 
-            post_id: postId
-          })
-        });
-      } else {
-        // Use POST method for like with post_id in payload
-        response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/post-like/', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ 
-            post_id: postId
-          })
-        });
-      }
-      
+      const response = await fetch(`${baseUrl}api/post-like/`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ post_id: postId })
+      });
+
       if (!response.ok) {
-        // If API call fails, revert the UI change
-        setPosts(prevPosts => 
-          prevPosts.map(p => {
-            if (p.post_id === postId) {
-              const likedByUsers = p.liked_by_users || [];
-              
-              // If user liked the post (revert)
-              if (!isLiked) {
-                return {
-                  ...p,
-                  like_count: Math.max((p.like_count || 0) - 1, 0),
-                  liked_by_users: likedByUsers.filter(id => id !== postAuthor)
-                };
-              } 
-              // If user unliked the post (revert)
-              else {
-                return {
-                  ...p,
-                  like_count: (p.like_count || 0) + 1,
-                  liked_by_users: [...likedByUsers, postAuthor]
-                };
-              }
-            }
-            return p;
-          })
-        );
-      }
-    } catch (error) {
-      // If there's an exception, revert the UI change
-      setPosts(prevPosts => 
-        prevPosts.map(p => {
+        // Revert optimistic update
+        setPosts(prev => prev.map(p => {
           if (p.post_id === postId) {
-            const likedByUsers = p.liked_by_users || [];
-            
-            // If user liked the post (revert)
-            if (!isLiked) {
-              return {
-                ...p,
-                like_count: Math.max((p.like_count || 0) - 1, 0),
-                liked_by_users: likedByUsers.filter(id => id !== postAuthor)
-              };
-            } 
-            // If user unliked the post (revert)
-            else {
-              return {
-                ...p,
-                like_count: (p.like_count || 0) + 1,
-                liked_by_users: [...likedByUsers, postAuthor]
-              };
-            }
+            return {
+              ...p,
+              unlike_count: Math.max((p.unlike_count || 0) - 1, 0),
+              unliked_by_users: (p.unliked_by_users || []).filter(u => u !== postAuthor)
+            };
           }
           return p;
-        })
-      );
+        }));
+      } else {
+        const data = await response.json().catch(() => null);
+        if (data && data.success) {
+          const updated = data.post || data.data || null;
+          if (updated) {
+            setPosts(prev => prev.map(p => p.post_id === (updated.post_id || postId) ? { ...p, ...updated, liked_by_users: updated.liked_by_users || p.liked_by_users || [], unliked_by_users: updated.unliked_by_users || p.unliked_by_users || [], like_count: updated.like_count ?? p.like_count, unlike_count: updated.unlike_count ?? p.unlike_count } : p));
+          }
+        }
+      }
+    } catch (err) {
+      // Revert optimistic update on exception
+      setPosts(prev => prev.map(p => {
+        if (p.post_id === postId) {
+          return {
+            ...p,
+            unlike_count: Math.max((p.unlike_count || 0) - 1, 0),
+            unliked_by_users: (p.unliked_by_users || []).filter(u => u !== postAuthor)
+          };
+        }
+        return p;
+      }));
+    } finally {
+      setLikeLoading(prev => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -700,21 +707,12 @@ const HrDashBoard = () => {
                         overflow: "hidden",
                       }}
                     >
-                      {/* Profile Image - using user data if available */}
-                      {currentUser && currentUser.profile_photo ? (
-                        <img
-                          src={`${baseUrl}${currentUser.profile_photo}`}
-                          alt="profile"
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      ) : (
-                        <div 
-                          className="d-flex align-items-center justify-content-center h-100"
-                          style={{ backgroundColor: "#007bff", color: "white" }}
-                        >
-                          {postAuthor ? postAuthor.substring(0, 2).toUpperCase() : "U"}
-                        </div>
-                      )}
+                      {/* Profile Image - placeholder (no current-user API) */}
+                      <img
+                        src="https://via.placeholder.com/55"
+                        alt="profile"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
                     </div>
 
                     <div className="ms-3">
@@ -904,24 +902,48 @@ const HrDashBoard = () => {
                                 {/* Post Content After Image */}
                                 <p className="mt-2">{post.content}</p>
 
-                                {/* Like Button with Count in Front */}
-                                <div className="d-flex align-items-center gap-2 mt-3">
-                                  <Button
-                                    variant="link"
-                                    className="p-0 d-flex align-items-center gap-1"
-                                    onClick={() => handleLike(post.post_id)}
-                                  >
-                                    {post.like_count > 0 && (
-                                      <span className={post.like_count > 0 ? "text-danger me-1" : "me-1"}>
-                                        {post.like_count}
-                                      </span>
-                                    )}
-                                    {isLiked ? (
-                                      <FaHeart className="text-danger" />
-                                    ) : (
-                                      <FaRegHeart />
-                                    )}
-                                  </Button>
+                                {/* Like and Unlike Buttons with Counts */}
+                                <div className="d-flex align-items-center gap-3 mt-3">
+                                  {/** compute liked/unliked locally if not present */}
+                                  <div className="d-flex align-items-center">
+                                    <Button
+                                      variant="link"
+                                      className="p-0 d-flex align-items-center gap-1"
+                                      onClick={() => handleLike(post.post_id)}
+                                      disabled={!!likeLoading[post.post_id]}
+                                    >
+                                      {post.like_count > 0 && (
+                                        <span className={post.like_count > 0 ? "text-danger me-1" : "me-1"}>
+                                          {post.like_count}
+                                        </span>
+                                      )}
+                                      { (post.liked_by_users || []).includes(postAuthor) ? (
+                                        <FaHeart className="text-danger" />
+                                      ) : (
+                                        <FaRegHeart />
+                                      )}
+                                    </Button>
+                                  </div>
+
+                                  <div className="d-flex align-items-center">
+                                    <Button
+                                      variant="link"
+                                      className="p-0 d-flex align-items-center gap-1"
+                                      onClick={() => handleUnlike(post.post_id)}
+                                      disabled={!!likeLoading[post.post_id]}
+                                    >
+                                      {post.unlike_count > 0 && (
+                                        <span className={post.unlike_count > 0 ? "text-muted me-1" : "me-1"}>
+                                          {post.unlike_count}
+                                        </span>
+                                      )}
+                                      { (post.unliked_by_users || []).includes(postAuthor) ? (
+                                        <FaThumbsDown className="text-muted" />
+                                      ) : (
+                                        <FaRegThumbsDown />
+                                      )}
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
