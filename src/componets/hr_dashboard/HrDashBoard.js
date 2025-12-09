@@ -53,7 +53,7 @@ const HrDashBoard = () => {
   const [postLoading, setPostLoading] = useState(true);
   const [postError, setPostError] = useState("");
   const [postSuccess, setPostSuccess] = useState("");
-  const [postAuthor, setPostAuthor] = useState("Kamal Hassan"); // logged-in user
+  const [postAuthor, setPostAuthor] = useState(""); // Removed static "Kamal Hassan"
   const [postDepartment] = useState("Human Resource HR Team");
   const [postTitle, setPostTitle] = useState("");
   const [postDescription, setPostDescription] = useState("");
@@ -62,6 +62,76 @@ const HrDashBoard = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [postContent, setPostContent] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Employee data state
+  const [employees, setEmployees] = useState({});
+  const [employeesLoading, setEmployeesLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null); // Added to store current user info
+  const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/";
+
+  // Fetch current user data
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch(`${baseUrl}api/current-user/`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setCurrentUser(data);
+        setPostAuthor(data.full_name || data.username || "User");
+      } catch (error) {
+        // If we can't fetch user data, just use a generic value
+        setPostAuthor("User");
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  // Fetch employee data
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await fetch(`${baseUrl}api/employee-list/`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Create a mapping of employee IDs to employee data
+        const employeeMap = {};
+        data.forEach(emp => {
+          employeeMap[emp.emp_id] = {
+            fullName: `${emp.first_name} ${emp.last_name}`,
+            profilePhoto: emp.profile_photo ? `${baseUrl}${emp.profile_photo}` : null,
+            designation: emp.designation,
+            department: emp.department
+          };
+        });
+        
+        setEmployees(employeeMap);
+      } catch (error) {
+        // Removed console.error
+      } finally {
+        setEmployeesLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   // Fetch employee count data
   useEffect(() => {
@@ -80,7 +150,7 @@ const HrDashBoard = () => {
         const data = await response.json();
         setEmployeeCount(data);
       } catch (error) {
-        console.error("Failed to fetch employee count:", error);
+        // Removed console.error
       }
     };
 
@@ -111,7 +181,7 @@ const HrDashBoard = () => {
           });
         }
       } catch (error) {
-        console.error("Failed to fetch attendance summary:", error);
+        // Removed console.error
       } finally {
         setStatsLoading(false);
       }
@@ -140,7 +210,7 @@ const HrDashBoard = () => {
           setBirthdays(data.birthdays_today);
         }
       } catch (error) {
-        console.error("Failed to fetch birthday data:", error);
+        // Removed console.error
       } finally {
         setBirthdayLoading(false);
       }
@@ -175,7 +245,7 @@ const HrDashBoard = () => {
           setPosts(processedPosts);
         }
       } catch (error) {
-        console.error("Failed to fetch posts:", error);
+        // Removed console.error
         setPostError("Failed to load posts. Please try again.");
       } finally {
         setPostLoading(false);
@@ -281,7 +351,7 @@ const HrDashBoard = () => {
               setPosts(processedPosts);
             }
           } catch (error) {
-            console.error("Failed to fetch posts:", error);
+            // Removed console.error
           }
         };
         
@@ -294,14 +364,13 @@ const HrDashBoard = () => {
         setPostError(data.message || "Failed to create post. Please try again.");
       }
     } catch (error) {
-      console.error("Failed to create post:", error);
+      // Removed console.error
       setPostError("Failed to create post. Please try again.");
     }
   };
 
- // Handle like/unlike - Fixed version
-const handleLike = async (postId) => {
-  try {
+  // Handle like/unlike - Updated to update UI immediately
+  const handleLike = async (postId) => {
     // Find the post to check if it's already liked
     const post = posts.find(p => p.post_id === postId);
     if (!post) return;
@@ -309,98 +378,133 @@ const handleLike = async (postId) => {
     // Check if user has already liked this post
     const isLiked = post.liked_by_users && post.liked_by_users.includes(postAuthor);
     
-    // Determine action based on current like status
-    const action = isLiked ? 'delete' : 'like';
-    
-    console.log("Sending request with action:", action); // Debug log
-    
-    const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/post-like/', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ 
-        post_id: postId,
-        action: action  // Send 'like' or 'delete' based on current state
+    // Update UI immediately
+    setPosts(prevPosts => 
+      prevPosts.map(p => {
+        if (p.post_id === postId) {
+          const likedByUsers = p.liked_by_users || [];
+          
+          // If user liked the post
+          if (!isLiked) {
+            return {
+              ...p,
+              like_count: (p.like_count || 0) + 1,
+              liked_by_users: [...likedByUsers, postAuthor]
+            };
+          } 
+          // If user unliked the post
+          else {
+            return {
+              ...p,
+              like_count: Math.max((p.like_count || 0) - 1, 0),
+              liked_by_users: likedByUsers.filter(id => id !== postAuthor)
+            };
+          }
+        }
+        return p;
       })
-    });
+    );
     
-    if (!response.ok) {
-      // Try to get error details from response
-      const errorText = await response.text();
-      console.error("API Error Response:", errorText);
+    try {
+      let response;
       
-      // If we get "Already liked" error when trying to unlike, just update UI locally
-      if (isLiked && errorText.includes("Already liked")) {
-        console.log("Already liked error on unlike, updating UI locally");
+      if (isLiked) {
+        // Use DELETE method for unlike with post_id in payload
+        response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/post-like/', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ 
+            post_id: postId
+          })
+        });
+      } else {
+        // Use POST method for like with post_id in payload
+        response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/post-like/', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ 
+            post_id: postId
+          })
+        });
+      }
+      
+      if (!response.ok) {
+        // If API call fails, revert the UI change
         setPosts(prevPosts => 
           prevPosts.map(p => {
             if (p.post_id === postId) {
               const likedByUsers = p.liked_by_users || [];
-              return {
-                ...p,
-                like_count: Math.max((p.like_count || 0) - 1, 0),
-                liked_by_users: likedByUsers.filter(id => id !== postAuthor)
-              };
+              
+              // If user liked the post (revert)
+              if (!isLiked) {
+                return {
+                  ...p,
+                  like_count: Math.max((p.like_count || 0) - 1, 0),
+                  liked_by_users: likedByUsers.filter(id => id !== postAuthor)
+                };
+              } 
+              // If user unliked the post (revert)
+              else {
+                return {
+                  ...p,
+                  like_count: (p.like_count || 0) + 1,
+                  liked_by_users: [...likedByUsers, postAuthor]
+                };
+              }
             }
             return p;
           })
         );
-        return; // Don't throw error, just update UI
       }
-      
-      throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
-    }
-    
-    const data = await response.json();
-    console.log("Like API Response:", data); // Debug log
-    
-    if (data.success) {
-      // Update posts with new like count
+    } catch (error) {
+      // If there's an exception, revert the UI change
       setPosts(prevPosts => 
         prevPosts.map(p => {
           if (p.post_id === postId) {
-            // Ensure liked_by_users is always an array
             const likedByUsers = p.liked_by_users || [];
             
-            // If user liked the post
-            if (action === 'like') {
-              return {
-                ...p,
-                like_count: (p.like_count || 0) + 1,
-                liked_by_users: [...likedByUsers, postAuthor]
-              };
-            } 
-            // If user unliked the post
-            else if (action === 'delete') {
+            // If user liked the post (revert)
+            if (!isLiked) {
               return {
                 ...p,
                 like_count: Math.max((p.like_count || 0) - 1, 0),
                 liked_by_users: likedByUsers.filter(id => id !== postAuthor)
+              };
+            } 
+            // If user unliked the post (revert)
+            else {
+              return {
+                ...p,
+                like_count: (p.like_count || 0) + 1,
+                liked_by_users: [...likedByUsers, postAuthor]
               };
             }
           }
           return p;
         })
       );
-    } else {
-      console.error("Like operation failed:", data.message || "Unknown error");
     }
-  } catch (error) {
-    console.error("Failed to like/unlike post:", error);
-  }
-};
+  };
 
   // Filter posts based on search term
   const filteredPosts = posts.filter(post => {
     if (!searchTerm) return true;
     
-    // Since we're not fetching employee details separately, we'll use the post_id for search
+    // Search by content or author name
+    const authorData = employees[post.created_by] || {};
+    const authorName = authorData.fullName || "";
+    
     return (
-      post.post_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (post.content && post.content.toLowerCase().includes(searchTerm.toLowerCase()))
+      (post.content && post.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      authorName.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -585,7 +689,7 @@ const handleLike = async (postId) => {
                   {postError && <div className="alert alert-danger">{postError}</div>}
                   {postSuccess && <div className="alert alert-success">{postSuccess}</div>}
                   
-                  {/* Post Author Section */}
+                  {/* Post Author Section - Using dynamic user data */}
                   <div className="d-flex align-items-center mb-4">
                     <div
                       style={{
@@ -596,16 +700,25 @@ const handleLike = async (postId) => {
                         overflow: "hidden",
                       }}
                     >
-                      {/* Profile Image (static) */}
-                      <img
-                        src="https://via.placeholder.com/55"
-                        alt="profile"
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
+                      {/* Profile Image - using user data if available */}
+                      {currentUser && currentUser.profile_photo ? (
+                        <img
+                          src={`${baseUrl}${currentUser.profile_photo}`}
+                          alt="profile"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <div 
+                          className="d-flex align-items-center justify-content-center h-100"
+                          style={{ backgroundColor: "#007bff", color: "white" }}
+                        >
+                          {postAuthor ? postAuthor.substring(0, 2).toUpperCase() : "U"}
+                        </div>
+                      )}
                     </div>
 
                     <div className="ms-3">
-                      <h6 className="fw-bold mb-0">{postAuthor}</h6>
+                      <h6 className="fw-bold mb-0">{postAuthor || "User"}</h6>
                       <small className="text-muted">{postDepartment}</small>
                     </div>
                   </div>
@@ -684,17 +797,7 @@ const handleLike = async (postId) => {
                       </Button>
                       <Button
                         variant="primary"
-                        onClick={() => {
-                          console.log("Post Submitted:", {
-                            postAuthor,
-                            postDepartment,
-                            postTitle,
-                            postDescription,
-                            postQuote,
-                            postImage,
-                          });
-                          setShowPostModal(false);
-                        }}
+                        onClick={handlePostSubmit}
                       >
                         Submit Post
                       </Button>
@@ -703,7 +806,7 @@ const handleLike = async (postId) => {
                 </Modal.Body>
               </Modal>
 
-              {/* Posts Section */}
+              {/* Posts Section with Custom Scrollbar */}
               <Card className="mb-3">
                 <Card.Header className="d-flex justify-content-between align-items-center">
                   <h5 className="mb-0">Posts</h5>
@@ -712,30 +815,40 @@ const handleLike = async (postId) => {
                       <FaSearch />
                     </InputGroup.Text>
                     <Form.Control
-                      placeholder="Search by post ID or content..."
+                      placeholder="Search by content or author..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </InputGroup>
                 </Card.Header>
-                <Card.Body className="p-0">
-                  {postLoading ? (
+                <Card.Body className="p-0" style={{ height: "500px", overflow: "hidden" }}>
+                  {postLoading || employeesLoading ? (
                     <div className="text-center py-4">
                       <div className="spinner-border" role="status">
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </div>
                   ) : filteredPosts.length > 0 ? (
-                    <div className="posts-container">
+                    <div className="posts-container" style={{ height: "100%", overflowY: "auto", paddingRight: "10px" }}>
                       {filteredPosts.map((post) => {
                         // Ensure liked_by_users is always an array
                         const likedByUsers = post.liked_by_users || [];
                         const isLiked = likedByUsers.includes(postAuthor);
                         
+                        // Get employee data for the post author
+                        const authorData = employees[post.created_by] || {};
+                        const authorName = authorData.fullName || "Unknown User";
+                        const authorProfilePhoto = authorData.profilePhoto;
+                        
+                        // Fix the post image URL
+                        const postImageUrl = post.image ? 
+                          (post.image.startsWith('http') ? post.image : `${baseUrl}${post.image}`) : 
+                          null;
+                        
                         return (
                           <div key={post.id} className="post-item p-3 border-bottom">
                             <div className="d-flex align-items-start gap-3">
-                              {/* Author Avatar - Using placeholder since we're not fetching employee details */}
+                              {/* Author Avatar */}
                               <div
                                 style={{
                                   width: "45px",
@@ -746,35 +859,37 @@ const handleLike = async (postId) => {
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  color: "white",
-                                  fontWeight: "bold",
                                 }}
                               >
-                                {post.created_by ? post.created_by.substring(0, 2).toUpperCase() : "U"}
+                                {authorProfilePhoto ? (
+                                  <img
+                                    src={authorProfilePhoto}
+                                    alt={authorName}
+                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  />
+                                ) : (
+                                  <span style={{ color: "white", fontWeight: "bold" }}>
+                                    {authorName.split(' ').map(n => n[0]).join('')}
+                                  </span>
+                                )}
                               </div>
 
                               {/* Post Content */}
                               <div className="flex-grow-1">
                                 <div className="d-flex justify-content-between align-items-start">
                                   <div>
-                                    <h6 className="mb-1 fw-bold">
-                                      {post.created_by || "Unknown User"}
-                                    </h6>
+                                    <h6 className="mb-1 fw-bold">{authorName}</h6>
                                     <small className="text-muted">
                                       Posted • {formatDate(post.created_at)}
                                     </small>
                                   </div>
-                                  <Badge bg="primary" className="post-id-badge">
-                                    {post.post_id}
-                                  </Badge>
                                 </div>
 
-                                <p className="mt-2">{post.content}</p>
-
-                                {post.image && (
+                                {/* Post Image First */}
+                                {postImageUrl && (
                                   <div className="mt-2">
                                     <img
-                                      src={post.image}
+                                      src={postImageUrl}
                                       alt="Post"
                                       style={{
                                         maxWidth: "100%",
@@ -786,19 +901,26 @@ const handleLike = async (postId) => {
                                   </div>
                                 )}
 
-                                {/* Like Button */}
+                                {/* Post Content After Image */}
+                                <p className="mt-2">{post.content}</p>
+
+                                {/* Like Button with Count in Front */}
                                 <div className="d-flex align-items-center gap-2 mt-3">
                                   <Button
                                     variant="link"
                                     className="p-0 d-flex align-items-center gap-1"
                                     onClick={() => handleLike(post.post_id)}
                                   >
+                                    {post.like_count > 0 && (
+                                      <span className={post.like_count > 0 ? "text-danger me-1" : "me-1"}>
+                                        {post.like_count}
+                                      </span>
+                                    )}
                                     {isLiked ? (
                                       <FaHeart className="text-danger" />
                                     ) : (
                                       <FaRegHeart />
                                     )}
-                                    <span>{post.like_count || 0}</span>
                                   </Button>
                                 </div>
                               </div>
@@ -816,6 +938,8 @@ const handleLike = async (postId) => {
                   )}
                 </Card.Body>
               </Card>
+
+              <FeedBackPost />
             </Col>
             <Col lg={4} md={12} sm={12} className="mb-3">
               {/* Dynamic Birthday Card */}
@@ -886,6 +1010,17 @@ const handleLike = async (postId) => {
               <LeaveBalance />
             </Col>
           </Row>
+          {/* Stats Cards */}
+
+          <Row>
+            {/* Pie Chart */}
+
+            {/* Leave Announcements */}
+
+            <Col lg={4} md={12} sm={12}></Col>
+          </Row>
+
+          {/* Existing Table + Quick Actions (same layout) */}
         </Container>
       </div>
 
