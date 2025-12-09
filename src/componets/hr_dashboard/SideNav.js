@@ -5,21 +5,20 @@ import {
   FaSignOutAlt,
   FaChevronDown,
   FaChevronRight,
-  FaChartLine,
+  FaUsers,
   FaUserCheck,
+  FaCalendarAlt,
+  FaMoneyBill,
+  FaBuilding,
+  FaBriefcase,
+  FaBell,
 } from "react-icons/fa";
 import axios from "axios";
 
 import "../../assets/css/emp_dashboard.css";
 import { Link } from "react-router-dom";
-import { PiPaypalLogo, PiUserListBold, PiUsersThreeBold } from "react-icons/pi";
-
-import { TbDeviceDesktopSearch } from "react-icons/tb";
-
-import { IoIosNotifications } from "react-icons/io";
 
 import BRLogo from "../../assets/images/brainrock_logo.png";
-import { FaUsersViewfinder } from "react-icons/fa6";
 import { AuthContext } from "../context/AuthContext";
 
 
@@ -44,25 +43,25 @@ const menuItems = [
     },
      
      {
-      icon: <PiUserListBold />,
+      icon: <FaUsers />,
       label: "Team Managment",
       submenu: [
         {
           label: "Create Team",
           path: "/CreateTeam",
-          icon: <FaChartLine />,
+          icon: <FaUsers />,
           allowedRoles: ["hr", "manager"],
         },
         {
           label: "Manage Team",
           path: "/ManageTeam",
-          icon: <FaChartLine />,
+          icon: <FaUsers />,
           allowedRoles: ["hr", "manager"],
         },
         {
           label: "My Team",
           path: "/MyTeam",
-          icon: <FaChartLine />,
+          icon: <FaUsers />,
           allowedRoles: ["employee"],
         },
       ],
@@ -74,14 +73,14 @@ const menuItems = [
   //     active: true,
   //   },
     {
-      icon: <PiUserListBold />,
+      icon: <FaUsers />,
       label: "Employee Management",
       allowedRoles: ["hr", "manager"],
       submenu: [
         {
           label: "Employee Directory",
           path: "/EmployeeManagement",
-          icon: <FaUsersViewfinder />,
+          icon: <FaUsers />,
         },
         
        
@@ -93,7 +92,7 @@ const menuItems = [
         {
           label: "Employee Transfer / Promotion",
           path: "/EmployeeTransfer",
-          icon: <FaChartLine />,
+          icon: <FaBriefcase />,
         },
         // {
         //   label: "Employee Exit & Clearance",
@@ -155,13 +154,13 @@ const menuItems = [
         {
           label: "Daily Attendance",
           path: "/DailyAttendance",
-          icon: <FaChartLine />,
+          icon: <FaUserCheck />,
         },
        
         {
           label: "Attendance Regularization",
           path: "/AttendanceRegularization",
-          icon: <FaChartLine />,
+          icon: <FaUserCheck />,
         },
        
        
@@ -171,14 +170,14 @@ const menuItems = [
     },
    
  {
-      icon: <FaChartLine />,
+      icon: <FaCalendarAlt />,
       label: " Leave",
  
       submenu: [
         {
           label: "Leave Management",
           path: "/LeaveManagement",
-          icon: <FaChartLine />,
+          icon: <FaCalendarAlt />,
         },
         // {
         //   label: "Leave Approval",
@@ -193,38 +192,38 @@ const menuItems = [
         {
           label: "Leave Calendar",
           path: "/ApplyLeaveCalendar",
-          icon: <FaChartLine />,
+          icon: <FaCalendarAlt />,
         },
        
         {
           label: "Leave History",
           path: "/LeaveHistory",
-          icon: <FaChartLine />,
+          icon: <FaCalendarAlt />,
         },
        
       ],
     },
  
  {
-      icon: <PiPaypalLogo />,
+      icon: <FaMoneyBill />,
       label: "Payroll",
  
       submenu: [
         {
           label: "Salary Structure",
           path: "/SalaryStructure",
-          icon: <FaChartLine />,
+          icon: <FaMoneyBill />,
         },
          {
           label: "Salary Calculation",
           path: "/EmpList",
-          icon: <FaChartLine />,
+          icon: <FaMoneyBill />,
         },
     
         {
           label: "Payslip Generation",
           path: "/PayslipGenerator",
-          icon: <FaChartLine />,
+          icon: <FaMoneyBill />,
         },
        
        
@@ -239,7 +238,7 @@ const menuItems = [
     },
  
      {
-      icon: <PiUsersThreeBold />,
+      icon: <FaBuilding />,
       label: "Departments",
       allowedRoles: ["hr", "manager"],
  
@@ -248,13 +247,13 @@ const menuItems = [
          {
           label: "Departmental Hierarchy",
           path: "/DepartmentHierarchy",
-          icon: <FaChartLine />,
+          icon: <FaBuilding />,
         },
        
         {
           label: "Add / Edit Department",
           path: "/EmployeeManagement",
-          icon: <FaChartLine />,
+          icon: <FaBuilding />,
         },
         // {
         //   label: "Department Heads",
@@ -275,26 +274,26 @@ const menuItems = [
    
  
     {
-      icon: <TbDeviceDesktopSearch />,
+      icon: <FaBriefcase />,
       label: "Recruitment",
  
       submenu: [
         {
           label: "Job Openings",
           path: "/JobOpenings",
-          icon: <FaChartLine />,
+          icon: <FaBriefcase />,
            allowedRoles: ["hr", "manager"],
         },
         {
           label: "Candidate Applications",
           path: "/JobApplications",
-          icon: <FaChartLine />,
+          icon: <FaBriefcase />,
            allowedRoles: ["hr", "manager"],
         },
         {
           label: "Interview Scheduling",
           path: "/InterviewSch",
-          icon: <FaChartLine />,
+          icon: <FaBriefcase />,
         },
         // {
         //   label: "Shortlisting & Hiring",
@@ -304,7 +303,7 @@ const menuItems = [
         {
           label: "Offer Letters",
           path: "/OfferLetters",
-          icon: <FaChartLine />,
+          icon: <FaBriefcase />,
         },
        
       ],
@@ -351,29 +350,29 @@ const menuItems = [
   //   },
    
    {
-      icon: <IoIosNotifications />,
+      icon: <FaBell />,
       label: "Notifications",
  
       submenu: [
         {
           label: "Leave / Attendance Alerts",
           path: "/EmployeeManagement",
-          icon: <FaChartLine />,
+          icon: <FaBell />,
         },
         {
           label: "Birthday & Anniversary Wishes",
           path: "/EmployeeManagement",
-          icon: <FaChartLine />,
+          icon: <FaBell />,
         },
         {
           label: "Payroll Notification",
           path: "/EmployeeManagement",
-          icon: <FaChartLine />,
+          icon: <FaBell />,
         },
         {
           label: "Recruitment Updates",
           path: "/EmployeeManagement",
-          icon: <FaChartLine />,
+          icon: <FaBell />,
         },
        
        
