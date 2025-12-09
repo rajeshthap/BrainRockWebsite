@@ -168,6 +168,11 @@ const menuItems = [
           path: "/ViewCertified",
           icon: <FaChartLine />,
         },
+         {
+          label: "All Students Data",
+          path: "/AllStudentsData",
+          icon: <FaChartLine />,
+        },
         
        
       ],
