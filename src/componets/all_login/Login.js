@@ -7,27 +7,8 @@ import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
   const trainingRoles = [
-    "Professional Corporate Training",
-    "Industrial Training Program",
-    "Full-Stack Web Development Training",
-    "Advanced Internship Program",
-    "On-Job Training (OJT)",
-    "JAVA/ Python",
-    "Fundamentals of Graphic Design",
-    "Advanced Creative Designing",
-    "UI/UX & Web Graphics",
-    "Video Editing & Motion Graphics",
-    "Digital Marketing Certification",
-    "Programming with Java",
-    "Programming with Python",
-    "WordPress Development",
-    "Core PHP Development",
-    "Advanced PHP & MVC Frameworks",
-    "C Programming",
-    "C++ Programming",
-    "Basic Computer Essentials (3 Months)",
-    "Advanced Computer Operations (6 Months)",
-    "Professional Computer Certification (1 Year)",
+    "Python",
+    "React",
   ];
 
   const { login, loading: authLoading, user, logout } = useContext(AuthContext);
