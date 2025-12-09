@@ -28,31 +28,26 @@ const menuItems = [
       active: true,
     },
    
-     {
-      icon: <FaTachometerAlt />,
-      label: "Refer a Friend",
-      path: "#",
-      active: true,
-    },
+    //  {
+    //   icon: <FaTachometerAlt />,
+    //   label: "Refer a Friend",
+    //   path: "#",
+    //   active: true,
+    // },
    
-     {
-      icon: <FaTachometerAlt />,
-      label: "Notifications",
-      path: "#",
-      active: true,
-    },
-     {
-      icon: <FaTachometerAlt />,
-      label: "Account Settings",
-      path: "#",
-      active: true,
-    },
-     {
-      icon: <FaTachometerAlt />,
-      label: "Payment Method",
-      path: "#",
-      active: true,
-    },
+    //  {
+    //   icon: <FaTachometerAlt />,
+    //   label: "Notifications",
+    //   path: "#",
+    //   active: true,
+    // },
+   
+    //  {
+    //   icon: <FaTachometerAlt />,
+    //   label: "Payment Method",
+    //   path: "#",
+    //   active: true,
+    // },
       {
       icon: <FaTachometerAlt />,
       label: "Purchase history",

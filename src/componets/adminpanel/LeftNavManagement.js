@@ -5,14 +5,22 @@ import {
   FaSignOutAlt,
   FaChevronDown,
   FaChevronRight,
-  FaChartLine,
-  FaUserCheck,
+  FaImages,
+  FaInfoCircle,
+  FaUsers,
+  FaBook,
+  FaBuilding,
+  FaImage,
+  FaTools,
+  FaComments,
+  FaCube,
+  FaProjectDiagram,
+  FaServer,
 } from "react-icons/fa";
 import axios from "axios";
 
 import "../../assets/css/emp_dashboard.css";
 import { Link } from "react-router-dom";
-import { PiUserListBold} from "react-icons/pi";
 
 import BRLogo from "../../assets/images/brainrock_logo.png";
 
@@ -41,7 +49,7 @@ const menuItems = [
       active: true,
     },
     {
-      icon: <PiUserListBold />,
+      icon: <FaImages />,
       label: "Carousel",
  
       submenu: [
@@ -50,19 +58,19 @@ const menuItems = [
         {
           label: "Add Carousel",
           path: "/AddCarousel",
-          icon: <FaChartLine />,
+          icon: <FaImage />,
         },
         {
           label: "Edit Carousel",
           path: "/EditCarousel",
-          icon: <FaChartLine />,
+          icon: <FaImages />,
         },
         
        
       ],
     },
     {
-      icon: <PiUserListBold />,
+      icon: <FaInfoCircle />,
       label: "About Us",
  
       submenu: [
@@ -71,24 +79,24 @@ const menuItems = [
         {
           label: "About Us",
           path: "/EditAboutUs",
-          icon: <FaChartLine />,
+          icon: <FaInfoCircle />,
         },
         {
           label: "Contact Us",
           path: "/EditContactUs",
-          icon: <FaChartLine />,
+          icon: <FaComments />,
         },
         {
           label: "ContactUs Query",
           path: "/ContactUsQuery",
-          icon: <FaChartLine />,
+          icon: <FaComments />,
         },
         
         
       ],
     },
      {
-      icon: <PiUserListBold />,
+      icon: <FaUsers />,
       label: "Our Team",
  
       submenu: [
@@ -97,12 +105,12 @@ const menuItems = [
         {
           label: "Add Our Team",
           path: "/AddOurTeam",
-          icon: <FaChartLine />,
+          icon: <FaUsers />,
         },
         {
           label: "Manage Our Team",
           path: "/ManageOurTeam",
-          icon: <FaChartLine />,
+          icon: <FaUsers />,
         },
         
         
@@ -110,7 +118,7 @@ const menuItems = [
       ],
     }, 
     {
-      icon: <PiUserListBold />,
+      icon: <FaBook />,
       label: "Manage Courses",
  
       submenu: [
@@ -119,12 +127,12 @@ const menuItems = [
         {
           label: "Add Course",
           path: "/AddCourses",
-          icon: <FaChartLine />,
+          icon: <FaBook />,
         },
         {
           label: "Edit Course",
           path: "/EditCourses",
-          icon: <FaChartLine />,
+          icon: <FaBook />,
         },
         
        
@@ -133,7 +141,7 @@ const menuItems = [
 
 
      {
-      icon: <PiUserListBold />,
+      icon: <FaBuilding />,
       label: "Client ",
  
       submenu: [
@@ -142,36 +150,36 @@ const menuItems = [
         {
           label: "Add Client ",
           path: "/AddClient",
-          icon: <FaChartLine />,
+          icon: <FaBuilding />,
         },
         {
           label: "Edit Client",
           path: "/EditClient",
-          icon: <FaChartLine />,
+          icon: <FaBuilding />,
         },
         
        
       ],
     }, 
     {
-      icon: <PiUserListBold />,
+      icon: <FaUsers />,
       label: "Students Gallery",
  
       submenu: [
         {
           label: "Manage Student",
           path: "/ManageStudent",
-          icon: <FaChartLine />,
+          icon: <FaUsers />,
         },
         {
           label: "View Certified Student",
           path: "/ViewCertified",
-          icon: <FaChartLine />,
+          icon: <FaImage />,
         },
          {
           label: "All Students Data",
           path: "/AllStudentsData",
-          icon: <FaChartLine />,
+          icon: <FaUsers />,
         },
         
        
@@ -179,7 +187,7 @@ const menuItems = [
     },
      
      {
-      icon: <PiUserListBold />,
+      icon: <FaTools />,
       label: "Services",
  
       submenu: [
@@ -188,19 +196,19 @@ const menuItems = [
         {
           label: "Add Services",
           path: "/AddServices",
-          icon: <FaChartLine />,
+          icon: <FaTools />,
         },
         {
           label: "View Services",
           path: "/ViewServices",
-          icon: <FaChartLine />,
+          icon: <FaTools />,
         },
         
        
       ],
     },
        {
-      icon: <PiUserListBold />,
+      icon: <FaBuilding />,
       label: "Firm Management",
  
       submenu: [
@@ -209,19 +217,19 @@ const menuItems = [
         {
           label: "Add Firm",
           path: "/AddFirm",
-          icon: <FaChartLine />,
+          icon: <FaBuilding />,
         },
         {
           label: "Manage Firm",
           path: "/ManageFirm",
-          icon: <FaChartLine />,
+          icon: <FaBuilding />,
         },
         
        
       ],
     },
      {
-      icon: <PiUserListBold />,
+      icon: <FaServer />,
       label: "Add Design & Dev",
  
       submenu: [
@@ -230,12 +238,12 @@ const menuItems = [
         {
           label: "Add Design",
           path: "/AddDesAndDev",
-          icon: <FaChartLine />,
+          icon: <FaServer />,
         },
         {
           label: "Manage Design",
           path: "/ManageDesAndDev",
-          icon: <FaChartLine />,
+          icon: <FaServer />,
         },
         
        
@@ -251,7 +259,7 @@ const menuItems = [
       active: true,
     },  
      {
-      icon: <PiUserListBold />,
+      icon: <FaCube />,
       label: "Our Tech Stack ",
  
       submenu: [
@@ -260,12 +268,12 @@ const menuItems = [
         {
           label: "Manage Tech Stack",
           path: "/ManageTechStack",
-          icon: <FaChartLine />,
+          icon: <FaCube />,
         },
       ],
     }, 
     {
-      icon: <PiUserListBold />,
+      icon: <FaProjectDiagram />,
       label: "Our Projects",
  
       submenu: [
@@ -274,29 +282,29 @@ const menuItems = [
         {
           label: "Add Project",
           path: "/AddProject",
-          icon: <FaChartLine />,
+          icon: <FaProjectDiagram />,
         },
         {
           label: "ManageProject",
           path: "/ManageProject",
-          icon: <FaChartLine />,
+          icon: <FaProjectDiagram />,
         },
       ],
     },
       {
-      icon: <PiUserListBold />,
+      icon: <FaServer />,
       label: "IT Services ",
  
       submenu: [
         {
           label: "Add ItServices",
           path: "/AddItServices",
-          icon: <FaChartLine />,
+          icon: <FaServer />,
         },
         {
           label: "Manage ItServices",
           path: "/ManageItServices",
-          icon: <FaChartLine />,
+          icon: <FaServer />,
         }, 
       ],
     },   
