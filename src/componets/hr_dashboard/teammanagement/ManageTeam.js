@@ -71,7 +71,7 @@ const ManageTeam = () => {
   const getProjectNameById = (id) => {
     if (!id) return "Not assigned";
     const project = projects.find(proj => proj.project_id === id);
-    return project ? project.project_name : id;
+    return project ? project.title : id;
   };
   
   // Format date for display
@@ -99,15 +99,27 @@ const ManageTeam = () => {
     return allTeamLeaders.filter(leader => !assignedLeaderIds.includes(leader.emp_id));
   };
   
-  // Get available projects (projects not assigned to other team leaders)
+  // Get available projects (projects not assigned to any team)
   const getAvailableProjects = () => {
-    // Get all project IDs that are already assigned to team leaders
+    // Get all project IDs that are already assigned to teams (excluding current team being edited)
     const assignedProjectIds = teams
-      .filter(team => team.project && team.id !== editingTeam)
-      .map(team => team.project);
+      .filter(team => team.id !== editingTeam) // Exclude current team if editing
+      .map(team => team.project) // Get the project field from all-teams API
+      .filter(Boolean); // Remove null/undefined values
+    
+    console.log("Assigned Project IDs:", assignedProjectIds);
+    console.log("All Projects:", projects);
     
     // Filter out projects that are already assigned
-    return projects.filter(project => !assignedProjectIds.includes(project.project_id));
+    // Only show projects whose project_id is NOT in the assignedProjectIds
+    const available = projects.filter(project => {
+      const isAssigned = assignedProjectIds.includes(project.project_id);
+      console.log(`Project ${project.project_id} (${project.title}): isAssigned=${isAssigned}`);
+      return !isAssigned;
+    });
+    
+    console.log("Available Projects (not assigned):", available);
+    return available;
   };
   
   // Get non-team-leader employees (only filter by designation, not by team assignment)
@@ -186,12 +198,18 @@ const ManageTeam = () => {
         const employeesData = await employeesResponse.json();
         const projectsData = await projectsResponse.json();
 
-        // Process and set teams data
+        // Process and set teams data - map "project" field to "project_id" for consistency
         let teamsList = [];
         if (teamsData.success && Array.isArray(teamsData.data)) {
-          teamsList = teamsData.data;
+          teamsList = teamsData.data.map(team => ({
+            ...team,
+            project_id: team.project // Map the "project" field to "project_id"
+          }));
         } else if (Array.isArray(teamsData)) {
-          teamsList = teamsData;
+          teamsList = teamsData.map(team => ({
+            ...team,
+            project_id: team.project
+          }));
         }
         setTeams(teamsList);
 
@@ -205,12 +223,16 @@ const ManageTeam = () => {
         setAllEmployees(employeesList);
 
         // Process and set projects data
+        let projectsList = [];
         if (projectsData.success && Array.isArray(projectsData.data)) {
-          setProjects(projectsData.data);
-        } else {
-          console.warn("Unexpected project data format:", projectsData);
-          setProjects([]);
+          projectsList = projectsData.data;
+        } else if (Array.isArray(projectsData)) {
+          projectsList = projectsData;
         }
+        setProjects(projectsList);
+        
+        console.log("Projects fetched:", projectsList);
+        console.log("Teams with project_id mapped:", teamsList);
 
       } catch (err) {
         setError(err.message);
@@ -237,7 +259,7 @@ const ManageTeam = () => {
       team.team_name?.toLowerCase().includes(lowercasedSearchTerm) ||
       team.team_id?.toLowerCase().includes(lowercasedSearchTerm) ||
       getEmployeeNameById(team.team_leader).toLowerCase().includes(lowercasedSearchTerm) ||
-      getProjectNameById(team.project).toLowerCase().includes(lowercasedSearchTerm) ||
+      getProjectNameById(team.project_id).toLowerCase().includes(lowercasedSearchTerm) ||
       (team.employee_ids && team.employee_ids.some(id => 
         id.toLowerCase().includes(lowercasedSearchTerm)
       ))
@@ -266,7 +288,7 @@ const ManageTeam = () => {
       team_id: team.team_id,
       team_name: team.team_name,
       team_leader: team.team_leader || "",
-      project: team.project || "",
+      project_id: team.project_id || "", // Changed to use project_id consistently
       employee_ids: team.employee_ids || [],
       start_date: team.start_date ? new Date(team.start_date) : null,
       end_date: team.end_date ? new Date(team.end_date) : null
@@ -350,7 +372,7 @@ const ManageTeam = () => {
         team_id: editFormData.team_id,
         team_name: editFormData.team_name,
         team_leader: editFormData.team_leader,
-        project: editFormData.project,
+        project_id: editFormData.project_id, // Use project_id consistently
         employee_ids: editFormData.employee_ids,
         start_date: formatDateForApi(editFormData.start_date),
         end_date: formatDateForApi(editFormData.end_date),
@@ -479,7 +501,7 @@ const ManageTeam = () => {
         "Team ID": team.team_id,
         "Team Name": team.team_name,
         "Team Leader": getEmployeeNameById(team.team_leader),
-        "Project": getProjectNameById(team.project),
+        "Project": getProjectNameById(team.project_id),
         "Start Date": formatDateForDisplay(team.start_date),
         "End Date": formatDateForDisplay(team.end_date),
         "Employees": employeeNames
@@ -640,19 +662,19 @@ const ManageTeam = () => {
                               <td data-th="Project">
                                 {editingTeam === team.id ? (
                                   <Form.Select
-                                    name="project"
-                                    value={editFormData.project}
+                                    name="project_id"
+                                    value={editFormData.project_id}
                                     onChange={handleFormChange}
                                   >
                                     <option value="">Select Project</option>
                                     {getAvailableProjects().map(project => (
-                                      <option key={project.project_id} value={project.title}>
+                                      <option key={project.project_id} value={project.project_id}>
                                         {project.title}
                                       </option>
                                     ))}
                                   </Form.Select>
                                 ) : (
-                                  getProjectNameById(team.project)
+                                  getProjectNameById(team.project_id)
                                 )}
                               </td>
                               <td data-th="Start Date">

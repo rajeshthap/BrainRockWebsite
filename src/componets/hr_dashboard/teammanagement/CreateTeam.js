@@ -179,12 +179,18 @@ const CreateTeam = () => {
         const employeesData = await employeesResponse.json();
         const projectsData = await projectsResponse.json();
 
-        // Process and set teams data
+        // Process and set teams data - map "project" field to "project_id" for consistency
         let teamsList = [];
         if (teamsData.success && Array.isArray(teamsData.data)) {
-          teamsList = teamsData.data;
+          teamsList = teamsData.data.map(team => ({
+            ...team,
+            project_id: team.project // Map the "project" field to "project_id"
+          }));
         } else if (Array.isArray(teamsData)) {
-          teamsList = teamsData;
+          teamsList = teamsData.map(team => ({
+            ...team,
+            project_id: team.project
+          }));
         }
         setTeams(teamsList);
 
@@ -202,12 +208,16 @@ const CreateTeam = () => {
         setTeamLeaders(leaders);
 
         // Process and set projects data
+        let projectsList = [];
         if (projectsData.success && Array.isArray(projectsData.data)) {
-          setProjects(projectsData.data);
-        } else {
-          console.error("Unexpected project data format:", projectsData);
-          setProjects([]);
+          projectsList = projectsData.data;
+        } else if (Array.isArray(projectsData)) {
+          projectsList = projectsData;
         }
+        setProjects(projectsList);
+        
+        console.log("Projects fetched:", projectsList);
+        console.log("Teams with project_id mapped:", teamsList);
       } catch (err) {
         setError(err.message);
         console.error("Failed to fetch data:", err);
@@ -232,18 +242,22 @@ const CreateTeam = () => {
         .filter(Boolean);
 
       // === PROJECT FILTERING LOGIC ===
-      // Step 1: Create an array of all project IDs that are already assigned to a team.
+      // Step 1: Get all project IDs that are already assigned to teams
       const assignedProjectIds = teams
-        .map((team) => team.project)
-        .filter(Boolean);
+        .map((team) => team.project) // Use the "project" field from all-teams API
+        .filter(Boolean); // Remove null/undefined values
 
-      // Step 2: Filter master list of all projects.
-      // Only keep projects whose ID is NOT in the assignedProjectIds array.
+      // Step 2: Filter master list of all projects
+      // Only keep projects whose project_id is NOT in the assignedProjectIds array
       const availableProjects = projects.filter(
         (project) => !assignedProjectIds.includes(project.project_id)
       );
-      // Step 3: Set the state with the list of available (unassigned) projects.
+      
+      // Step 3: Set the state with the list of available (unassigned) projects
       setFilteredProjects(availableProjects);
+      
+      console.log("Assigned Project IDs:", assignedProjectIds);
+      console.log("Available Projects (not assigned):", availableProjects);
       // === END OF PROJECT FILTERING LOGIC ===
 
       // Filter out team leaders who are already assigned
@@ -252,13 +266,10 @@ const CreateTeam = () => {
       );
       setFilteredTeamLeaders(availableTeamLeaders);
 
-      // --- MODIFICATION START ---
-      // Filter out ONLY team leaders. All other employees are now available for selection.
+      // Filter out ONLY team leaders. All other employees are now available for selection
       const availableEmployees = allEmployees.filter((emp) => {
-        // Only skip team leaders
         return !isTeamLeader(emp);
       });
-      // --- MODIFICATION END ---
 
       setAvailableEmployees(availableEmployees);
 
@@ -267,7 +278,6 @@ const CreateTeam = () => {
         value: emp.emp_id,
         label: `${emp.first_name} ${emp.last_name}`,
         subLabel: `ID: ${emp.emp_id} | Designation: ${emp.designation}`,
-        // Add search terms for better filtering
         searchTerms:
           `${emp.first_name} ${emp.last_name} ${emp.emp_id} ${emp.designation}`.toLowerCase(),
       }));
@@ -315,11 +325,11 @@ const handleSubmit = async (e) => {
   const teamData = {
     team_name: teamName,
     team_leader_id: selectedTeamLeader,
-    project_id: selectedProject,
+    project_id: selectedProject, // Changed from project.title to project_id
     employee_ids: employeeIds,
     manager_id: managerId,
-    start_date: formatDateForServer(startDate), // e.g., "2023-10-27"
-    end_date: formatDateForServer(endDate),       // e.g., "2023-11-15"
+    start_date: formatDateForServer(startDate),
+    end_date: formatDateForServer(endDate),
   };
 
   // Log the data being sent for debugging
@@ -499,7 +509,6 @@ const handleSubmit = async (e) => {
                   <Col md={6}>
                     <Form.Group controlId="project">
                       <Form.Label>Select Project</Form.Label>
-                      {/* The dropdown below uses 'filteredProjects', which contains only unassigned projects. */}
                       <Form.Select
                         value={selectedProject}
                         onChange={(e) => setSelectedProject(e.target.value)}
@@ -508,8 +517,8 @@ const handleSubmit = async (e) => {
                         <option value="">Select Project</option>
                         {filteredProjects.map((project) => (
                           <option
-                            key={project.id}
-                            value={project.title}
+                            key={project.project_id}
+                            value={project.project_id}
                           >
                             {project.title}
                           </option>
