@@ -124,7 +124,7 @@ const TrainingVideoPlayer = () => {
               </button>
             ) : (
               <div className="tvp-completion-section">
-                <p className="tvp-completion-message">✅ All lectures completed!</p>
+                <p className="tvp-completion-message"> All lectures completed!</p>
                 <button className="tvp-submit-button" onClick={handleSubmitCourse}>
                   Submit Course
                 </button>
