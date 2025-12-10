@@ -15,7 +15,8 @@ const JobOpenings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
-
+ const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
   // Form state for posting/editing job
   const [formData, setFormData] = useState({
     title: "",
@@ -34,7 +35,23 @@ const JobOpenings = () => {
   const [editingJobId, setEditingJobId] = useState(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
   // Fetch all job openings
   const fetchJobs = async () => {
     setLoading(true);
@@ -301,7 +318,12 @@ const handleStatusChange = async (jobId, newStatus) => {
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
 
       {/* Main Content */}
       <div className="main-content">

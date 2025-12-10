@@ -7,13 +7,36 @@ import HrHeader from "../HrHeader";
 const OfferLetters = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
  
+ const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
   // Toggle Sidebar
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
- 
+   useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+   <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
  
       {/* Main Content */}
       <div className="main-content">

@@ -3,7 +3,6 @@ import {
   Container,
   Row,
   Col,
-  Card,
   Form,
   Button,
   Alert,
@@ -24,7 +23,29 @@ import { AuthContext } from "../../context/AuthContext"; // Adjust the import pa
 const CreateTeam = () => {
   const { user } = useContext(AuthContext); // Get user from auth context
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
+  const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
+  
+  // FIX: Only auto-set sidebar state on desktop (width >= 1024)
+  // On mobile/tablet, preserve the user's toggle choice
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
+  
   // API data states
   const [teams, setTeams] = useState([]);
   const [teamLeaders, setTeamLeaders] = useState([]);
@@ -32,7 +53,7 @@ const CreateTeam = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [filteredTeamLeaders, setFilteredTeamLeaders] = useState([]);
-  const [availableEmployees, setAvailableEmployees] = useState([]);
+  const [, setAvailableEmployees] = useState([]);
   const [employeeOptions, setEmployeeOptions] = useState([]);
 
   // UI states
@@ -442,8 +463,13 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      {/* FIX: Add isMobile and isTablet props to SideNav */}
+      <SideNav 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen} 
+        isMobile={isMobile}
+        isTablet={isTablet}
+      />
 
       {/* Main Content */}
       <div className="main-content">

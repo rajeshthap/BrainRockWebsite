@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Spinner, Alert, Badge } from "react-bootstrap";
 import { FaProjectDiagram, FaUsers, FaArrowLeft, FaBuilding, FaUserTie, FaCalendarAlt, FaUser } from "react-icons/fa";
+import "../../../assets/css/Teammember.css";
 
 const TeamMember = () => {
   const [projects, setProjects] = useState([]);
@@ -147,7 +148,7 @@ const TeamMember = () => {
 
   if (selectedProject) {
     return (
-      <Card className="team-card">
+      <Card className="team-card-member">
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0 d-flex align-items-center">
             <FaProjectDiagram className="me-2" />
@@ -239,7 +240,7 @@ const TeamMember = () => {
   }
 
   return (
-    <Card className="team-card">
+    <Card className="team-card-member">
       <Card.Header>
         <h5 className="mb-0 d-flex align-items-center">
           <FaProjectDiagram className="me-2" />

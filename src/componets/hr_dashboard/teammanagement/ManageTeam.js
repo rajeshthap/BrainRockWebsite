@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useMemo, useRef } from "react";
-import { Container, Row, Col, Card, Alert, Spinner, Badge, Button, Pagination, Form, Modal, InputGroup, FormControl } from "react-bootstrap";
+import { Container, Row, Alert, Spinner, Badge, Button, Pagination, Form, Modal, InputGroup, FormControl } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { FaCalendar } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -17,12 +17,31 @@ import { saveAs } from "file-saver";
 const ManageTeam = () => {
   const { user } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
+
   
   // State for all API data
   const [teams, setTeams] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
   const [projects, setProjects] = useState([]);
-  
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
   // State for UI
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -567,7 +586,8 @@ const ManageTeam = () => {
   return (
     <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
       {/* Sidebar */}
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}  isMobile={isMobile}
+  isTablet={isTablet}/>
       
       {/* Main Content */}
       <div className="main-content" style={{ height: '100vh', overflow: 'auto', display: 'flex', flexDirection: 'column' }}>

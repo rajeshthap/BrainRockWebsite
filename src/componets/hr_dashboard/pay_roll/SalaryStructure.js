@@ -46,6 +46,8 @@ const GOVERNMENT_SALARY_STRUCTURE = {
   }
 };
 
+  
+
 // Other salary structure percentages
 const OTHER_SALARY_STRUCTURE = {
   earnings: {
@@ -170,8 +172,26 @@ const SalaryStructure = () => {
   // New state for number of clients and per-client bonus
   const [numberOfClients, setNumberOfClients] = useState(0);
   const [perClientBonus, setPerClientBonus] = useState(2000); // Default 2000 per client
-
+ const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+ useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
 
   // Fetch data from API
   useEffect(() => {
@@ -835,7 +855,12 @@ const handleDownload = () => {
     
     return (
       <div className="dashboard-container">
-        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+       <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
         <div className="main-content">
           <HrHeader toggleSidebar={toggleSidebar} />
           

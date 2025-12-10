@@ -21,6 +21,8 @@ import { FaFileExcel } from "react-icons/fa";
 const LeaveHistory = () => {
   const { user } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+   const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [leaveHistory, setLeaveHistory] = useState([]);
@@ -30,7 +32,23 @@ const LeaveHistory = () => {
     department: "",
     phone: "",
   });
-
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
   const employee_id = user?.unique_id;
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -188,7 +206,12 @@ const LeaveHistory = () => {
 
   return (
     <div className="dashboard-container">
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+    <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
 
       <div className="main-content">
         <HrHeader toggleSidebar={toggleSidebar} />
