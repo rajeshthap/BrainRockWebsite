@@ -111,6 +111,8 @@ import EmployeeTransfer from "./componets/hr_dashboard/hr_iinerpage/EmployeeTran
 import UserProfile from "./componets/training_dashboard/training_profile/UserProfile";
 import AllStudentsData from "./componets/adminpanel/Candidate/AllStudentsData";
 import Purchasehistory from "./componets/training_dashboard/Purchasehistory";
+import AddNotification from "./componets/adminpanel/Notification/AddNotification";
+import EditNotification from "./componets/adminpanel/Notification/EditNotification";
 function AppContent() {
   const location = useLocation();
 
@@ -167,6 +169,8 @@ function AppContent() {
     "/AddProject",
     "/ManageProject",
     "/ViewCertified",
+    "/AddNotification",
+    "/EditNotification",
     "/AddFirm",
     "/ManageFirm",
     "/JobApplications",
@@ -643,6 +647,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/AddProject"
           element={
@@ -656,6 +661,24 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageProject/>
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+          path="/AddNotification"
+          element={
+            <ProtectedRoute>
+              <AddNotification/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/EditNotification"
+          element={
+            <ProtectedRoute>
+              <EditNotification/>
             </ProtectedRoute>
           }
         />
