@@ -29,23 +29,6 @@ export default function Login() {
     }
   };
 
-  // Fetch courses from API
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/');
-        const data = await response.json();
-        if (data.success && data.courses) {
-          setCourses(data.courses);
-        }
-      } catch (error) {
-        console.error("Error fetching courses:", error);
-      }
-    };
-
-    fetchCourses();
-  }, []);
-
   // This effect runs when the component mounts to clear cookies
   useEffect(() => {
     clearAllCookies();
@@ -67,6 +50,15 @@ export default function Login() {
       if (user.role === "admin") {
         navigate("/ManageOurTeam", {
           state: { unique_id: user.id },
+          replace: true,
+        });
+        return;
+      }
+
+      // Check for training role
+      if (user.role === "training") {
+        navigate("/TrainingDashBoard", {
+          state: { unique_id: user.unique_id },
           replace: true,
         });
         return;

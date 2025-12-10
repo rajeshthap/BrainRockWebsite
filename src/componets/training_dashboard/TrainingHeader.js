@@ -65,7 +65,14 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     const fetchUserDetails = async () => {
       // First try to fetch course-registration (applicant) data
       try {
-        const resp = await axios.get(`${BASE_URL}/api/course-registration/?applicant_id=APP/2025/161006`, {
+        // Use unique_id from AuthContext as applicant_id
+        const applicantId = user?.unique_id;
+        if (!applicantId) {
+          console.warn("No unique_id available in AuthContext");
+          throw new Error("No unique_id available");
+        }
+        
+        const resp = await axios.get(`${BASE_URL}/api/course-registration/?applicant_id=${applicantId}`, {
           withCredentials: true,
           headers: { "Content-Type": "application/json" }
         });
