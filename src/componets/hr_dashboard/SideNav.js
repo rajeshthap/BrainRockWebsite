@@ -349,38 +349,38 @@ const menuItems = [
   //     ],
   //   },
    
-   {
-      icon: <FaBell />,
-      label: "Notifications",
+  //  {
+  //     icon: <FaBell />,
+  //     label: "Notifications",
  
-      submenu: [
-        {
-          label: "Leave / Attendance Alerts",
-          path: "/EmployeeManagement",
-          icon: <FaBell />,
-        },
-        {
-          label: "Birthday & Anniversary Wishes",
-          path: "/EmployeeManagement",
-          icon: <FaBell />,
-        },
-        {
-          label: "Payroll Notification",
-          path: "/EmployeeManagement",
-          icon: <FaBell />,
-        },
-        {
-          label: "Recruitment Updates",
-          path: "/EmployeeManagement",
-          icon: <FaBell />,
-        },
+  //     submenu: [
+  //       {
+  //         label: "Leave / Attendance Alerts",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaBell />,
+  //       },
+  //       {
+  //         label: "Birthday & Anniversary Wishes",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaBell />,
+  //       },
+  //       {
+  //         label: "Payroll Notification",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaBell />,
+  //       },
+  //       {
+  //         label: "Recruitment Updates",
+  //         path: "/EmployeeManagement",
+  //         icon: <FaBell />,
+  //       },
        
        
        
        
        
-      ],
-    },
+  //     ],
+  //   },
  
     //  {
     //   icon: <AiOutlineFile />,

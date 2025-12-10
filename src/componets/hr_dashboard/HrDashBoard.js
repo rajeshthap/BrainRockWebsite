@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Card, Table, Modal, Form, Badge, InputGroup } from "react-bootstrap";
+import { Container, Row, Col, Button, Card, Modal, Form,  InputGroup } from "react-bootstrap";
 import {
   FaTachometerAlt,
   FaUsers,
@@ -13,8 +13,7 @@ import {
   FaThumbsDown,
   FaRegThumbsDown,
 } from "react-icons/fa";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
-import { Tooltip, ResponsiveContainer } from "recharts";
+
 import "../../assets/css/emp_dashboard.css";
 import SideNav from "./SideNav";
 import LeaveCalendar from "./hr_iinerpage/LeaveCalendar";

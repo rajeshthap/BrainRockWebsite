@@ -47,6 +47,25 @@ const ApplyLeaveCalendar = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+ const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
+    useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
 
   // State for create meeting modal
   const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
@@ -427,7 +446,12 @@ const fetchMeetingData = async () => {
 
   return (
     <div className="dashboard-container d-flex">
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+     <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
 
       <div className="main-content w-100">
         <HrHeader toggleSidebar={toggleSidebar} />

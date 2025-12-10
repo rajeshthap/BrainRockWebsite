@@ -13,10 +13,27 @@ import { PiCertificate } from "react-icons/pi";
 const HrProfile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
+   const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
   const { user } = useContext(AuthContext);
   const fileInputRef = useRef(null);
-
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
   const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
 
   const [data, setData] = useState({});
@@ -313,7 +330,12 @@ const normalizeCertificates = (certs) => {
 
   return (
     <div className="dashboard-container">
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+    <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
       <div className="main-content">
         <HrHeader toggleSidebar={toggleSidebar} />
 

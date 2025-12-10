@@ -16,8 +16,9 @@ const DepartmentHierarchy = () => {
   const [error, setError] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isMobile] = useState(false);
-  const [isTablet] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState('all');
   const [expandedNodes, setExpandedNodes] = useState(new Set());
@@ -27,7 +28,23 @@ const DepartmentHierarchy = () => {
   const [teams, setTeams] = useState([]);
   const [employeeProjects, setEmployeeProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
-
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
   // Fetch employee data from API with authentication
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -384,12 +401,12 @@ const DepartmentHierarchy = () => {
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <SideNav
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        isMobile={isMobile}
-        isTablet={isTablet}
-      />
+      <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
 
       {/* Main Content */}
       <div className="main-content">

@@ -100,3 +100,7 @@
   margin: 2px 4px 4px -12px;
   position: absolute;
 }
+
+.team-card-member {
+  margin-top: 12px !important;
+}

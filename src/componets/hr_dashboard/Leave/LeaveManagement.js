@@ -42,14 +42,35 @@ const LeaveManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [actionType, setActionType] = useState("");
+   const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
   const [notification, setNotification] = useState({
     show: false,
     message: "",
     type: "",
   });
   const [activeTab, setActiveTab] = useState("myLeaves");
+  
+useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
 
   // Filter states
+
   const [statusFilter, setStatusFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -578,7 +599,12 @@ const handleDownload = () => {
   if (!user || !employee_id) {
     return (
       <div className="dashboard-container">
-        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+       <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
         <div className="main-content">
           <HrHeader toggleSidebar={toggleSidebar} />
           <Container fluid className="dashboard-body">
@@ -595,8 +621,12 @@ const handleDownload = () => {
 
   return (
     <div className="dashboard-container">
-      <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
+      <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
       <div className="main-content">
         <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 

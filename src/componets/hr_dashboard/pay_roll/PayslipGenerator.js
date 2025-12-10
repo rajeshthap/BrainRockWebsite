@@ -318,12 +318,35 @@ const PayslipGenerator = () => {
   const totalPages = Math.ceil(allFilteredEmployees.length / itemsPerPage);
 
   const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
-
+ const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
+    useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
   // If showing payslip view, render the Payslip component
   if (showPayslipView && selectedEmployee) {
     return (
       <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
-        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <SideNav 
+  sidebarOpen={sidebarOpen} 
+  setSidebarOpen={setSidebarOpen} 
+  isMobile={isMobile}
+  isTablet={isTablet}
+/>
         <div className="main-content" style={{ height: '100vh', overflow: 'auto' }}>
           <HrHeader toggleSidebar={toggleSidebar} />
           

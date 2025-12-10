@@ -46,7 +46,27 @@ const DailyAttendance = () => {
   const [employeesLoading, setEmployeesLoading] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmployeeList, setShowEmployeeList] = useState(true);
-  
+  const [isMobile, setIsMobile] = useState(false); 
+  const [isTablet, setIsTablet] = useState(false);
+
+    useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Only auto-set sidebar state on desktop (width >= 1024)
+      // On mobile/tablet, preserve the user's toggle choice
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
+
   // State for search and pagination
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -1016,7 +1036,8 @@ const handleDownload = () => {
   const renderEmployeeList = () => {
     return (
       <div className="dashboard-container" style={{ height: '100vh', overflow: 'hidden' }}>
-        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <SideNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}  isMobile={isMobile}
+  isTablet={isTablet} />
 
         <div className="main-content" style={{ height: '100%', overflow: 'hidden' }}>
           <HrHeader toggleSidebar={toggleSidebar} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />

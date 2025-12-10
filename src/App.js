@@ -20,6 +20,7 @@ import HrDashBoard from "./componets/hr_dashboard/HrDashBoard";
 import EmployeeManagement from "./componets/hr_dashboard/hr_iinerpage/EmployeeManagement";
 import Login from "./componets/all_login/Login";
 import { AuthProvider } from "./componets/context/AuthContext";
+import { UserProfileProvider } from "./componets/context/UserProfileContext";
 import EmployeeRegistration from "./componets/all_registration/EmployeeRegistration";
 import ProtectedRoute from "./componets/context/ProtectedRoute";
 import DailyAttendance from "./componets/hr_dashboard/attendance/DailyAttendance";
@@ -686,9 +687,11 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <UserProfileProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </UserProfileProvider>
     </AuthProvider>
   );
 }
