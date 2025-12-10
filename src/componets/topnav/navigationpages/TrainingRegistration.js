@@ -25,6 +25,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
   const [formData, setFormData] = useState({
     application_for_course: "",
+    application_for_course_id: "",
     candidate_name: "",
     guardian_name: "",
     address: "",
@@ -51,10 +52,16 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
       location.state?.courseTitle ||
       courseTitle;
     if (courseName && courseData.length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        application_for_course: courseName
-      }));
+      const matchingCourse = courseData.find(course =>
+        course.course_name === courseName
+      );
+      if (matchingCourse) {
+        setFormData(prev => ({
+          ...prev,
+          application_for_course: courseName,
+          application_for_course_id: matchingCourse.course_id
+        }));
+      }
     }
   }, [location.state, courseData, courseTitle]);
 
@@ -75,7 +82,8 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
             if (matchingCourse) {
               setFormData(prev => ({
                 ...prev,
-                application_for_course: courseName
+                application_for_course: courseName,
+                application_for_course_id: matchingCourse.course_id
               }));
             }
           }
@@ -83,7 +91,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
       })
       .catch((err) => {
         console.error("Course list error:", err);
-        setErrorMessage("Failed to load course data. Please refresh the page.");
+        setErrorMessage("Failed to load course data. Please refresh page.");
         setShowError(true);
       });
   }, [location.state, courseTitle]);
@@ -133,10 +141,21 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    const newValue = files ? files[0] : value;
-
-    setFormData({ ...formData, [name]: newValue });
-    validateField(name, newValue);
+    
+    // Handle course selection differently
+    if (name === "application_for_course") {
+      const selectedCourse = courseData.find(course => course.course_name === value);
+      setFormData(prev => ({
+        ...prev,
+        application_for_course: value,
+        application_for_course_id: selectedCourse ? selectedCourse.course_id : ""
+      }));
+      validateField(name, value);
+    } else {
+      const newValue = files ? files[0] : value;
+      setFormData({ ...formData, [name]: newValue });
+      validateField(name, newValue);
+    }
   };
 
   const validateFormBeforeSubmit = () => {
@@ -186,19 +205,28 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     setShowError(false);
     setShowSuccess(false);
 
+    // Create FormData for file upload
     const payload = new FormData();
-    for (const key in formData) {
-      payload.append(key, formData[key]);
-    }
-
-    // Find the selected course to get additional details
-    const selectedCourse = courseData.find(course =>
-      course.course_name === formData.application_for_course
-    );
-
-    if (selectedCourse) {
-      payload.append("course_id", selectedCourse.course_id);
-      payload.append("duration", selectedCourse.duration);
+    
+    // Add all form fields as strings
+    payload.append("candidate_name", formData.candidate_name);
+    payload.append("guardian_name", formData.guardian_name);
+    payload.append("address", formData.address);
+    payload.append("date_of_birth", formData.date_of_birth);
+    payload.append("email", formData.email);
+    payload.append("password", formData.password);
+    payload.append("mobile_no", formData.mobile_no);
+    payload.append("school_college_name", formData.school_college_name);
+    payload.append("highest_education", formData.highest_education);
+    payload.append("course_status", "pending");
+    
+    // Add course fields as arrays
+    payload.append("application_for_course", JSON.stringify([formData.application_for_course]));
+    payload.append("application_for_course_id", JSON.stringify([formData.application_for_course_id]));
+    
+    // Add profile photo if it exists
+    if (formData.profile_photo) {
+      payload.append("profile_photo", formData.profile_photo);
     }
 
     console.log("Submitting form data:");
@@ -210,7 +238,12 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
       const response = await axios.post(
         "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/",
         payload,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { 
+          headers: { 
+            // Don't set Content-Type header when using FormData
+            // Let browser set it automatically with boundary
+          } 
+        }
       );
 
       setSuccessMsg("Registration Successful!");
@@ -218,6 +251,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
       setFormData({
         application_for_course: "",
+        application_for_course_id: "",
         candidate_name: "",
         guardian_name: "",
         address: "",
@@ -307,7 +341,6 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
       <div className={`ourteam-section ${isFromTrainingPage ? 'no-footer' : ''}`}>
         <Container className="mt-4 mb-3">
           <div className="ourteam-box text-heading">
-
 
             {showSuccess && (
               <Alert variant="success" onClose={() => setShowSuccess(false)} dismissible>
