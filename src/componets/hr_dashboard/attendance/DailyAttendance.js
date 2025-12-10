@@ -89,16 +89,16 @@ const DailyAttendance = () => {
   // Check if user is a regular employee (not admin/HR/manager)
   const isRegularEmployee = () => {
     const userRole = user?.role?.toLowerCase();
-    return userRole !== 'admin' && userRole !== 'hr' && userRole !== 'manager';
+    return  userRole !== 'hr' && userRole !== 'manager';
   };
 
   // CORRECTED: Check if check-in/check-out buttons should be visible
-  const shouldShowCheckInOutButtons = () => {
-    // Show buttons if:
-    // 1. User is a regular employee (always for their own view), OR
-    // 2. User is admin/other privileged role
-    return isRegularEmployee() || isAdminOrOther();
-  };
+  // CORRECTED: Check if check-in/check-out buttons should be visible
+const shouldShowCheckInOutButtons = () => {
+  // Only show buttons for employees with "employee" role
+  const userRole = user?.role?.toLowerCase();
+  return userRole === 'employee';
+};
 
   // Check if edit functionality should be visible
   const shouldShowEditFunctionality = () => {

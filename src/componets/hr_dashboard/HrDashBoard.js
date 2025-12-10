@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Card, Modal, Form,  InputGroup } from "react-bootstrap";
+import React, { useState, useEffect, useContext } from "react";
+import { Container, Row, Col, Button, Card, Modal, Form, InputGroup } from "react-bootstrap";
 import {
   FaTachometerAlt,
   FaUsers,
@@ -26,8 +26,11 @@ import LeaveBalance from "./hr_iinerpage/LeaveBalance";
 import { BsFillFilePostFill } from "react-icons/bs";
 import { GiImpactPoint } from "react-icons/gi";
 import { LuFileBadge2 } from "react-icons/lu";
+import { AuthContext } from "../context/AuthContext";
 
 const HrDashBoard = () => {
+  const { user } = useContext(AuthContext);
+  const userRole = user?.role?.toLowerCase(); // Get user role from context
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -55,7 +58,7 @@ const HrDashBoard = () => {
   const [postError, setPostError] = useState("");
   const [postSuccess, setPostSuccess] = useState("");
   const [likeLoading, setLikeLoading] = useState({});
-  const [postAuthor, setPostAuthor] = useState(""); // Removed static "Kamal Hassan"
+  const [postAuthor, setPostAuthor] = useState(""); 
   const [postDepartment] = useState("Human Resource HR Team");
   const [postTitle, setPostTitle] = useState("");
   const [postDescription, setPostDescription] = useState("");
@@ -520,46 +523,55 @@ const HrDashBoard = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // HR Stats Data - using API data
-  const statsData = [
-    {
-      title: "Employee Overview",
-      value: "Total Employees:",
-      number: ` ${employeeCount.total_employees}`,
-      change: "Active",
-      leavnumber: ` ${employeeCount.total_active}`,
-      Leavechange: "On Leave:",
-      onleave: `${attendanceSummary.on_leave_today}`,
-      resign: "Inactive:",
-      resignumber: `${employeeCount.total_inactive}`,
-      icon: <FaUsers />,
-    },
-    {
-      title: "Attendance Summary",
-      value: "Absent:",
-      number: ` ${attendanceSummary.absent_today}`,
-      change: "Present",
-      leavnumber: ` ${attendanceSummary.present_today}`,
-      icon: <FaTachometerAlt />,
-    },
-    {
-      title: "Leave Requests",
-      value: "Pending:",
-      number: " 5",
-      change: "Approved",
-      leavnumber: " 1",
-      resign: "Rejected:",
-      resignumber: "5",
-      icon: <FaTachometerAlt />,
-    },
-    {
-      title: "Payroll Summary",
-      value: "Current Month Processed:",
-      number: " ₹24,00,000",
-      change: "Processed",
-      icon: <FaTachometerAlt />,
-    },
-  ];
+  // Role-based stats data
+  const getStatsData = () => {
+    const baseStats = [
+      {
+        title: "Employee Overview",
+        value: "Total Employees:",
+        number: ` ${employeeCount.total_employees}`,
+        change: "Active",
+        leavnumber: ` ${employeeCount.total_active}`,
+        Leavechange: "On Leave:",
+        onleave: `${attendanceSummary.on_leave_today}`,
+        resign: "Inactive:",
+        resignumber: `${employeeCount.total_inactive}`,
+        icon: <FaUsers />,
+      },
+      {
+        title: "Attendance Summary",
+        value: "Absent:",
+        number: ` ${attendanceSummary.absent_today}`,
+        change: "Present",
+        leavnumber: ` ${attendanceSummary.present_today}`,
+        icon: <FaTachometerAlt />,
+      }
+    ];
+
+    if (userRole === 'hr') {
+      // HR sees Leave Requests but not Payroll Summary
+      return [
+        ...baseStats,
+        {
+          title: "Leave Requests",
+          value: "Pending:",
+          number: " 5",
+          change: "Approved",
+          leavnumber: " 1",
+          resign: "Rejected:",
+          resignumber: "5",
+          icon: <FaTachometerAlt />,
+        }
+      ];
+    } else if (userRole === 'employee') {
+      // Employee doesn't see Leave Requests or Payroll Summary
+      return baseStats;
+    }
+    
+    return baseStats;
+  };
+
+  const statsData = getStatsData();
 
   return (
     <div className="dashboard-container">
@@ -580,19 +592,24 @@ const HrDashBoard = () => {
         <Container fluid className="dashboard-body">
           <Row className="align-items-center mb-4">
             <Col lg={6} md={12} sm={12}>
-              <h1 className="page-title">Dashboard</h1>
-              <Col lg={4} md={12} sm={12}>
-                <div className="quick-actions">
-                  <Button
-                    variant="primary"
-                    className="w-100 btn-emp mb-2"
-                    onClick={() => navigate("/EmployeeRegistration")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <FaPlus className="me-2" /> Add Employee
-                  </Button>
-                </div>
-              </Col>
+              <h1 className="page-title">
+                {userRole === 'hr' ? 'HR Dashboard' : 'Employee Dashboard'}
+              </h1>
+              {/* Conditionally render Add Employee button only for HR */}
+              {userRole === 'hr' && (
+                <Col lg={4} md={12} sm={12}>
+                  <div className="quick-actions">
+                    <Button
+                      variant="primary"
+                      className="w-100 btn-emp mb-2"
+                      onClick={() => navigate("/EmployeeRegistration")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <FaPlus className="me-2" /> Add Employee
+                    </Button>
+                  </div>
+                </Col>
+              )}
             </Col>
 
             <Col
@@ -646,24 +663,28 @@ const HrDashBoard = () => {
                               <span className="stat-number">{stat.number}</span>
                             </h3>
 
-                            <h3 className="stat-value">
-                              {stat.Leavechange}
-                              <span className="stat-leave-num">
-                                {stat.onleave}
-                              </span>
-                            </h3>
+                            {stat.Leavechange && (
+                              <h3 className="stat-value">
+                                {stat.Leavechange}
+                                <span className="stat-leave-num">
+                                  {stat.onleave}
+                                </span>
+                              </h3>
+                            )}
                             <h3 className="stat-value">
                               {stat.change}
                               <span className="stat-change-num">
                                 {stat.leavnumber}
                               </span>
                             </h3>
-                            <h3 className="stat-value">
-                              {stat.resign}
-                              <span className="stat-resign-num">
-                                {stat.resignumber}
-                              </span>
-                            </h3>
+                            {stat.resign && (
+                              <h3 className="stat-value">
+                                {stat.resign}
+                                <span className="stat-resign-num">
+                                  {stat.resignumber}
+                                </span>
+                              </h3>
+                            )}
                           </div>
                           <div className="br-stat-info ">
                             <Button
@@ -1026,7 +1047,8 @@ const HrDashBoard = () => {
                   </div>
                 </Card>
               )}
-              <TeamMember />
+              {/* Conditionally render TeamMember only for HR */}
+              {userRole === 'hr' && <TeamMember />}
               <LeaveCalendar />
               <LeaveBalance />
             </Col>
