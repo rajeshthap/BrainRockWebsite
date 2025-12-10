@@ -380,7 +380,7 @@ const ManageOurTeam = () => {
                             variant="top" 
                             src={member.image} 
                             alt={member.full_name}
-                            style={{ height: '200px', objectFit: 'cover' }}
+                            style={{ height: '340px', objectFit: 'cover' }}
                           />
                         )}
                         <Card.Body className="d-flex flex-column">

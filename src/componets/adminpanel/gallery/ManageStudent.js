@@ -88,14 +88,53 @@ const ManageStudent = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   
+  // Function to format the application_for_course field
+  const formatCourseList = (courses) => {
+    if (!courses) return 'N/A';
+    
+    // If it's already a string, return it
+    if (typeof courses === 'string') {
+      return courses;
+    }
+    
+    // If it's an array of objects with a name property
+    if (Array.isArray(courses)) {
+      if (courses.length > 0) {
+        // Check if each item is an object with a name property
+        if (typeof courses[0] === 'object' && courses[0] !== null) {
+          // Extract the name from each object
+          const courseNames = courses.map(course => 
+            course.name || course.course_name || course.title || JSON.stringify(course)
+          );
+          return courseNames.join(', ');
+        } else {
+          // If it's an array of strings, join them
+          return courses.join(', ');
+        }
+      } else {
+        return 'N/A';
+      }
+    }
+    
+    // If it's an object, try to extract a meaningful property
+    if (typeof courses === 'object' && courses !== null) {
+      return courses.name || courses.course_name || courses.title || JSON.stringify(courses);
+    }
+    
+    // Fallback
+    return String(courses);
+  };
+  
   // Filter students based on search term and status
   const filteredStudents = students.filter((student) => {
     const lowerSearch = searchTerm.toLowerCase();
+    const courseString = formatCourseList(student.application_for_course).toLowerCase();
+    
     const matchesSearch = (
       student.candidate_name?.toLowerCase().includes(lowerSearch) ||
       student.email?.toLowerCase().includes(lowerSearch) ||
       student.mobile_no?.toLowerCase().includes(lowerSearch) ||
-      student.application_for_course?.toLowerCase().includes(lowerSearch)
+      courseString.includes(lowerSearch)
     );
     
     const matchesStatus = statusFilter === 'all' || student.course_status === statusFilter;
@@ -227,7 +266,7 @@ const ManageStudent = () => {
                               <td data-th="Name">{student.candidate_name}</td>
                               <td data-th="Email">{student.email}</td>
                               <td data-th="Phone">{student.mobile_no}</td>
-                              <td data-th="Course">{student.application_for_course}</td>
+                              <td data-th="Course">{formatCourseList(student.application_for_course)}</td>
                               <td data-th="Status">
                                 <span className={`badge bg-${getStatusVariant(student.course_status)} me-2`}>
                                   {student.course_status}
@@ -335,7 +374,7 @@ const ManageStudent = () => {
               </Row>
               <Row>
                 <Col md={12} className="mb-3">
-                  <p><strong>Applied Course:</strong> {selectedStudent.application_for_course}</p>
+                  <p><strong>Applied Course:</strong> {formatCourseList(selectedStudent.application_for_course)}</p>
                 </Col>
               </Row>
               <Row>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Container, Row, Col, Table, Button, Alert, Spinner, Modal, Form } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Alert, Spinner, Modal, Form, Pagination } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
@@ -45,7 +45,9 @@ const ContactUsQuery = () => {
   useEffect(() => {
     const fetchContactQueries = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/contact-us/`);
+        const response = await fetch(`${API_BASE_URL}/api/contact-us/`, {
+          credentials: 'include'
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch contact queries');
         }
@@ -124,6 +126,9 @@ const ContactUsQuery = () => {
 
   // Calculate total pages
   const totalPages = Math.ceil(filteredContacts.length / itemsPerPage);
+  
+  // Handle page change
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="dashboard-container">
@@ -161,81 +166,79 @@ const ContactUsQuery = () => {
               <>
                 {/* --- TABLE STRUCTURE --- */}
                 <Row className="mt-3">
-                  <Col xs={12}>
-                    <div className="table-responsive">
-                      <Table striped bordered hover>
-                        <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Subject</th>
-                            <th>Message</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {paginatedContacts.length > 0 ? (
-                            paginatedContacts.map((query) => (
-                              <tr key={query.id}>
-                                <td>{query.full_name}</td>
-                                <td>{query.email}</td>
-                                <td>{query.phone}</td>
-                                <td>{query.subject}</td>
-                                <td className="message-cell">
-                                  {query.message.length > 50 
-                                    ? `${query.message.substring(0, 50)}...` 
-                                    : query.message}
-                                </td>
-                                <td>{formatDate(query.created_at)}</td>
-                                <td>
-                                  <Button 
-                                    variant="primary" 
-                                    size="sm"
-                                    onClick={() => handleViewContact(query)}
-                                  >
-                                    View Details
-                                  </Button>
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan="7" className="text-center">
-                                No contact queries found matching your search.
+                  <div className="col-md-12">
+                    <table className="temp-rwd-table">
+                      <tbody>
+                        <tr>
+                          <th>S.No</th>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th>Subject</th>
+                          <th>Message</th>
+                          <th>Date</th>
+                          <th>Action</th>
+                        </tr>
+                        
+                        {paginatedContacts.length > 0 ? (
+                          paginatedContacts.map((query, index) => (
+                            <tr key={query.id}>
+                              <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                              <td data-th="Name">{query.full_name}</td>
+                              <td data-th="Email">{query.email}</td>
+                              <td data-th="Phone">{query.phone}</td>
+                              <td data-th="Subject">{query.subject}</td>
+                              <td data-th="Message" className="message-cell">
+                                {query.message.length > 50 
+                                  ? `${query.message.substring(0, 50)}...` 
+                                  : query.message}
+                              </td>
+                              <td data-th="Date">{formatDate(query.created_at)}</td>
+                              <td data-th="Action">
+                                <Button 
+                                  variant="primary" 
+                                  size="sm"
+                                  onClick={() => handleViewContact(query)}
+                                >
+                                  View
+                                </Button>
                               </td>
                             </tr>
-                          )}
-                        </tbody>
-                      </Table>
-                    </div>
-                  </Col>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="8" className="text-center">
+                              No contact queries found matching your search.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </Row>
               
                 {/* --- PAGINATION CONTROLS --- */}
-                {filteredContacts.length > itemsPerPage && (
-                  <div className="d-flex justify-content-center align-items-center mt-4">
-                    <Button 
-                      variant="outline-primary" 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-                      disabled={currentPage === 1}
-                      className="me-2"
-                    >
-                      Previous
-                    </Button>
-                    
-                    <span className="mx-2">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    
-                    <Button 
-                      variant="outline-primary" 
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </Button>
+                {totalPages > 1 && (
+                  <div className="d-flex justify-content-center mt-4">
+                    <Pagination>
+                      <Pagination.Prev 
+                        onClick={() => handlePageChange(currentPage - 1)} 
+                        disabled={currentPage === 1}
+                      />
+                      {[...Array(totalPages).keys()].map(page => (
+                        <Pagination.Item 
+                          key={page + 1} 
+                          active={page + 1 === currentPage}
+                          onClick={() => handlePageChange(page + 1)}
+                        >
+                          {page + 1}
+                        </Pagination.Item>
+                      ))}
+                      <Pagination.Next 
+                        onClick={() => handlePageChange(currentPage + 1)} 
+                        disabled={currentPage === totalPages}
+                      />
+                    </Pagination>
                   </div>
                 )}
               </>
