@@ -23,6 +23,7 @@ import { LuSearchCode } from "react-icons/lu";
 import { AiOutlineFileDone } from "react-icons/ai";
 import ServicesCarousel from "./ServicesCarousel";
 import TestimonialCarousel from "./TestimonialCarousel";
+import TopNotificationBanner from "./TopNotificationBanner";
 import { GoCodeReview } from "react-icons/go";
 import { MdEngineering } from "react-icons/md";
 import { Link } from "react-router-dom";
@@ -295,6 +296,7 @@ function UserPage() {
 
   return (
     <div className="container-fluid p-0">
+      <TopNotificationBanner />
       <div className="craousal-main" style={{ overflow: 'hidden' }}>
         <Carousel className="resorce-craousal" interval={3000} pause={false}>
           {loading ? (

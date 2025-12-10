@@ -59,7 +59,106 @@
 .card-orange {
   background: linear-gradient(135deg, #fb8c00, #ffa726);
 }
+.card-orange-student {
+  background: linear-gradient(135deg, #00bcfb, #00fbee);
+}
+.team-image {
+  width: 100%;
+  height: 220px;   /* FIXED SMALL HEIGHT */
+  object-fit: cover; /* keeps face visible */
+  border-radius: 8px;
+}
+.team-card {
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+/* ==========================================================================
+   Manage Our Team - Table View Styles
+   ========================================================================== */
 
+/* Main table container for responsiveness */
+.table-responsive {
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+}
+
+/* Table base styles */
+.table {
+  margin-bottom: 0;
+  color: #495057;
+}
+
+/* Table Header Styling */
+.table thead th {
+  background: var(--br-primary); /* Light gray background for header */
+  color: #fff; /* Darker text for header */
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #dee2e6;
+  vertical-align: middle;
+  padding: 1rem;
+}
+
+/* Table Body Styling */
+.table tbody td {
+  vertical-align: middle;
+  padding: 1rem;
+  border-color: #e9ecef;
+}
+
+/* Table Row Hover Effect */
+.table tbody tr:hover {
+  background-color: #f1f3f5; /* A subtle gray on hover */
+  cursor: default;
+}
+
+/* Circular profile image in the table */
+.team-image-list {
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Placeholder for missing images */
+.team-placeholder {
+  border: 2px dashed #ced4da;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto; /* Center the placeholder */
+  color: #6c757d;
+}
+
+.team-placeholder::after {
+  content: "No Image";
+  font-size: 0.7rem;
+}
+
+/* Social links styling inside the table */
+.social-links a {
+  color: #6c757d; /* Muted color for icons */
+  font-size: 1.1rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.social-links a:hover {
+  color: #007bff; /* Bootstrap primary color on hover */
+  text-decoration: none;
+}
+
+/* Action buttons styling */
+.table .btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.775rem;
+}
+
+/* Zebra-striping for better readability (optional) */
+.table tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .br-stat-card {

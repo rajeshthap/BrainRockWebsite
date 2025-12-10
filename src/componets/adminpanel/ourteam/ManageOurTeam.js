@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Modal, Card, Pagination } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Modal, Pagination, Table } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
@@ -18,7 +18,7 @@ const ManageOurTeam = () => {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Number of cards to show per page
+  const itemsPerPage = 10; // Number of items to show per page
   
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
@@ -366,42 +366,59 @@ const ManageOurTeam = () => {
               <p>No team members found.</p>
             ) : (
               <>
-                <Row>
-                  {currentItems.length === 0 ? (
-                    <Col xs={12} className="text-center my-5">
-                      <p>{searchTerm ? 'No team members match your search.' : 'No team members found.'}</p>
-                    </Col>
-                  ) : (
-                    currentItems.map((member) => (
-                      <Col lg={4} md={6} sm={12} className="mb-4" key={member.id}>
-                      <Card className="h-100 team-card">
-                        {member.image && (
-                          <Card.Img 
-                            variant="top" 
-                            src={member.image} 
-                            alt={member.full_name}
-                            style={{ height: '340px', objectFit: 'cover' }}
-                          />
-                        )}
-                        <Card.Body className="d-flex flex-column">
-                          <Card.Title className="managetitle">{member.full_name}</Card.Title>
-                          <Card.Subtitle className="mb-2 text-muted">{member.designation}</Card.Subtitle>
-                          <div className="social-links mt-auto mb-3">
-                            {member.facebook_profile_link && <a href={member.facebook_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-facebook"></i></a>}
-                            {member.instagram_profile_link && <a href={member.instagram_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-instagram"></i></a>}
-                            {member.linkedinn_profile_link && <a href={member.linkedinn_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-linkedin"></i></a>}
-                            {member.x_profile_link && <a href={member.x_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-x-twitter"></i></a>}
-                          </div>
-                        </Card.Body>
-                        <Card.Footer className="bg-white border-top-0">
-                          <Button variant="primary" size="sm" className="me-2" onClick={() => handleEdit(member)}>Edit</Button>
-                          <Button variant="danger" size="sm" onClick={() => handleDelete(member.id)}>Delete</Button>
-                        </Card.Footer>
-                      </Card>
-                    </Col>
-                    ))
-                  )}
-                </Row>
+                <div className="table-responsive">
+                  <Table striped bordered hover>
+                    <thead>
+                      <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Designation</th>
+                        <th>Social Links</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentItems.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="text-center">
+                            {searchTerm ? 'No team members match your search.' : 'No team members found.'}
+                          </td>
+                        </tr>
+                      ) : (
+                        currentItems.map((member) => (
+                          <tr key={member.id}>
+                            <td className="text-center">
+                              {member.image ? (
+                                <img 
+                                  src={member.image} 
+                                  alt={member.full_name} 
+                                  className="team-image-list"
+                                  style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '50%' }}
+                                />
+                              ) : (
+                                <div className="team-placeholder" style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#e9ecef' }}></div>
+                              )}
+                            </td>
+                            <td>{member.full_name}</td>
+                            <td>{member.designation}</td>
+                            <td>
+                              <div className="social-links">
+                                {member.facebook_profile_link && <a href={member.facebook_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-facebook"></i></a>}
+                                {member.instagram_profile_link && <a href={member.instagram_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-instagram"></i></a>}
+                                {member.linkedinn_profile_link && <a href={member.linkedinn_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-linkedin"></i></a>}
+                                {member.x_profile_link && <a href={member.x_profile_link} target="_blank" rel="noopener noreferrer" className="me-2"><i className="fab fa-x-twitter"></i></a>}
+                              </div>
+                            </td>
+                            <td>
+                              <Button variant="primary" size="sm" className="me-2" onClick={() => handleEdit(member)}>Edit</Button>
+                              <Button variant="danger" size="sm" onClick={() => handleDelete(member.id)}>Delete</Button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </Table>
+                </div>
                 {renderPagination()}
               </>
             )}

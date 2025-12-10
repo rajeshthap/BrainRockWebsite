@@ -1,0 +1,278 @@
+/* Top Notification Banner Styles */
+
+.top-notification-banner {
+  background: linear-gradient(135deg, #5624d0 0%, #3f1aa6 100%);
+  color: white;
+  padding: 0;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(86, 36, 208, 0.3);
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.top-notification-banner.loading-state {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-spinner {
+  color: white;
+}
+
+.notification-banner-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 25px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.notification-banner-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  flex: 1;
+  min-width: 300px;
+}
+
+.notification-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 45px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+}
+
+.notification-bell-icon {
+  font-size: 20px;
+  color: white;
+}
+
+.notification-banner-text {
+  flex: 1;
+  margin-top: 5px;
+}
+
+.notification-banner-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.notification-banner-message {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-banner-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.notification-nav-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.notification-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.05);
+}
+
+.notification-nav-btn:active {
+  transform: scale(0.95);
+}
+
+.notification-counter {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  min-width: 45px;
+  text-align: center;
+}
+
+.notification-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.notification-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: rotate(90deg);
+}
+
+.notification-close-btn:active {
+  transform: rotate(90deg) scale(0.9);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .notification-banner-container {
+    padding: 12px 18px;
+    gap: 15px;
+  }
+
+  .notification-banner-content {
+    min-width: 250px;
+  }
+
+  .notification-banner-title {
+    font-size: 15px;
+  }
+
+  .notification-banner-message {
+    font-size: 13px;
+  }
+
+  .notification-icon-wrapper {
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .notification-bell-icon {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .notification-banner-container {
+    padding: 12px 15px;
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .notification-banner-content {
+    min-width: 100%;
+  }
+
+  .notification-banner-title {
+    font-size: 14px;
+  }
+
+  .notification-banner-message {
+    font-size: 12px;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .notification-banner-controls {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .notification-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 35px;
+    height: 35px;
+  }
+
+  .notification-nav-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+
+  .notification-icon-wrapper {
+    min-width: 38px;
+    height: 38px;
+  }
+}
+
+@media (max-width: 576px) {
+  .notification-banner-container {
+    padding: 10px 12px;
+  }
+
+  .notification-banner-content {
+    gap: 12px;
+  }
+
+  .notification-banner-title {
+    font-size: 13px;
+  }
+
+  .notification-banner-message {
+    font-size: 11px;
+  }
+
+  .notification-close-btn {
+    width: 32px;
+    height: 32px;
+    top: 8px;
+    right: 8px;
+  }
+
+  .notification-nav-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .notification-counter {
+    font-size: 11px;
+  }
+}
