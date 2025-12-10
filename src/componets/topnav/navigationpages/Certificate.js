@@ -57,6 +57,36 @@ const Certificate = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // Get the full URL for the PDF file
+  const getPdfUrl = () => {
+    if (!certificateData || !certificateData.pdf_file) return null;
+    // The base URL is the same as the API endpoint
+    const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+    return `${baseUrl}${certificateData.pdf_file}`;
+  };
+
+  // Handle viewing the PDF
+  const handleViewPdf = () => {
+    const pdfUrl = getPdfUrl();
+    if (pdfUrl) {
+      window.open(pdfUrl, '_blank');
+    }
+  };
+
+  // Handle downloading the PDF
+  const handleDownloadPdf = () => {
+    const pdfUrl = getPdfUrl();
+    if (pdfUrl) {
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.target = '_blank';
+      link.download = `${certificateData.certificate_number}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <>
       <div className='feedback-banner'>
@@ -140,6 +170,29 @@ const Certificate = () => {
                       <p><strong>Start Date:</strong> {formatDate(certificateData.from_date)}</p>
                       <p><strong>End Date:</strong> {formatDate(certificateData.to_date)}</p>
                       <p><strong>Issued Date:</strong> {formatDate(certificateData.created_at)}</p>
+                    </Col>
+                  </Row>
+                  
+                  {/* PDF Section */}
+                  <Row className="mt-4">
+                    <Col className="text-center">
+                      <h5 className="mb-3">Certificate Document</h5>
+                      <div className="d-flex justify-content-center gap-3">
+                        <Button 
+                          variant="outline-primary" 
+                          onClick={handleViewPdf}
+                          disabled={!certificateData.pdf_file}
+                        >
+                          View PDF
+                        </Button>
+                        <Button 
+                          variant="primary" 
+                          onClick={handleDownloadPdf}
+                          disabled={!certificateData.pdf_file}
+                        >
+                          Download PDF
+                        </Button>
+                      </div>
                     </Col>
                   </Row>
                 </Card.Body>
