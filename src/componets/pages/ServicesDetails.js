@@ -166,7 +166,7 @@ const ServicesDetails = () => {
                 )}
               </Col>
               <div className="text-center">
-                <Link to="/" className="btn btn-primary mt-3">Back to Services</Link>
+                <Link to="/ServicePage" className="btn btn-primary mt-3">Back to Services</Link>
               </div>
             </Row>
           </div>

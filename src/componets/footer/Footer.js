@@ -12,7 +12,7 @@ function Footer() {
       <div >
 
         <Col className='awc-footer-main '>
-          <p>© 2026 Brainrock Consulting Services, All Right Reserved  <br /> <Link to="/https://www.brainrock.in/" target="_blank">Designed By Brainrock</Link></p>
+          <p>© 2025-26 Brainrock Consulting Services, All Right Reserved  <br /> <Link to="/https://www.brainrock.in/" target="_blank">Designed By Brainrock</Link></p>
 
         </Col>
 
