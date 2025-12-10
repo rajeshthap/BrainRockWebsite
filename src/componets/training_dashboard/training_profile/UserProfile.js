@@ -203,6 +203,8 @@ const UserProfile = () => {
         // Don't set Content-Type header when using FormData
       });
       
+      console.log("Image upload response status:", response.status);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -210,7 +212,7 @@ const UserProfile = () => {
       const result = await response.json();
       console.log("Image upload response:", result);
       
-      // Show success message
+      // Show success message immediately
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
       
@@ -218,7 +220,7 @@ const UserProfile = () => {
       await fetchProfileData();
     } catch (error) {
       console.error("Failed to upload image:", error);
-      alert('Failed to upload image. Please try again.');
+      alert(`Failed to upload image: ${error.message}`);
     } finally {
       setUploadingImage(false);
       // Reset file input
@@ -237,10 +239,16 @@ const UserProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Include applicant_id from AuthContext in the payload
+      // Create a clean payload with only editable fields
+      // Filter out read-only fields like id, password, created_at, updated_at, etc.
       const payload = {
-        ...editForm,
-        applicant_id: user?.unique_id
+        applicant_id: user?.unique_id,
+        candidate_name: editForm.candidate_name,
+        guardian_name: editForm.guardian_name,
+        address: editForm.address,
+        date_of_birth: editForm.date_of_birth,
+        school_college_name: editForm.school_college_name,
+        highest_education: editForm.highest_education,
       };
       
       console.log("Submitting update with payload:", payload); // Debug log
@@ -253,6 +261,8 @@ const UserProfile = () => {
         body: JSON.stringify(payload)
       });
       
+      console.log("Response status:", response.status); // Debug log
+      
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -260,15 +270,27 @@ const UserProfile = () => {
       const result = await response.json();
       console.log("Update response:", result); // Debug log
       
-      // Close the modal and show success message regardless of response format
+      // Update local state with edited data (merge with original to keep read-only fields)
+      const updatedData = { ...profileData, ...payload };
+      setProfileData(updatedData);
+      setEditForm(updatedData);
+      
+      // Update shared profile context immediately
+      updateUserProfile({
+        candidate_name: payload.candidate_name,
+        profile_photo: profileData.profile_photo, // Keep existing photo
+        email: profileData.email,
+        mobile_no: profileData.mobile_no,
+      });
+      
+      // Close the modal and show success message
       setShowEditModal(false);
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
       
-      // Refetch profile data to ensure we have the latest data
-      await fetchProfileData();
     } catch (error) {
       console.error("Failed to update profile:", error);
+      alert(`Error updating profile: ${error.message}`);
     }
   };
 
