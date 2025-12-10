@@ -17,8 +17,7 @@ const TrainingVideoPlayer = () => {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("overview"); // ⭐ tab state
-
-  const chapters = [
+  const [chapters, setChapters] = useState([
     { id: 1, title: "Introduction and Showcase", time: "19min", completed: true },
     { id: 2, title: "Together Section", time: "10min", completed: true },
     { id: 3, title: "Not Your Section", time: "14min", completed: false },
@@ -27,7 +26,44 @@ const TrainingVideoPlayer = () => {
     { id: 6, title: "Footer", time: "9min", completed: false },
     { id: 7, title: "Desktop Responsive", time: "8min", completed: false },
     { id: 8, title: "Responsiveness in Tablet and Mobile", time: "14min", completed: false },
-  ];
+  ]);
+  const [courseCompleted, setCourseCompleted] = useState(false);
+
+  // Calculate progress percentage
+  const calculateProgress = () => {
+    const totalChapters = chapters.length;
+    const completedChapters = chapters.filter(c => c.completed).length;
+    return Math.round((completedChapters / totalChapters) * 100);
+  };
+
+  const progress = calculateProgress();
+
+  // Handle Complete Lecture button click
+  const handleCompleteLecture = () => {
+    const updatedChapters = [...chapters];
+    if (activeIndex < updatedChapters.length && !updatedChapters[activeIndex].completed) {
+      updatedChapters[activeIndex].completed = true;
+      setChapters(updatedChapters);
+
+      // Check if all lectures are completed
+      if (updatedChapters.every(c => c.completed)) {
+        setCourseCompleted(true);
+      }
+
+      // Move to next lecture if available
+      if (activeIndex < updatedChapters.length - 1) {
+        setActiveIndex(activeIndex + 1);
+      }
+    }
+  };
+
+  // Handle Submit button - mark course as fully completed
+  const handleSubmitCourse = () => {
+    console.log("Course submitted! Progress:", progress + "%");
+    // API call to submit course completion can be added here
+    alert(`Course completed and submitted! Progress: ${progress}%`);
+    // Optionally navigate back or reset
+  };
 
   const handleChapterClick = (index) => {
     setActiveIndex(index);
@@ -70,9 +106,30 @@ const TrainingVideoPlayer = () => {
             autoPlay={true}
           />
 
-          {/* COMPLETE BUTTON */}
+          {/* PROGRESS BAR */}
+          <div className="tvp-progress-container">
+            <div className="tvp-progress-label">
+              <span>Course Progress: {progress}%</span>
+            </div>
+            <div className="tvp-progress-bar">
+              <div className="tvp-progress-fill" style={{ width: `${progress}%` }}></div>
+            </div>
+          </div>
+
+          {/* COMPLETE BUTTON & SUBMIT BUTTON */}
           <div className="tvp-button-container">
-            <button className="tvp-blue-button">Complete Lecture & Continue</button>
+            {!courseCompleted ? (
+              <button className="tvp-blue-button" onClick={handleCompleteLecture}>
+                Complete Lecture & Continue
+              </button>
+            ) : (
+              <div className="tvp-completion-section">
+                <p className="tvp-completion-message">✅ All lectures completed!</p>
+                <button className="tvp-submit-button" onClick={handleSubmitCourse}>
+                  Submit Course
+                </button>
+              </div>
+            )}
           </div>
 
        
