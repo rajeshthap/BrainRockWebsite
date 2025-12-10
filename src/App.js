@@ -110,6 +110,7 @@ import Career from "./componets/topnav/navigationpages/Career";
 import EmployeeTransfer from "./componets/hr_dashboard/hr_iinerpage/EmployeeTransfer";
 import UserProfile from "./componets/training_dashboard/training_profile/UserProfile";
 import AllStudentsData from "./componets/adminpanel/Candidate/AllStudentsData";
+import Purchasehistory from "./componets/training_dashboard/Purchasehistory";
 function AppContent() {
   const location = useLocation();
 
@@ -176,6 +177,7 @@ function AppContent() {
     "/EmployeeTransfer",
     "/UserProfile",
     "/AllStudentsData",
+    "/Purchasehistory"
   ]);
 
   const hiddenFooter1 = new Set([
@@ -239,6 +241,15 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+         <Route
+          path="/Purchasehistory"
+          element={
+            <ProtectedRoute>
+              <Purchasehistory />
+            </ProtectedRoute>
+          }
+        />
+       
          <Route
           path="/UserProfile"
           element={

@@ -287,7 +287,17 @@ body {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
-
+.br-all-heading h2{
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: var(--br-space-700);
+}
+.br-btn-all{
+  font-size: 10px;
+}
+.all-clear{
+  font-size: 10px;
+}
 .employee-card:hover {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -311,14 +321,70 @@ body {
 .dropdown-item {
   font-size: 12px;
 }
+.print-btn,
+.download-btn {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  color: #333;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
+/* Hover Effect */
+.print-btn:hover,
+.download-btn:hover {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
+/* Print Button Specific */
+.print-btn {
+  border-color: #28a745;
+}
+
+.print-btn:hover {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+/* Download Button Specific */
+.download-btn {
+  border-color: #ffc107;
+}
+
+.download-btn:hover {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #fff;
+}
+.all-edit-btn{
+  font-size: 10px;
+}
+.edit-all-icon{
+  margin-right: 4px;
+  font-size: 10px;
+}
+.br-calcel-all{
+  margin-top: 12px;
+}
 @media only screen and (max-width: 568px) {
   .br-login {
     margin: var(--br-space-200) var(--br-space-0) var(--br-space-0) var(--br-space-0) !important;
   }
-
-  .search-btn {
-    margin-top: 12px;
+  .print-btn,
+  .download-btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+.br-box-container {
+ padding: 12px;
   }
 
   .sbt-btn-text {

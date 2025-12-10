@@ -478,8 +478,9 @@ const handleSubmit = async (e) => {
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
             
-
+<div className="br-all-heading">
             <h2>Create Team</h2>
+            </div>
 
             {loading && (
               <div className="d-flex justify-content-center my-5">
@@ -498,28 +499,27 @@ const handleSubmit = async (e) => {
             {!loading && !error && (
               <Form onSubmit={handleSubmit}>
                 <Row className="mb-4">
-                  <Col md={6}>
-                    <Form.Group controlId="teamName">
-                      <Form.Label>Team Name</Form.Label>
+                  <Col md={6} lg={6} sm={12}>
+                    <Form.Group controlId="teamName mb-3 ">
+                      <Form.Label className="br-label mt-3">Team Name</Form.Label>
                       <Form.Control
                         type="text"
                         placeholder="Enter team name"
-                        value={teamName}
+                        value={teamName} className="br-form-control"
                         onChange={(e) => setTeamName(e.target.value)}
                         required
                       />
                     </Form.Group>
                   </Col>
-                </Row>
+              
 
-                <Row className="mb-4">
-                  <Col md={6}>
-                    <Form.Group controlId="teamLeader">
-                      <Form.Label>Select Team Leader</Form.Label>
+                 <Col md={6} lg={6} sm={12}>
+                    <Form.Group controlId="teamLeader mb-3">
+                      <Form.Label className="br-label mt-3">Select Team Leader</Form.Label>
                       <Form.Select
                         value={selectedTeamLeader}
                         onChange={(e) => setSelectedTeamLeader(e.target.value)}
-                        required
+                        required className="br-form-control"
                       >
                         <option value="">Select Team Leader</option>
                         {filteredTeamLeaders.map((leader) => (
@@ -532,12 +532,12 @@ const handleSubmit = async (e) => {
                     </Form.Group>
                   </Col>
 
-                  <Col md={6}>
-                    <Form.Group controlId="project">
-                      <Form.Label>Select Project</Form.Label>
+                <Col md={6} lg={6} sm={12}>
+                    <Form.Group controlId="project mb-3">
+                      <Form.Label className="br-label mt-3">Select Project</Form.Label>
                       <Form.Select
                         value={selectedProject}
-                        onChange={(e) => setSelectedProject(e.target.value)}
+                        onChange={(e) => setSelectedProject(e.target.value)} className="br-form-control"
                         required
                       >
                         <option value="">Select Project</option>
@@ -552,13 +552,13 @@ const handleSubmit = async (e) => {
                       </Form.Select>
                     </Form.Group>
                   </Col>
-                </Row>
+              
 
-                <Row className="mb-4">
-                  <Col md={6}>
-                    <Form.Group controlId="startDate">
-                      <Form.Label className="temp-label">
-                        Start Date <span className="temp-span-star">*</span>
+              
+                 <Col md={6} lg={6} sm={12}>
+                    <Form.Group controlId="startDate mb-3">
+                      <Form.Label className="temp-label mt-3">
+                        Start Date 
                       </Form.Label>
                       <DatePicker
                         selected={startDate}
@@ -567,7 +567,7 @@ const handleSubmit = async (e) => {
                         timeFormat="hh:mm aa"
                         timeIntervals={30}
                         dateFormat="MMMM d, yyyy h:mm aa"
-                        className="form-control temp-form-control-option w-100"
+                        className="form-control br-form-control-option w-100"
                         customInput={
                           <CustomDatePickerInput placeholder="Select Start Date and Time" />
                         }
@@ -578,10 +578,10 @@ const handleSubmit = async (e) => {
                     </Form.Group>
                   </Col>
 
-                  <Col md={6}>
-                    <Form.Group controlId="endDate">
-                      <Form.Label className="temp-label">
-                        End Date <span className="temp-span-star">*</span>
+                  <Col md={6} lg={6} sm={12}>
+                    <Form.Group controlId="endDate mb-3">
+                      <Form.Label className="br-label mt-3">
+                        End Date 
                       </Form.Label>
                       <DatePicker
                         selected={endDate}
@@ -590,7 +590,7 @@ const handleSubmit = async (e) => {
                         timeFormat="hh:mm aa"
                         timeIntervals={30}
                         dateFormat="MMMM d, yyyy h:mm aa"
-                        className="form-control temp-form-control-option w-100"
+                        className="form-control br-form-control-option w-100"
                         customInput={
                           <CustomDatePickerInput placeholder="Select End Date and Time" />
                         }
@@ -600,13 +600,14 @@ const handleSubmit = async (e) => {
                       />
                     </Form.Group>
                   </Col>
-                </Row>
+               
 
-                <Row className="mb-4">
-                  <Col md={12}>
-                    <Form.Label className="temp-label">
+               
+                 <Col md={6} lg={6} sm={12}>
+                    <Form.Group controlId=" mb-3">
+                    <Form.Label className="br-label mt-3">
                       Select Team Members{" "}
-                      <span className="temp-span-star">*</span>
+                     
                     </Form.Label>
                     <Form.Text className="text-muted mb-2 d-block">
                       Search for all employees by name, ID, or designation.
@@ -658,15 +659,16 @@ const handleSubmit = async (e) => {
                       components={{ Option: OptionComponent }}
                       isClearable={true}
                     />
+                    </Form.Group>
                   </Col>
                 </Row>
 
                 <div className="d-flex justify-content-between">
-                  <Button variant="outline-danger" onClick={clearForm}>
+                  <Button variant="outline-danger" className="all-clear" onClick={clearForm}>
                     Clear Form
                   </Button>
-                  <div>
-                    <Button variant="primary" type="submit">
+                  <div className="all-btn">
+                    <Button variant="primary" type="submit" className="br-btn-all">
                       Create Team
                     </Button>
                   </div>

@@ -51,7 +51,7 @@ const menuItems = [
       {
       icon: <FaTachometerAlt />,
       label: "Purchase history",
-      path: "#",
+      path: "/Purchasehistory",
       active: true,
     },
    
