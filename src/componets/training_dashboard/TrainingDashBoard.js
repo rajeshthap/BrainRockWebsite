@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Modal, Button, Form } from "react-bootstrap";
 import "../../assets/css/trainingdashboard.css";
 
 import TrainingHeader from "./TrainingHeader";
 import TrainingLeftnav from "./TrainingLeftnav";
-import { VideoPlayer } from "@graphland/react-video-player";
 import { useNavigate } from "react-router-dom";
-import { FaHeart } from "react-icons/fa";
+import { FaHeart, FaCheckCircle } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext";
 
 const TrainingDashBoard = () => {
@@ -27,6 +26,11 @@ const TrainingDashBoard = () => {
   const [userRegistrationData, setUserRegistrationData] = useState(null); // State to store user registration data
   const [allRegistrations, setAllRegistrations] = useState([]); // State to store all registrations
   const [loading, setLoading] = useState(true); // Loading state
+  const [addingCourse, setAddingCourse] = useState(false); // State to track when adding a course
+  const [showModulesModal, setShowModulesModal] = useState(false); // State to control modules modal
+  const [selectedCourse, setSelectedCourse] = useState(null); // State to store selected course for modules
+  const [completedModules, setCompletedModules] = useState({}); // State to track completed modules for each course
+  const [courseProgress, setCourseProgress] = useState({}); // State to track course progress
  
   const navigate = useNavigate();
 
@@ -41,9 +45,177 @@ const TrainingDashBoard = () => {
     });
   };
 
+  // Function to open modules modal
+  const openModulesModal = (course) => {
+    setSelectedCourse(course);
+    setShowModulesModal(true);
+    
+    // Initialize completed modules for this course if not already done
+    if (!completedModules[course.course_id]) {
+      const initialModules = {};
+      if (course.modules && Array.isArray(course.modules)) {
+        course.modules.forEach((module, index) => {
+          initialModules[index] = false;
+        });
+        setCompletedModules(prev => ({
+          ...prev,
+          [course.course_id]: initialModules
+        }));
+      }
+    }
+  };
+
+  // Function to handle module checkbox change
+  const handleModuleChange = (courseId, moduleIndex, isChecked) => {
+    setCompletedModules(prev => ({
+      ...prev,
+      [courseId]: {
+        ...prev[courseId],
+        [moduleIndex]: isChecked
+      }
+    }));
+    
+    // Update course progress
+    const courseModules = completedModules[courseId] || {};
+    const totalModules = Object.keys(courseModules).length;
+    const completedCount = Object.values({
+      ...courseModules,
+      [moduleIndex]: isChecked
+    }).filter(Boolean).length;
+    
+    const progress = totalModules > 0 ? Math.round((completedCount / totalModules) * 100) : 0;
+    
+    setCourseProgress(prev => ({
+      ...prev,
+      [courseId]: progress
+    }));
+  };
+
+  // Function to check if all modules are completed
+  const areAllModulesCompleted = (courseId) => {
+    const courseModules = completedModules[courseId] || {};
+    const totalModules = Object.keys(courseModules).length;
+    const completedCount = Object.values(courseModules).filter(Boolean).length;
+    return totalModules > 0 && totalModules === completedCount;
+  };
+
+  // Function to handle course completion
+  const handleCompleteCourse = (courseId) => {
+    // Here you can make an API call to mark the course as completed
+    alert(`Course with ID ${courseId} has been marked as completed!`);
+    
+    // You might want to update the course status in your state or make an API call
+    // to update the course status in the backend
+  };
+
   // Add to Wishlist function
   const addToWishlist = (course) => {
     setWishlist((prev) => [...prev, course]);
+  };
+
+  // Add Course to Registration function
+  const addCourseToRegistration = async (course) => {
+    if (!applicantId) {
+      console.error("Applicant ID not available");
+      return;
+    }
+
+    setAddingCourse(true);
+    
+    try {
+      // Get current registration data
+      const currentRegistration = allRegistrations.find(reg => reg.applicant_id === applicantId);
+      
+      // Prepare the updated course arrays
+      let updatedCourses = [];
+      let updatedCourseIds = [];
+      
+      if (currentRegistration) {
+        // If registration exists, add to existing arrays
+        // Handle both string and array formats for application_for_course
+        if (typeof currentRegistration.application_for_course === 'string') {
+          updatedCourses = [currentRegistration.application_for_course];
+        } else if (Array.isArray(currentRegistration.application_for_course)) {
+          updatedCourses = [...currentRegistration.application_for_course];
+        }
+        
+        // Handle both string and array formats for application_for_course_id
+        if (typeof currentRegistration.application_for_course_id === 'string') {
+          updatedCourseIds = [currentRegistration.application_for_course_id];
+        } else if (Array.isArray(currentRegistration.application_for_course_id)) {
+          updatedCourseIds = [...currentRegistration.application_for_course_id];
+        }
+        
+        // Check if course is already registered
+        if (updatedCourses.includes(course.title)) {
+          alert("You have already registered for this course!");
+          setAddingCourse(false);
+          return;
+        }
+        
+        // Add the new course
+        updatedCourses.push(course.title);
+        updatedCourseIds.push(course.course_id);
+      } else {
+        // If no registration exists, create new arrays
+        updatedCourses = [course.title];
+        updatedCourseIds = [course.course_id];
+      }
+      
+      // Make the PUT request
+      const response = await fetch(
+        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            applicant_id: applicantId,
+            application_for_course: updatedCourses,
+            application_for_course_id: updatedCourseIds
+          })
+        }
+      );
+      
+      const data = await response.json();
+      console.log("Add Course API Response:", data);
+      
+      if (data.success) {
+        alert("Course added successfully!");
+        
+        // Refresh the registrations data
+        const fetchResponse = await fetch(
+          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`,
+          {
+            method: "GET",
+            credentials: 'include'
+          }
+        );
+        
+        const fetchData = await fetchResponse.json();
+        if (fetchData && fetchData.success && fetchData.data) {
+          setAllRegistrations(fetchData.data);
+          
+          // Filter registrations for the current user
+          const userRegistrations = fetchData.data.filter(registration => 
+            registration.applicant_id === applicantId
+          );
+          
+          if (userRegistrations.length > 0) {
+            setUserRegistrationData(userRegistrations[0]);
+          }
+        }
+      } else {
+        alert("Failed to add course. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error adding course:', error);
+      alert("An error occurred while adding the course. Please try again.");
+    } finally {
+      setAddingCourse(false);
+    }
   };
 
   // Fetch course items from API
@@ -76,7 +248,7 @@ const TrainingDashBoard = () => {
           `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`,
           {
             method: "GET",
-            credentials: 'include' // Include credentials in the request
+            credentials: 'include' // Include credentials in request
           }
         );
 
@@ -135,64 +307,70 @@ const TrainingDashBoard = () => {
 
   // Match user registrations with course details
   useEffect(() => {
-    if (courseItems.length > 0 && allRegistrations.length > 0) {
-      // Filter registrations for the current user
-      const userRegistrations = allRegistrations.filter(registration => 
-        registration.applicant_id === applicantId
-      );
-      
-      console.log("User registrations for matching:", userRegistrations);
+    if (courseItems.length > 0 && userRegistrationData) {
+      console.log("User registration data:", userRegistrationData);
       console.log("Available course items:", courseItems);
       
-      if (userRegistrations.length > 0) {
-        // Get the course names that the user has registered for
-        const registeredCourseNames = userRegistrations.map(reg => {
-          console.log("Registration application_for_course:", reg.application_for_course);
-          return reg.application_for_course;
-        });
-        console.log("Registered course names:", registeredCourseNames);
-        
-        // Find matching courses from the course-items API
-        const matchedCourses = courseItems.filter(course => {
-          console.log("Comparing course title:", course.title, "with registered names:", registeredCourseNames);
-          return registeredCourseNames.includes(course.title);
-        });
-        
-        console.log("Matched courses:", matchedCourses);
-        
-        // Enhance the matched courses with registration data
-        const enhancedCourses = matchedCourses.map(course => {
-          const registration = userRegistrations.find(reg => reg.application_for_course === course.title);
-          return {
-            ...course,
-            registration_id: registration.id,
-            applicant_id: registration.applicant_id,
-            course_status: registration.course_status,
-            candidate_name: registration.candidate_name,
-            guardian_name: registration.guardian_name,
-            address: registration.address,
-            date_of_birth: registration.date_of_birth,
-            profile_photo: registration.profile_photo,
-            email: registration.email,
-            mobile_no: registration.mobile_no,
-            school_college_name: registration.school_college_name,
-            highest_education: registration.highest_education,
-            created_at: registration.created_at,
-            updated_at: registration.updated_at,
-            // Add default values for properties not in the API response
-            progress: 0,
-            rating: 0,
-            duration: course.duration || "30 Days"
-          };
-        });
-        
-        console.log("Enhanced courses with registration data:", enhancedCourses);
-        setUserCourses(enhancedCourses);
-      } else {
-        setUserCourses([]);
+      // Get the course names that the user has registered for
+      // Handle both string and array formats for application_for_course
+      let registeredCourseNames = [];
+      let registeredCourseIds = [];
+      
+      if (typeof userRegistrationData.application_for_course === 'string') {
+        registeredCourseNames = [userRegistrationData.application_for_course];
+      } else if (Array.isArray(userRegistrationData.application_for_course)) {
+        registeredCourseNames = [...userRegistrationData.application_for_course];
       }
+      
+      if (typeof userRegistrationData.application_for_course_id === 'string') {
+        registeredCourseIds = [userRegistrationData.application_for_course_id];
+      } else if (Array.isArray(userRegistrationData.application_for_course_id)) {
+        registeredCourseIds = [...userRegistrationData.application_for_course_id];
+      }
+      
+      console.log("Registered course names:", registeredCourseNames);
+      console.log("Registered course IDs:", registeredCourseIds);
+      
+      // Find matching courses from the course-items API
+      const matchedCourses = courseItems.filter(course => {
+        console.log("Comparing course title:", course.title, "with registered names:", registeredCourseNames);
+        console.log("Comparing course ID:", course.course_id, "with registered IDs:", registeredCourseIds);
+        return registeredCourseNames.includes(course.title) || registeredCourseIds.includes(course.course_id);
+      });
+      
+      console.log("Matched courses:", matchedCourses);
+      
+      // Enhance the matched courses with registration data
+      const enhancedCourses = matchedCourses.map(course => {
+        return {
+          ...course,
+          registration_id: userRegistrationData.id,
+          applicant_id: userRegistrationData.applicant_id,
+          course_status: userRegistrationData.course_status,
+          candidate_name: userRegistrationData.candidate_name,
+          guardian_name: userRegistrationData.guardian_name,
+          address: userRegistrationData.address,
+          date_of_birth: userRegistrationData.date_of_birth,
+          profile_photo: userRegistrationData.profile_photo,
+          email: userRegistrationData.email,
+          mobile_no: userRegistrationData.mobile_no,
+          school_college_name: userRegistrationData.school_college_name,
+          highest_education: userRegistrationData.highest_education,
+          created_at: userRegistrationData.created_at,
+          updated_at: userRegistrationData.updated_at,
+          // Add default values for properties not in the API response
+          progress: courseProgress[course.course_id] || 0,
+          rating: 0,
+          duration: course.duration || "30 Days"
+        };
+      });
+      
+      console.log("Enhanced courses with registration data:", enhancedCourses);
+      setUserCourses(enhancedCourses);
+    } else {
+      setUserCourses([]);
     }
-  }, [courseItems, allRegistrations, applicantId]);
+  }, [courseItems, userRegistrationData, applicantId, courseProgress]);
 
   useEffect(() => {
     const checkDevice = () => {
@@ -222,33 +400,6 @@ const TrainingDashBoard = () => {
 
   const AllCoursesUI = () => (
     <div className="all-courses-wrapper">
-      <div className="weekly-streak-card">
-        <div className="ws-row">
-          <div className="ws-col">
-            <strong>0 weeks</strong>
-            <p className="ws-label">Current streak</p>
-          </div>
-
-          <div className="ws-col ws-right">
-            <div className="ws-progress-circle"></div>
-
-            <div className="ws-progress-info">
-              <p className="ws-line">
-                <span className="dot dot-orange"></span>
-                0/30 course min
-              </p>
-
-              <p className="ws-line">
-                <span className="dot dot-green"></span>
-                1/1 visit
-              </p>
-
-              <p className="ws-date">Dec 1 – 8</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* USER'S REGISTERED COURSES */}
       <div className="course-cards-container">
         {loading ? (
@@ -259,9 +410,9 @@ const TrainingDashBoard = () => {
           </div>
         ) : userCourses.length > 0 ? (
           userCourses.map(course => (
-            <div className="course-card-container" key={course.id} style={{ cursor: "pointer" }}>
+            <div className="course-card-container" key={course.course_id} style={{ cursor: "pointer" }}>
               <div className="course-card">
-                <div onClick={() => openVideoPage(course)}>
+                <div onClick={() => openModulesModal(course)}>
                   <div className="course-video">
                     {/* Using course icon if available, otherwise use profile photo, then default poster */}
                     <img 
@@ -325,51 +476,6 @@ const TrainingDashBoard = () => {
           </div>
         )}
       </div>
-      
-      {/* USER REGISTRATION DETAILS */}
-      {userRegistrationData && (
-        <div className="user-registration-details" style={{ marginTop: "30px", padding: "20px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
-          <h3>Your Registration Details</h3>
-          <div className="registration-info" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "15px" }}>
-            <div>
-              <strong>Applicant ID:</strong> {userRegistrationData.applicant_id}
-            </div>
-            <div>
-              <strong>Course:</strong> {userRegistrationData.application_for_course}
-            </div>
-            <div>
-              <strong>Status:</strong> {userRegistrationData.course_status}
-            </div>
-            <div>
-              <strong>Name:</strong> {userRegistrationData.candidate_name}
-            </div>
-            <div>
-              <strong>Guardian Name:</strong> {userRegistrationData.guardian_name}
-            </div>
-            <div>
-              <strong>Address:</strong> {userRegistrationData.address}
-            </div>
-            <div>
-              <strong>Date of Birth:</strong> {userRegistrationData.date_of_birth}
-            </div>
-            <div>
-              <strong>Email:</strong> {userRegistrationData.email}
-            </div>
-            <div>
-              <strong>Mobile:</strong> {userRegistrationData.mobile_no}
-            </div>
-            <div>
-              <strong>School/College:</strong> {userRegistrationData.school_college_name}
-            </div>
-            <div>
-              <strong>Education:</strong> {userRegistrationData.highest_education}
-            </div>
-            <div>
-              <strong>Registration Date:</strong> {new Date(userRegistrationData.created_at).toLocaleDateString()}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 
@@ -379,7 +485,6 @@ const TrainingDashBoard = () => {
     const coursesWithDefaults = courseItems.map(course => ({
       ...course,
       title: course.title,
-      video: "https://www.w3schools.com/html/mov_bbb.mp4",
       poster: course.icon,
       progress: 0,
       rating: 4,
@@ -389,7 +494,21 @@ const TrainingDashBoard = () => {
     }));
 
     const isInWishlist = (courseId) => {
-      return wishlist.some(item => item.id === courseId);
+      return wishlist.some(item => item.course_id === courseId);
+    };
+
+    // Check if a course is already registered by the user
+    const isCourseRegistered = (courseTitle) => {
+      if (!userRegistrationData || !userRegistrationData.application_for_course) return false;
+      
+      // Handle both string and array formats
+      if (typeof userRegistrationData.application_for_course === 'string') {
+        return userRegistrationData.application_for_course === courseTitle;
+      } else if (Array.isArray(userRegistrationData.application_for_course)) {
+        return userRegistrationData.application_for_course.includes(courseTitle);
+      }
+      
+      return false;
     };
 
     // Filter courses based on course_type from API
@@ -448,16 +567,15 @@ const TrainingDashBoard = () => {
         
         <div className="recommended-courses-grid">
           {filteredCourses.map(course => (
-            <div className="recommended-course-card" key={course.id}>
+            <div className="recommended-course-card" key={course.course_id}>
               <div>
                 <div className="recommended-course-video">
-                  <VideoPlayer
-                    src={course.video}
-                    poster={course.poster}
-                    primaryColor="#5624d0"
-                    height={180}
-                    width={"100%"}
-                    autoPlay={false}
+                  {/* Replaced VideoPlayer with img tag */}
+                  <img 
+                    src={course.icon ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${course.icon}` : 
+                        "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"} 
+                    alt={course.title}
+                    style={{ width: "100%", height: "180px", objectFit: "cover" }}
                   />
                 </div>
 
@@ -495,26 +613,22 @@ const TrainingDashBoard = () => {
                   </div>
 
                   <div className="recommended-course-footer">
-                    <span className="recommended-continue-btn">
-                      {course.progress > 0 ? "Continue Learning" : "Start Course"}
-                    </span>
+                    <button
+                      className={`add-course-btn ${isCourseRegistered(course.title) ? "registered" : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isCourseRegistered(course.title)) {
+                          addCourseToRegistration(course);
+                        }
+                      }}
+                      disabled={addingCourse || isCourseRegistered(course.title)}
+                    >
+                      {isCourseRegistered(course.title) ? "Already Registered" : 
+                       addingCourse ? "Adding..." : "Add Course"}
+                    </button>
                   </div>
                 </div>
               </div>
-              
-              {/* <button
-                className={`recommended-wishlist-btn ${isInWishlist(course.id) ? "in-wishlist" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isInWishlist(course.id)) {
-                    setWishlist(prev => prev.filter(item => item.id !== course.id));
-                  } else {
-                    addToWishlist(course);
-                  }
-                }}
-              >
-                <FaHeart />
-              </button> */}
             </div>
           ))}
         </div>
@@ -558,6 +672,78 @@ const TrainingDashBoard = () => {
           <div className="tab-content-wrapper">{renderTabContent()}</div>
         </Container>
       </div>
+
+      {/* Modules Modal */}
+      <Modal 
+        show={showModulesModal} 
+        onHide={() => setShowModulesModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{selectedCourse?.title} - Course Modules</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedCourse && selectedCourse.modules && Array.isArray(selectedCourse.modules) ? (
+            <div>
+              <div className="course-progress-container mb-4">
+                <h5>Course Progress: {courseProgress[selectedCourse.course_id] || 0}%</h5>
+                <div className="progress">
+                  <div 
+                    className="progress-bar" 
+                    role="progressbar" 
+                    style={{ width: `${courseProgress[selectedCourse.course_id] || 0}%` }}
+                    aria-valuenow={courseProgress[selectedCourse.course_id] || 0} 
+                    aria-valuemin="0" 
+                    aria-valuemax="100"
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="modules-list">
+                {selectedCourse.modules.map((module, index) => (
+                  <div key={index} className="module-item mb-3 p-3 border rounded">
+                    <div className="d-flex align-items-start">
+                      <Form.Check 
+                        type="checkbox"
+                        id={`module-${index}`}
+                        className="me-3 mt-1"
+                        checked={completedModules[selectedCourse.course_id]?.[index] || false}
+                        onChange={(e) => handleModuleChange(selectedCourse.course_id, index, e.target.checked)}
+                      />
+                      <div className="flex-grow-1">
+                        <h6>{module[0]}</h6>
+                        <p className="mb-0 text-muted">{module[1]}</p>
+                      </div>
+                      {completedModules[selectedCourse.course_id]?.[index] && (
+                        <FaCheckCircle className="text-success ms-2" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {areAllModulesCompleted(selectedCourse.course_id) && (
+                <div className="text-center mt-4">
+                  <Button 
+                    variant="success" 
+                    onClick={() => handleCompleteCourse(selectedCourse.course_id)}
+                  >
+                    Complete Course
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p>No modules available for this course.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModulesModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
