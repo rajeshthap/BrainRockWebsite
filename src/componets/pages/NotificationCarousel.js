@@ -27,7 +27,6 @@ const NotificationCarousel = () => {
         }
 
         const result = await response.json();
-        console.log("Notifications response:", result);
 
         // Handle both array and object responses
         let notificationsList = [];
@@ -43,7 +42,6 @@ const NotificationCarousel = () => {
 
         setNotifications(notificationsList);
       } catch (err) {
-        console.error("Error fetching notifications:", err);
         setError(err.message);
       } finally {
         setLoading(false);

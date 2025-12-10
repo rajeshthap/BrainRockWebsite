@@ -92,7 +92,6 @@ function UserPage() {
           throw new Error("API returned unsuccessful response");
         }
       } catch (error) {
-        console.error("Error fetching carousel data:", error);
         setError(error.message);
         // Fallback data if API fails
         setCarouselData([
@@ -150,7 +149,6 @@ function UserPage() {
           setImageTimestamp(Date.now());
         }
       } catch (err) {
-        console.error("Error fetching About Us data:", err);
       }
     };
 
@@ -182,7 +180,6 @@ function UserPage() {
           throw new Error("API returned unsuccessful response");
         }
       } catch (error) {
-        console.error("Error fetching design and development data:", error);
         setDesignDevError(error.message);
       } finally {
         setDesignDevLoading(false);
@@ -221,7 +218,6 @@ function UserPage() {
           setTechImageTimestamp(Date.now());
         }
       } catch (err) {
-        console.error("Error fetching tech stack data:", err);
         setTechStackError(err.message);
       } finally {
         setTechStackLoading(false);
@@ -256,7 +252,6 @@ function UserPage() {
           throw new Error("API returned unsuccessful response");
         }
       } catch (error) {
-        console.error("Error fetching IT service data:", error);
         setItServiceError(error.message);
       } finally {
         setItServiceLoading(false);

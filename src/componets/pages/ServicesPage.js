@@ -50,7 +50,6 @@ function ServicesPage() {
           throw new Error("API returned unsuccessful response");
         }
       } catch (error) {
-        console.error("Error fetching IT service data:", error);
         setItServiceError(error.message);
       } finally {
         setItServiceLoading(false);

@@ -29,7 +29,6 @@ const TopNotificationBanner = () => {
         }
 
         const result = await response.json();
-        console.log("Top notifications response:", result);
 
         // Handle both array and object responses
         let notificationsList = [];
@@ -50,7 +49,6 @@ const TopNotificationBanner = () => {
           setDismissed(false);
         }
       } catch (err) {
-        console.error("Error fetching notifications:", err);
         setError(err.message);
       } finally {
         setLoading(false);

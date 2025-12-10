@@ -51,7 +51,6 @@ const ServicesDetails = () => {
         }
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching service data:", err);
         setError(err.message);
         setLoading(false);
       }

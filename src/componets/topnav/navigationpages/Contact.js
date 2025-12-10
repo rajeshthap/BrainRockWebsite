@@ -53,7 +53,6 @@ function Contact() {
           throw new Error('Invalid response format');
         }
       } catch (error) {
-        console.error('Error fetching company details:', error);
         setDetailsError(error.message);
       } finally {
         setDetailsLoading(false);
@@ -148,7 +147,6 @@ function Contact() {
       });
       setErrors({});
     } catch (error) {
-      console.error('Error submitting form:', error);
       setApiResponse({
         success: false,
         message: "Failed to send your message. Please try again later."

@@ -12,9 +12,7 @@ const TrainingDashBoard = () => {
   const { user } = useContext(AuthContext);
   const applicantId = user?.unique_id; // Get applicant ID from AuthContext
   
-  // Console log to track unique ID after login
-  console.log("TrainingDashBoard Component - User object:", user);
-  console.log("TrainingDashBoard Component - Unique ID (applicantId):", applicantId);
+  // debug logs removed
   
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -171,17 +169,13 @@ const TrainingDashBoard = () => {
 
   // Function to handle course completion
   const handleCompleteCourse = async (courseId) => {
-    // Debug: Log the user object and applicantId
-    console.log("User object in handleCompleteCourse:", user);
-    console.log("Applicant ID in handleCompleteCourse:", applicantId);
+    // debug logs removed
     
     // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
     const currentApplicantId = user?.unique_id;
     
     if (!currentApplicantId || !selectedCourse) {
       alert("Applicant ID or course details not available. Please try again.");
-      console.log("Current Applicant ID:", currentApplicantId);
-      console.log("Selected course:", selectedCourse);
       return;
     }
     
@@ -204,7 +198,7 @@ const TrainingDashBoard = () => {
         applicant_id: currentApplicantId // Add applicant_id (using unique_id from AuthContext)
       };
       
-      console.log("Certificate data to send:", certificateData);
+      
       
       // Make POST request to certificate API
       const response = await fetch(
@@ -226,19 +220,16 @@ const TrainingDashBoard = () => {
       
       // Get response text first to check if it's valid JSON
       const responseText = await response.text();
-      console.log("Raw certificate API response:", responseText);
       
       let data;
       try {
         data = JSON.parse(responseText);
       } catch (error) {
-        console.error("Error parsing JSON response:", error);
-        console.error("Response text:", responseText);
         alert("Invalid response from server. Please try again.");
         return;
       }
       
-      console.log("Certificate API Response:", data);
+      
       
       if (data.success) {
         alert("Course completed successfully! Certificate generated.");
@@ -251,7 +242,6 @@ const TrainingDashBoard = () => {
         alert("Failed to generate certificate. Please try again.");
       }
     } catch (error) {
-      console.error('Error completing course:', error);
       alert("An error occurred while completing the course. Please try again.");
     }
   };
@@ -262,12 +252,10 @@ const TrainingDashBoard = () => {
     const currentApplicantId = user?.unique_id;
     
     if (!currentApplicantId) {
-      console.log("Applicant ID not available for fetching completed courses");
       return;
     }
     
     try {
-      console.log("Fetching completed courses for applicantId:", currentApplicantId);
       const response = await fetch(
         `${BASE_URL}/api/certificate/?applicant_id=${currentApplicantId}`,
         {
@@ -276,46 +264,38 @@ const TrainingDashBoard = () => {
         }
       );
 
-      console.log("Completed courses API response status:", response.status);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const responseText = await response.text();
-      console.log("Raw completed courses API response:", responseText);
       
       let data;
       try {
         data = JSON.parse(responseText);
       } catch (error) {
-        console.error("Error parsing JSON response:", error);
-        console.error("Response text:", responseText);
+        
         setCompletedCourses([]);
         return;
       }
       
-      console.log("Completed Courses API Response:", data);
+      
       
       // Check if the API returned a successful response with data
       if (data && data.success && data.data) {
         // Check if data is an array or object
         if (Array.isArray(data.data)) {
-          console.log("Setting completed courses from array:", data.data);
           setCompletedCourses(data.data);
         } else if (typeof data.data === 'object' && data.data !== null) {
-          console.log("Setting completed courses from object:", [data.data]);
           setCompletedCourses([data.data]);
         } else {
-          console.log("No completed courses found in response");
           setCompletedCourses([]);
         }
       } else {
-        console.log("API response invalid or no data");
         setCompletedCourses([]);
       }
     } catch (error) {
-      console.error('Error fetching completed courses:', error);
       setCompletedCourses([]);
     }
   };
@@ -331,7 +311,6 @@ const TrainingDashBoard = () => {
     const currentApplicantId = user?.unique_id;
     
     if (!currentApplicantId) {
-      console.error("Applicant ID not available");
       return;
     }
 
@@ -395,7 +374,6 @@ const TrainingDashBoard = () => {
       );
       
       const data = await response.json();
-      console.log("Add Course API Response:", data);
       
       if (data.success) {
         alert("Course added successfully!");
@@ -426,7 +404,6 @@ const TrainingDashBoard = () => {
         alert("Failed to add course. Please try again.");
       }
     } catch (error) {
-      console.error('Error adding course:', error);
       alert("An error occurred while adding the course. Please try again.");
     } finally {
       setAddingCourse(false);
@@ -440,12 +417,10 @@ const TrainingDashBoard = () => {
       const currentApplicantId = user?.unique_id;
       
       if (!currentApplicantId) {
-        console.log("Applicant ID not available for fetching employee details");
         return;
       }
       
       try {
-        console.log("Fetching employee details for applicantId:", currentApplicantId);
         const response = await fetch(
           `${BASE_URL}/api/course-registration/?applicant_id=${currentApplicantId}`,
           {
@@ -454,46 +429,34 @@ const TrainingDashBoard = () => {
           }
         );
 
-        console.log("Employee details API response status:", response.status);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const responseText = await response.text();
-        console.log("Raw employee details API response:", responseText);
         
         let data;
         try {
           data = JSON.parse(responseText);
         } catch (error) {
-          console.error("Error parsing JSON response:", error);
-          console.error("Response text:", responseText);
           setEmployeeDetails(null);
           return;
         }
-        
-        console.log("Employee Details API Response:", data);
-        
         // Check if the API returned a successful response with data
         if (data && data.success && data.data) {
           // Check if data is an array or object
           if (Array.isArray(data.data) && data.data.length > 0) {
-            console.log("Setting employee details from array:", data.data[0]);
             setEmployeeDetails(data.data[0]);
           } else if (typeof data.data === 'object' && data.data !== null) {
-            console.log("Setting employee details from object:", data.data);
             setEmployeeDetails(data.data);
           } else {
-            console.log("No employee details found in response");
             setEmployeeDetails(null);
           }
         } else {
-          console.log("API response invalid or no data");
           setEmployeeDetails(null);
         }
       } catch (error) {
-        console.error('Error fetching employee details:', error);
         setEmployeeDetails(null);
       }
     };
@@ -512,12 +475,11 @@ const TrainingDashBoard = () => {
       try {
         const response = await fetch(`${BASE_URL}/api/course-items/`);
         const data = await response.json();
-        console.log("Course Items API Response:", data);
         if (data.success) {
           setCourseItems(data.data);
         }
       } catch (error) {
-        console.error('Error fetching course items:', error);
+        
       }
     };
 
@@ -529,10 +491,8 @@ const TrainingDashBoard = () => {
     // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
     const currentApplicantId = user?.unique_id;
     
-    console.log("useEffect triggered - applicantId:", currentApplicantId);
     
     const fetchAllRegistrations = async () => {
-      console.log("fetchAllRegistrations called - applicantId:", currentApplicantId);
       
       try {
         const response = await fetch(
@@ -544,7 +504,6 @@ const TrainingDashBoard = () => {
         );
 
         const data = await response.json();
-        console.log("All Registrations API Response:", data); // Log the response for debugging
         
         // Check if the API returned a successful response with data
         if (data && data.success && data.data) {
@@ -552,35 +511,21 @@ const TrainingDashBoard = () => {
           setAllRegistrations(data.data);
           
           // Filter registrations for the current user
-          const userRegistrations = data.data.filter(registration => {
-            console.log("Comparing:", registration.applicant_id, "with:", currentApplicantId);
-            return registration.applicant_id === currentApplicantId;
-          });
-          
-          console.log("Filtered user registrations:", userRegistrations);
+          const userRegistrations = data.data.filter(registration => registration.applicant_id === currentApplicantId);
           
           // If user has registrations, update the state
           if (userRegistrations.length > 0) {
-            // Log the application_for_course field for each matching registration
-            userRegistrations.forEach(registration => {
-              console.log("Matched applicant_id:", registration.applicant_id, "with application_for_course:", registration.application_for_course);
-            });
-            
             // Set the registration data to the first registration
             setUserRegistrationData(userRegistrations[0]);
           } else {
-            // If no registrations for the user, set empty states
-            console.log("No registrations found for applicantId:", currentApplicantId);
             setUserRegistrationData(null);
           }
         } else {
           // If no data is returned, set empty states
-          console.log("API response invalid or no data");
           setUserRegistrationData(null);
           setAllRegistrations([]);
         }
       } catch (error) {
-        console.error('Error fetching user courses:', error);
         setUserRegistrationData(null);
         setAllRegistrations([]);
       } finally {
@@ -591,7 +536,6 @@ const TrainingDashBoard = () => {
     if (currentApplicantId) {
       fetchAllRegistrations();
     } else {
-      console.log("applicantId is not available yet");
       setLoading(false);
     }
   }, [user]); // Depend on user instead of applicantId
@@ -602,8 +546,7 @@ const TrainingDashBoard = () => {
     const currentApplicantId = user?.unique_id;
     
     if (courseItems.length > 0 && userRegistrationData) {
-      console.log("User registration data:", userRegistrationData);
-      console.log("Available course items:", courseItems);
+      
       
       // Get the course names that the user has registered for
       // Handle both string and array formats for application_for_course
@@ -622,17 +565,11 @@ const TrainingDashBoard = () => {
         registeredCourseIds = [...userRegistrationData.application_for_course_id];
       }
       
-      console.log("Registered course names:", registeredCourseNames);
-      console.log("Registered course IDs:", registeredCourseIds);
+      
       
       // Find matching courses from the course-items API
-      const matchedCourses = courseItems.filter(course => {
-        console.log("Comparing course title:", course.title, "with registered names:", registeredCourseNames);
-        console.log("Comparing course ID:", course.course_id, "with registered IDs:", registeredCourseIds);
-        return registeredCourseNames.includes(course.title) || registeredCourseIds.includes(course.course_id);
-      });
+      const matchedCourses = courseItems.filter(course => registeredCourseNames.includes(course.title) || registeredCourseIds.includes(course.course_id));
       
-      console.log("Matched courses:", matchedCourses);
       
       // Enhance the matched courses with registration data
       const enhancedCourses = matchedCourses.map(course => {
@@ -667,7 +604,6 @@ const TrainingDashBoard = () => {
         };
       });
       
-      console.log("Enhanced courses with registration data:", enhancedCourses);
       setUserCourses(enhancedCourses);
     } else {
       setUserCourses([]);

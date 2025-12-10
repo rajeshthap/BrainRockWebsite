@@ -11,9 +11,7 @@ const Purchasehistory = () => {
   const { user } = useContext(AuthContext);
   const applicantId = user?.unique_id; // Get applicant ID from AuthContext
   
-  // Console log to track unique ID after login
-  console.log("TrainingDashBoard Component - User object:", user);
-  console.log("TrainingDashBoard Component - Unique ID (applicantId):", applicantId);
+  // debug logs removed
   
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);

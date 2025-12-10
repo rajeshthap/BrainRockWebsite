@@ -38,7 +38,6 @@ const ServicesCarousel = () => {
         
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching services:', error);
         setError(error.message);
         setLoading(false);
       }

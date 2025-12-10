@@ -31,7 +31,6 @@ useEffect(() => {
         setShowCareer(false);
       }
     } catch (error) {
-      console.error("Job API Error:", error);
       setShowCareer(false);
     }
   };

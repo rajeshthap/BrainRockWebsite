@@ -108,7 +108,6 @@ const MyTeam = () => {
         if (projectsData.success && Array.isArray(projectsData.data)) {
           setProjects(projectsData.data);
         } else {
-          console.warn("Unexpected project data format:", projectsData);
           setProjects([]);
         }
 

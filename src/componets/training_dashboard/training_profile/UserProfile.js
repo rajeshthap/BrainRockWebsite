@@ -73,7 +73,7 @@ const UserProfile = () => {
       // Use unique_id from AuthContext as applicant_id
       const applicantId = user?.unique_id;
       if (!applicantId) {
-        console.warn("No unique_id available in AuthContext");
+        
         throw new Error("No unique_id available");
       }
       
@@ -84,7 +84,7 @@ const UserProfile = () => {
       });
       
       const result = await response.json();
-      console.log("Profile data response:", result); // Debug log
+      
       
       if (result.success) {
         setProfileData(result.data);
@@ -97,7 +97,7 @@ const UserProfile = () => {
           mobile_no: result.data.mobile_no,
         });
       } else {
-        console.error("API returned success=false:", result.message);
+        
         // Even if success is false, try to use the data if available
         if (result.data) {
           setProfileData(result.data);
@@ -112,7 +112,7 @@ const UserProfile = () => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch profile data:", error);
+      
     } finally {
       setLoading(false);
     }
@@ -203,14 +203,14 @@ const UserProfile = () => {
         // Don't set Content-Type header when using FormData
       });
       
-      console.log("Image upload response status:", response.status);
+      
       
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       
       const result = await response.json();
-      console.log("Image upload response:", result);
+      
       
       // Show success message immediately
       setShowSuccessAlert(true);
@@ -219,7 +219,7 @@ const UserProfile = () => {
       // Refetch profile data to get the updated image
       await fetchProfileData();
     } catch (error) {
-      console.error("Failed to upload image:", error);
+      
       alert(`Failed to upload image: ${error.message}`);
     } finally {
       setUploadingImage(false);
@@ -251,7 +251,7 @@ const UserProfile = () => {
         highest_education: editForm.highest_education,
       };
       
-      console.log("Submitting update with payload:", payload); // Debug log
+      
       
       // Changed API path to not include profile ID
       const response = await fetch(`${BASE_URL}/api/course-registration/`, {
@@ -261,14 +261,14 @@ const UserProfile = () => {
         body: JSON.stringify(payload)
       });
       
-      console.log("Response status:", response.status); // Debug log
+      
       
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       
       const result = await response.json();
-      console.log("Update response:", result); // Debug log
+      
       
       // Update local state with edited data (merge with original to keep read-only fields)
       const updatedData = { ...profileData, ...payload };
@@ -289,7 +289,7 @@ const UserProfile = () => {
       setTimeout(() => setShowSuccessAlert(false), 3000);
       
     } catch (error) {
-      console.error("Failed to update profile:", error);
+      
       alert(`Error updating profile: ${error.message}`);
     }
   };

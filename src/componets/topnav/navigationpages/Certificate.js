@@ -45,7 +45,6 @@ const Certificate = () => {
         setNotFound(true);
       }
     } catch (err) {
-      console.error('Error fetching certificate:', err);
       setError('Failed to fetch certificate details. Please try again.');
     } finally {
       setLoading(false);

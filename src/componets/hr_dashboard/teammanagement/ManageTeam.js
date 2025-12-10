@@ -128,18 +128,13 @@ const ManageTeam = () => {
       .map(team => team.project) // Get the project field from all-teams API
       .filter(Boolean); // Remove null/undefined values
     
-    console.log("Assigned Project IDs:", assignedProjectIds);
-    console.log("All Projects:", projects);
-    
     // Filter out projects that are already assigned
     // Only show projects whose project_id is NOT in the assignedProjectIds
     const available = projects.filter(project => {
       const isAssigned = assignedProjectIds.includes(project.project_id);
-      console.log(`Project ${project.project_id} (${project.title}): isAssigned=${isAssigned}`);
       return !isAssigned;
     });
     
-    console.log("Available Projects (not assigned):", available);
     return available;
   };
   
@@ -252,12 +247,9 @@ const ManageTeam = () => {
         }
         setProjects(projectsList);
         
-        console.log("Projects fetched:", projectsList);
-        console.log("Teams with project_id mapped:", teamsList);
 
       } catch (err) {
         setError(err.message);
-        console.error("Failed to fetch data:", err);
       } finally {
         setLoading(false);
       }

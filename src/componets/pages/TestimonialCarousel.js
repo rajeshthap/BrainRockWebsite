@@ -41,7 +41,6 @@ const TestimonialCarousel = () => {
         }
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching testimonials:', err);
         
         // Fallback to dummy data if API fails
         setTestimonials([

@@ -59,7 +59,7 @@ const TrainingVideoPlayer = () => {
 
   // Handle Submit button - mark course as fully completed
   const handleSubmitCourse = () => {
-    console.log("Course submitted! Progress:", progress + "%");
+    
     // API call to submit course completion can be added here
     alert(`Course completed and submitted! Progress: ${progress}%`);
     // Optionally navigate back or reset

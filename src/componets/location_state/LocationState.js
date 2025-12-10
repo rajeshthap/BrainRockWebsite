@@ -19,7 +19,6 @@ const LocationState = ({
       // Ensure it's an array
       setCountries(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("Error fetching countries:", err);
     }
   };
   fetchCountries();
@@ -38,7 +37,6 @@ const LocationState = ({
         );
         setStates(res.data);
       } catch (err) {
-        console.error("Error fetching states:", err);
       }
     };
     fetchStates();
@@ -56,7 +54,6 @@ const LocationState = ({
         );
         setCities(res.data);
       } catch (err) {
-        console.error("Error fetching cities:", err);
       }
     };
     fetchCities();

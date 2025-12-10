@@ -83,7 +83,6 @@ function Feedback() {
 
       setErrors({});
     } catch (error) {
-      console.error("Feedback submission error:", error);
 
       // Handle API errors for duplicate email
       if (error.response && error.response.data && error.response.data.errors) {

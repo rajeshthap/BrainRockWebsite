@@ -130,14 +130,12 @@ const shouldShowCheckInOutButtons = () => {
         }
       } else {
         const errorText = await response.text();
-        console.error("Error fetching employees:", errorText);
         setMessage({
           type: "danger",
           text: "Failed to fetch employee list"
         });
       }
     } catch (error) {
-      console.error("Error fetching employees:", error);
       setMessage({
         type: "danger",
         text: "Error fetching employee list. Please try again."
@@ -604,7 +602,6 @@ const handleDownload = () => {
         });
       }
     } catch (error) {
-      console.error("Error checking in:", error);
       setMessage({
         type: "danger",
         text: "Network error. Please check your connection and try again."
@@ -668,7 +665,6 @@ const handleDownload = () => {
         });
       }
     } catch (error) {
-      console.error("Error checking out:", error);
       setMessage({
         type: "danger",
         text: "Network error. Please check your connection and try again."
@@ -707,7 +703,6 @@ const handleDownload = () => {
         fetchAttendanceData(selectedDate, viewMode, selectedEmployee?.emp_id);
       }
     } catch (error) {
-      console.error("Error in auto check-out:", error);
     }
   };
 
@@ -727,7 +722,7 @@ const handleDownload = () => {
         apiUrl += `&start_date=${start}&end_date=${end}`;
       }
       
-      console.log('Fetching data for:', { mode, start, end, employeeId });
+      
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -854,7 +849,6 @@ const handleDownload = () => {
         let errorMessage = "Failed to fetch attendance data";
         try {
           const errorText = await response.text();
-          console.error("Error response:", errorText);
           if (errorText.includes("<!DOCTYPE")) {
             errorMessage = "Server returned an error page. Please check the API endpoint.";
           } else {
@@ -870,7 +864,6 @@ const handleDownload = () => {
         });
       }
     } catch (error) {
-      console.error("Error fetching attendance data:", error);
       setMessage({ 
         type: "danger", 
         text: "Error fetching attendance data. Please try again." 
@@ -1002,7 +995,6 @@ const handleDownload = () => {
         });
       }
     } catch (error) {
-      console.error("Error updating attendance:", error);
       setMessage({
         type: "danger",
         text: "Network error. Please check your connection and try again."

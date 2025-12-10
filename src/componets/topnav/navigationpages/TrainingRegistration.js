@@ -90,7 +90,6 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
         }
       })
       .catch((err) => {
-        console.error("Course list error:", err);
         setErrorMessage("Failed to load course data. Please refresh page.");
         setShowError(true);
       });
@@ -229,11 +228,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
       payload.append("profile_photo", formData.profile_photo);
     }
 
-    console.log("Submitting form data:");
-    for (let [key, value] of payload.entries()) {
-      console.log(`${key}:`, value);
-    }
-
+    
     try {
       const response = await axios.post(
         "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/",
@@ -269,12 +264,9 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
       setTimeout(() => setShowSuccess(false), 5000);
     } catch (error) {
-      console.error("Registration Error:", error);
 
       if (error.response) {
-        console.log("Error response data:", error.response.data);
-        console.log("Error response status:", error.response.status);
-        console.log("Error response headers:", error.response.headers);
+        
       }
 
       if (error.response && error.response.data) {
