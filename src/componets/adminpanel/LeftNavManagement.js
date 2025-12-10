@@ -139,6 +139,28 @@ const menuItems = [
       ],
     }, 
 
+     {
+      icon: <FaBook />,
+      label: "Notification",
+ 
+      submenu: [
+        
+       
+        {
+          label: "Add Notification",
+          path: "/AddNotification",
+          icon: <FaBook />,
+        },
+        {
+          label: "Edit Notification",
+          path: "/EditNotification",
+          icon: <FaBook />,
+        },
+        
+       
+      ],
+    }, 
+
 
      {
       icon: <FaBuilding />,
