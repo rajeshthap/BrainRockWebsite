@@ -8,12 +8,14 @@ import TrainingHeader from "../TrainingHeader";
 import TrainingLeftnav from "../TrainingLeftnav";
 import "../../../assets/css/trainingprofile.css";
 import { AuthContext } from "../../context/AuthContext";
+import { UserProfileContext } from "../../context/UserProfileContext";
 
 // Base URL for media and API resources
 const BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
 const UserProfile = () => {
   const { user } = useContext(AuthContext);
+  const { updateUserProfile } = useContext(UserProfileContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -87,12 +89,26 @@ const UserProfile = () => {
       if (result.success) {
         setProfileData(result.data);
         setEditForm(result.data);
+        // Update shared profile context immediately
+        updateUserProfile({
+          candidate_name: result.data.candidate_name,
+          profile_photo: result.data.profile_photo,
+          email: result.data.email,
+          mobile_no: result.data.mobile_no,
+        });
       } else {
         console.error("API returned success=false:", result.message);
         // Even if success is false, try to use the data if available
         if (result.data) {
           setProfileData(result.data);
           setEditForm(result.data);
+          // Still update context with available data
+          updateUserProfile({
+            candidate_name: result.data.candidate_name,
+            profile_photo: result.data.profile_photo,
+            email: result.data.email,
+            mobile_no: result.data.mobile_no,
+          });
         }
       }
     } catch (error) {
