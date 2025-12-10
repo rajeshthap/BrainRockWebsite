@@ -5,7 +5,7 @@ import "../../assets/css/trainingdashboard.css";
 import TrainingHeader from "./TrainingHeader";
 import TrainingLeftnav from "./TrainingLeftnav";
 import { useNavigate } from "react-router-dom";
-import { FaHeart, FaCheckCircle } from "react-icons/fa";
+import { FaHeart, FaCheckCircle, FaDownload } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext";
 
 const TrainingDashBoard = () => {
@@ -31,8 +31,12 @@ const TrainingDashBoard = () => {
   const [selectedCourse, setSelectedCourse] = useState(null); // State to store selected course for modules
   const [completedModules, setCompletedModules] = useState({}); // State to track completed modules for each course
   const [courseProgress, setCourseProgress] = useState({}); // State to track course progress
+  const [employeeDetails, setEmployeeDetails] = useState(null); // State to store employee details
+  const [completedCourses, setCompletedCourses] = useState([]); // State to store completed courses from certificate API
+  const [certificateData, setCertificateData] = useState({}); // State to store certificate data for each course
  
   const navigate = useNavigate();
+  const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
 
   // Redirect Function
   const openVideoPage = (course) => {
@@ -99,13 +103,221 @@ const TrainingDashBoard = () => {
     return totalModules > 0 && totalModules === completedCount;
   };
 
-  // Function to handle course completion
-  const handleCompleteCourse = (courseId) => {
-    // Here you can make an API call to mark the course as completed
-    alert(`Course with ID ${courseId} has been marked as completed!`);
+  // Function to check if a course is completed
+  const isCourseCompleted = (courseId, courseTitle) => {
+    // Check if there's a certificate for this course
+    return completedCourses.some(cert => {
+      // Check if the program name matches the course title
+      const programMatches = cert.program === courseTitle;
+      
+      // If the API response includes course_id, check that too
+      const courseIdMatches = cert.course_id === courseId;
+      
+      // Return true if either condition is met
+      return programMatches || courseIdMatches;
+    });
+  };
+
+  // Function to get certificate data for a course
+  const getCertificateData = (courseId, courseTitle) => {
+    return completedCourses.find(cert => {
+      // Check if the program name matches the course title
+      const programMatches = cert.program === courseTitle;
+      
+      // If the API response includes course_id, check that too
+      const courseIdMatches = cert.course_id === courseId;
+      
+      // Return true if either condition is met
+      return programMatches || courseIdMatches;
+    });
+  };
+
+  // Function to view certificate in new tab
+  const viewCertificate = (courseId, courseTitle) => {
+    const cert = getCertificateData(courseId, courseTitle);
+    if (cert && cert.pdf_file) {
+      // Open the PDF in a new tab
+      const certificateUrl = `${BASE_URL}${cert.pdf_file}`;
+      window.open(certificateUrl, '_blank');
+    } else {
+      alert("Certificate not available.");
+    }
+  };
+
+  // Function to calculate start date based on course duration
+  const calculateStartDate = (course) => {
+    if (!course || !course.duration) return null;
     
-    // You might want to update the course status in your state or make an API call
-    // to update the course status in the backend
+    const today = new Date();
+    let durationInDays = 30; // Default duration
+    
+    // Try to extract duration in days from the duration string
+    if (typeof course.duration === 'string') {
+      const durationMatch = course.duration.match(/(\d+)/);
+      if (durationMatch) {
+        durationInDays = parseInt(durationMatch[1]);
+      }
+    } else if (typeof course.duration === 'number') {
+      durationInDays = course.duration;
+    }
+    
+    // Calculate start date by subtracting duration from today
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - durationInDays);
+    
+    // Format as YYYY-MM-DD
+    return startDate.toISOString().split('T')[0];
+  };
+
+  // Function to handle course completion
+  const handleCompleteCourse = async (courseId) => {
+    // Debug: Log the user object and applicantId
+    console.log("User object in handleCompleteCourse:", user);
+    console.log("Applicant ID in handleCompleteCourse:", applicantId);
+    
+    // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
+    const currentApplicantId = user?.unique_id;
+    
+    if (!currentApplicantId || !selectedCourse) {
+      alert("Applicant ID or course details not available. Please try again.");
+      console.log("Current Applicant ID:", currentApplicantId);
+      console.log("Selected course:", selectedCourse);
+      return;
+    }
+    
+    try {
+      // Get current date for to_date
+      const today = new Date();
+      const toDate = today.toISOString().split('T')[0];
+      
+      // Calculate start date based on course duration
+      const fromDate = calculateStartDate(selectedCourse);
+      
+      // Prepare certificate data with course_id and applicant_id (using unique_id from AuthContext)
+      const certificateData = {
+        full_name: employeeDetails?.candidate_name || "",
+        father_name: employeeDetails?.guardian_name || "",
+        from_date: fromDate,
+        to_date: toDate,
+        program: selectedCourse.title,
+        course_id: selectedCourse.course_id, // Add course_id
+        applicant_id: currentApplicantId // Add applicant_id (using unique_id from AuthContext)
+      };
+      
+      console.log("Certificate data to send:", certificateData);
+      
+      // Make POST request to certificate API
+      const response = await fetch(
+        `${BASE_URL}/api/certificate/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: 'include',
+          body: JSON.stringify(certificateData)
+        }
+      );
+      
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // Get response text first to check if it's valid JSON
+      const responseText = await response.text();
+      console.log("Raw certificate API response:", responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (error) {
+        console.error("Error parsing JSON response:", error);
+        console.error("Response text:", responseText);
+        alert("Invalid response from server. Please try again.");
+        return;
+      }
+      
+      console.log("Certificate API Response:", data);
+      
+      if (data.success) {
+        alert("Course completed successfully! Certificate generated.");
+        // Close the modal
+        setShowModulesModal(false);
+        
+        // Refresh completed courses
+        fetchCompletedCourses();
+      } else {
+        alert("Failed to generate certificate. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error completing course:', error);
+      alert("An error occurred while completing the course. Please try again.");
+    }
+  };
+
+  // Function to fetch completed courses
+  const fetchCompletedCourses = async () => {
+    // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
+    const currentApplicantId = user?.unique_id;
+    
+    if (!currentApplicantId) {
+      console.log("Applicant ID not available for fetching completed courses");
+      return;
+    }
+    
+    try {
+      console.log("Fetching completed courses for applicantId:", currentApplicantId);
+      const response = await fetch(
+        `${BASE_URL}/api/certificate/?applicant_id=${currentApplicantId}`,
+        {
+          method: "GET",
+          credentials: 'include'
+        }
+      );
+
+      console.log("Completed courses API response status:", response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const responseText = await response.text();
+      console.log("Raw completed courses API response:", responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (error) {
+        console.error("Error parsing JSON response:", error);
+        console.error("Response text:", responseText);
+        setCompletedCourses([]);
+        return;
+      }
+      
+      console.log("Completed Courses API Response:", data);
+      
+      // Check if the API returned a successful response with data
+      if (data && data.success && data.data) {
+        // Check if data is an array or object
+        if (Array.isArray(data.data)) {
+          console.log("Setting completed courses from array:", data.data);
+          setCompletedCourses(data.data);
+        } else if (typeof data.data === 'object' && data.data !== null) {
+          console.log("Setting completed courses from object:", [data.data]);
+          setCompletedCourses([data.data]);
+        } else {
+          console.log("No completed courses found in response");
+          setCompletedCourses([]);
+        }
+      } else {
+        console.log("API response invalid or no data");
+        setCompletedCourses([]);
+      }
+    } catch (error) {
+      console.error('Error fetching completed courses:', error);
+      setCompletedCourses([]);
+    }
   };
 
   // Add to Wishlist function
@@ -115,7 +327,10 @@ const TrainingDashBoard = () => {
 
   // Add Course to Registration function
   const addCourseToRegistration = async (course) => {
-    if (!applicantId) {
+    // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
+    const currentApplicantId = user?.unique_id;
+    
+    if (!currentApplicantId) {
       console.error("Applicant ID not available");
       return;
     }
@@ -124,7 +339,7 @@ const TrainingDashBoard = () => {
     
     try {
       // Get current registration data
-      const currentRegistration = allRegistrations.find(reg => reg.applicant_id === applicantId);
+      const currentRegistration = allRegistrations.find(reg => reg.applicant_id === currentApplicantId);
       
       // Prepare the updated course arrays
       let updatedCourses = [];
@@ -164,7 +379,7 @@ const TrainingDashBoard = () => {
       
       // Make the PUT request
       const response = await fetch(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`,
+        `${BASE_URL}/api/course-registration/`,
         {
           method: "PUT",
           headers: {
@@ -172,7 +387,7 @@ const TrainingDashBoard = () => {
           },
           credentials: 'include',
           body: JSON.stringify({
-            applicant_id: applicantId,
+            applicant_id: currentApplicantId,
             application_for_course: updatedCourses,
             application_for_course_id: updatedCourseIds
           })
@@ -187,7 +402,7 @@ const TrainingDashBoard = () => {
         
         // Refresh the registrations data
         const fetchResponse = await fetch(
-          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`,
+          `${BASE_URL}/api/course-registration/`,
           {
             method: "GET",
             credentials: 'include'
@@ -200,7 +415,7 @@ const TrainingDashBoard = () => {
           
           // Filter registrations for the current user
           const userRegistrations = fetchData.data.filter(registration => 
-            registration.applicant_id === applicantId
+            registration.applicant_id === currentApplicantId
           );
           
           if (userRegistrations.length > 0) {
@@ -218,11 +433,84 @@ const TrainingDashBoard = () => {
     }
   };
 
+  // Fetch employee details
+  useEffect(() => {
+    const fetchEmployeeDetails = async () => {
+      // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
+      const currentApplicantId = user?.unique_id;
+      
+      if (!currentApplicantId) {
+        console.log("Applicant ID not available for fetching employee details");
+        return;
+      }
+      
+      try {
+        console.log("Fetching employee details for applicantId:", currentApplicantId);
+        const response = await fetch(
+          `${BASE_URL}/api/course-registration/?applicant_id=${currentApplicantId}`,
+          {
+            method: "GET",
+            credentials: 'include'
+          }
+        );
+
+        console.log("Employee details API response status:", response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const responseText = await response.text();
+        console.log("Raw employee details API response:", responseText);
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (error) {
+          console.error("Error parsing JSON response:", error);
+          console.error("Response text:", responseText);
+          setEmployeeDetails(null);
+          return;
+        }
+        
+        console.log("Employee Details API Response:", data);
+        
+        // Check if the API returned a successful response with data
+        if (data && data.success && data.data) {
+          // Check if data is an array or object
+          if (Array.isArray(data.data) && data.data.length > 0) {
+            console.log("Setting employee details from array:", data.data[0]);
+            setEmployeeDetails(data.data[0]);
+          } else if (typeof data.data === 'object' && data.data !== null) {
+            console.log("Setting employee details from object:", data.data);
+            setEmployeeDetails(data.data);
+          } else {
+            console.log("No employee details found in response");
+            setEmployeeDetails(null);
+          }
+        } else {
+          console.log("API response invalid or no data");
+          setEmployeeDetails(null);
+        }
+      } catch (error) {
+        console.error('Error fetching employee details:', error);
+        setEmployeeDetails(null);
+      }
+    };
+
+    fetchEmployeeDetails();
+  }, [user]); // Depend on user instead of applicantId
+
+  // Fetch completed courses
+  useEffect(() => {
+    fetchCompletedCourses();
+  }, [user]); // Depend on user instead of applicantId
+
   // Fetch course items from API
   useEffect(() => {
     const fetchCourseItems = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-items/');
+        const response = await fetch(`${BASE_URL}/api/course-items/`);
         const data = await response.json();
         console.log("Course Items API Response:", data);
         if (data.success) {
@@ -238,14 +526,17 @@ const TrainingDashBoard = () => {
 
   // Fetch all course registrations
   useEffect(() => {
-    console.log("useEffect triggered - applicantId:", applicantId);
+    // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
+    const currentApplicantId = user?.unique_id;
+    
+    console.log("useEffect triggered - applicantId:", currentApplicantId);
     
     const fetchAllRegistrations = async () => {
-      console.log("fetchAllRegistrations called - applicantId:", applicantId);
+      console.log("fetchAllRegistrations called - applicantId:", currentApplicantId);
       
       try {
         const response = await fetch(
-          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`,
+          `${BASE_URL}/api/course-registration/`,
           {
             method: "GET",
             credentials: 'include' // Include credentials in request
@@ -262,8 +553,8 @@ const TrainingDashBoard = () => {
           
           // Filter registrations for the current user
           const userRegistrations = data.data.filter(registration => {
-            console.log("Comparing:", registration.applicant_id, "with:", applicantId);
-            return registration.applicant_id === applicantId;
+            console.log("Comparing:", registration.applicant_id, "with:", currentApplicantId);
+            return registration.applicant_id === currentApplicantId;
           });
           
           console.log("Filtered user registrations:", userRegistrations);
@@ -279,7 +570,7 @@ const TrainingDashBoard = () => {
             setUserRegistrationData(userRegistrations[0]);
           } else {
             // If no registrations for the user, set empty states
-            console.log("No registrations found for applicantId:", applicantId);
+            console.log("No registrations found for applicantId:", currentApplicantId);
             setUserRegistrationData(null);
           }
         } else {
@@ -297,16 +588,19 @@ const TrainingDashBoard = () => {
       }
     };
 
-    if (applicantId) {
+    if (currentApplicantId) {
       fetchAllRegistrations();
     } else {
       console.log("applicantId is not available yet");
       setLoading(false);
     }
-  }, [applicantId]);
+  }, [user]); // Depend on user instead of applicantId
 
   // Match user registrations with course details
   useEffect(() => {
+    // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
+    const currentApplicantId = user?.unique_id;
+    
     if (courseItems.length > 0 && userRegistrationData) {
       console.log("User registration data:", userRegistrationData);
       console.log("Available course items:", courseItems);
@@ -342,6 +636,12 @@ const TrainingDashBoard = () => {
       
       // Enhance the matched courses with registration data
       const enhancedCourses = matchedCourses.map(course => {
+        // Check if the course is completed by checking both course_id and title
+        const isCompleted = isCourseCompleted(course.course_id, course.title);
+        
+        // Get certificate data for this course
+        const certData = getCertificateData(course.course_id, course.title);
+        
         return {
           ...course,
           registration_id: userRegistrationData.id,
@@ -359,9 +659,11 @@ const TrainingDashBoard = () => {
           created_at: userRegistrationData.created_at,
           updated_at: userRegistrationData.updated_at,
           // Add default values for properties not in the API response
-          progress: courseProgress[course.course_id] || 0,
+          progress: isCompleted ? 100 : (courseProgress[course.course_id] || 0),
           rating: 0,
-          duration: course.duration || "30 Days"
+          duration: course.duration || "30 Days",
+          isCompleted: isCompleted, // Add a flag to indicate if the course is completed
+          certificateData: certData // Store certificate data for this course
         };
       });
       
@@ -370,7 +672,7 @@ const TrainingDashBoard = () => {
     } else {
       setUserCourses([]);
     }
-  }, [courseItems, userRegistrationData, applicantId, courseProgress]);
+  }, [courseItems, userRegistrationData, user, courseProgress, completedCourses]); // Depend on user instead of applicantId
 
   useEffect(() => {
     const checkDevice = () => {
@@ -411,23 +713,30 @@ const TrainingDashBoard = () => {
         ) : userCourses.length > 0 ? (
           userCourses.map(course => (
             <div className="course-card-container" key={course.course_id} style={{ cursor: "pointer" }}>
-              <div className="course-card">
-                <div onClick={() => openModulesModal(course)}>
+              <div className={`course-card ${course.isCompleted ? 'completed' : ''}`}>
+                <div onClick={() => !course.isCompleted && openModulesModal(course)}>
                   <div className="course-video">
                     {/* Using course icon if available, otherwise use profile photo, then default poster */}
                     <img 
-                      src={course.icon ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${course.icon}` : 
-                          course.profile_photo ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${course.profile_photo}` : 
+                      src={course.icon ? `${BASE_URL}${course.icon}` : 
+                          course.profile_photo ? `${BASE_URL}${course.profile_photo}` : 
                           "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"} 
                       alt={course.title}
                       style={{ width: "100%", height: "220px", objectFit: "cover" }}
                     />
+                    {course.isCompleted && (
+                      <div className="completed-badge">
+                        <FaCheckCircle /> Completed
+                      </div>
+                    )}
                   </div>
 
                   <div className="course-info-text">
                     <h3 className="course-title">{course.title}</h3>
                     <p className="course-instructor">
-                      {course.course_status ? `Status: ${course.course_status}` : "Duration: " + (course.duration || "N/A")}
+                      {course.isCompleted ? "Status: Completed" : 
+                       course.course_status ? `Status: ${course.course_status}` : 
+                       "Duration: " + (course.duration || "N/A")}
                     </p>
                     {course.price && (
                       <p className="course-instructor">Price: ₹{course.price}</p>
@@ -463,7 +772,21 @@ const TrainingDashBoard = () => {
                     </div>
 
                     <div className="course-footer">
-                      <span className="rate-text">Leave a rating</span>
+                      {course.isCompleted && course.certificateData && (
+                        <button
+                          className="download-certificate-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            viewCertificate(course.course_id, course.title);
+                          }}
+                          title="View Certificate"
+                        >
+                          <FaDownload /> View Certificate
+                        </button>
+                      )}
+                      {!course.isCompleted && (
+                        <span className="rate-text">Leave a rating</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -482,16 +805,26 @@ const TrainingDashBoard = () => {
   // Recommended Courses UI Component
   const RecommendedCoursesUI = () => {
     // Add default properties to all courses from API
-    const coursesWithDefaults = courseItems.map(course => ({
-      ...course,
-      title: course.title,
-      poster: course.icon,
-      progress: 0,
-      rating: 4,
-      // Use course_type from API or default to "basic"
-      difficulty: course.course_type || "basic",
-      price: course.price
-    }));
+    const coursesWithDefaults = courseItems.map(course => {
+      // Check if the course is completed by checking both course_id and title
+      const isCompleted = isCourseCompleted(course.course_id, course.title);
+      
+      // Get certificate data for this course
+      const certData = getCertificateData(course.course_id, course.title);
+      
+      return {
+        ...course,
+        title: course.title,
+        poster: course.icon,
+        progress: isCompleted ? 100 : 0,
+        rating: 4,
+        // Use course_type from API or default to "basic"
+        difficulty: course.course_type || "basic",
+        price: course.price,
+        isCompleted: isCompleted, // Add a flag to indicate if the course is completed
+        certificateData: certData // Store certificate data for this course
+      };
+    });
 
     const isInWishlist = (courseId) => {
       return wishlist.some(item => item.course_id === courseId);
@@ -567,16 +900,21 @@ const TrainingDashBoard = () => {
         
         <div className="recommended-courses-grid">
           {filteredCourses.map(course => (
-            <div className="recommended-course-card" key={course.course_id}>
+            <div className={`recommended-course-card ${course.isCompleted ? 'completed' : ''}`} key={course.course_id}>
               <div>
                 <div className="recommended-course-video">
                   {/* Replaced VideoPlayer with img tag */}
                   <img 
-                    src={course.icon ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${course.icon}` : 
+                    src={course.icon ? `${BASE_URL}${course.icon}` : 
                         "https://i.ibb.co/4Y6HcRD/reactjs-banner.png"} 
                     alt={course.title}
                     style={{ width: "100%", height: "180px", objectFit: "cover" }}
                   />
+                  {course.isCompleted && (
+                    <div className="completed-badge">
+                      <FaCheckCircle /> Completed
+                    </div>
+                  )}
                 </div>
 
                 <div className="recommended-course-info">
@@ -593,7 +931,8 @@ const TrainingDashBoard = () => {
                   
                   <div className="recommended-course-meta">
                     <span className="recommended-progress-text">
-                      {course.progress > 0 ? `${course.progress}% complete` : "Not started"}
+                      {course.isCompleted ? "Completed" : 
+                       course.progress > 0 ? `${course.progress}% complete` : "Not started"}
                     </span>
                     <div className="recommended-rating">
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -613,19 +952,33 @@ const TrainingDashBoard = () => {
                   </div>
 
                   <div className="recommended-course-footer">
-                    <button
-                      className={`add-course-btn ${isCourseRegistered(course.title) ? "registered" : ""}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isCourseRegistered(course.title)) {
-                          addCourseToRegistration(course);
-                        }
-                      }}
-                      disabled={addingCourse || isCourseRegistered(course.title)}
-                    >
-                      {isCourseRegistered(course.title) ? "Already Registered" : 
-                       addingCourse ? "Adding..." : "Add Course"}
-                    </button>
+                    {course.isCompleted && course.certificateData && (
+                      <button
+                        className="download-certificate-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          viewCertificate(course.course_id, course.title);
+                        }}
+                        title="View Certificate"
+                      >
+                        <FaDownload /> View Certificate
+                      </button>
+                    )}
+                    {!course.isCompleted && (
+                      <button
+                        className={`add-course-btn ${isCourseRegistered(course.title) ? "registered" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isCourseRegistered(course.title)) {
+                            addCourseToRegistration(course);
+                          }
+                        }}
+                        disabled={addingCourse || isCourseRegistered(course.title)}
+                      >
+                        {isCourseRegistered(course.title) ? "Already Registered" : 
+                         addingCourse ? "Adding..." : "Add Course"}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -648,13 +1001,17 @@ const TrainingDashBoard = () => {
   };
 
   return (
-    <div className="dashboard-container full-width">
-     
+    <div className="dashboard-container">
+      <TrainingLeftnav
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        isMobile={isMobile}
+      />
 
-      <div className="main-content full-width">
+      <div className="main-content">
         <TrainingHeader toggleSidebar={toggleSidebar} />
 
-        <Container fluid className="dashboard-body full-width">
+        <Container fluid className="dashboard-body">
           <div className="top-banner">
             <h1 className="td-heading">{banner.title}</h1>
             <p className="td-subtext">{banner.desc}</p>
@@ -740,6 +1097,109 @@ const TrainingDashBoard = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <style jsx>{`
+        /* Download Certificate Button Styles */
+        .download-certificate-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-decoration: none;
+        }
+
+        .download-certificate-btn:hover {
+          background: linear-gradient(135deg, #218838, #1ea085);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(40, 42, 167, 0.3);
+        }
+
+        .download-certificate-btn:active {
+          transform: translateY(0);
+        }
+
+        .download-certificate-btn svg {
+          font-size: 16px;
+        }
+
+        /* Completed Badge Styles */
+        .completed-badge {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: rgba(40, 167, 69, 0.9);
+          color: white;
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          backdrop-filter: blur(4px);
+          z-index: 2;
+        }
+
+        .completed-badge svg {
+          font-size: 14px;
+        }
+
+        /* Course Card Completed State */
+        .course-card.completed,
+        .recommended-course-card.completed {
+          position: relative;
+          border: 2px solid #28a745;
+          box-shadow: 0 0 15px rgba(40, 167, 69, 0.2);
+        }
+
+        .course-card.completed::before,
+        .recommended-course-card.completed::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        /* Course Footer Adjustments */
+        .course-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid #eee;
+        }
+
+        .recommended-course-footer {
+          display: flex;
+          justify-content: center;
+          margin-top: 12px;
+        }
+
+        /* Progress Bar for Completed Courses */
+        .course-card.completed .progress-fill,
+        .recommended-course-card.completed .recommended-progress-fill {
+          background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        /* Hover Effects for Completed Courses */
+        .course-card.completed:hover,
+        .recommended-course-card.completed:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+      `}</style>
     </div>
   );
 };
