@@ -1001,17 +1001,17 @@ const TrainingDashBoard = () => {
   };
 
   return (
-    <div className="dashboard-container">
-      <TrainingLeftnav
+    <div className="dashboard-container  full-width">
+      {/* <TrainingLeftnav
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         isMobile={isMobile}
-      />
+      /> */}
 
-      <div className="main-content">
+      <div className="main-content full-width">
         <TrainingHeader toggleSidebar={toggleSidebar} />
 
-        <Container fluid className="dashboard-body">
+        <Container fluid className="dashboard-body full-width">
           <div className="top-banner">
             <h1 className="td-heading">{banner.title}</h1>
             <p className="td-subtext">{banner.desc}</p>

@@ -107,7 +107,7 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
 
           <Col xs="auto">
             <div className="header-actions">
-              <Dropdown align="end">
+              {/* <Dropdown align="end">
                 <Dropdown.Toggle variant="light" className="notification-btn">
                   <FaBell />
                   {unreadCount > 0 && (
@@ -135,7 +135,7 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
                     </Dropdown.Item>
                   ))}
                 </Dropdown.Menu>
-              </Dropdown>
+              </Dropdown> */}
 
               <Dropdown align="end">
                 <Dropdown.Toggle variant="light" className="user-profile-btn">

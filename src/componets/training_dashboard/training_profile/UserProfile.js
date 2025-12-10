@@ -295,17 +295,17 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container full-width">
       {/* Sidebar */}
-      <TrainingLeftnav
+      {/* <TrainingLeftnav
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         isMobile={isMobile}
         isTablet={isTablet}
-      />
+      /> */}
 
       {/* Main Content */}
-      <div className="main-content">
+      <div className="main-content full-width">
         {/* Header */}
         <TrainingHeader toggleSidebar={toggleSidebar} />
 
@@ -318,7 +318,7 @@ const UserProfile = () => {
         )}
 
         {/* Dashboard Body */}
-        <Container fluid className="dashboard-body profile-page">
+        <Container fluid className="dashboard-body profile-page full-width">
           <Row className="align-items-center mb-4">
             <Col lg={6} md={12} sm={12}>
               <Button 
