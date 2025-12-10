@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "./LeftNavManagement";
 import AdminHeader from "./AdminHeader";
 import "../../assets/css/websitemanagement.css";
-
+const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api';
 const WebsiteManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -36,10 +36,53 @@ const WebsiteManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [students, setStudents] = useState([]); // To store the list of students
+    const [studentCount, setStudentCount] = useState(0); // To store the total number of students
+  
+    const [error, setError] = useState(null); // To store any error messages
   // Detail view modal states
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+useEffect(() => {
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch student data');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        const processedStudents = data.data.map(student => ({
+          ...student,
+          profile_photo: student.profile_photo
+            ? `${API_BASE_URL}${student.profile_photo}?t=${Date.now()}`
+            : null,
+        }));
+
+        setStudents(processedStudents);
+
+        //  SET TOTAL REGISTERED STUDENTS COUNT
+        setStudentCount(data.data.length);
+      } else {
+        throw new Error(data.message || 'Failed to fetch student data');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchStudents();
+}, []);
 
   useEffect(() => {
     const checkDevice = () => {
@@ -86,7 +129,9 @@ const WebsiteManagement = () => {
 
     fetchCourses();
   }, []);
-
+const goToNextComponent = () => {
+  navigate("/ManageStudent");   // ← change URL as per your route
+};
   // Fetch Employees data
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -161,6 +206,7 @@ const WebsiteManagement = () => {
 
     fetchProjects();
   }, []);
+
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -695,7 +741,7 @@ const WebsiteManagement = () => {
               {/* Projects Card */}
               <Col lg={4} md={6} sm={12} className="mb-3">
                 <div
-                  className="br-stat-card card-orange"
+                  className="br-stat-card card-orange-student"
                   onClick={() => handleCardClick("projects")}
                   style={{ cursor: "pointer" }}
                 >
@@ -708,6 +754,23 @@ const WebsiteManagement = () => {
                   </div>
                 </div>
               </Col>
+               {/* Total Registr student */}
+              <Col lg={4} md={6} sm={12} className="mb-3">
+  <div
+    className="br-stat-card card-orange"
+      onClick={goToNextComponent}
+    style={{ cursor: "pointer" }}
+  >
+    <div className="br-stat-icon">
+      <FaUserGraduate />
+    </div>
+    <div className="br-stat-details">
+      <h5>Total Registered Students</h5>
+      <h2>{studentCount}</h2>
+    </div>
+  </div>
+</Col>
+
             </Row>
           </div>
 

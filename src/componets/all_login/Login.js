@@ -48,7 +48,7 @@ export default function Login() {
     if (user) {
       // First check for admin role (highest priority)
       if (user.role === "admin") {
-        navigate("/ManageOurTeam", {
+        navigate("/WebsiteManagement", {
           state: { unique_id: user.id },
           replace: true,
         });
