@@ -656,7 +656,55 @@
     margin-bottom: 15px;
   }
 }
+.dashboard-container.full-width {
+  width: 100%;
+  padding: 0;
+}
 
+.main-content.full-width {
+  width: 100%;
+  margin-left: 0;
+}
+
+.dashboard-body.full-width {
+  width: 100%;
+  padding: 0 15px;
+}
+.add-course-btn {
+  background-color: #5624d0;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+ 
+.add-course-btn:hover:not(:disabled) {
+  background-color: #4a1fb8;
+}
+ 
+.add-course-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+ 
+.add-course-btn.registered {
+  background-color: #28a745;
+}
+ .dashboard-header{
+  /* background: white; */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* padding: 1rem 0; */
+    position: sticky;
+    top: 0;
+    padding: 0px !important;
+    z-index: 999;
+    background: var(--br-primary);
+ }
+ .top-banner{
+  margin-top: 12px;
+ }
 /* -------- Responsive -------- */
 @media (max-width: 768px) {
   .td-tabs {

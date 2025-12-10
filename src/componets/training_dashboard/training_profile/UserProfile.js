@@ -61,7 +61,7 @@ const UserProfile = () => {
     if (typeof courses === 'object' && courses !== null) {
       return courses.name || courses.course_name || courses.title || JSON.stringify(courses);
     }
-    
+
     // Fallback
     return String(courses);
   };

@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Container } from "react-bootstrap";
 import "../../assets/css/trainingdashboard.css";
-
 import TrainingHeader from "./TrainingHeader";
 import TrainingLeftnav from "./TrainingLeftnav";
-import { VideoPlayer } from "@graphland/react-video-player";
 import { useNavigate } from "react-router-dom";
-import { FaHeart } from "react-icons/fa";
+
 import { AuthContext } from "../context/AuthContext";
 
 const Purchasehistory = () => {
@@ -19,9 +17,6 @@ const Purchasehistory = () => {
   
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
- 
-  const [allRegistrations, setAllRegistrations] = useState([]); // State to store all registrations
-  const [loading, setLoading] = useState(true); // Loading state
  
   const navigate = useNavigate();
 
@@ -45,10 +40,8 @@ const Purchasehistory = () => {
         setSidebarOpen={setSidebarOpen}
         isMobile={isMobile}
       />
-
       <div className="main-content">
         <TrainingHeader toggleSidebar={toggleSidebar} />
-
         <Container fluid className="dashboard-body">
         test
         </Container>

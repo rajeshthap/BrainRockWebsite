@@ -21,6 +21,7 @@ import axios from "axios";
 
 import { AuthContext } from "../context/AuthContext";
 import { UserProfileContext } from "../context/UserProfileContext";
+import BRLogo from "../../assets/images/brainrock_logo.png";
 
 // Base URL used by the backend for media/API
 const BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
@@ -85,13 +86,19 @@ function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
       <Container fluid>
         <Row className="align-items-center">
           <Col xs="auto">
-            <Button
+            {/* <Button
               variant="light"
               className="sidebar-toggle"
               onClick={toggleSidebar}
             >
               <FaBars />
-            </Button>
+            </Button> */}
+               <div className="logo-container">
+                        <div className="logo">
+                         
+                          <span className="logo-text"><img src={BRLogo} alt="text"></img></span>
+                        </div>
+                      </div>
           </Col>
 
           <Col>
