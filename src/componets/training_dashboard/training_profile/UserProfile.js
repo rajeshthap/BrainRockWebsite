@@ -1,5 +1,5 @@
 // UserProfile.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button, Card, Modal, Badge, Alert } from "react-bootstrap";
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaIdCard, FaEdit, FaCheck, FaTimes, FaCamera, FaSave, FaArrowLeft } from "react-icons/fa";
@@ -7,11 +7,13 @@ import "../../../assets/css/emp_dashboard.css";
 import TrainingHeader from "../TrainingHeader";
 import TrainingLeftnav from "../TrainingLeftnav";
 import "../../../assets/css/trainingprofile.css";
+import { AuthContext } from "../../context/AuthContext";
 
 // Base URL for media and API resources
 const BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
 
 const UserProfile = () => {
+  const { user } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -21,37 +23,89 @@ const UserProfile = () => {
   const [editForm, setEditForm] = useState({});
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
   
+  // Function to format the application_for_course field
+  const formatCourseList = (courses) => {
+    if (!courses) return 'N/A';
+    
+    // If it's already a string, return it
+    if (typeof courses === 'string') {
+      return courses;
+    }
+    
+    // If it's an array of objects with a name property
+    if (Array.isArray(courses)) {
+      if (courses.length > 0) {
+        // Check if each item is an object with a name property
+        if (typeof courses[0] === 'object' && courses[0] !== null) {
+          // Extract the name from each object
+          const courseNames = courses.map(course => 
+            course.name || course.course_name || course.title || JSON.stringify(course)
+          );
+          return courseNames.join(', ');
+        } else {
+          // If it's an array of strings, join them
+          return courses.join(', ');
+        }
+      } else {
+        return 'N/A';
+      }
+    }
+    
+    // If it's an object, try to extract a meaningful property
+    if (typeof courses === 'object' && courses !== null) {
+      return courses.name || courses.course_name || courses.title || JSON.stringify(courses);
+    }
+    
+    // Fallback
+    return String(courses);
+  };
 
-  // Fetch profile data
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/?applicant_id=APP/2025/161006', {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        // if (!response.ok) {
-        //   throw new Error(`HTTP error! Status: ${response.status}`);
-        // }
-        
-        const result = await response.json();
-        if (result.success) {
+  // Function to fetch profile data
+  const fetchProfileData = async () => {
+    try {
+      setLoading(true);
+      // Use unique_id from AuthContext as applicant_id
+      const applicantId = user?.unique_id;
+      if (!applicantId) {
+        console.warn("No unique_id available in AuthContext");
+        throw new Error("No unique_id available");
+      }
+      
+      const response = await fetch(`${BASE_URL}/api/course-registration/?applicant_id=${applicantId}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const result = await response.json();
+      console.log("Profile data response:", result); // Debug log
+      
+      if (result.success) {
+        setProfileData(result.data);
+        setEditForm(result.data);
+      } else {
+        console.error("API returned success=false:", result.message);
+        // Even if success is false, try to use the data if available
+        if (result.data) {
           setProfileData(result.data);
           setEditForm(result.data);
         }
-      } catch (error) {
-        console.error("Failed to fetch profile data:", error);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch profile data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Fetch profile data on component mount
+  useEffect(() => {
     fetchProfileData();
-  }, []);
+  }, [user]);
 
   // Responsive check
   useEffect(() => {
@@ -101,15 +155,36 @@ const UserProfile = () => {
     setEditForm(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Handle image upload
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.match('image.*')) {
+      alert('Please select an image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+    
     try {
-      const response = await fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/${profileData.id}/`, {
+      setUploadingImage(true);
+      
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('profile_photo', file);
+      formData.append('applicant_id', user?.unique_id);
+      
+      const response = await fetch(`${BASE_URL}/api/course-registration/`, {
         method: 'PUT',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm)
+        body: formData
+        // Don't set Content-Type header when using FormData
       });
       
       if (!response.ok) {
@@ -117,12 +192,65 @@ const UserProfile = () => {
       }
       
       const result = await response.json();
-      if (result.success) {
-        setProfileData(result.data);
-        setShowEditModal(false);
-        setShowSuccessAlert(true);
-        setTimeout(() => setShowSuccessAlert(false), 3000);
+      console.log("Image upload response:", result);
+      
+      // Show success message
+      setShowSuccessAlert(true);
+      setTimeout(() => setShowSuccessAlert(false), 3000);
+      
+      // Refetch profile data to get the updated image
+      await fetchProfileData();
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
+    }
+  };
+
+  // Handle camera icon click
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Include applicant_id from AuthContext in the payload
+      const payload = {
+        ...editForm,
+        applicant_id: user?.unique_id
+      };
+      
+      console.log("Submitting update with payload:", payload); // Debug log
+      
+      // Changed API path to not include profile ID
+      const response = await fetch(`${BASE_URL}/api/course-registration/`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log("Update response:", result); // Debug log
+      
+      // Close the modal and show success message regardless of response format
+      setShowEditModal(false);
+      setShowSuccessAlert(true);
+      setTimeout(() => setShowSuccessAlert(false), 3000);
+      
+      // Refetch profile data to ensure we have the latest data
+      await fetchProfileData();
     } catch (error) {
       console.error("Failed to update profile:", error);
     }
@@ -211,9 +339,27 @@ const UserProfile = () => {
                               <FaUser />
                             </div>
                           )}
-                          <div className="profile-photo-overlay">
-                            <FaCamera />
+                          <div 
+                            className="profile-photo-overlay"
+                            onClick={handleCameraClick}
+                            style={{ cursor: uploadingImage ? 'not-allowed' : 'pointer' }}
+                          >
+                            {uploadingImage ? (
+                              <div className="spinner-border spinner-border-sm text-light" role="status">
+                                <span className="visually-hidden">Uploading...</span>
+                              </div>
+                            ) : (
+                              <FaCamera />
+                            )}
                           </div>
+                          {/* Hidden file input */}
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            style={{ display: 'none' }}
+                          />
                         </div>
                         <div className="profile-info flex-grow-1 text-center text-md-start">
                           <h2 className="profile-name">{profileData.candidate_name}</h2>
@@ -394,7 +540,7 @@ const UserProfile = () => {
                                 </div>
                                 <div className="info-content">
                                   <h6>Applied Course</h6>
-                                  <p>{profileData.application_for_course}</p>
+                                  <p>{formatCourseList(profileData.application_for_course)}</p>
                                 </div>
                               </div>
                             </Col>
@@ -422,6 +568,9 @@ const UserProfile = () => {
                       <FaTimes className="text-danger mb-3" style={{ fontSize: '3rem' }} />
                       <h4>No profile data found</h4>
                       <p className="text-muted">Please check your applicant ID or try again later.</p>
+                      <Button variant="primary" onClick={fetchProfileData}>
+                        Refresh Data
+                      </Button>
                     </div>
                   </Card.Body>
                 </Card>
@@ -475,6 +624,7 @@ const UserProfile = () => {
                   name="email"
                   value={editForm.email || ''}
                   onChange={handleInputChange}
+                  disabled // Email field is disabled
                 />
               </Col>
               <Col lg={6} md={12} sm={12} className="mb-3">
@@ -485,6 +635,7 @@ const UserProfile = () => {
                   name="mobile_no"
                   value={editForm.mobile_no || ''}
                   onChange={handleInputChange}
+                  disabled // Phone field is disabled
                 />
               </Col>
               <Col lg={12} md={12} sm={12} className="mb-3">
@@ -533,8 +684,9 @@ const UserProfile = () => {
                   type="text"
                   className="form-control"
                   name="application_for_course"
-                  value={editForm.application_for_course || ''}
+                  value={formatCourseList(editForm.application_for_course)}
                   onChange={handleInputChange}
+                  disabled // Course field is disabled
                 />
               </Col>
             </Row>
