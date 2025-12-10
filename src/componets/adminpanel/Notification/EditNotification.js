@@ -23,12 +23,9 @@ const EditNotification = () => {
   const [currentEditItem, setCurrentEditItem] = useState(null);
   const [editFormData, setEditFormData] = useState({
     title: "",
-    message: "",
-    priority: "medium",
-    expiry_date: ""
+    content: "", // Changed from message to content to match API
+    status: "active"
   });
-  const [editImagePreview, setEditImagePreview] = useState(null);
-  const [hasImageChanged, setHasImageChanged] = useState(false);
 
   // Alert state
   const [showAlert, setShowAlert] = useState(false);
@@ -53,12 +50,12 @@ const EditNotification = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  // Fetch notification data (placeholder - will be replaced with actual API)
+  // Fetch notification data
   useEffect(() => {
     const fetchNotificationData = async () => {
       try {
-        // Placeholder API call - replace with actual endpoint
-        const response = await fetch(`${API_BASE_URL}/api/notifications/`, {
+        const response = await fetch(`${API_BASE_URL}/api/all-notification-post/`, {
+          method: 'GET',
           credentials: 'include'
         });
        
@@ -69,10 +66,10 @@ const EditNotification = () => {
         const result = await response.json();
        
         if (result.success) {
-          // Construct full image URLs
+          // Map API response to component structure
           const data = result.data.map(item => ({
             ...item,
-            image: item.image ? `${API_BASE_URL}${item.image}?t=${Date.now()}` : null
+            message: item.content, // Map content to message for display
           }));
           setNotificationData(data);
         } else {
@@ -100,8 +97,8 @@ const EditNotification = () => {
         const lowerSearch = searchTerm.toLowerCase();
         return (
           item.title?.toLowerCase().includes(lowerSearch) ||
-          item.message?.toLowerCase().includes(lowerSearch) ||
-          item.priority?.toLowerCase().includes(lowerSearch)
+          item.content?.toLowerCase().includes(lowerSearch) ||
+          item.status?.toLowerCase().includes(lowerSearch)
         );
       });
   
@@ -113,18 +110,19 @@ const EditNotification = () => {
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-  // Handle delete (placeholder - will be replaced with actual API)
-  const handleDelete = async (id) => {
+  // Handle delete
+  const handleDelete = async (id, post_id) => {
     if (window.confirm("Are you sure you want to delete this notification?")) {
       try {
-        const dataToSend = new FormData();
-        dataToSend.append('id', id);
-
-        // Placeholder API call - replace with actual endpoint
-        const response = await fetch(`${API_BASE_URL}/api/notifications/`, {
+        const response = await fetch(`${API_BASE_URL}/api/all-notification-post/`, {
           method: 'DELETE',
           credentials: 'include',
-          body: dataToSend,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            post_id: post_id
+          }),
         });
        
         if (!response.ok) {
@@ -154,57 +152,38 @@ const EditNotification = () => {
     setCurrentEditItem(item);
     setEditFormData({
       title: item.title,
-      message: item.message,
-      priority: item.priority || "medium",
-      expiry_date: item.expiry_date || ""
+      content: item.content, // Changed from message to content
+      status: item.status || "active"
     });
-    // Use the original image without the timestamp for the preview
-    const originalImageUrl = item.image ? item.image.split('?t=')[0] : null;
-    setEditImagePreview(originalImageUrl);
-    setHasImageChanged(false);
     setShowEditModal(true);
   };
 
   // Handle edit form input changes
   const handleEditChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
    
-    if (name === 'image') {
-      const file = files[0];
-      if (file) {
-        const previewUrl = URL.createObjectURL(file);
-        setEditImagePreview(previewUrl);
-        setHasImageChanged(true);
-      }
-    } else {
-      setEditFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  // Handle edit form submission (placeholder - will be replaced with actual API)
+  // Handle edit form submission
   const handleEditSubmit = async (e) => {
     e.preventDefault();
    
-    const dataToSend = new FormData();
-    dataToSend.append('id', currentEditItem.id);
-    dataToSend.append('title', editFormData.title);
-    dataToSend.append('message', editFormData.message);
-    dataToSend.append('priority', editFormData.priority);
-    dataToSend.append('expiry_date', editFormData.expiry_date);
-   
-    if (hasImageChanged && e.target.image.files[0]) {
-      dataToSend.append('image', e.target.image.files[0]);
-    }
-   
     try {
-      // Placeholder API call - replace with actual endpoint
-      const response = await fetch(`${API_BASE_URL}/api/notifications/`, {
+      const response = await fetch(`${API_BASE_URL}/api/all-notification-post/`, {
         method: 'PUT',
         credentials: 'include',
-        body: dataToSend,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          post_id: currentEditItem.post_id,
+          title: editFormData.title,
+          content: editFormData.content // Changed from message to content
+        }),
       });
      
       if (!response.ok) {
@@ -212,27 +191,17 @@ const EditNotification = () => {
         throw new Error(errorData.message || `Failed to update notification (Status: ${response.status})`);
       }
      
-      const apiResponseData = await response.json();
- 
-      // Generate a unique timestamp for cache busting
-      const timestamp = Date.now();
-     
-      // Instant UI update with correct path
+      // Update UI with the edited data
       setNotificationData(prevData =>
         prevData.map(item =>
           item.id === currentEditItem.id
             ? {
                 ...item,
                 title: editFormData.title,
-                message: editFormData.message,
-                priority: editFormData.priority,
-                expiry_date: editFormData.expiry_date,
-                // Always update the image URL with a new timestamp to force refresh
-                image: hasImageChanged
-                  ? (editImagePreview && editImagePreview.startsWith('blob:')
-                      ? editImagePreview // Use the blob URL for immediate preview
-                      : `${API_BASE_URL}${apiResponseData.data.image || item.image?.split('?t=')[0]}?t=${timestamp}`)
-                  : `${item.image?.split('?t=')[0]}?t=${timestamp}` // Add timestamp to existing image
+                content: editFormData.content, // Changed from message to content
+                message: editFormData.content, // Keep message field for display
+                status: editFormData.status,
+                updated_at: new Date().toISOString()
               }
             : item
         )
@@ -254,13 +223,12 @@ const EditNotification = () => {
     }
   };
 
-  // Get priority badge color
-  const getPriorityBadgeColor = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'high': return 'danger';
-      case 'medium': return 'warning';
-      case 'low': return 'info';
-      default: return 'secondary';
+  // Get status badge color
+  const getStatusBadgeColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'active': return 'success';
+      case 'inactive': return 'secondary';
+      default: return 'primary';
     }
   };
 
@@ -281,7 +249,7 @@ const EditNotification = () => {
               <div style={{ width: '300px' }}>
                 <input
                   type="text"
-                  placeholder="Search by title, message, or priority..."
+                  placeholder="Search by title, content, or status..."
                   className="form-control"
                   value={searchTerm}
                   onChange={(e) => {
@@ -315,27 +283,20 @@ const EditNotification = () => {
                   currentItems.map((item) => (
                     <Col lg={4} md={6} sm={12} className="mb-4" key={item.id}>
                       <Card className="h-100">
-                        {item.image && (
-                          <Card.Img
-                            variant="top"
-                            src={item.image}
-                            alt={item.title || "Notification image"}
-                            style={{ height: '200px', objectFit: 'cover' }}
-                          />
-                        )}
                         <Card.Body>
                           <div className="d-flex justify-content-between align-items-start mb-2">
                             <Card.Title className="managetitle">{item.title}</Card.Title>
-                            <Badge bg={getPriorityBadgeColor(item.priority)}>
-                              {item.priority || 'Medium'}
+                            <Badge bg={getStatusBadgeColor(item.status)}>
+                              {item.status || 'Active'}
                             </Badge>
                           </div>
                           <Card.Text>{item.message}</Card.Text>
-                          {item.expiry_date && (
-                            <div className="text-muted small mb-3">
-                              Expires: {new Date(item.expiry_date).toLocaleDateString()}
-                            </div>
-                          )}
+                          <div className="text-muted small mb-3">
+                            Post ID: {item.post_id}
+                          </div>
+                          <div className="text-muted small mb-3">
+                            Created: {new Date(item.created_at).toLocaleDateString()}
+                          </div>
                           <div className="d-flex justify-content-end">
                             <Button
                               variant="primary"
@@ -348,7 +309,7 @@ const EditNotification = () => {
                             <Button
                               variant="danger"
                               size="sm"
-                              onClick={() => handleDelete(item.id)}
+                              onClick={() => handleDelete(item.id, item.post_id)}
                             >
                               Delete
                             </Button>
@@ -398,6 +359,15 @@ const EditNotification = () => {
         <Form onSubmit={handleEditSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
+              <Form.Label>Post ID</Form.Label>
+              <Form.Control
+                type="text"
+                value={currentEditItem?.post_id || ''}
+                disabled
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
               <Form.Label>Title</Form.Label>
               <Form.Control
                 type="text"
@@ -409,63 +379,27 @@ const EditNotification = () => {
             </Form.Group>
            
             <Form.Group className="mb-3">
-              <Form.Label>Message</Form.Label>
+              <Form.Label>Content</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                name="message"
-                value={editFormData.message}
+                name="content"
+                value={editFormData.content}
                 onChange={handleEditChange}
                 required
               />
             </Form.Group>
            
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Priority</Form.Label>
-                  <Form.Select
-                    name="priority"
-                    value={editFormData.priority}
-                    onChange={handleEditChange}
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Expiry Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="expiry_date"
-                    value={editFormData.expiry_date}
-                    onChange={handleEditChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-           
             <Form.Group className="mb-3">
-              <Form.Label>Image (Optional)</Form.Label>
-              <Form.Control
-                type="file"
-                name="image"
+              <Form.Label>Status</Form.Label>
+              <Form.Select
+                name="status"
+                value={editFormData.status}
                 onChange={handleEditChange}
-                accept="image/*"
-              />
-              {editImagePreview && (
-                <div className="mt-3">
-                  <img
-                    src={editImagePreview}
-                    alt="Preview"
-                    style={{ maxWidth: '200px', maxHeight: '150px' }}
-                  />
-                </div>
-              )}
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </Form.Select>
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
