@@ -13,6 +13,8 @@ import { FaFileExcel } from "react-icons/fa";
 import { FaTimes } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { AiTwotoneEdit } from "react-icons/ai";
+import "../../../assets/css/myteams.css";
 
 const ManageTeam = () => {
   const { user } = useContext(AuthContext);
@@ -595,17 +597,9 @@ const ManageTeam = () => {
         
         <Container fluid className="dashboard-body p-4" style={{ flex: 1, overflow: 'auto' }}>
           <div className="br-box-container">
-            <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="d-flex justify-content-between align-items-center br-all-heading">
               <h2 className="mb-0">Teams Data</h2>
-            </div>
-
-            {/* API Message Display */}
-            {apiMessage && (
-              <Alert variant={apiMessage.includes("success") ? "success" : "danger"}>
-                {apiMessage}
-              </Alert>
-            )}
-
+              
             <div className="mt-2 mb-2 text-end">
               <Button variant="" size="sm" className="mx-2 print-btn" onClick={handlePrint}>
                 <FaPrint /> Print
@@ -615,6 +609,15 @@ const ManageTeam = () => {
                 <FaFileExcel /> Download
               </Button>
             </div>
+            </div>
+
+            {/* API Message Display */}
+            {apiMessage && (
+              <Alert variant={apiMessage.includes("success") ? "success" : "danger"}>
+                {apiMessage}
+              </Alert>
+            )}
+
             
             {loading && (
               <div className="d-flex justify-content-center my-5">
@@ -629,8 +632,8 @@ const ManageTeam = () => {
               <>
                 {/* Custom Table Structure */}
                 <Row className="mt-3">
-                  <div className="col-md-12">
-                    <table className="temp-rwd-table">
+                  <div className="col-md-12 ">
+                    <table className="temp-rwd-table ">
                       <tbody>
                         <tr>
                           <th>S.No</th>
@@ -653,7 +656,7 @@ const ManageTeam = () => {
                                 {editingTeam === team.id ? (
                                   <Form.Control
                                     type="text"
-                                    name="team_name"
+                                    name="team_name" className="team-detail-value"
                                     value={editFormData.team_name}
                                     onChange={handleFormChange}
                                   />
@@ -666,7 +669,7 @@ const ManageTeam = () => {
                                   <Form.Select
                                     name="team_leader"
                                     value={editFormData.team_leader}
-                                    onChange={handleFormChange}
+                                    onChange={handleFormChange} className="team-detail-value"
                                   >
                                     <option value="">Select Team Leader</option>
                                     {getTeamLeaders().map(leader => (
@@ -684,7 +687,7 @@ const ManageTeam = () => {
                                   <Form.Select
                                     name="project_id"
                                     value={editFormData.project_id}
-                                    onChange={handleFormChange}
+                                    onChange={handleFormChange} className="team-detail-value"
                                   >
                                     <option value="">Select Project</option>
                                     {getAvailableProjects().map(project => (
@@ -706,7 +709,7 @@ const ManageTeam = () => {
                                     timeFormat="hh:mm aa"
                                     timeIntervals={30}
                                     dateFormat="MMMM d, yyyy h:mm aa"
-                                    className="form-control temp-form-control-option w-100"
+                                    className="form-control temp-form-control-option w-100 team-detail-value"
                                     customInput={
                                       <CustomDatePickerInput placeholder="Select Start Date and Time" />
                                     }
@@ -799,7 +802,7 @@ const ManageTeam = () => {
                                             return (
                                               <div 
                                                 key={emp.emp_id} 
-                                                className={`employee-option p-2 ${isSelected ? 'bg-light' : ''}`}
+                                                className={`employee-option temp-form-control-option p-2 ${isSelected ? 'bg-light' : ''}`}
                                                 style={{ 
                                                   cursor: 'pointer',
                                                   borderBottom: '1px solid #eee'
@@ -860,7 +863,7 @@ const ManageTeam = () => {
                                     <Button 
                                       variant="secondary" 
                                       size="sm"
-                                      onClick={handleCancelEdit}
+                                      onClick={handleCancelEdit} className="br-calcel-all"
                                     >
                                       Cancel
                                     </Button>
@@ -868,10 +871,10 @@ const ManageTeam = () => {
                                 ) : (
                                   <Button 
                                     variant="primary" 
-                                    size="sm"
+                                    size="sm" className="all-edit-btn"
                                     onClick={() => handleEditClick(team)}
                                   >
-                                    Edit
+                                 <i className="edit-all-icon"> <AiTwotoneEdit /> </i> Edit
                                   </Button>
                                 )}
                               </td>
