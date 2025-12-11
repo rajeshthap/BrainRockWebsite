@@ -14,15 +14,14 @@ import {
   FaUserCircle,
   FaCog,
   FaSignOutAlt,
-  FaSearch,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { AuthContext } from "../context/AuthContext";
 
-// 1. Accept searchTerm and setSearchTerm as props
-function HrHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
+// Removed searchTerm and setSearchTerm from props
+function HrHeader({ toggleSidebar }) {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -127,21 +126,9 @@ function HrHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             </Button>
           </Col>
 
-          <Col>
-            <div className="search-bar">
-              <FaSearch className="search-icon" />
-              {/* 2. Add value and onChange to the existing input. No other changes here. */}
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Search by Name, ID, Email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </Col>
+          {/* Removed the search bar column */}
 
-          <Col xs="auto">
+          <Col xs="auto" className="ms-auto">
             <div className="header-actions">
               <Dropdown align="end">
                 <Dropdown.Toggle variant="light" className="notification-btn">
