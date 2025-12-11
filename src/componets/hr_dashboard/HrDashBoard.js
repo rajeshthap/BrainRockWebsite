@@ -13,6 +13,7 @@ import {
   FaThumbsDown,
   FaRegThumbsDown,
 } from "react-icons/fa";
+import axios from "axios";
 
 import "../../assets/css/emp_dashboard.css";
 import SideNav from "./SideNav";
@@ -59,7 +60,8 @@ const HrDashBoard = () => {
   const [postSuccess, setPostSuccess] = useState("");
   const [likeLoading, setLikeLoading] = useState({});
   const [postAuthor, setPostAuthor] = useState(""); 
-  const [postDepartment] = useState("Human Resource HR Team");
+  const [postAuthorProfilePhoto, setPostAuthorProfilePhoto] = useState(null);
+  const [postDepartment, setPostDepartment] = useState("");
   const [postTitle, setPostTitle] = useState("");
   const [postDescription, setPostDescription] = useState("");
   const [postQuote, setPostQuote] = useState("");
@@ -68,10 +70,60 @@ const HrDashBoard = () => {
   const [postContent, setPostContent] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   
+  // Current user details state
+  const [currentUserDetails, setCurrentUserDetails] = useState({
+    first_name: "",
+    last_name: "",
+    profile_photo: null,
+    designation: "",
+    department: ""
+  });
+  
   // Employee data state
   const [employees, setEmployees] = useState({});
   const [employeesLoading, setEmployeesLoading] = useState(true);
   const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/";
+
+  // Fetch current user details for post form
+  useEffect(() => {
+    const fetchCurrentUserDetails = async () => {
+      if (user && user.unique_id) {
+        try {
+          const response = await axios.get(
+            `${baseUrl}api/employee-details/?emp_id=${user.unique_id}`,
+            {
+              withCredentials: true,
+              headers: { "Content-Type": "application/json" }
+            }
+          );
+
+          if (response.data) {
+            const fullName = `${response.data.first_name || ""} ${response.data.last_name || ""}`.trim();
+            const profilePhoto = response.data.profile_photo 
+              ? `${baseUrl}${response.data.profile_photo}` 
+              : null;
+
+            setCurrentUserDetails({
+              first_name: response.data.first_name || "",
+              last_name: response.data.last_name || "",
+              profile_photo: profilePhoto,
+              designation: response.data.designation || "",
+              department: response.data.department || ""
+            });
+
+            // Set post author details
+            setPostAuthor(fullName);
+            setPostAuthorProfilePhoto(profilePhoto);
+            setPostDepartment(`${response.data.designation || ""}, ${response.data.department || ""}`);
+          }
+        } catch (error) {
+          // Handle error silently
+        }
+      }
+    };
+
+    fetchCurrentUserDetails();
+  }, [user, baseUrl]);
 
   // Fetch employee data
   useEffect(() => {
@@ -109,7 +161,7 @@ const HrDashBoard = () => {
     };
 
     fetchEmployees();
-  }, []);
+  }, [baseUrl]);
 
   // Fetch employee count data
   useEffect(() => {
@@ -716,7 +768,7 @@ const HrDashBoard = () => {
                   {postError && <div className="alert alert-danger">{postError}</div>}
                   {postSuccess && <div className="alert alert-success">{postSuccess}</div>}
                   
-                  {/* Post Author Section - Using dynamic user data */}
+                  {/* Post Author Section - Using current user data */}
                   <div className="d-flex align-items-center mb-4">
                     <div
                       style={{
@@ -725,14 +777,25 @@ const HrDashBoard = () => {
                         borderRadius: "50%",
                         backgroundColor: "#e0e0e0",
                         overflow: "hidden",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
                       }}
                     >
-                      {/* Profile Image - placeholder (no current-user API) */}
-                      <img
-                        src="https://via.placeholder.com/55"
-                        alt="profile"
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
+                      {postAuthorProfilePhoto ? (
+                        <img
+                          src={postAuthorProfilePhoto}
+                          alt="profile"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <span style={{ color: "white", fontWeight: "bold", fontSize: "24px" }}>
+                          {postAuthor
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </span>
+                      )}
                     </div>
 
                     <div className="ms-3">
