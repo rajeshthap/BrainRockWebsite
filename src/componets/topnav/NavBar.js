@@ -90,12 +90,21 @@ useEffect(() => {
               <Nav.Link as={Link} to="/ServicesPage" onClick={closeMenu}>Services</Nav.Link>
               <Nav.Link as={Link} to="/Courses" onClick={closeMenu}>Courses</Nav.Link>
               <Nav.Link as={Link} to="/Gallery" onClick={closeMenu}>Gallery</Nav.Link>
-              <Nav.Link as={Link} to="/Feedback" onClick={closeMenu}>Feedback</Nav.Link>
               <Nav.Link as={Link} to="/TrainingRegistration" onClick={closeMenu}>
                 Registration
               </Nav.Link>
               <Nav.Link as={Link} to="/Certificate" onClick={closeMenu}>Certificate</Nav.Link>
-              <Nav.Link as={Link} to="/Contact" onClick={closeMenu}>Contact Us</Nav.Link>
+             <NavDropdown title="Contact Us" id="ContactUs" onClick={(e) => e.stopPropagation()} className="about-drop">
+                <NavDropdown.Item as={Link} to="/Contact" onClick={closeMenu}>
+                  Contact Us
+                </NavDropdown.Item>
+               <NavDropdown.Item as={Link} to="/Feedback" onClick={closeMenu}>
+                  Feedback
+                </NavDropdown.Item>
+                 <NavDropdown.Item as={Link} to="/FAQ" onClick={closeMenu}>
+                  FAQ
+                </NavDropdown.Item>
+</NavDropdown>
  {showCareer && (
         <Nav.Link as={Link} to="/Career" onClick={closeMenu}>
           Career

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Form, Button, Alert, Spinner, InputGroup } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Spinner, InputGroup, Card } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import "../../../assets/css/Trainingregistration.css";
 import FooterPage from "../../footer/FooterPage";
 
@@ -41,6 +41,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
   const [errors, setErrors] = useState({});
   const [successMsg, setSuccessMsg] = useState("");
+  const [registrationDetails, setRegistrationDetails] = useState(null);
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -241,7 +242,15 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
         }
       );
 
-      setSuccessMsg("Registration Successful!");
+      // Store registration details for success message
+      setRegistrationDetails({
+        candidateName: formData.candidate_name,
+        courseName: formData.application_for_course,
+        email: formData.email,
+        mobile: formData.mobile_no
+      });
+
+      setSuccessMsg("Training Registration Successful!");
       setShowSuccess(true);
 
       setFormData({
@@ -262,13 +271,9 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
       setErrors({});
 
-      setTimeout(() => setShowSuccess(false), 5000);
+      // Keep success message visible longer
+      setTimeout(() => setShowSuccess(false), 10000);
     } catch (error) {
-
-      if (error.response) {
-        
-      }
-
       if (error.response && error.response.data) {
         const apiErrors = {};
 
@@ -309,6 +314,12 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     }
   };
 
+  const handleContinue = () => {
+    setShowSuccess(false);
+    // Optionally redirect to another page
+    // window.location.href = "/courses";
+  };
+
   return (
     <>
       {!isFromTrainingPage && (
@@ -334,10 +345,27 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
         <Container className="mt-4 mb-3">
           <div className="ourteam-box text-heading">
 
+            {/* Enhanced Success Alert */}
             {showSuccess && (
-              <Alert variant="success" onClose={() => setShowSuccess(false)} dismissible>
-                {successMsg}
-              </Alert>
+              <Card className="mb-4 border-success success-card">
+                <Card.Body className="text-center">
+                  <FaCheckCircle className="text-success success-icon" />
+                  <Card.Title className="text-success mt-3">Registration Successful!</Card.Title>
+                  <Card.Text>
+                    {registrationDetails && (
+                      <div className="registration-details">
+                        <p>Thank you, <strong>{registrationDetails.candidateName}</strong>!</p>
+                        <p>Your registration for <strong>{registrationDetails.courseName}</strong> has been received.</p>
+                        <p>We've sent a confirmation to <strong>{registrationDetails.email}</strong></p>
+                        <p>Our team will contact you soon at <strong>{registrationDetails.mobile}</strong></p>
+                      </div>
+                    )}
+                  </Card.Text>
+                  <Button variant="success" onClick={handleContinue} className="mt-2">
+                    Continue
+                  </Button>
+                </Card.Body>
+              </Card>
             )}
 
             {showError && (
@@ -631,6 +659,26 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
           </Container>
         )}
       </div>
+
+      {/* Add custom styles for the success card */}
+      <style jsx>{`
+        .success-card {
+          box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+        }
+        .success-icon {
+          font-size: 3rem;
+        }
+        .registration-details {
+          margin: 15px 0;
+          text-align: left;
+          max-width: 500px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .registration-details p {
+          margin-bottom: 8px;
+        }
+      `}</style>
     </>
   );
 }

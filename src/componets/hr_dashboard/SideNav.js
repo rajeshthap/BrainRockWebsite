@@ -33,6 +33,8 @@ const SideNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
       setOpenSubmenu(openSubmenu === index ? null : index);
     };
 
+    // Determine dashboard title based on user role
+    const dashboardTitle = userRole === "hr" ? "HR Dashboard" : "Employee Dashboard";
 
 const menuItems = [
     {
@@ -484,11 +486,8 @@ const menuItems = [
         className={`sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}
       >
         <div className="sidebar-header">
-          <div className="logo-container">
-            <div className="logo">
-             
-              <span className="logo-text"><img src={BRLogo} alt="text"></img></span>
-            </div>
+          <div className="logo-container text-center">
+            <h5 className="mb-0 text-white">{dashboardTitle}</h5>
           </div>
         </div>
 
@@ -574,7 +573,7 @@ const menuItems = [
   enforceFocus={false} //  ADD THIS LINE — fixes close button focus issue
 >
   <Offcanvas.Header closeButton className="br-offcanvas-header">
-    <Offcanvas.Title className="br-off-title">Menu</Offcanvas.Title>
+    <Offcanvas.Title className="br-off-title">{dashboardTitle}</Offcanvas.Title>
   </Offcanvas.Header>
 
   <Offcanvas.Body className="br-offcanvas">

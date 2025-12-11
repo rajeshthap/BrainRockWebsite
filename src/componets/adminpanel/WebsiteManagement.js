@@ -701,7 +701,7 @@ const goToNextComponent = () => {
         <AdminHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="dashboard-body">
-          <h1 className="page-title">Dashboard</h1>
+          <h1 className="page-title"> Admin Dashboard</h1>
           <div className="br-box-container mt-4">
             <Row className="br-stats-row">
               {/* Courses Card */}

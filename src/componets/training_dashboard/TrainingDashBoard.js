@@ -32,6 +32,7 @@ const TrainingDashBoard = () => {
   const [employeeDetails, setEmployeeDetails] = useState(null); // State to store employee details
   const [completedCourses, setCompletedCourses] = useState([]); // State to store completed courses from certificate API
   const [certificateData, setCertificateData] = useState({}); // State to store certificate data for each course
+  const [completingCourse, setCompletingCourse] = useState(false); // State to track course completion process
  
   const navigate = useNavigate();
   const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
@@ -169,6 +170,11 @@ const TrainingDashBoard = () => {
 
   // Function to handle course completion
   const handleCompleteCourse = async (courseId) => {
+    // Prevent multiple clicks
+    if (completingCourse) return;
+    
+    setCompletingCourse(true);
+    
     // debug logs removed
     
     // Use user?.unique_id directly instead of applicantId to ensure we have the latest value
@@ -176,6 +182,7 @@ const TrainingDashBoard = () => {
     
     if (!currentApplicantId || !selectedCourse) {
       alert("Applicant ID or course details not available. Please try again.");
+      setCompletingCourse(false);
       return;
     }
     
@@ -198,8 +205,6 @@ const TrainingDashBoard = () => {
         applicant_id: currentApplicantId // Add applicant_id (using unique_id from AuthContext)
       };
       
-      
-      
       // Make POST request to certificate API
       const response = await fetch(
         `${BASE_URL}/api/certificate/`,
@@ -221,17 +226,16 @@ const TrainingDashBoard = () => {
       // Get response text first to check if it's valid JSON
       const responseText = await response.text();
       
-      let data;
+      let responseData; // Renamed to avoid conflict with outer scope
       try {
-        data = JSON.parse(responseText);
+        responseData = JSON.parse(responseText);
       } catch (error) {
         alert("Invalid response from server. Please try again.");
+        setCompletingCourse(false);
         return;
       }
       
-      
-      
-      if (data.success) {
+      if (responseData && responseData.success) {
         alert("Course completed successfully! Certificate generated.");
         // Close the modal
         setShowModulesModal(false);
@@ -243,6 +247,8 @@ const TrainingDashBoard = () => {
       }
     } catch (error) {
       alert("An error occurred while completing the course. Please try again.");
+    } finally {
+      setCompletingCourse(false);
     }
   };
 
@@ -965,7 +971,10 @@ const TrainingDashBoard = () => {
       {/* Modules Modal */}
       <Modal 
         show={showModulesModal} 
-        onHide={() => setShowModulesModal(false)}
+        onHide={() => {
+          setShowModulesModal(false);
+          setCompletingCourse(false); // Reset completingCourse state when modal is closed
+        }}
         size="lg"
         centered
       >
@@ -1017,8 +1026,9 @@ const TrainingDashBoard = () => {
                   <Button 
                     variant="success" 
                     onClick={() => handleCompleteCourse(selectedCourse.course_id)}
+                    disabled={completingCourse}
                   >
-                    Complete Course
+                    {completingCourse ? 'Processing...' : 'Complete Course'}
                   </Button>
                 </div>
               )}
@@ -1028,7 +1038,10 @@ const TrainingDashBoard = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModulesModal(false)}>
+          <Button variant="secondary" onClick={() => {
+            setShowModulesModal(false);
+            setCompletingCourse(false); // Reset completingCourse state when modal is closed
+          }}>
             Close
           </Button>
         </Modal.Footer>
