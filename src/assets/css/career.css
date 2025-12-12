@@ -5,7 +5,18 @@
     transition: all 0.3s ease-in-out;
     overflow: hidden;
 }
+.br-career-body p{
+    margin-bottom: 8px !important;
+}
 
+.job-apply-btn{
+    font-size: 10px;
+}
+
+.section-title{
+        font-size: 22px;
+    font-weight: 600;
+}
 .br-career-card {
     padding: 12px 19px;
     border-radius: 10px;

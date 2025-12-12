@@ -22,6 +22,10 @@ function Career() {
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState("");
+  
+  // View Modal State
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
 
   // Form Fields
   const [fullName, setFullName] = useState("");
@@ -55,10 +59,16 @@ function Career() {
       .finally(() => setJobLoading(false));
   }, []);
 
-  // Open Modal
+  // Open Apply Modal
   const handleApplyClick = (jobId) => {
     setSelectedJobId(jobId);
     setShowModal(true);
+  };
+
+  // Open View Modal
+  const handleViewClick = (job) => {
+    setSelectedJob(job);
+    setShowViewModal(true);
   };
 
   // PDF Validation
@@ -188,9 +198,16 @@ function Career() {
                         <p><strong>Deadline:</strong> {job.application_deadline}</p>
                       )}
 
-                      <div className="job-opening-btn">
+                      <div className="job-opening-btn d-flex justify-content-between">
                         <Button
-                          className="btn btn-primary job-view-btn"
+                          variant="outline-primary"
+                          className="job-apply-btn me-2"
+                          onClick={() => handleViewClick(job)}
+                        >
+                          View Details
+                        </Button>
+                        <Button
+                          className="btn btn-primary job-apply-btn"
                           onClick={() => handleApplyClick(job.job_id)}
                         >
                           Apply Now
@@ -208,6 +225,95 @@ function Career() {
           <FooterPage />
         </Container>
       </div>
+
+      {/* VIEW JOB DETAILS Modal */}
+      <Modal 
+        show={showViewModal} 
+        onHide={() => setShowViewModal(false)} 
+        centered
+        size="lg"
+        className="job-details-modal"
+      >
+        <Modal.Header closeButton className="br-career-modal">
+          <Modal.Title className="br-job-title">{selectedJob?.title}</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {selectedJob && (
+            <div className="job-details">
+              <Row>
+                <Col md={6}>
+                  <p><strong>Department:</strong> {selectedJob.department}</p>
+                  <p><strong>Location:</strong> {selectedJob.location}</p>
+                  <p><strong>Employment Type:</strong> {selectedJob.employment_type}</p>
+                  <p><strong>Salary Range:</strong> {selectedJob.salary_range}</p>
+                </Col>
+                <Col md={6}>
+                  <p><strong>Experience Level:</strong> {selectedJob.experience_level}</p>
+                  <p><strong>Education:</strong> {selectedJob.education}</p>
+                  <p><strong>Application Deadline:</strong> {selectedJob.application_deadline}</p>
+                  <p><strong>Status:</strong> 
+                    <span className={`badge ${selectedJob.status === 'active' ? 'bg-success' : 'bg-secondary'} ms-2`}>
+                      {selectedJob.status}
+                    </span>
+                  </p>
+                </Col>
+              </Row>
+
+              <div className="mt-4">
+                <h5 className="section-title">Job Description</h5>
+                <p>{selectedJob.description}</p>
+              </div>
+
+              {selectedJob.responsibilities && selectedJob.responsibilities.length > 0 && (
+                <div className="mt-4">
+                  <h5 className="section-title">Key Responsibilities</h5>
+                  <ul>
+                    {selectedJob.responsibilities.map((resp, index) => (
+                      <li key={index}>{resp}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {selectedJob.requirements && selectedJob.requirements.length > 0 && (
+                <div className="mt-4">
+                  <h5 className="section-title">Requirements</h5>
+                  <ul>
+                    {selectedJob.requirements.map((req, index) => (
+                      <li key={index}>{req}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {selectedJob.skills && selectedJob.skills.length > 0 && (
+                <div className="mt-4">
+                  <h5 className="section-title">Required Skills</h5>
+                  <div className="skills-container">
+                    {selectedJob.skills.map((skill, index) => (
+                      <span key={index} className="skill-badge">{skill}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center mt-4">
+                <Button
+                  variant="primary"
+                  className="job-apply-btn"
+                  onClick={() => {
+                    setShowViewModal(false);
+                    handleApplyClick(selectedJob.job_id);
+                  }}
+                >
+                  Apply for this Position
+                </Button>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
 
       {/* APPLY Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
