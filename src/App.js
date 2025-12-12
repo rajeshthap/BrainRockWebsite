@@ -113,6 +113,7 @@ import AllStudentsData from "./componets/adminpanel/Candidate/AllStudentsData";
 import Purchasehistory from "./componets/training_dashboard/Purchasehistory";
 import AddNotification from "./componets/adminpanel/Notification/AddNotification";
 import EditNotification from "./componets/adminpanel/Notification/EditNotification";
+import AddStudent from "./componets/adminpanel/gallery/AddStudent";
 function AppContent() {
   const location = useLocation();
 
@@ -150,6 +151,7 @@ function AppContent() {
     "/AddCourses",
     "/EditCourses",
     "/ManageStudent",
+    "/AddStudent",
     "/EditAboutUs",
     "/TrainingDashBoard",
     "/TrainingLeftnav",
@@ -528,6 +530,15 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <EditCourses />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/AddStudent"
+          element={
+            <ProtectedRoute>
+              <AddStudent/>
             </ProtectedRoute>
           }
         />

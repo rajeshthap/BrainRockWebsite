@@ -189,6 +189,11 @@ const menuItems = [
  
       submenu: [
         {
+          label: "Add Student",
+          path: "/AddStudent",
+          icon: <FaUsers />,
+        },
+        {
           label: "Manage Student",
           path: "/ManageStudent",
           icon: <FaUsers />,
