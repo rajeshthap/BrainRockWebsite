@@ -133,7 +133,9 @@ function CompanyProfile() {
               <Col lg={6} md={6} sm={12} className="about-right pl-30 d-flex flex-column justify-content-center p-5">
                 <span className="hero-sub-title">About Us</span>
                 <h2 className="heading-1">{aboutData.title}</h2>
-                <p>{aboutData.description}</p>
+                <p style={{ whiteSpace: "pre-line" }}>
+                  {aboutData.description}
+                </p>
               </Col>
             </Row>
           </div>

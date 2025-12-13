@@ -152,7 +152,9 @@ function ServicesPage() {
                           <div className="flaticon-cloud"></div>
                           <div className="feature-desc">
                             <h4>{item.title}</h4>
-                            <p>{item.description}</p>
+                            <p style={{ whiteSpace: "pre-line" }}>
+                              {item.description}
+                            </p>
                             {/* Updated to use Link with state prop instead of button */}
                             <Link
                               to="/ServicesDetails"

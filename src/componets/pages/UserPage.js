@@ -608,7 +608,9 @@ function UserPage() {
               {/* Dynamic title from API */}
               <h2 className="heading-1">{aboutData.title}</h2>
               {/* Dynamic description from API - using p tag instead of ul */}
-              <p>{aboutData.description}</p>
+              <p style={{ whiteSpace: "pre-line" }}>
+                {aboutData.description}
+              </p>
               {/* Static list items */}
             </Col>
           </Row>

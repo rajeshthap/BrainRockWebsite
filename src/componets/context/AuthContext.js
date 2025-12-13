@@ -218,30 +218,45 @@ export const AuthProvider = ({ children }) => {
           navType = perf.navigation.type === 1 ? 'reload' : 'navigate';
         }
 
-        const isReload = navType === 'reload';
         const path = (typeof window !== 'undefined' && window.location.pathname) ? window.location.pathname : '/';
-
-        // List of pages that should remain on the same URL after a hard reload.
-        const allowedReloadPaths = [
-          '/', '/home', '/CompanyProfile', '/OurTeam', '/RunningProjects', '/ServicesPage',
-          '/Courses', '/Gallery', '/Feedback', '/TrainingRegistration', '/Training',
-          '/Contact', '/Login', '/ServicesDetails', '/Certificate','/Career'
-        ].map(p => p.toLowerCase());
-
         const normalizedPath = path.toLowerCase().replace(/\/+$/, '') || '/';
 
-        // If it's a reload and the current path is NOT in allowed list and NOT the login page, redirect to root
-        if (isReload && !allowedReloadPaths.includes(normalizedPath) && normalizedPath !== '/login') {
-          try {
-            if (typeof window !== 'undefined') {
-              window.location.replace('/');
+        // Public pages — refreshing should keep you on them
+        const publicPaths = new Set([
+          '/', '/home', '/companyprofile', '/ourteam', '/runningprojects', '/servicespage',
+          '/courses', '/gallery', '/feedback', '/trainingregistration', '/training',
+          '/contact', '/login', '/servicesdetails', '/certificate', '/career'
+        ]);
+
+        // Initial navigation (first load in the tab/browser): redirect to home '/'
+        if (navType === 'navigate') {
+          if (normalizedPath !== '/') {
+            try {
+              if (typeof window !== 'undefined') {
+                window.location.replace('/');
+              }
+            } catch (e) {
+              // ignore
             }
-          } catch (e) {
-            // ignore
+            return;
           }
-          return;
         }
 
+        // Page reload: if we're on a protected route (not a public path), send to '/Login'
+        if (navType === 'reload') {
+          if (!publicPaths.has(normalizedPath) && normalizedPath !== '/login') {
+            try {
+              if (typeof window !== 'undefined') {
+                window.location.replace('/Login');
+              }
+            } catch (e) {
+              // ignore
+            }
+            return;
+          }
+        }
+
+        // If we haven't failed refresh flow, attempt token validation/refresh (but avoid doing it on the login page)
         if (!hasRefreshFailed) {
           if (typeof window === 'undefined' || window.location.pathname !== '/Login') {
             validateOrRefreshToken();

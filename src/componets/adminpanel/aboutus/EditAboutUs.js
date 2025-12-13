@@ -14,14 +14,14 @@ const EditAboutUs = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
-  
+
   // Data state
   const [aboutUsData, setAboutUsData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageTimestamp, setImageTimestamp] = useState(Date.now()); // Add timestamp for cache busting
   const [forceRefresh, setForceRefresh] = useState(false); // Add force refresh flag
-  
+
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
@@ -32,7 +32,7 @@ const EditAboutUs = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [hasImageChanged, setHasImageChanged] = useState(false);
   const [updating, setUpdating] = useState(false); // Add updating state
-  
+
   // Alert state
   const [showAlert, setShowAlert] = useState(false);
   const [message, setMessage] = useState("");
@@ -60,12 +60,12 @@ const EditAboutUs = () => {
           throw new Error('Failed to fetch About Us data');
         }
         const result = await response.json();
-        
+
         // Check if data exists and has items
         if (result.success && result.data && result.data.length > 0) {
           // Get the first item from the array
           const item = result.data[0];
-          
+
           // Process the data to construct full image URL if exists
           const processedData = {
             id: item.id,
@@ -108,7 +108,7 @@ const EditAboutUs = () => {
   // Handle edit form input changes
   const handleEditChange = (e) => {
     const { name, value, files } = e.target;
-    
+
     if (name === 'image') {
       const file = files[0];
       if (file) {
@@ -132,17 +132,17 @@ const EditAboutUs = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
-    
+
     const dataToSend = new FormData();
     // Send the ID in the payload as requested
     dataToSend.append('id', aboutUsData.id);
     dataToSend.append('title', editFormData.title);
     dataToSend.append('description', editFormData.description);
-    
+
     if (hasImageChanged && editFormData.image) {
       dataToSend.append('image', editFormData.image);
     }
-    
+
     try {
       // Use the base endpoint for PUT
       const response = await fetch(`${API_BASE_URL}/api/aboutus-item/`, {
@@ -150,18 +150,18 @@ const EditAboutUs = () => {
         credentials: 'include',
         body: dataToSend,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Server error' }));
         throw new Error(errorData.message || `Failed to update About Us (Status: ${response.status})`);
       }
-      
+
       const apiResponseData = await response.json();
 
       // Create a unique timestamp to force image refresh
       const newTimestamp = Date.now();
       setImageTimestamp(newTimestamp);
-      
+
       // Force a refresh
       setForceRefresh(prev => !prev);
 
@@ -171,27 +171,27 @@ const EditAboutUs = () => {
         title: editFormData.title,
         description: editFormData.description,
         image: hasImageChanged && apiResponseData.data && apiResponseData.data.image
-            ? `${API_BASE_URL}${apiResponseData.data.image}`
-            : aboutUsData.image
+          ? `${API_BASE_URL}${apiResponseData.data.image}`
+          : aboutUsData.image
       });
-      
+
       // If image was updated, also update the preview in the modal
       if (hasImageChanged && apiResponseData.data && apiResponseData.data.image) {
         setImagePreview(`${API_BASE_URL}${apiResponseData.data.image}?t=${newTimestamp}`);
       }
-      
+
       setMessage("About Us updated successfully!");
       setVariant("success");
       setShowAlert(true);
       setShowEditModal(false);
-      
+
       setTimeout(() => setShowAlert(false), 3000);
     } catch (error) {
       console.error('Error updating About Us:', error);
       setMessage(error.message || "Failed to update About Us");
       setVariant("danger");
       setShowAlert(true);
-      
+
       setTimeout(() => setShowAlert(false), 5000);
     } finally {
       setUpdating(false);
@@ -214,13 +214,13 @@ const EditAboutUs = () => {
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
             <h2 className="mb-4">Manage About Us</h2>
-            
+
             {showAlert && (
               <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
                 {message}
               </Alert>
             )}
-            
+
             {loading ? (
               <div className="text-center my-5">
                 <Spinner animation="border" role="status">
@@ -244,9 +244,9 @@ const EditAboutUs = () => {
                         <div className="d-flex align-items-center mb-3">
                           {/* Display the image or a default */}
                           {imageUrl ? (
-                            <img 
-                              src={imageUrl} 
-                              alt="About Us" 
+                            <img
+                              src={imageUrl}
+                              alt="About Us"
                               style={{ width: '120px', height: '120px', marginRight: '15px', objectFit: 'cover' }}
                               key={`${imageUrl}-${forceRefresh}`} // Add key to force re-render
                             />
@@ -256,16 +256,19 @@ const EditAboutUs = () => {
                           <div className="flex-grow-1">
                             <Card.Title className="managetitle">{aboutUsData.title}</Card.Title>
                           </div>
-                          <Button 
-                            variant="primary" 
-                            size="sm" 
+                          <Button
+                            variant="primary"
+                            size="sm"
                             onClick={handleEdit}
                             disabled={updating}
                           >
                             {updating ? 'Updating...' : 'Edit'}
                           </Button>
                         </div>
-                        <Card.Text>{aboutUsData.description}</Card.Text>
+                        <Card.Text style={{ whiteSpace: "pre-wrap", lineHeight: "1.7" }}>
+                          {aboutUsData.description}
+                        </Card.Text>
+
                       </Card.Body>
                     </Card>
                   </Col>
@@ -275,7 +278,7 @@ const EditAboutUs = () => {
           </div>
         </Container>
       </div>
-      
+
       {/* Edit Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
         <Modal.Header closeButton>
@@ -293,7 +296,7 @@ const EditAboutUs = () => {
                 required
               />
             </Form.Group>
-            
+
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
               <Form.Control
@@ -305,7 +308,7 @@ const EditAboutUs = () => {
                 required
               />
             </Form.Group>
-            
+
             <Form.Group className="mb-3">
               <Form.Label>About Us Image</Form.Label>
               <Form.Control
@@ -316,9 +319,9 @@ const EditAboutUs = () => {
               />
               {imagePreview && (
                 <div className="mt-3">
-                  <img 
-                    src={imagePreview} 
-                    alt="Image Preview" 
+                  <img
+                    src={imagePreview}
+                    alt="Image Preview"
                     style={{ maxWidth: '200px', maxHeight: '200px' }}
                     key={imagePreview} // Add key to force re-render
                   />
