@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner,Pagination } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner, Pagination } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
@@ -14,14 +14,14 @@ const ManageItServices = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
-  
+
   // Data state
   const [itServicesData, setItServicesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [iconTimestamps, setIconTimestamps] = useState({}); // Changed from imageTimestamps to iconTimestamps
   const [forceRefresh, setForceRefresh] = useState(false);
-  
+
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentEditItem, setCurrentEditItem] = useState(null);
@@ -33,17 +33,17 @@ const ManageItServices = () => {
   const [iconPreview, setIconPreview] = useState(null); // Changed from imagePreview to iconPreview
   const [hasIconChanged, setHasIconChanged] = useState(false); // Changed from hasImageChanged to hasIconChanged
   const [updating, setUpdating] = useState(false);
-  
+
   // Delete confirmation modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  
+
   // Pagination and search state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Alert state
   const [showAlert, setShowAlert] = useState(false);
   const [message, setMessage] = useState("");
@@ -67,13 +67,13 @@ const ManageItServices = () => {
     const fetchItServicesData = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/itservice-items/`);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch IT services data');
         }
-        
+
         const result = await response.json();
-        
+
         // The API returns data in the format {success: true, data: [{...}]}
         if (result.success && result.data && result.data.length > 0) {
           // Process the data - construct full icon URL if icon path is provided
@@ -83,9 +83,9 @@ const ManageItServices = () => {
             description: item.description,
             icon: item.icon ? `${API_BASE_URL}${item.icon}` : null // Changed from image to icon
           }));
-          
+
           setItServicesData(processedData);
-          
+
           // Create timestamps for each item to force icon refresh
           const timestamps = {};
           processedData.forEach(item => {
@@ -109,22 +109,22 @@ const ManageItServices = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   // Filter IT services based on search term
-  const filteredItServices = searchTerm.trim() === '' 
-    ? itServicesData 
+  const filteredItServices = searchTerm.trim() === ''
+    ? itServicesData
     : itServicesData.filter((item) => {
-        const lowerSearch = searchTerm.toLowerCase();
-        return (
-          item.title?.toLowerCase().includes(lowerSearch) ||
-          item.description?.toLowerCase().includes(lowerSearch)
-        );
-      });
-  
+      const lowerSearch = searchTerm.toLowerCase();
+      return (
+        item.title?.toLowerCase().includes(lowerSearch) ||
+        item.description?.toLowerCase().includes(lowerSearch)
+      );
+    });
+
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredItServices.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredItServices.length / itemsPerPage);
-  
+
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   // Handle edit
@@ -151,9 +151,9 @@ const ManageItServices = () => {
   // Confirm delete
   const confirmDelete = async () => {
     if (!itemToDelete) return;
-    
+
     setDeleting(true);
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/itservice-items/`, {
         method: 'DELETE',
@@ -163,27 +163,27 @@ const ManageItServices = () => {
         body: JSON.stringify({ id: itemToDelete.id }),
         credentials: 'include'
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Server error' }));
         throw new Error(errorData.message || 'Failed to delete IT service');
       }
-      
+
       // Update state by removing the deleted item
       setItServicesData(prevData => prevData.filter(item => item.id !== itemToDelete.id));
-      
+
       setMessage("IT Service deleted successfully!");
       setVariant("success");
       setShowAlert(true);
       setShowDeleteModal(false);
-      
+
       setTimeout(() => setShowAlert(false), 3000);
     } catch (error) {
       console.error('Error deleting IT service:', error);
       setMessage(error.message || "Failed to delete IT service");
       setVariant("danger");
       setShowAlert(true);
-      
+
       setTimeout(() => setShowAlert(false), 5000);
     } finally {
       setDeleting(false);
@@ -194,7 +194,7 @@ const ManageItServices = () => {
   // Handle edit form input changes
   const handleEditChange = (e) => {
     const { name, value, files } = e.target;
-    
+
     if (name === 'icon') { // Changed from image to icon
       const file = files[0];
       if (file) {
@@ -218,17 +218,17 @@ const ManageItServices = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
-    
+
     const dataToSend = new FormData();
     // Send the ID in the payload as requested
     dataToSend.append('id', currentEditItem.id);
     dataToSend.append('title', editFormData.title);
     dataToSend.append('description', editFormData.description);
-    
+
     if (hasIconChanged && editFormData.icon) { // Changed from hasImageChanged to hasIconChanged
       dataToSend.append('icon', editFormData.icon); // Changed from image to icon
     }
-    
+
     try {
       // Use the base endpoint for PUT
       const response = await fetch(`${API_BASE_URL}/api/itservice-items/`, {
@@ -236,59 +236,59 @@ const ManageItServices = () => {
         credentials: 'include',
         body: dataToSend,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Server error' }));
         throw new Error(errorData.message || 'Failed to update IT service');
       }
-      
+
       const apiResponseData = await response.json();
-      
+
       // Create a unique timestamp to force icon refresh
       const newTimestamp = Date.now();
-      
+
       // Update the timestamp for the specific item
       setIconTimestamps(prev => ({ // Changed from setImageTimestamps to setIconTimestamps
         ...prev,
         [currentEditItem.id]: newTimestamp
       }));
-      
+
       // Force a refresh
       setForceRefresh(prev => !prev);
 
       // Update state with the new data
-      setItServicesData(prevData => 
-        prevData.map(item => 
-          item.id === currentEditItem.id 
+      setItServicesData(prevData =>
+        prevData.map(item =>
+          item.id === currentEditItem.id
             ? {
-                ...item,
-                title: editFormData.title,
-                description: editFormData.description,
-                icon: hasIconChanged && apiResponseData.data && apiResponseData.data.icon // Changed from image to icon
-                    ? `${API_BASE_URL}${apiResponseData.data.icon}` // Changed from image to icon
-                    : item.icon // Changed from image to icon
-              }
+              ...item,
+              title: editFormData.title,
+              description: editFormData.description,
+              icon: hasIconChanged && apiResponseData.data && apiResponseData.data.icon // Changed from image to icon
+                ? `${API_BASE_URL}${apiResponseData.data.icon}` // Changed from image to icon
+                : item.icon // Changed from image to icon
+            }
             : item
         )
       );
-      
+
       // If the icon was updated, also update the preview in the modal
       if (hasIconChanged && apiResponseData.data && apiResponseData.data.icon) { // Changed from image to icon
         setIconPreview(`${API_BASE_URL}${apiResponseData.data.icon}?t=${newTimestamp}`); // Changed from setImagePreview to setIconPreview
       }
-      
+
       setMessage("IT Service updated successfully!");
       setVariant("success");
       setShowAlert(true);
       setShowEditModal(false);
-      
+
       setTimeout(() => setShowAlert(false), 3000);
     } catch (error) {
       console.error('Error updating IT service:', error);
       setMessage(error.message || "Failed to update IT service");
       setVariant("danger");
       setShowAlert(true);
-      
+
       setTimeout(() => setShowAlert(false), 5000);
     } finally {
       setUpdating(false);
@@ -329,13 +329,13 @@ const ManageItServices = () => {
                 />
               </div>
             </div>
-            
+
             {showAlert && (
               <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
                 {message}
               </Alert>
             )}
-            
+
             {loading ? (
               <div className="text-center my-5">
                 <Spinner animation="border" role="status">
@@ -352,82 +352,84 @@ const ManageItServices = () => {
               </Col>
             ) : (
               <>
-              <Row>
-                {currentItems.map((item) => (
-                  <Col lg={6} md={12} sm={12} className="mb-4" key={item.id}>
-                    <Card>
-                      <Card.Body>
-                        <div className="d-flex align-items-center mb-3">
-                          {/* Display the icon or a default icon */}
-                          {getIconUrl(item) ? ( // Changed from getImageUrl to getIconUrl
-                            <img 
-                              src={getIconUrl(item)} // Changed from getImageUrl to getIconUrl
-                              alt={item.title} 
-                              style={{ width: '120px', height: '120px', marginRight: '15px', objectFit: 'cover' }}
-                              key={`${getIconUrl(item)}-${forceRefresh}`} // Changed from getImageUrl to getIconUrl
-                            />
-                          ) : (
-                            <AiOutlineFileDone size={120} style={{ marginRight: '15px' }} />
-                          )}
-                          <div className="flex-grow-1">
-                            <Card.Title className="managetitle">{item.title}</Card.Title>
+                <Row>
+                  {currentItems.map((item) => (
+                    <Col lg={6} md={12} sm={12} className="mb-4" key={item.id}>
+                      <Card>
+                        <Card.Body>
+                          <div className="d-flex align-items-center mb-3">
+                            {/* Display the icon or a default icon */}
+                            {getIconUrl(item) ? ( // Changed from getImageUrl to getIconUrl
+                              <img
+                                src={getIconUrl(item)} // Changed from getImageUrl to getIconUrl
+                                alt={item.title}
+                                style={{ width: '120px', height: '120px', marginRight: '15px', objectFit: 'cover' }}
+                                key={`${getIconUrl(item)}-${forceRefresh}`} // Changed from getImageUrl to getIconUrl
+                              />
+                            ) : (
+                              <AiOutlineFileDone size={120} style={{ marginRight: '15px' }} />
+                            )}
+                            <div className="flex-grow-1">
+                              <Card.Title className="managetitle">{item.title}</Card.Title>
+                            </div>
+                            <div className="d-flex gap-2">
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={() => handleEdit(item)}
+                                disabled={updating}
+                              >
+                                {updating ? 'Updating...' : 'Edit'}
+                              </Button>
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => handleDelete(item)}
+                                disabled={deleting}
+                              >
+                                <AiOutlineDelete />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="d-flex gap-2">
-                            <Button 
-                              variant="primary" 
-                              size="sm" 
-                              onClick={() => handleEdit(item)}
-                              disabled={updating}
-                            >
-                              {updating ? 'Updating...' : 'Edit'}
-                            </Button>
-                            <Button 
-                              variant="danger" 
-                              size="sm" 
-                              onClick={() => handleDelete(item)}
-                              disabled={deleting}
-                            >
-                              <AiOutlineDelete />
-                            </Button>
-                          </div>
-                        </div>
-                        <Card.Text>{item.description}</Card.Text>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-              
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="d-flex justify-content-center mt-4">
-                  <Pagination>
-                    <Pagination.Prev 
-                      onClick={() => handlePageChange(currentPage - 1)} 
-                      disabled={currentPage === 1}
-                    />
-                    {[...Array(totalPages).keys()].map(page => (
-                      <Pagination.Item 
-                        key={page + 1} 
-                        active={page + 1 === currentPage}
-                        onClick={() => handlePageChange(page + 1)}
-                      >
-                        {page + 1}
-                      </Pagination.Item>
-                    ))}
-                    <Pagination.Next 
-                      onClick={() => handlePageChange(currentPage + 1)} 
-                      disabled={currentPage === totalPages}
-                    />
-                  </Pagination>
-                </div>
-              )}
+                          <Card.Text style={{ whiteSpace: "pre-line" }}>
+                            {item.description}
+                          </Card.Text>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="d-flex justify-content-center mt-4">
+                    <Pagination>
+                      <Pagination.Prev
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      />
+                      {[...Array(totalPages).keys()].map(page => (
+                        <Pagination.Item
+                          key={page + 1}
+                          active={page + 1 === currentPage}
+                          onClick={() => handlePageChange(page + 1)}
+                        >
+                          {page + 1}
+                        </Pagination.Item>
+                      ))}
+                      <Pagination.Next
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      />
+                    </Pagination>
+                  </div>
+                )}
               </>
             )}
           </div>
         </Container>
       </div>
-      
+
       {/* Edit Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
         <Modal.Header closeButton>
@@ -445,7 +447,7 @@ const ManageItServices = () => {
                 required
               />
             </Form.Group>
-            
+
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
               <Form.Control
@@ -457,7 +459,7 @@ const ManageItServices = () => {
                 required
               />
             </Form.Group>
-            
+
             <Form.Group className="mb-3">
               <Form.Label>Service Icon</Form.Label> {/* Changed from Service Image to Service Icon */}
               <Form.Control
@@ -468,10 +470,10 @@ const ManageItServices = () => {
               />
               {iconPreview && ( // Changed from imagePreview to iconPreview
                 <div className="mt-3">
-                  <img 
+                  <img
                     src={iconPreview} // Changed from imagePreview to iconPreview
                     alt="Icon Preview" // Changed from Image Preview to Icon Preview
-                    style={{ maxWidth: '200px', maxHeight: '200px' }} 
+                    style={{ maxWidth: '200px', maxHeight: '200px' }}
                   />
                 </div>
               )}
@@ -494,7 +496,7 @@ const ManageItServices = () => {
           </Modal.Footer>
         </Form>
       </Modal>
-      
+
       {/* Delete Confirmation Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>

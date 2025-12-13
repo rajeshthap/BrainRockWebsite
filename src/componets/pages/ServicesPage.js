@@ -4,7 +4,6 @@ import "../../assets/css/aboutus.css";
 
 // Missing imports FIXED
 import { Link } from "react-router-dom";
-import { FaArrowRight } from "react-icons/fa";
 import { LuBrainCircuit } from "react-icons/lu";
 import { SiCircuitverse, SiAmazoncloudwatch } from "react-icons/si";
 
@@ -85,13 +84,13 @@ function ServicesPage() {
 
               <Row className="feature-area feature-minus-top">
                 <Container>
-                  <div className="feature-wpr grid-3">
+                  <div className="feature-wpr" style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                     {itServiceLoading ? (
                       // Show loading state while fetching data
                       Array(3)
                         .fill()
                         .map((_, index) => (
-                          <div className="feature-box" key={index}>
+                          <div className="feature-box" key={index} style={{ width: '100%' }}>
                             <div className="feature-icon">
                               <i class="flaticon-cloud">
                                 <div
@@ -106,12 +105,7 @@ function ServicesPage() {
                             <div className="feature-desc">
                               <h4>Loading...</h4>
                               <p>Loading content...</p>
-                              <Link to="/service-single" className="feature-btn">
-                                Read More
-                                <i className="ti-arrow-right">
-                                  <FaArrowRight />
-                                </i>
-                              </Link>
+                              {/* Removed Read More button */}
                             </div>
                           </div>
                         ))
@@ -120,7 +114,7 @@ function ServicesPage() {
                       Array(3)
                         .fill()
                         .map((_, index) => (
-                          <div className="feature-box" key={index}>
+                          <div className="feature-box" key={index} style={{ width: '100%' }}>
                             <div className="feature-icon">
                               <i class="flaticon-cloud">
                                 <LuBrainCircuit />
@@ -133,19 +127,14 @@ function ServicesPage() {
                                 Unable to load service information. Please try again
                                 later.
                               </p>
-                              <Link to="/service-single" className="feature-btn">
-                                Read More
-                                <i className="ti-arrow-right">
-                                  <FaArrowRight />
-                                </i>
-                              </Link>
+                              {/* Removed Read More button */}
                             </div>
                           </div>
                         ))
                     ) : itServiceData.length > 0 ? (
                       // Map over the IT service data to render items dynamically
                       itServiceData.map((item, index) => (
-                        <div className="feature-box" key={item.id}>
+                        <div className="feature-box" key={item.id} style={{ width: '100%' }}>
                           <div className="feature-icon">
                             <i class="flaticon-cloud">{renderIcon(item.icon)}</i>
                           </div>
@@ -155,24 +144,14 @@ function ServicesPage() {
                             <p style={{ whiteSpace: "pre-line" }}>
                               {item.description}
                             </p>
-                            {/* Updated to use Link with state prop instead of button */}
-                            <Link
-                              to="/ServicesDetails"
-                              state={{ serviceId: item.id }}
-                              className="feature-btn"
-                            >
-                              Read More
-                              <i className="ti-arrow-right">
-                                <FaArrowRight />
-                              </i>
-                            </Link>
+                            {/* Removed Read More button */}
                           </div>
                         </div>
                       ))
                     ) : (
                       // Fallback to hardcoded data if no data is available
                       <>
-                        <div className="feature-box">
+                        <div className="feature-box" style={{ width: '100%' }}>
                           <div className="feature-icon">
                             <i class="flaticon-cloud">
                               <LuBrainCircuit />
@@ -186,15 +165,10 @@ function ServicesPage() {
                               will be distracted by the readable content fact that a
                               reader will
                             </p>
-                            <Link to="/service-single" className="feature-btn">
-                              Read More
-                              <i className="ti-arrow-right">
-                                <FaArrowRight />
-                              </i>
-                            </Link>
+                            {/* Removed Read More button */}
                           </div>
                         </div>
-                        <div className="feature-box">
+                        <div className="feature-box" style={{ width: '100%' }}>
                           <div className="feature-icon">
                             <i class="flaticon-cloud">
                               <SiCircuitverse />
@@ -208,15 +182,10 @@ function ServicesPage() {
                               distracted by the readable content fact that a reader
                               will
                             </p>
-                            <Link to="/service-single" className="feature-btn">
-                              Read More
-                              <i className="ti-arrow-right">
-                                <FaArrowRight />
-                              </i>
-                            </Link>
+                            {/* Removed Read More button */}
                           </div>
                         </div>
-                        <div className="feature-box">
+                        <div className="feature-box" style={{ width: '100%' }}>
                           <div className="feature-icon">
                             <i class="flaticon-cloud">
                               <SiAmazoncloudwatch />
@@ -230,12 +199,7 @@ function ServicesPage() {
                               distracted by the readable content fact that a reader
                               will
                             </p>
-                            <Link to="/service-single" className="feature-btn">
-                              Read More
-                              <i className="ti-arrow-right">
-                                <FaArrowRight />
-                              </i>
-                            </Link>
+                            {/* Removed Read More button */}
                           </div>
                         </div>
                       </>
