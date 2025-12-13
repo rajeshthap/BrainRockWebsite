@@ -115,6 +115,7 @@ const AddClient = () => {
       }
       
       // --- SUCCESS PATH ---
+      alert('Client added successfully!');
       setMessage("Client added successfully!");
       setVariant("success");
       setShowAlert(true);

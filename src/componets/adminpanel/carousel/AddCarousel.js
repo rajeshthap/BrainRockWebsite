@@ -120,6 +120,7 @@ const AddCarousel = () => {
       }
       
       // --- SUCCESS PATH ---
+      alert('Carousel item added successfully!');
       setMessage("Carousel item added successfully!");
       setVariant("success");
       setShowAlert(true);

@@ -133,6 +133,7 @@ const AddOurTeam = () => {
       }
       
       // SUCCESS PATH
+      alert('Team member added successfully!');
       setMessage("Team member added successfully!");
       setVariant("success");
       setShowAlert(true);

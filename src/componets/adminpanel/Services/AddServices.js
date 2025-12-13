@@ -118,6 +118,7 @@ const AddServices = () => {
       }
       
       // SUCCESS PATH
+      alert('Service added successfully!');
       setMessage("Service added successfully!");
       setVariant("success");
       setShowAlert(true);

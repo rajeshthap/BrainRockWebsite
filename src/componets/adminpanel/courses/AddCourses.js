@@ -225,6 +225,7 @@ const AddCourses = () => {
       }
       
       // SUCCESS PATH
+      alert('Course added successfully!');
       setMessage("Course added successfully!");
       setVariant("success");
       setShowAlert(true);

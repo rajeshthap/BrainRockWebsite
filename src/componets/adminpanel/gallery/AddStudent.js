@@ -120,6 +120,7 @@ const AddStudent = () => {
       }
       
       // --- SUCCESS PATH ---
+      alert('Student added successfully!');
       setMessage("Student added successfully!");
       setVariant("success");
       setShowAlert(true);

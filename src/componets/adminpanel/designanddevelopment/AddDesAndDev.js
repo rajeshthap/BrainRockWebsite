@@ -123,6 +123,7 @@ const AddDesAndDev = () => {
       }
       
       // SUCCESS PATH
+      alert('Design and development item added successfully!'); 
       setMessage("Design and development item added successfully!");
       setVariant("success");
       setShowAlert(true);

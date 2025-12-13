@@ -81,6 +81,7 @@ const AddNotification = () => {
         throw new Error(errorData.message || `Failed to add notification (Status: ${response.status})`);
       }
       
+      alert('Notification added successfully!');
       setMessage("Notification added successfully!");
       setVariant("success");
       setShowAlert(true);

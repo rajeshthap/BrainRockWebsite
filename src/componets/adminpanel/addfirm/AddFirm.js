@@ -109,6 +109,7 @@ const AddFirm = () => {
       }
       
       // --- SUCCESS PATH ---
+      alert('Firm added successfully!');
       setMessage("Firm added successfully!");
       setVariant("success");
       setShowAlert(true);

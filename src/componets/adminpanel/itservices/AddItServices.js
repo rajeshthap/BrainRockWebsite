@@ -169,6 +169,7 @@ const AddItServices = () => {
       }
       
       // SUCCESS PATH
+      alert('IT service added successfully!');
       setMessage("IT service added successfully!");
       setVariant("success");
       setShowAlert(true);

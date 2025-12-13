@@ -214,6 +214,7 @@ const AddProject = () => {
       }
       
       // --- SUCCESS PATH ---
+      alert('Project added successfully!');
       setMessage("Project added successfully!");
       setVariant("success");
       setShowAlert(true);
