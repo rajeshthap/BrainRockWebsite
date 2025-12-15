@@ -30,6 +30,14 @@ import { Link } from "react-router-dom";
 import FooterPage from "../footer/FooterPage";
 
 function UserPage() {
+  // Helper function to truncate text to 20 words
+  const truncateText = (text, wordLimit = 20) => {
+    if (!text) return "";
+    const words = text.split(' ');
+    if (words.length <= wordLimit) return text;
+    return words.slice(0, wordLimit).join(' ') + '...';
+  };
+
   const [carouselData, setCarouselData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -394,7 +402,7 @@ function UserPage() {
                       <div className="feature-desc">
                         <h4>Loading...</h4>
                         <p>Loading content...</p>
-                        <Link to="/service-single" className="feature-btn">
+                        <Link to="/ServicesPage" className="feature-btn">
                           Read More
                           <i className="ti-arrow-right">
                             <FaArrowRight />
@@ -421,7 +429,7 @@ function UserPage() {
                           Unable to load service information. Please try again
                           later.
                         </p>
-                        <Link to="/service-single" className="feature-btn">
+                        <Link to="/ServicesPage" className="feature-btn">
                           Read More
                           <i className="ti-arrow-right">
                             <FaArrowRight />
@@ -440,11 +448,17 @@ function UserPage() {
                     <div className="flaticon-cloud"></div>
                     <div className="feature-desc">
                       <h4>{item.title}</h4>
-                      <p>{item.description}</p>
-                      {/* Updated to use Link with state prop instead of button */}
+                      {/* MODIFIED: Added truncateText function with 20 word limit */}
+                      <p style={{ whiteSpace: "pre-line" }}>
+                        {truncateText(item.description)}
+                      </p>
+                      {/* MODIFIED: Updated Link to navigate to ServicesPage and pass full description in state */}
                       <Link
-                        to="/ServicesDetails"
-                        state={{ serviceId: item.id }}
+                        to="/ServicesPage"
+                        state={{ 
+                          serviceId: item.id,
+                          fullDescription: item.description // Pass full description
+                        }}
                         className="feature-btn"
                       >
                         Read More
@@ -467,12 +481,19 @@ function UserPage() {
                     <div className="flaticon-cloud"></div>
                     <div className="feature-desc">
                       <h4>It Solution</h4>
+                      {/* MODIFIED: Added truncateText function with 20 word limit */}
                       <p>
-                        It Solution It is a long established fact that a reader
-                        will be distracted by the readable content fact that a
-                        reader will
+                        {truncateText("It Solution It is a long established fact that a reader will be distracted by the readable content fact that a reader will")}
                       </p>
-                      <Link to="/service-single" className="feature-btn">
+                      {/* MODIFIED: Updated Link to navigate to ServicesPage and pass full description in state */}
+                      <Link
+                        to="/ServicesPage"
+                        state={{ 
+                          serviceId: 1,
+                          fullDescription: "It Solution It is a long established fact that a reader will be distracted by the readable content fact that a reader will"
+                        }}
+                        className="feature-btn"
+                      >
                         Read More
                         <i className="ti-arrow-right">
                           <FaArrowRight />
@@ -489,12 +510,19 @@ function UserPage() {
                     <div className="flaticon-cloud"></div>
                     <div className="feature-desc">
                       <h4>It Management</h4>
+                      {/* MODIFIED: Added truncateText function with 20 word limit */}
                       <p>
-                        It is a long established fact that a reader will be
-                        distracted by the readable content fact that a reader
-                        will
+                        {truncateText("It is a long established fact that a reader will be distracted by the readable content fact that a reader will")}
                       </p>
-                      <Link to="/service-single" className="feature-btn">
+                      {/* MODIFIED: Updated Link to navigate to ServicesPage and pass full description in state */}
+                      <Link
+                        to="/ServicesPage"
+                        state={{ 
+                          serviceId: 2,
+                          fullDescription: "It is a long established fact that a reader will be distracted by the readable content fact that a reader will"
+                        }}
+                        className="feature-btn"
+                      >
                         Read More
                         <i className="ti-arrow-right">
                           <FaArrowRight />
@@ -511,12 +539,19 @@ function UserPage() {
                     <div className="flaticon-cloud"></div>
                     <div className="feature-desc">
                       <h4>It Consultancy</h4>
+                      {/* MODIFIED: Added truncateText function with 20 word limit */}
                       <p>
-                        It is a long established fact that a reader will be
-                        distracted by the readable content fact that a reader
-                        will
+                        {truncateText("It is a long established fact that a reader will be distracted by the readable content fact that a reader will")}
                       </p>
-                      <Link to="/service-single" className="feature-btn">
+                      {/* MODIFIED: Updated Link to navigate to ServicesPage and pass full description in state */}
+                      <Link
+                        to="/ServicesPage"
+                        state={{ 
+                          serviceId: 3,
+                          fullDescription: "It is a long established fact that a reader will be distracted by the readable content fact that a reader will"
+                        }}
+                        className="feature-btn"
+                      >
                         Read More
                         <i className="ti-arrow-right">
                           <FaArrowRight />
@@ -590,7 +625,7 @@ function UserPage() {
                     )}
                   </i>
                   <div className="about-yr-exp">
-                    <p>18</p>
+                    <p>10</p>
                     <h5>
                       <span>Year</span> Experience
                     </h5>

@@ -123,7 +123,7 @@ function CompanyProfile() {
                         </div>
                       )}
                     </i>
-                    <div className="about-yr-exp"><p>18</p>
+                    <div className="about-yr-exp"><p>10</p>
                       <h5>
                         <span>Year</span> Experience
                       </h5></div>
