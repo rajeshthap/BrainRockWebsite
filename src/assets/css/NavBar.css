@@ -69,16 +69,11 @@ img.logo-wecd {
     margin-bottom: var(--br-space-50);
 }
 
-
-
-
 @media (max-width: 576px) {
-
     .awc-title p {
         font-size: var(--br-space-200);
     }
 .nav-link {
-   
     font-size: var(--br-space-400);
     padding: 8px;
 }
@@ -87,9 +82,6 @@ img.logo-wecd {
         display: block;
         background-color: #a5969621;
     }
-
-
-
     .awc-title {
         margin-top: 4px;
     }

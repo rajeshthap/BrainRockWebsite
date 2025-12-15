@@ -78,43 +78,58 @@ function RunningProjects() {
       <Container className="ourteam-section" style={{ overflow: 'hidden', }}>
         <div >
           <Container className="ourteam-box mt-3 mb-3" style={{ maxWidth: '100%', padding: '0 15px' }}>
-            <Row style={{ margin: '0 -15px' }}>
-              {projects.map((project) => (
-                <Col key={project.id} lg={4} md={6} sm={12} className="mb-4 mt-3" style={{ padding: '0 15px' }}>
-                  <figure className="shape-box shape-box_half" style={{ margin: '0', overflow: 'hidden' }}>
-                    <img
-                      src={
-                        project.company_logo
-                          ? `${API_BASE_URL}${project.company_logo}`
-                          : "https://via.placeholder.com/400x300?text=No+Image"
-                      }
-                      alt=""
-                      style={{ width: '100%', height: 'auto' }}
-                    />
+          <Row>
+  {projects.map((project) => (
+    <Col key={project.id} lg={4} md={6} sm={12} className="mb-4">
+      <div className="project-card">
+        <img
+          src={
+            project.company_logo
+              ? `${API_BASE_URL}${project.company_logo}`
+              : "https://via.placeholder.com/400x250?text=No+Image"
+          }
+          alt={project.title || "Project Image"}
+          className="project-image"
+        />
 
-                    <div className="brk-abs-overlay z-index-0 bg-black opacity-60"></div>
+       <div className="project-body">
+  <h5 className="project-title">
+    {project.title || "No Title"}
+  </h5>
+  
+ 
+  <p className="project-desc" style={{ whiteSpace: "pre-line" }}>
+    {project.description || "No description available"}
+  </p>
 
-                    <figcaption>
-                      <div className="show-cont">
-                        <h4 className="card-main-title">
-                          {project.company_name || "No Title"}
-                        </h4>
-                      </div>
+  {project.project_link ? (
+    <a
+      href={project.project_link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="read-more-btn"
+    >
+      Read More
+    </a>
+  ) : (
+    <a
+      href="#"
+      className="read-more-btn"
+      onClick={(e) => {
+        e.preventDefault();
+        window.location.reload();
+      }}
+    >
+      Read More
+    </a>
+  )}
+</div>
 
-                      <p className="card-content">
-                        {project.description
-                          ? project.description
-                          : project.technology_used?.length
-                            ? project.technology_used.join(", ")
-                            : "No description available"}
-                      </p>
-                    </figcaption>
+      </div>
+    </Col>
+  ))}
+</Row>
 
-                    <span className="after"></span>
-                  </figure>
-                </Col>
-              ))}
-            </Row>
           </Container>
         </div>
       </Container>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Spinner, Badge } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
@@ -14,15 +14,14 @@ const AddProject = () => {
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
   
-  // Form state
+  // Form state - Updated to match the required fields
   const [formData, setFormData] = useState({
-    title: "", // Project name
+    title: "",
     description: "",
-    company_name: "",
-    technology_used: [],
     company_logo: null, // Will hold file object
     firm_id: "",
-    project_budget: ""
+    project_link: "",
+    status: "ongoing" // Default status
   });
   
   // State for firm data
@@ -31,9 +30,6 @@ const AddProject = () => {
   
   // State for logo preview
   const [logoPreview, setLogoPreview] = useState(null);
-  
-  // State for technology input field
-  const [techInput, setTechInput] = useState("");
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,56 +121,22 @@ const AddProject = () => {
     }
   };
 
-  // Handle technology input
-  const handleTechInputChange = (e) => {
-    setTechInput(e.target.value);
-  };
-
-  // Add technology to array
-  const addTechnology = () => {
-    if (techInput.trim() && !formData.technology_used.includes(techInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        technology_used: [...prev.technology_used, techInput.trim()]
-      }));
-      setTechInput("");
-    }
-  };
-
-  // Remove technology from array
-  const removeTechnology = (techToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      technology_used: prev.technology_used.filter(tech => tech !== techToRemove)
-    }));
-  };
-
-  // Handle Enter key in technology input
-  const handleTechInputKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTechnology();
-    }
-  };
-
-  // Clear form function
+  // Clear form function - Updated to match new form state
   const clearForm = () => {
     setFormData({
       title: "",
       description: "",
-      company_name: "",
-      technology_used: [],
       company_logo: null,
       firm_id: "",
-      project_budget: ""
+      project_link: "",
+      status: "ongoing"
     });
-    setTechInput("");
     setLogoPreview(null);
     setMessage("");
     setShowAlert(false);
   };
 
-  // Handle form submission
+  // Handle form submission - Updated to send only the required fields
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -182,18 +144,11 @@ const AddProject = () => {
     
     // Create a FormData object to send file
     const dataToSend = new FormData();
-    dataToSend.append('title', formData.title); // Project name
+    dataToSend.append('title', formData.title);
     dataToSend.append('description', formData.description);
-    dataToSend.append('company_name', formData.company_name);
-    
-    // Convert technology array to JSON string
-    dataToSend.append('technology_used', JSON.stringify(formData.technology_used));
-    
-    // Send firm_id as requested
     dataToSend.append('firm_id', formData.firm_id);
-    
-    // Convert budget to number
-    dataToSend.append('project_budget', parseFloat(formData.project_budget));
+    dataToSend.append('project_link', formData.project_link);
+    dataToSend.append('status', formData.status);
     
     if (formData.company_logo) {
       dataToSend.append('company_logo', formData.company_logo, formData.company_logo.name);
@@ -277,34 +232,17 @@ const AddProject = () => {
             <Row>
               <Col lg={12} md={12} sm={12}>
                 <Form onSubmit={handleSubmit}>
-                  <Row>
-                    <Col lg={6} md={6} sm={12}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Project Name</Form.Label>
-                        <Form.Control
-                          type="text"
-                          placeholder="Enter project name"
-                          name="title"
-                          value={formData.title}
-                          onChange={handleChange}
-                          required
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col lg={6} md={6} sm={12}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Company Name</Form.Label>
-                        <Form.Control
-                          type="text"
-                          placeholder="Enter company name"
-                          name="company_name"
-                          value={formData.company_name}
-                          onChange={handleChange}
-                          required
-                        />
-                      </Form.Group>
-                    </Col>
-                  </Row>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Project Title</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter project title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
                   
                   <Form.Group className="mb-3">
                     <Form.Label>Description</Form.Label>
@@ -346,52 +284,29 @@ const AddProject = () => {
                     </Col>
                     <Col lg={6} md={6} sm={12}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Project Budget</Form.Label>
-                        <Form.Control
-                          type="number"
-                          step="0.01"
-                          placeholder="Enter project budget"
-                          name="project_budget"
-                          value={formData.project_budget}
+                        <Form.Label>Status</Form.Label>
+                        <Form.Select
+                          name="status"
+                          value={formData.status}
                           onChange={handleChange}
                           required
-                        />
+                        >
+                          <option value="ongoing">Ongoing</option>
+                          <option value="completed">Completed</option>
+                        </Form.Select>
                       </Form.Group>
                     </Col>
                   </Row>
-                  
+
                   <Form.Group className="mb-3">
-                    <Form.Label>Technologies Used</Form.Label>
-                    <div className="d-flex mb-2">
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter technology (e.g., Django)"
-                        value={techInput}
-                        onChange={handleTechInputChange}
-                        onKeyPress={handleTechInputKeyPress}
-                      />
-                      <Button 
-                        variant="outline-secondary" 
-                        onClick={addTechnology}
-                        className="ms-2"
-                        type="button"
-                      >
-                        Add
-                      </Button>
-                    </div>
-                    <div className="mt-2">
-                      {formData.technology_used.map((tech, index) => (
-                        <Badge 
-                          key={index} 
-                          bg="info" 
-                          className="me-2 mb-2"
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => removeTechnology(tech)}
-                        >
-                          {tech} &times;
-                        </Badge>
-                      ))}
-                    </div>
+                    <Form.Label>Project Link</Form.Label>
+                    <Form.Control
+                      type="url"
+                      placeholder="Enter project link (e.g., https://example.com)"
+                      name="project_link"
+                      value={formData.project_link}
+                      onChange={handleChange}
+                    />
                   </Form.Group>
                   
                   <Form.Group className="mb-3">

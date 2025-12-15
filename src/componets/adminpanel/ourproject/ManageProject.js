@@ -25,21 +25,18 @@ const ManageProject = () => {
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentEditProject, setCurrentEditProject] = useState(null);
+  // Updated form data to match the new required fields
   const [editFormData, setEditFormData] = useState({
     title: "",
     description: "",
-    company_name: "",
-    technology_used: [],
     company_logo: null,
     firm_id: "",
     firm_name: "",
-    project_budget: ""
+    project_link: "",
+    status: "ongoing" // Default status
   });
   const [logoPreview, setLogoPreview] = useState(null);
   const [hasLogoChanged, setHasLogoChanged] = useState(false);
-  
-  // State for technology input field in edit form
-  const [techInput, setTechInput] = useState("");
 
   // Alert state
   const [showAlert, setShowAlert] = useState(false);
@@ -128,15 +125,6 @@ const ManageProject = () => {
             });
           }
           
-          // Format budget
-          if (project.project_budget) {
-            processedProject.formatted_budget = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'INR',
-              minimumFractionDigits: 0
-            }).format(project.project_budget);
-          }
-          
           return processedProject;
         });
 
@@ -162,9 +150,9 @@ const ManageProject = () => {
         const lowerSearch = searchTerm.toLowerCase();
         return (
           project.title?.toLowerCase().includes(lowerSearch) ||
-          project.company_name?.toLowerCase().includes(lowerSearch) ||
           project.firm_name?.toLowerCase().includes(lowerSearch) ||
-          project.technology_used?.some(tech => tech.toLowerCase().includes(lowerSearch))
+          project.status?.toLowerCase().includes(lowerSearch) ||
+          project.description?.toLowerCase().includes(lowerSearch)
         );
       });
   
@@ -176,54 +164,54 @@ const ManageProject = () => {
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
- // Handle delete
-const handleDelete = async (id, project_id) => {
-  if (window.confirm("Are you sure you want to delete this project?")) {
-    try {
-      const dataToSend = new FormData();
-      // ONLY send project_id in payload as requested
-      dataToSend.append('project_id', project_id);
+  // Handle delete
+  const handleDelete = async (id, project_id) => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      try {
+        const dataToSend = new FormData();
+        // ONLY send project_id in payload as requested
+        dataToSend.append('project_id', project_id);
 
-      const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
-        method: 'DELETE',
-        credentials: 'include',
-        body: dataToSend,
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete project');
+        const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
+          method: 'DELETE',
+          credentials: 'include',
+          body: dataToSend,
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete project');
+        }
+        
+        setProjects(prevData => prevData.filter(item => item.id !== id));
+        
+        setMessage("Project deleted successfully!");
+        setVariant("success");
+        setShowAlert(true);
+        
+        setTimeout(() => setShowAlert(false), 3000);
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        setMessage(error.message || "Failed to delete project");
+        setVariant("danger");
+        setShowAlert(true);
+        
+        setTimeout(() => setShowAlert(false), 5000);
       }
-      
-      setProjects(prevData => prevData.filter(item => item.id !== id));
-      
-      setMessage("Project deleted successfully!");
-      setVariant("success");
-      setShowAlert(true);
-      
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      setMessage(error.message || "Failed to delete project");
-      setVariant("danger");
-      setShowAlert(true);
-      
-      setTimeout(() => setShowAlert(false), 5000);
     }
-  }
-};
+  };
 
   // Handle edit
   const handleEdit = (project) => {
     setCurrentEditProject(project);
+    // Updated to handle new fields
     setEditFormData({
       title: project.title || "",
       description: project.description || "",
-      company_name: project.company_name || "",
-      technology_used: project.technology_used || [],
       company_logo: null,
       firm_id: project.firm_id || "",
       firm_name: project.firm_name || "",
-      project_budget: project.project_budget || ""
+      project_link: project.project_link || "",
+      status: project.status || "ongoing"
     });
     const originalLogoUrl = project.company_logo ? project.company_logo.split('?t=')[0] : null;
     setLogoPreview(originalLogoUrl);
@@ -232,130 +220,48 @@ const handleDelete = async (id, project_id) => {
   };
 
   // Handle edit form input changes
-const handleEditChange = (e) => {
-  const { name, value, files } = e.target;
-  
-  if (name === 'company_logo') {
-    const file = files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setLogoPreview(previewUrl);
-      setHasLogoChanged(true);
+  const handleEditChange = (e) => {
+    const { name, value, files } = e.target;
+    
+    if (name === 'company_logo') {
+      const file = files[0];
+      if (file) {
+        const previewUrl = URL.createObjectURL(file);
+        setLogoPreview(previewUrl);
+        setHasLogoChanged(true);
+        setEditFormData(prev => ({
+          ...prev,
+          [name]: file
+        }));
+      }
+    } else if (name === 'firm_id') {
+      // When firm_id changes, also update firm_name
+      const selectedFirm = firms.find(firm => firm.firm_id === value);
       setEditFormData(prev => ({
         ...prev,
-        [name]: file
+        firm_id: value,
+        firm_name: selectedFirm ? selectedFirm.firm_name : ""
       }));
-    }
-  } else if (name === 'firm_id') {
-    // When firm_id changes, also update firm_name
-    const selectedFirm = firms.find(firm => firm.firm_id === value);
-    setEditFormData(prev => ({
-      ...prev,
-      firm_id: value,
-      firm_name: selectedFirm ? selectedFirm.firm_name : ""
-    }));
-  } else {
-    setEditFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  }
-};
-
-  // Handle technology input in edit form
-  const handleTechInputChange = (e) => {
-    setTechInput(e.target.value);
-  };
-
-  // Add technology to array in edit form
-  const addTechnology = () => {
-    if (techInput.trim() && !editFormData.technology_used.includes(techInput.trim())) {
+    } else {
       setEditFormData(prev => ({
         ...prev,
-        technology_used: [...prev.technology_used, techInput.trim()]
+        [name]: value
       }));
-      setTechInput("");
     }
-  };
-
-  // Remove technology from the array in edit form
-  const removeTechnology = (techToRemove) => {
-    setEditFormData(prev => ({
-      ...prev,
-      technology_used: prev.technology_used.filter(tech => tech !== techToRemove)
-    }));
   };
 
   // Handle edit form submission
-const handleEditSubmit = async (e) => {
-  e.preventDefault();
-  
-  let tempLogoUrl = null;
-  if (hasLogoChanged && editFormData.company_logo) {
-    tempLogoUrl = URL.createObjectURL(editFormData.company_logo);
-  }
-  
-  const originalProjectData = projects.find(p => p.id === currentEditProject.id);
-  
-  // Update UI immediately
-  setProjects(prevData => 
-    prevData.map(item => 
-      item.id === currentEditProject.id 
-        ? {
-            ...item,
-            title: editFormData.title,
-            description: editFormData.description,
-            company_name: editFormData.company_name,
-            technology_used: editFormData.technology_used,
-            company_logo: hasLogoChanged ? tempLogoUrl : item.company_logo,
-            firm_id: editFormData.firm_id,
-            firm_name: editFormData.firm_name,
-            project_budget: editFormData.project_budget
-          } 
-        : item
-    )
-  );
-  
-  setShowEditModal(false);
-  
-  const dataToSend = new FormData();
-  // MANDATORY: Send project_id in payload
-  dataToSend.append('project_id', currentEditProject.project_id); 
-  dataToSend.append('title', editFormData.title);
-  dataToSend.append('description', editFormData.description);
-  dataToSend.append('company_name', editFormData.company_name);
-  dataToSend.append('technology_used', JSON.stringify(editFormData.technology_used));
-  dataToSend.append('firm_id', editFormData.firm_id);
-  dataToSend.append('firm_name', editFormData.firm_name);
-  dataToSend.append('project_budget', editFormData.project_budget);
-  
-  if (hasLogoChanged && editFormData.company_logo) {
-    dataToSend.append('company_logo', editFormData.company_logo);
-  }
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: dataToSend,
-    });
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
     
-    if (!response.ok) {
-      // Revert to original data if update fails
-      setProjects(prevData => 
-        prevData.map(item => 
-          item.id === currentEditProject.id ? originalProjectData : item
-        )
-      );
-      throw new Error('Failed to update project');
+    let tempLogoUrl = null;
+    if (hasLogoChanged && editFormData.company_logo) {
+      tempLogoUrl = URL.createObjectURL(editFormData.company_logo);
     }
     
-    const apiResponseData = await response.json();
+    const originalProjectData = projects.find(p => p.id === currentEditProject.id);
     
-    if (tempLogoUrl) {
-      URL.revokeObjectURL(tempLogoUrl);
-    }
-    
+    // Update UI immediately with new data
     setProjects(prevData => 
       prevData.map(item => 
         item.id === currentEditProject.id 
@@ -363,33 +269,89 @@ const handleEditSubmit = async (e) => {
               ...item,
               title: editFormData.title,
               description: editFormData.description,
-              company_name: editFormData.company_name,
-              technology_used: editFormData.technology_used,
-              company_logo: hasLogoChanged && apiResponseData.data && apiResponseData.data.company_logo
-                  ? `${API_BASE_URL}${apiResponseData.data.company_logo}?t=${Date.now()}`
-                  : item.company_logo,
+              company_logo: hasLogoChanged ? tempLogoUrl : item.company_logo,
               firm_id: editFormData.firm_id,
               firm_name: editFormData.firm_name,
-              project_budget: editFormData.project_budget
+              project_link: editFormData.project_link,
+              status: editFormData.status
             } 
           : item
       )
     );
     
-    setMessage("Project updated successfully!");
-    setVariant("success");
-    setShowAlert(true);
+    setShowEditModal(false);
     
-    setTimeout(() => setShowAlert(false), 3000);
-  } catch (error) {
-    console.error('Error updating project:', error);
-    setMessage(error.message || "Failed to update project");
-    setVariant("danger");
-    setShowAlert(true);
+    const dataToSend = new FormData();
+    // MANDATORY: Send project_id in payload
+    dataToSend.append('project_id', currentEditProject.project_id); 
+    dataToSend.append('title', editFormData.title);
+    dataToSend.append('description', editFormData.description);
+    dataToSend.append('firm_id', editFormData.firm_id);
+    dataToSend.append('firm_name', editFormData.firm_name);
+    dataToSend.append('project_link', editFormData.project_link);
+    dataToSend.append('status', editFormData.status);
     
-    setTimeout(() => setShowAlert(false), 5000);
-  }
-};
+    if (hasLogoChanged && editFormData.company_logo) {
+      dataToSend.append('company_logo', editFormData.company_logo);
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
+        method: 'PUT',
+        credentials: 'include',
+        body: dataToSend,
+      });
+      
+      if (!response.ok) {
+        // Revert to original data if update fails
+        setProjects(prevData => 
+          prevData.map(item => 
+            item.id === currentEditProject.id ? originalProjectData : item
+          )
+        );
+        throw new Error('Failed to update project');
+      }
+      
+      const apiResponseData = await response.json();
+      
+      if (tempLogoUrl) {
+        URL.revokeObjectURL(tempLogoUrl);
+      }
+      
+      // Final update with data from API response (e.g., new logo URL)
+      setProjects(prevData => 
+        prevData.map(item => 
+          item.id === currentEditProject.id 
+            ? {
+                ...item,
+                title: editFormData.title,
+                description: editFormData.description,
+                company_logo: hasLogoChanged && apiResponseData.data && apiResponseData.data.company_logo
+                    ? `${API_BASE_URL}${apiResponseData.data.company_logo}?t=${Date.now()}`
+                    : item.company_logo,
+                firm_id: editFormData.firm_id,
+                firm_name: editFormData.firm_name,
+                project_link: editFormData.project_link,
+                status: editFormData.status
+              } 
+            : item
+        )
+      );
+      
+      setMessage("Project updated successfully!"); // Updated success message
+      setVariant("success");
+      setShowAlert(true);
+      
+      setTimeout(() => setShowAlert(false), 3000);
+    } catch (error) {
+      console.error('Error updating project:', error);
+      setMessage(error.message || "Failed to update project");
+      setVariant("danger");
+      setShowAlert(true);
+      
+      setTimeout(() => setShowAlert(false), 5000);
+    }
+  };
 
   return (
     <div className="dashboard-container">
@@ -408,7 +370,7 @@ const handleEditSubmit = async (e) => {
               <div style={{ width: '300px' }}>
                 <input
                   type="text"
-                  placeholder="Search by project, company, firm, or technology..."
+                  placeholder="Search by title, firm, or status..."
                   className="form-control"
                   value={searchTerm}
                   onChange={(e) => {
@@ -447,7 +409,7 @@ const handleEditSubmit = async (e) => {
                             {project.company_logo ? (
                               <img 
                                 src={project.company_logo} 
-                                alt={project.company_name} 
+                                alt={project.title} 
                                 style={{ width: '60px', height: '60px', marginRight: '15px', objectFit: 'cover', borderRadius: '50%' }} 
                               />
                             ) : (
@@ -456,27 +418,27 @@ const handleEditSubmit = async (e) => {
                             <div>
                               <Card.Title className="managetitle">{project.title}</Card.Title>
                               <Card.Subtitle className="mb-2 text-muted">
-                                Company: {project.company_name}
+                                Firm: {project.firm_name || 'N/A'}
                               </Card.Subtitle>
                             </div>
                           </div>
                           <Card.Text className="mb-2">{project.description}</Card.Text>
                           <div className="mb-2">
-                            <small className="text-muted">Firm: {project.firm_name}</small>
+                            <small className="text-muted">Status: </small>
+                            <Badge bg={project.status === 'ongoing' ? 'warning' : 'success'}>
+                              {project.status}
+                            </Badge>
                           </div>
+                          {project.project_link && (
+                            <div className="mb-2">
+                              <small className="text-muted">Project Link: </small>
+                              <a href={project.project_link} target="_blank" rel="noopener noreferrer">
+                                View Project
+                              </a>
+                            </div>
+                          )}
                           <div className="mb-2">
-                            <small className="text-muted">Budget: {project.formatted_budget || `$${project.project_budget}`}</small>
-                          </div>
-                          <div className="mb-3">
-                            {project.technology_used && project.technology_used.map((tech, index) => (
-                              <Badge 
-                                key={index} 
-                                bg="info" 
-                                className="me-1 mb-1"
-                              >
-                                {tech}
-                              </Badge>
-                            ))}
+                            <small className="text-muted">Created: {project.formatted_created_at}</small>
                           </div>
                           <div className="d-flex justify-content-between align-items-center">
                             <span></span>
@@ -543,7 +505,7 @@ const handleEditSubmit = async (e) => {
         <Form onSubmit={handleEditSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Project Name</Form.Label>
+              <Form.Label>Project Title</Form.Label>
               <Form.Control
                 type="text"
                 name="title"
@@ -568,18 +530,6 @@ const handleEditSubmit = async (e) => {
             <Row>
               <Col lg={6} md={6} sm={12}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Company Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="company_name"
-                    value={editFormData.company_name}
-                    onChange={handleEditChange}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col lg={6} md={6} sm={12}>
-                <Form.Group className="mb-3">
                   <Form.Label>Firm</Form.Label>
                   <Form.Select
                     name="firm_id"
@@ -602,52 +552,31 @@ const handleEditSubmit = async (e) => {
                   )}
                 </Form.Group>
               </Col>
-            </Row>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Project Budget</Form.Label>
-              <Form.Control
-                type="number"
-                step="0.01"
-                name="project_budget"
-                value={editFormData.project_budget}
-                onChange={handleEditChange}
-                required
-              />
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Technologies Used</Form.Label>
-              <div className="d-flex mb-2">
-                <Form.Control
-                  type="text"
-                  placeholder="Enter technology (e.g., Django)"
-                  value={techInput}
-                  onChange={handleTechInputChange}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
-                />
-                <Button 
-                  variant="outline-secondary" 
-                  onClick={addTechnology}
-                  className="ms-2"
-                  type="button"
-                >
-                  Add
-                </Button>
-              </div>
-              <div className="mt-2">
-                {editFormData.technology_used.map((tech, index) => (
-                  <Badge 
-                    key={index} 
-                    bg="info" 
-                    className="me-2 mb-2"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => removeTechnology(tech)}
+              <Col lg={6} md={6} sm={12}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Status</Form.Label>
+                  <Form.Select
+                    name="status"
+                    value={editFormData.status}
+                    onChange={handleEditChange}
+                    required
                   >
-                    {tech} &times;
-                  </Badge>
-                ))}
-              </div>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="completed">Completed</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Project Link</Form.Label>
+              <Form.Control
+                type="url"
+                name="project_link"
+                value={editFormData.project_link}
+                onChange={handleEditChange}
+                placeholder="https://example.com"
+              />
             </Form.Group>
             
             <Form.Group className="mb-3">

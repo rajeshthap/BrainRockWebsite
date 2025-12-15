@@ -14,6 +14,15 @@ function Courses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ 15 WORDS ONLY
+  const getShortDescription = (text, words = 15) => {
+    if (!text) return "";
+    const splitText = text.split(" ");
+    return splitText.length > words
+      ? splitText.slice(0, words).join(" ") + "..."
+      : text;
+  };
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -55,15 +64,13 @@ function Courses() {
           </ul>
         </div>
       </div>
+
       <Container className='ourteam-box mt-4 mb-3' style={{ overflow: 'hidden' }}>
         <div className="ourteam-section">
 
-
           {loading && (
             <div className="text-center my-5">
-              <Spinner animation="border" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
+              <Spinner animation="border" />
             </div>
           )}
 
@@ -95,7 +102,11 @@ function Courses() {
                       flexDirection: 'column'
                     }}>
                       <h4 className="heading-5">{course.title}</h4>
-                      <p style={{ flex: '1 0 auto' }}>{course.description}</p>
+
+                      {/* ✅ ONLY 15 WORDS */}
+                      <p style={{ flex: '1 0 auto' }}>
+                        {getShortDescription(course.description, 15)}
+                      </p>
 
                       <p className="course-info">
                         <span className="course-label">Price:</span>
@@ -109,7 +120,11 @@ function Courses() {
 
                       <button
                         className="service-btn-read"
-                        onClick={() => navigate("/Training", { state: { courseId: course.id } })}
+                        onClick={() =>
+                          navigate("/Training", {
+                            state: { courseId: course.id }
+                          })
+                        }
                       >
                         Read More <FaArrowRight />
                       </button>
@@ -121,10 +136,10 @@ function Courses() {
           )}
         </div>
       </Container>
+
       <Container fluid className="br-footer-box">
         <FooterPage />
       </Container>
-
     </>
   );
 }
