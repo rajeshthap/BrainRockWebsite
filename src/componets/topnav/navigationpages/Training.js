@@ -89,7 +89,7 @@ const Training = () => {
             <Row>
               <Col md={6} sm={6}>
 
-                {/* ✅ FULL DESCRIPTION ALWAYS */}
+                {/*   FULL DESCRIPTION ALWAYS */}
                 <div className="module-container">
                   <h4 className="module-heading">
                     <span className="module-number">1</span>

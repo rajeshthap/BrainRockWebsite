@@ -82,11 +82,10 @@ useEffect(() => {
                 <NavDropdown.Item as={Link} to="/OurTeam" onClick={closeMenu}>
                   Our Team
                 </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/RunningProjects" onClick={closeMenu}>
-                  Project
-                </NavDropdown.Item>
+               
               </NavDropdown>
-
+              
+              <Nav.Link as={Link} to="/RunningProjects" onClick={closeMenu}>Project</Nav.Link>
               <Nav.Link as={Link} to="/ServicesPage" onClick={closeMenu}>Services</Nav.Link>
               <Nav.Link as={Link} to="/Courses" onClick={closeMenu}>Courses</Nav.Link>
               <Nav.Link as={Link} to="/Gallery" onClick={closeMenu}>Gallery</Nav.Link>

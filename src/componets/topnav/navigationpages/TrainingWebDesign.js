@@ -42,10 +42,10 @@ const TrainingWebDesign = () => {
                   <div className="module-card">
                     <div>
                       <ul>
-                                    <li> ✅ What is Web Development? <br />
-                                      ✅ Frontend vs Backend vs Full Stack{" "}
-                                      <br />✅ How the Web Works (HTTP,
-                                      Browsers, Servers) <br />✅ Tools Setup:
+                                    <li>   What is Web Development? <br />
+                                        Frontend vs Backend vs Full Stack{" "}
+                                      <br />  How the Web Works (HTTP,
+                                      Browsers, Servers) <br />  Tools Setup:
                                       VSCode, Browsers, Node.js, Git <br /></li> 
                                     </ul>
                     </div>
@@ -60,7 +60,7 @@ const TrainingWebDesign = () => {
                   </h4>
                   <div className="module-card">
                     <div>
-                         ✅ HTML (Structure)
+                           HTML (Structure)
                                     <ul>
                                       <li>
                                         HTML Elements, Attributes, and Structure{" "}
@@ -70,7 +70,7 @@ const TrainingWebDesign = () => {
                                       </li>
                                       <li>Semantic HTML5 Tags </li>
                                     </ul>
-                                    <br />✅ CSS (Styling)
+                                    <br />  CSS (Styling)
                                     <ul>
                                       <li>
                                         CSS Syntax, Selectors (class, id,
@@ -87,7 +87,7 @@ const TrainingWebDesign = () => {
                                       </li>
                                       <li>CSS Animations & Transitions </li>
                                     </ul>
-                                    <br />✅ Bootstrap / Tailwind CSS (Optional
+                                    <br />  Bootstrap / Tailwind CSS (Optional
                                     Framework)
                                     <ul>
                                       <li>Grid System </li>
@@ -97,7 +97,7 @@ const TrainingWebDesign = () => {
                                       </li>
                                       <li>Responsive Utilities </li>
                                     </ul>
-                                    <br />✅ JavaScript (Interactivity)
+                                    <br />  JavaScript (Interactivity)
                                     <ul>
                                       <li>Introduction to JavaScript </li>
                                       <li>Variables, Data Types, Operators</li>
@@ -124,12 +124,12 @@ const TrainingWebDesign = () => {
                   </h4>
                   <div className="module-card">
                     <div>
-                    ✅ Introduction to Backend
+                      Introduction to Backend
                                     <ul>
                                       <li>What is a Server? </li>
                                       <li>Basics of REST APIs </li>
                                     </ul>
-                                    <br />✅ Node.js & Express.js (Optional)
+                                    <br />  Node.js & Express.js (Optional)
                                     <ul>
                                       <li>Setting up Node.js Environment </li>
                                       <li>
@@ -138,7 +138,7 @@ const TrainingWebDesign = () => {
                                       <li>Routing in Express </li>
                                       <li>Handling Forms and Data </li>
                                     </ul>
-                                    <br />✅ Database (MySQL / MongoDB)
+                                    <br />  Database (MySQL / MongoDB)
                                     <ul>
                                       <li> Introduction to Databases </li>
                                       <li>Connecting Backend with Database </li>
@@ -157,10 +157,10 @@ const TrainingWebDesign = () => {
                   <div className="module-card">
                     <div>
                     <ul>
-                                    <li> ✅ Git Basics (init, add, commit, push,
+                                    <li>   Git Basics (init, add, commit, push,
                                       pull) <br />
-                                      ✅ Creating a GitHub Account & Hosting
-                                      Code <br />✅ Collaborating with Teams
+                                        Creating a GitHub Account & Hosting
+                                      Code <br />  Collaborating with Teams
                                       (Branches & Pull Requests)</li> 
                                     </ul>
                     </div>
@@ -176,9 +176,9 @@ const TrainingWebDesign = () => {
                   <div className="module-card">
                     <div>
                     <ul>
-                                    <li> ✅ Hosting Static Sites (Netlify, Vercel,
+                                    <li>   Hosting Static Sites (Netlify, Vercel,
                                       GitHub Pages) <br />
-                                      ✅ Hosting Dynamic Sites (Heroku or
+                                        Hosting Dynamic Sites (Heroku or
                                       Render) <br /></li> 
                                     </ul>
                     </div>
@@ -200,7 +200,7 @@ const TrainingWebDesign = () => {
                                         To-Do List App (with Local Storage){" "}
                                       </li>
                                     </ul>
-                                    <br />✅ Full Stack Project (Optional)
+                                    <br />  Full Stack Project (Optional)
                                     <ul>
                                       <li>
                                         Simple Blog App or E-commerce Website{" "}

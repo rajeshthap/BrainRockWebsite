@@ -41,7 +41,7 @@ const TrainingBootstrap = () => {
                   </h4>
                   <div className="module-card">
                     <div>
-                      ✅ Introduction to HTML
+                        Introduction to HTML
                                     <ul>
                                       <li>What is HTML? </li>
                                       <li>
@@ -54,7 +54,7 @@ const TrainingBootstrap = () => {
                                       </li>
                                       <li>Writing your first HTML page</li>
                                     </ul>
-                                    <br />✅ HTML Basics
+                                    <br />  HTML Basics
                                     <ul>
                                       <li>What is HTML? </li>
                                       <li>
@@ -67,7 +67,7 @@ const TrainingBootstrap = () => {
                                       </li>
                                       <li>Writing your first HTML page</li>
                                     </ul>
-                                    <br />✅ HTML5 Features
+                                    <br />  HTML5 Features
                                     <ul>
                                       <li>Audio and Video tags </li>
                                       <li>
@@ -91,7 +91,7 @@ const TrainingBootstrap = () => {
                   </h4>
                   <div className="module-card">
                     <div>
-                        ✅ Introduction to CSS
+                          Introduction to CSS
                                     <ul>
                                       <li>What is CSS? </li>
                                       <li>
@@ -102,7 +102,7 @@ const TrainingBootstrap = () => {
                                         Values)
                                       </li>
                                     </ul>
-                                    <br />✅ Selectors & Properties
+                                    <br />  Selectors & Properties
                                     <ul>
                                       <li>Element, ID, Class Selectors </li>
                                       <li>
@@ -112,7 +112,7 @@ const TrainingBootstrap = () => {
                                       <li>Colors, Backgrounds, Borders</li>
                                       <li>Fonts, Text Styling </li>
                                     </ul>
-                                    <br />✅ Box Model
+                                    <br />  Box Model
                                     <ul>
                                       <li>Margin, Border, Padding, Content </li>
                                       <li>
@@ -120,7 +120,7 @@ const TrainingBootstrap = () => {
                                         overflow{" "}
                                       </li>
                                     </ul>
-                                    <br />✅ Positioning & Layout
+                                    <br />  Positioning & Layout
                                     <ul>
                                       <li>
                                         Static, Relative, Absolute, Fixed,
@@ -133,12 +133,12 @@ const TrainingBootstrap = () => {
                                       <li>Flexbox (Basics)</li>
                                       <li>CSS Grid (Basics) </li>
                                     </ul>
-                                    <br />✅ Transitions & Animations
+                                    <br />  Transitions & Animations
                                     <ul>
                                       <li>CSS Transitions </li>
                                       <li>Keyframe Animations </li>
                                     </ul>
-                                    <br />✅ Responsive Design Basics
+                                    <br />  Responsive Design Basics
                                     <ul>
                                       <li>Media Queries </li>
                                       <li>Units: px, %, em, rem, vh, vw </li>
@@ -172,7 +172,7 @@ const TrainingBootstrap = () => {
                   </h4>
                   <div className="module-card">
                     <div>
-                      ✅ Introduction to Bootstrap
+                        Introduction to Bootstrap
                                     <ul>
                                       <li>
                                         What is Bootstrap and Why use it?{" "}
@@ -181,13 +181,13 @@ const TrainingBootstrap = () => {
                                         Setting up Bootstrap (CDN & Local){" "}
                                       </li>
                                     </ul>
-                                    <br />✅ Bootstrap Grid System
+                                    <br />  Bootstrap Grid System
                                     <ul>
                                       <li>Rows and Columns </li>
                                       <li>Container Classes </li>
                                       <li>Responsive Design with Grid</li>
                                     </ul>
-                                    <br />✅ Bootstrap Components
+                                    <br />  Bootstrap Components
                                     <ul>
                                       <li> Buttons, Alerts, Badges </li>
                                       <li>Navbar, Breadcrumbs, Pagination </li>
@@ -195,18 +195,18 @@ const TrainingBootstrap = () => {
                                         Cards, Modals, Accordion, Carousel
                                       </li>
                                     </ul>
-                                    <br />✅ Bootstrap Forms
+                                    <br />  Bootstrap Forms
                                     <ul>
                                       <li>Form Layouts & Controls </li>
                                       <li>Validation Classes </li>
                                     </ul>
-                                    <br />✅ Utilities and Helpers
+                                    <br />  Utilities and Helpers
                                     <ul>
                                       <li>Spacing (margins & paddings) </li>
                                       <li>Text Alignment and Colors </li>
                                       <li>Display Utilities</li>
                                     </ul>
-                                    <br />✅ Bootstrap 5 New Features
+                                    <br />  Bootstrap 5 New Features
                                     <ul>
                                       <li>Updated Grid System </li>
                                       <li>Customizable utilities </li>

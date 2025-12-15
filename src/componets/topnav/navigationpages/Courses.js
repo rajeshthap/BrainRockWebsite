@@ -14,7 +14,7 @@ function Courses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ 15 WORDS ONLY
+  //   15 WORDS ONLY
   const getShortDescription = (text, words = 15) => {
     if (!text) return "";
     const splitText = text.split(" ");
@@ -32,14 +32,28 @@ function Courses() {
         const result = await response.json();
         const coursesData = result.data || result;
 
-        const processedCourses = coursesData.map(course => ({
-          ...course,
-          icon: course.icon ? `${API_BASE_URL}${course.icon}?t=${Date.now()}` : null,
-          formattedPrice: new Intl.NumberFormat('en-IN', {
+        const processedCourses = coursesData.map(course => {
+          // Format both regular price and offer price
+          const formattedPrice = new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR'
-          }).format(course.price)
-        }));
+          }).format(course.price);
+          
+          let formattedOfferPrice = null;
+          if (course.offer_price) {
+            formattedOfferPrice = new Intl.NumberFormat('en-IN', {
+              style: 'currency',
+              currency: 'INR'
+            }).format(course.offer_price);
+          }
+
+          return {
+            ...course,
+            icon: course.icon ? `${API_BASE_URL}${course.icon}?t=${Date.now()}` : null,
+            formattedPrice,
+            formattedOfferPrice
+          };
+        });
 
         setCourses(processedCourses);
       } catch (err) {
@@ -103,7 +117,7 @@ function Courses() {
                     }}>
                       <h4 className="heading-5">{course.title}</h4>
 
-                      {/* ✅ ONLY 15 WORDS */}
+                      {/*   ONLY 15 WORDS */}
                       <p style={{ flex: '1 0 auto' }}>
                         {getShortDescription(course.description, 15)}
                       </p>
@@ -112,6 +126,16 @@ function Courses() {
                         <span className="course-label">Price:</span>
                         <span className="course-value">{course.formattedPrice}</span>
                       </p>
+
+                      {/* Add offer price if available */}
+                      {course.formattedOfferPrice && (
+                        <p className="course-info">
+                          <span className="course-label">Offer Price:</span>
+                          <span className="course-value" style={{ color: 'red', fontWeight: 'bold' }}>
+                            {course.formattedOfferPrice}
+                          </span>
+                        </p>
+                      )}
 
                       <p className="course-info">
                         <span className="course-label">Duration:</span>

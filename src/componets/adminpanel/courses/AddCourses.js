@@ -17,6 +17,7 @@ const AddCourses = () => {
     title: "",
     description: "",
     price: "",
+    offer_price: "", // Added offer_price field
     duration: "",
     course_type: "basic", // Added course_type with default value
     icon: null,
@@ -168,6 +169,7 @@ const AddCourses = () => {
       title: "",
       description: "",
       price: "",
+      offer_price: "", // Reset offer_price
       duration: "",
       course_type: "basic", // Reset to default value
       icon: null,
@@ -199,6 +201,7 @@ const AddCourses = () => {
     dataToSend.append('title', formData.title);
     dataToSend.append('description', formData.description);
     dataToSend.append('price', formData.price);
+    dataToSend.append('offer_price', formData.offer_price); // Added offer_price to form data
     dataToSend.append('duration', formData.duration);
     dataToSend.append('course_type', formData.course_type); // Added course_type to form data
     
@@ -333,6 +336,19 @@ const AddCourses = () => {
                 </Col>
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3">
+                    <Form.Label>Offer Price ($)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="0.01"
+                      placeholder="Enter offer price"
+                      name="offer_price"
+                      value={formData.offer_price}
+                      onChange={handleChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col lg={4} md={6} sm={12}>
+                  <Form.Group className="mb-3">
                     <Form.Label>Duration</Form.Label>
                     <Form.Control
                       type="text"
@@ -344,6 +360,9 @@ const AddCourses = () => {
                     />
                   </Form.Group>
                 </Col>
+              </Row>
+              
+              <Row>
                 <Col lg={4} md={6} sm={12}>
                   <Form.Group className="mb-3">
                     <Form.Label>Course Type</Form.Label>
@@ -359,8 +378,9 @@ const AddCourses = () => {
                     </Form.Select>
                   </Form.Group>
                 </Col>
-              </Row>
               
+
+               <Col lg={4} md={6} sm={12}>
               <Form.Group className="mb-3">
                 <Form.Label>Course Icon</Form.Label>
                 <Form.Control
@@ -375,6 +395,8 @@ const AddCourses = () => {
                   </div>
                 )}
               </Form.Group>
+               </Col>
+               </Row>
               
               {/* Modules Section */}
               <Form.Group className="mb-3">

@@ -282,7 +282,7 @@ body {
   border-radius: 0.375rem;
   padding: 10px;
 }
-.service-desc{
+.service-desc p{
   text-align: justify;
 }
 .employee-card {

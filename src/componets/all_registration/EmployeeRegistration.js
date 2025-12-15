@@ -108,6 +108,7 @@ const EmployeeRegistration = () => {
     panCard: useRef(null),
     username: useRef(null),
     password: useRef(null),
+     course_mode: useRef(null),
   };
 
   const [formData, setFormData] = useState({
@@ -142,6 +143,7 @@ const EmployeeRegistration = () => {
     experience_certificates: [],
     experience: "",
     skills_set: [],
+    course_mode: "",
   });
 
   // Add this useEffect with your other useEffect hooks
@@ -405,6 +407,8 @@ const EmployeeRegistration = () => {
         return !value ? "Work location is required" : "";
       case "ifsc_code":
         return !value.trim() ? "IFSC code is required" : "";
+         case "course_mode":
+      return !value ? "Course mode is required" : "";
       case "email":
         if (!value.trim()) return "Email is required";
         if (!/\S+@\S+\.\S+/.test(value)) return "Email is invalid";
@@ -669,6 +673,7 @@ const EmployeeRegistration = () => {
       experience_certificates: [],
       experience: "", // Reset this new field
       skills_set: [], // Reset this new field
+       course_mode: "",
     });
 
     setPhoto({
@@ -829,8 +834,10 @@ const EmployeeRegistration = () => {
     payload.append("username", formData.username);
     payload.append("password", formData.password);
     payload.append("experience", formData.experience);
+     payload.append("course_mode", formData.course_mode);
 
     payload.append("skills_set", JSON.stringify(formData.skills_set));
+    
 
     if (photo.file) payload.append("profile_photo", photo.file);
     if (resume.file) payload.append("resume_document", resume.file);
@@ -1580,6 +1587,30 @@ const EmployeeRegistration = () => {
                     </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
+
+                <Col lg={4} md={6} sm={12}>
+  <Form.Group className="mb-3" controlId="courseMode">
+    <Form.Label className="br-label">
+      Course Mode <span className="br-span-star">*</span>
+    </Form.Label>
+    <Form.Select
+      className="br-form-control"
+      name="course_mode"
+      value={formData.course_mode}
+      onChange={handleInputChange}
+      isInvalid={!!errors.course_mode}
+      required
+      ref={formRefs.course_mode}
+    >
+      <option value="">Select Mode</option>
+      <option value="offline">Offline</option>
+      <option value="online">Online</option>
+    </Form.Select>
+    <Form.Control.Feedback type="br-alert">
+      {errors.course_mode}
+    </Form.Control.Feedback>
+  </Form.Group>
+</Col>
 
 
                 <Col lg={4} md={6} sm={12}>

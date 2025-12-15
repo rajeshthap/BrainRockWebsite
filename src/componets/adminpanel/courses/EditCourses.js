@@ -28,6 +28,7 @@ const EditCourses = () => {
     title: "",
     description: "",
     price: "",
+    offer_price: "", // Added offer_price field
     duration: "",
     course_type: "basic", // Added course_type with default value
     icon: null,
@@ -78,7 +79,13 @@ const EditCourses = () => {
             style: 'currency',
             currency: 'INR',
             minimumFractionDigits: 0
-          }).format(course.price)
+          }).format(course.price),
+          // Add formatted offer price if it exists
+          formattedOfferPrice: course.offer_price ? new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0
+          }).format(course.offer_price) : null
         }));
 
         setCourses(processedCourses);
@@ -159,6 +166,7 @@ const EditCourses = () => {
       title: course.title,
       description: course.description,
       price: course.price,
+      offer_price: course.offer_price || "", // Add offer_price from course data
       duration: course.duration,
       course_type: course.course_type || "basic", // Get course_type from course or default to "basic"
       icon: null,
@@ -235,6 +243,7 @@ const EditCourses = () => {
     dataToSend.append('title', editFormData.title);
     dataToSend.append('description', editFormData.description);
     dataToSend.append('price', editFormData.price);
+    dataToSend.append('offer_price', editFormData.offer_price); // Add offer_price to form data
     dataToSend.append('duration', editFormData.duration);
     dataToSend.append('course_type', editFormData.course_type); // Add course_type to form data
 
@@ -272,9 +281,21 @@ const EditCourses = () => {
               title: editFormData.title,
               description: editFormData.description,
               price: editFormData.price,
+              offer_price: editFormData.offer_price, // Update offer_price
               duration: editFormData.duration,
               course_type: editFormData.course_type, // Update course_type
               modules: editFormData.modules,
+              // Update formatted prices
+              formattedPrice: new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0
+              }).format(editFormData.price),
+              formattedOfferPrice: editFormData.offer_price ? new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0
+              }).format(editFormData.offer_price) : null,
               // Use the preview URL immediately if icon was changed
               // This ensures the new image shows up instantly
               icon: hasIconChanged
@@ -410,7 +431,12 @@ const EditCourses = () => {
                             </div>
                             <Card.Text>{course.description}</Card.Text>
                             <div className="d-flex justify-content-between align-items-center">
-                              <span className="fw-bold">Price: {course.formattedPrice}</span>
+                              <div>
+                                <div className="fw-bold">Price: {course.formattedPrice}</div>
+                                {course.formattedOfferPrice && (
+                                  <div className="text-success">Offer Price: {course.formattedOfferPrice}</div>
+                                )}
+                              </div>
                               <div>
                                 <Button
                                   variant="primary"
@@ -512,6 +538,18 @@ const EditCourses = () => {
               </Col>
               <Col lg={4} md={6} sm={12}>
                 <Form.Group className="mb-3">
+                  <Form.Label>Offer Price ($)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    name="offer_price"
+                    value={editFormData.offer_price}
+                    onChange={handleEditChange}
+                  />
+                </Form.Group>
+              </Col>
+              <Col lg={4} md={6} sm={12}>
+                <Form.Group className="mb-3">
                   <Form.Label>Duration</Form.Label>
                   <Form.Control
                     type="text"
@@ -522,6 +560,9 @@ const EditCourses = () => {
                   />
                 </Form.Group>
               </Col>
+            </Row>
+
+            <Row>
               <Col lg={4} md={6} sm={12}>
                 <Form.Group className="mb-3">
                   <Form.Label>Course Type</Form.Label>
@@ -537,8 +578,9 @@ const EditCourses = () => {
                   </Form.Select>
                 </Form.Group>
               </Col>
-            </Row>
+           
 
+              <Col lg={4} md={6} sm={12}>
             <Form.Group className="mb-3">
               <Form.Label>Course Icon</Form.Label>
               <Form.Control
@@ -557,6 +599,8 @@ const EditCourses = () => {
                 </div>
               )}
             </Form.Group>
+            </Col>
+             </Row>
 
             {/* Modules Section */}
             <Form.Group className="mb-3">

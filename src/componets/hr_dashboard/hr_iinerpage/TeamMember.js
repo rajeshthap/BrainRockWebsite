@@ -32,9 +32,11 @@ const TeamMember = () => {
         
         // Create a mapping of emp_id to full_name
         const namesMap = {};
-        data.forEach(emp => {
-          namesMap[emp.emp_id] = emp.full_name;
-        });
+        if (Array.isArray(data)) {
+          data.forEach(emp => {
+            namesMap[emp.emp_id] = emp.full_name;
+          });
+        }
         
         setEmployeeNames(namesMap);
       } catch (error) {
@@ -63,12 +65,15 @@ const TeamMember = () => {
         
         const data = await response.json();
         if (data.success) {
-          setProjects(data.data);
+          // Ensure data.data is an array
+          setProjects(Array.isArray(data.data) ? data.data : []);
         } else {
           setErrorProjects(data.message || 'Failed to fetch projects');
+          setProjects([]);
         }
       } catch (error) {
         setErrorProjects(error.message);
+        setProjects([]);
       } finally {
         setLoadingProjects(false);
       }
@@ -95,14 +100,17 @@ const TeamMember = () => {
       
       const data = await response.json();
       if (data.success) {
-        // Filter teams by the selected project
-        const filteredTeams = data.data.filter(team => team.project === projectId);
+        // Filter teams by the selected project and ensure data.data is an array
+        const allTeams = Array.isArray(data.data) ? data.data : [];
+        const filteredTeams = allTeams.filter(team => team.project === projectId);
         setTeams(filteredTeams);
       } else {
         setErrorTeams(data.message || 'Failed to fetch teams');
+        setTeams([]);
       }
     } catch (error) {
       setErrorTeams(error.message);
+      setTeams([]);
     } finally {
       setLoadingTeams(false);
     }
@@ -166,7 +174,7 @@ const TeamMember = () => {
             </div>
             <div className="d-flex align-items-center mb-2">
               <FaCalendarAlt className="me-2 text-primary" />
-              <span><strong>Budget:</strong> ₹{parseFloat(selectedProject.project_budget).toLocaleString()}</span>
+              <span><strong>Budget:</strong> ₹{parseFloat(selectedProject.project_budget || 0).toLocaleString()}</span>
             </div>
             <div className="d-flex align-items-center mb-2">
               <span className={`badge ${selectedProject.status === 'ongoing' ? 'bg-success' : 'bg-secondary'}`}>
@@ -219,15 +227,15 @@ const TeamMember = () => {
                   <div>
                     <div className="d-flex align-items-center mb-2">
                       <FaUsers className="me-2 text-primary" />
-                      <strong>Team Members ({team.employee_ids.length}):</strong>
+                      <strong>Team Members ({Array.isArray(team.employee_ids) ? team.employee_ids.length : 0}):</strong>
                     </div>
                     <div className="mt-2 d-flex flex-wrap gap-2">
-                      {team.employee_ids.map(empId => (
+                      {Array.isArray(team.employee_ids) ? team.employee_ids.map(empId => (
                         <Badge key={empId} bg="light" text="dark" className="d-flex align-items-center">
                           <FaUser className="me-1" size={12} />
                           {getEmployeeName(empId)}
                         </Badge>
-                      ))}
+                      )) : <span className="text-muted">No team members data available</span>}
                     </div>
                   </div>
                 </div>
@@ -285,11 +293,11 @@ const TeamMember = () => {
                     </div>
                     <p className="mb-1 text-muted">{project.company_name}</p>
                     <div className="d-flex flex-wrap gap-2 mt-2">
-                      {project.technology_used.map(tech => (
+                      {Array.isArray(project.technology_used) ? project.technology_used.map(tech => (
                         <Badge key={tech} bg="light" text="dark">
                           {tech}
                         </Badge>
-                      ))}
+                      )) : <span className="text-muted">No technologies listed</span>}
                     </div>
                   </div>
                 </div>

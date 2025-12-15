@@ -13,7 +13,7 @@ const PayDashBoard = () => {
   const [payrollData, setPayrollData] = useState([]);
   const [totals, setTotals] = useState({});
 
-  // ✅ Step 1: Calculate payroll for each employee
+  //   Step 1: Calculate payroll for each employee
   const calculatePayroll = (emps) => {
     return emps.map(emp => ({
       ...emp,

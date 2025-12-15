@@ -42,12 +42,12 @@ const UIUXTraining = () => {
                   <div className="module-card">
                     <div>
                     <ul>
-                                  <li>   ✅ What is UI (User Interface) and UX
+                                  <li>     What is UI (User Interface) and UX
                                       (User Experience)? <br />
-                                      ✅ Difference between UI & UX <br />
-                                      ✅ Role of a UI/UX Designer in Web & App
+                                        Difference between UI & UX <br />
+                                        Role of a UI/UX Designer in Web & App
                                       Development
-                                      <br />✅ Design Thinking Process Overview</li> 
+                                      <br />  Design Thinking Process Overview</li> 
                                     </ul>
                     </div>
                   </div>
@@ -61,7 +61,7 @@ const UIUXTraining = () => {
                   </h4>
                   <div className="module-card">
                     <div>
-                          ✅ Understanding Users
+                            Understanding Users
                                     <ul>
                                       <li>
                                         User Research (Surveys, Interviews,
@@ -71,7 +71,7 @@ const UIUXTraining = () => {
                                       <li>Creating User Personas </li>
                                       <li>User Journey Mapping </li>
                                     </ul>
-                                    <br />✅ UX Processes
+                                    <br />  UX Processes
                                     <ul>
                                       <li>
                                         Information Architecture (Sitemaps &
@@ -88,7 +88,7 @@ const UIUXTraining = () => {
                                         Improving Designs){" "}
                                       </li>
                                     </ul>
-                                    <br />✅ Tools for UX Design
+                                    <br />  Tools for UX Design
                                     <ul>
                                       <li>Figma (UX workflows) </li>
                                       <li>Adobe XD or Sketch (optional) </li>
@@ -106,7 +106,7 @@ const UIUXTraining = () => {
                   </h4>
                   <div className="module-card">
                     <div>
-                  ✅ Visual Design Principles
+                    Visual Design Principles
                                     <ul>
                                       <li>Layout, Grids & Spacing </li>
                                       <li>Color Theory and Accessibility </li>
@@ -119,7 +119,7 @@ const UIUXTraining = () => {
                                         First Design){" "}
                                       </li>
                                     </ul>
-                                    <br />✅ UI Components
+                                    <br />  UI Components
                                     <ul>
                                       <li>
                                         Buttons, Forms, Cards, Icons, Modals{" "}
@@ -132,7 +132,7 @@ const UIUXTraining = () => {
                                         Micro-Interactions and Animations{" "}
                                       </li>
                                     </ul>
-                                    <br />✅ UI Tools
+                                    <br />  UI Tools
                                     <ul>
                                       <li>
                                         {" "}
@@ -156,9 +156,9 @@ const UIUXTraining = () => {
                   <div className="module-card">
                     <div>
                   <ul>
-                                     <li>✅ Designing for Web, Mobile, and Tablet{" "}
+                                     <li>  Designing for Web, Mobile, and Tablet{" "}
                                       <br />
-                                      ✅ Breakpoints and Grids <br />✅ Creating
+                                        Breakpoints and Grids <br />  Creating
                                       Mobile App UI (iOS & Android Guidelines)</li> 
                                     </ul>
                     </div>
@@ -174,10 +174,10 @@ const UIUXTraining = () => {
                   <div className="module-card">
                     <div>
                     <ul>
-                                    <li> ✅ Working with Developers (Exporting
+                                    <li>   Working with Developers (Exporting
                                       Assets & Code) <br />
-                                      ✅ Handoff Tools: Zeplin / Figma Inspect{" "}
-                                      <br />✅ Version Control in Design Files</li> 
+                                        Handoff Tools: Zeplin / Figma Inspect{" "}
+                                      <br />  Version Control in Design Files</li> 
                                     </ul>
                     </div>
                   </div>
@@ -202,7 +202,7 @@ const UIUXTraining = () => {
                                         UX Improvements){" "}
                                       </li>
                                     </ul>
-                                    <br />✅ Capstone Project:
+                                    <br />  Capstone Project:
                                     <ul>
                                       <li>
                                         Complete UI/UX Design for a Real-World
@@ -225,8 +225,8 @@ const UIUXTraining = () => {
                   <div className="module-card">
                     <div>
                      <ul>
-                                     <li> ✅ Creating Your Design Portfolio <br />
-                                      ✅ Preparing for UI/UX Interviews <br />✅
+                                     <li>   Creating Your Design Portfolio <br />
+                                        Preparing for UI/UX Interviews <br /> 
                                       Understanding Freelance & Agency Workflows</li>
                                     </ul>
                     </div>
