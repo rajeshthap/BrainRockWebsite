@@ -37,6 +37,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     school_college_name: "",
     highest_education: "",
     profile_photo: null,
+    course_mode: "", // Added course_mode field
   });
 
   const [errors, setErrors] = useState({});
@@ -131,6 +132,10 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
         if (!value.trim()) msg = "Please select a course";
         break;
 
+      case "course_mode": // Added validation for course_mode
+        if (!value.trim()) msg = "Please select course mode";
+        break;
+
       default:
         break;
     }
@@ -164,6 +169,11 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
 
     if (!formData.application_for_course) {
       temp.application_for_course = "Please select course";
+      isValid = false;
+    }
+
+    if (!formData.course_mode) { // Added validation for course_mode
+      temp.course_mode = "Please select course mode";
       isValid = false;
     }
 
@@ -219,6 +229,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
     payload.append("school_college_name", formData.school_college_name);
     payload.append("highest_education", formData.highest_education);
     payload.append("course_status", "pending");
+    payload.append("course_mode", formData.course_mode); // Added course_mode to payload
     
     // Add course fields as arrays
     payload.append("application_for_course", JSON.stringify([formData.application_for_course]));
@@ -267,6 +278,7 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
         school_college_name: "",
         highest_education: "",
         profile_photo: null,
+        course_mode: "", // Reset course_mode
       });
 
       setErrors({});
@@ -398,6 +410,30 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
                     {errors.application_for_course && (
                       <div className="invalid-feedback d-block">
                         {errors.application_for_course}
+                      </div>
+                    )}
+                  </Form.Group>
+                </Col>
+
+                {/* COURSE MODE - New field */}
+                <Col md={6} className="mt-3">
+                  <Form.Group className="">
+                    <Form.Label className="br-label">
+                      Course Mode <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Select
+                      className={`br-form-control ${errors.course_mode ? "is-invalid" : ""}`}
+                      name="course_mode"
+                      value={formData.course_mode}
+                      onChange={handleChange}
+                    >
+                      <option value="">-- Select Mode --</option>
+                      <option value="online">Online</option>
+                      <option value="offline">Offline</option>
+                    </Form.Select>
+                    {errors.course_mode && (
+                      <div className="invalid-feedback d-block">
+                        {errors.course_mode}
                       </div>
                     )}
                   </Form.Group>
