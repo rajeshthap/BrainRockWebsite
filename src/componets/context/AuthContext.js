@@ -1,24 +1,24 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import axios from "axios";
 import Cookies from "js-cookie";
-
+ 
 export const AuthContext = createContext();
-
+ 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasRefreshFailed, setHasRefreshFailed] = useState(false);
   const isRefreshing = useRef(false);
-
+ 
   const axiosInstance = axios.create({
     baseURL: "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/",
     withCredentials: true,
   });
-
+ 
   const login = async (email_or_phone, password) => {
     try {
       const res = await axiosInstance.post("login/", { email_or_phone, password });
-
+ 
       setUser({
         id: res.data.user?.id || res.data.user_id || res.data.id,
         unique_id: res.data.user?.unique_id || res.data.unique_id || null,
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
         full_name: res.data.user?.full_name || res.data.full_name || null,
         role: res.data.user?.role || res.data.role || null,
       });
-
+ 
       try {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('BR_LOGGED_OUT');
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       } catch (e) {
         // ignore
       }
-
+ 
       return { success: true, data: res.data };
     } catch (err) {
       return {
@@ -45,12 +45,12 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
+ 
   const logout = async (options = { redirect: true }) => {
     try {
       const res = await axiosInstance.post("logout/");
       console.log("Logout response:", res.data);
-
+ 
       clearAllCookies();
       try {
         if (typeof window !== 'undefined') {
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setLoading(false);
       setHasRefreshFailed(false);
-
+ 
       if (options && options.redirect !== false) {
         try {
           if (typeof window !== 'undefined') {
@@ -72,11 +72,11 @@ export const AuthProvider = ({ children }) => {
           // ignore
         }
       }
-
+ 
       return { success: true, data: res.data };
     } catch (err) {
       console.error("Logout failed:", err.response?.data || err.message);
-
+ 
       clearAllCookies();
       try {
         if (typeof window !== 'undefined') {
@@ -97,14 +97,14 @@ export const AuthProvider = ({ children }) => {
           // ignore
         }
       }
-
+ 
       return {
         success: false,
         error: err.response?.data || { message: err.message },
       };
     }
   };
-
+ 
   const validateOrRefreshToken = async () => {
     try {
       if (typeof window !== 'undefined' && localStorage.getItem('BR_LOGGED_OUT') === '1') {
@@ -115,16 +115,16 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       // ignore
     }
-
+ 
     if (hasRefreshFailed || isRefreshing.current) {
       return { success: false, error: "Refresh already failed or in progress." };
     }
-
+ 
     try {
       isRefreshing.current = true;
-
+ 
       const res = await axiosInstance.post("token/refresh/");
-
+ 
       // Prefer res.data.user if present, otherwise use res.data itself.
       const newUserSource = res.data.user || res.data || {};
       setUser({
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }) => {
         full_name: newUserSource.full_name || res.data.full_name || null,
         role: newUserSource.role || res.data.role || null,
       });
-
+ 
       setHasRefreshFailed(false);
       setLoading(false);
       return { success: true, data: res.data };
@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }) => {
       isRefreshing.current = false;
     }
   };
-
+ 
   const clearAllCookies = () => {
     const cookies = document.cookie.split(";");
     for (let i = 0; i < cookies.length; i++) {
@@ -167,17 +167,17 @@ export const AuthProvider = ({ children }) => {
       document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     }
   };
-
+ 
   useEffect(() => {
     const interceptor = axiosInstance.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-
+ 
         if (!originalRequest || !error.response) {
           return Promise.reject(error);
         }
-
+ 
         if (
           originalRequest.url.includes("login")
           ||
@@ -185,7 +185,7 @@ export const AuthProvider = ({ children }) => {
         ) {
           return Promise.reject(error);
         }
-
+ 
         if (error.response.status === 401 && !originalRequest._retry) {
           if (!isRefreshing.current && !hasRefreshFailed) {
             originalRequest._retry = true;
@@ -195,81 +195,91 @@ export const AuthProvider = ({ children }) => {
             }
           }
         }
-
+ 
         return Promise.reject(error);
       }
     );
-
+ 
     return () => axiosInstance.interceptors.response.eject(interceptor);
   }, [hasRefreshFailed]);
-
-  useEffect(() => {
-    const doInit = async () => {
-      try {
-        const perf = typeof performance !== 'undefined' ? performance : null;
-        let navType = null;
-        if (perf && perf.getEntriesByType) {
-          const entries = perf.getEntriesByType('navigation');
-          navType = entries && entries.length ? entries[0].type : null;
-        }
-
-        // Fallback for older browsers
-        if (!navType && perf && perf.navigation) {
-          navType = perf.navigation.type === 1 ? 'reload' : 'navigate';
-        }
-
-        const path = (typeof window !== 'undefined' && window.location.pathname) ? window.location.pathname : '/';
-        const normalizedPath = path.toLowerCase().replace(/\/+$/, '') || '/';
-
-        // Public pages — refreshing should keep you on them
-        const publicPaths = new Set([
-          '/', '/home', '/companyprofile', '/ourteam', '/runningprojects', '/servicespage',
-          '/courses', '/gallery', '/feedback', '/trainingregistration', '/training',
-          '/contact', '/login', '/servicesdetails', '/certificate', '/career'
-        ]);
-
-        // Initial navigation (first load in the tab/browser): redirect to home '/'
-        if (navType === 'navigate') {
-          if (normalizedPath !== '/') {
-            try {
-              if (typeof window !== 'undefined') {
-                window.location.replace('/');
-              }
-            } catch (e) {
-              // ignore
-            }
-            return;
-          }
-        }
-
-        // Page reload: if we're on a protected route (not a public path), send to '/Login'
-        if (navType === 'reload') {
-          if (!publicPaths.has(normalizedPath) && normalizedPath !== '/login') {
-            try {
-              if (typeof window !== 'undefined') {
-                window.location.replace('/Login');
-              }
-            } catch (e) {
-              // ignore
-            }
-            return;
-          }
-        }
-
-        // If we haven't failed refresh flow, attempt token validation/refresh (but avoid doing it on the login page)
-        if (!hasRefreshFailed) {
-          if (typeof window === 'undefined' || window.location.pathname !== '/Login') {
-            validateOrRefreshToken();
-          }
-        }
-      } catch (e) {
-        // ignore
+ 
+useEffect(() => {
+  const doInit = async () => {
+    try {
+      const perf = typeof performance !== 'undefined' ? performance : null;
+      let navType = null;
+      if (perf && perf.getEntriesByType) {
+        const entries = perf.getEntriesByType('navigation');
+        navType = entries && entries.length ? entries[0].type : null;
       }
-    };
 
-    doInit();
-  }, []);
+      // Fallback for older browsers
+      if (!navType && perf && perf.navigation) {
+        navType = perf.navigation.type === 1 ? 'reload' : 'navigate';
+      }
 
+      const isReload = navType === 'reload';
+      const path = (typeof window !== 'undefined' && window.location.pathname) ? window.location.pathname : '/';
+
+      // List of pages that should remain on the same URL after a hard reload.
+      const allowedReloadPaths = [
+        '/', '/home', '/CompanyProfile', '/OurTeam', '/RunningProjects', '/ServicesPage',
+        '/Courses', '/Gallery', '/Feedback', '/TrainingRegistration', '/Training',
+        '/Contact', '/Login', '/ServicesDetails', '/Certificate','/Career'
+      ].map(p => p.toLowerCase());
+
+      const normalizedPath = path.toLowerCase().replace(/\/+$/, '') || '/';
+
+      // Check if the current path is a protected page (not in allowedReloadPaths and not login)
+      const isProtectedPage = !allowedReloadPaths.includes(normalizedPath) && normalizedPath !== '/login';
+
+      if (isReload) {
+        // For reloads: if it's a protected page, redirect to login
+        if (isProtectedPage) {
+          try {
+            if (typeof window !== 'undefined') {
+              // Clear authentication state before redirecting
+              clearAllCookies();
+              setUser(null);
+              setLoading(false);
+              setHasRefreshFailed(true);
+              localStorage.setItem('BR_LOGGED_OUT', '1');
+              
+              window.location.replace('/Login');
+            }
+          } catch (e) {
+            // ignore
+          }
+          return;
+        }
+      } else {
+        // For initial loads: if it's a protected page, redirect to home
+        if (isProtectedPage) {
+          try {
+            if (typeof window !== 'undefined') {
+              window.location.replace('/');
+            }
+          } catch (e) {
+            // ignore
+          }
+          return;
+        }
+      }
+
+      // If we haven't failed refresh flow, attempt token validation/refresh (but avoid doing it on the login page)
+      if (!hasRefreshFailed) {
+        if (typeof window === 'undefined' || window.location.pathname !== '/Login') {
+          validateOrRefreshToken();
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  doInit();
+}, []);
+ 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading, validateOrRefreshToken }}>
       {children}
