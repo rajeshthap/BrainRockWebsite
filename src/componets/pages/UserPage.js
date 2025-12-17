@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import {Col, Container, Row } from "react-bootstrap";
 import "../../assets/css/UserPage.css";
-import PoorImg from "../../assets/images/poorimg.jpg";
+// import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
 import { FaArrowRight } from "react-icons/fa6";
 // Component
@@ -11,11 +11,8 @@ import Banner2 from "../../assets/images/banner-2.png";
 
 import "../../assets/css/slider.css";
 import { LuBrainCircuit } from "react-icons/lu";
-
 import { SiCircuitverse } from "react-icons/si";
-
 import { SiAmazoncloudwatch } from "react-icons/si";
-
 import TechImg from "../../assets/images/shield-bg.png";
 import { TbSettingsCode } from "react-icons/tb";
 import { GrShieldSecurity } from "react-icons/gr";
@@ -345,28 +342,37 @@ function UserPage() {
             carouselData.map((item) => (
               <Carousel.Item key={item.id}>
                 <Row className="resorce-img">
-                  <Col lg={6} md={6} sm={12}>
-                    <div className=" d-flex flex-column h-100 align-items-start justify-content-center bottom-0 resorce-sub-title ">
+                  <Col lg={7} md={7} sm={12} >
+                    <div className=" d-flex flex-column  align-items-start justify-content-center bottom-0 resorce-sub-title ">
                       <h1 className=" bg-opacity-50 py-2 px-4">
-                        <span class="hero-sub-title mb-20">
-                          {item.subtitle}
-                        </span>{" "}
+                       <span
+  className="hero-sub-title mb-2"
+  style={{ 
+    whiteSpace: "pre-line",
+    lineHeight: 2
+  }}
+>
+ <p>
+  {item.subtitle.replace(/\.\s*/g, ".\n")}
+</p>
+</span>
+
                         <br></br>
-                        <span className="br-span-title">{item.title}</span>{" "}
+                        <span className="br-span-title" >{item.title}</span>{" "}
                       </h1>
                       <p className=" bg-opacity-50 py-2 px-4">
                         {item.description}
                       </p>
                     </div>
                   </Col>
-                  <Col lg={6} md={6} sm={12} className="banner-img">
-                    <div>
+                  <Col lg={5} md={5} sm={12} className="banner-img">
+                   / <div>
                       <i>
-                        <img
+                        {/* <img
                           src={item.image || Banner1} // Use fallback image if item.image is null
                           alt={item.alt || "Carousel image"}
                           className="img-fluid"
-                        ></img>
+                        ></img> */}
                       </i>
                     </div>
                   </Col>

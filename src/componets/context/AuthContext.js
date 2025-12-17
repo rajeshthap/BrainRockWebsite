@@ -254,6 +254,7 @@ export const AuthProvider = ({ children }) => {
           "/certificate",
           "/career",
           "/login",
+          "/ProjectDetail"
         ].map((p) => p.toLowerCase());
  
         const normalizedPath = path.toLowerCase().replace(/\/+$/, "") || "/";

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Table, Badge, Button, Pagination, Alert, Form } from "react-bootstrap";
-import { AiOutlineUser } from 'react-icons/ai'; // Default icon for students
+import { Container, Row, Button, Pagination, Alert, Form } from "react-bootstrap";
+import { AiOutlineUser, AiOutlineDownload, AiOutlinePrinter } from 'react-icons/ai'; // Added download and print icons
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
+import * as XLSX from 'xlsx'; // Import xlsx library for Excel export
 
 // Define base URL for your API
 const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
@@ -172,6 +173,130 @@ const AllStudentsData = () => {
     return pages;
   };
 
+  // Excel download function
+  const downloadExcel = () => {
+    // Prepare data for Excel
+    const excelData = filteredStudents.map((student, index) => ({
+      'S.No': index + 1,
+      'Name': student.girl_name,
+      'Mobile': student.mobile_no,
+      'District': student.district,
+      'Status': student.status || 'pending'
+    }));
+    
+    // Create a new workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Create a worksheet from the data
+    const ws = XLSX.utils.json_to_sheet(excelData);
+    
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Students Data");
+    
+    // Generate a filename with current date
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `students_data_${yearFilter}_${date}.xlsx`;
+    
+    // Download the Excel file
+    XLSX.writeFile(wb, filename);
+  };
+
+  // Print function
+  const handlePrint = () => {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    // Get the current filter values for the title
+    const districtText = districtFilter === 'all' ? 'All Districts' : districtFilter;
+    const statusText = statusFilter === 'all' ? 'All Status' : statusFilter;
+    
+    // Create the HTML content for printing
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Student Details - ${yearFilter}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 20px;
+            }
+            h1 {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .filter-info {
+              margin-bottom: 20px;
+              font-size: 14px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            tr:nth-child(even) {
+              background-color: #f9f9f9;
+            }
+            .page-break {
+              page-break-after: always;
+            }
+            @media print {
+              .no-print {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Student Details - ${yearFilter}</h1>
+          <div class="filter-info">
+            <p><strong>Filters:</strong> District: ${districtText}, Status: ${statusText}</p>
+            <p><strong>Total Records:</strong> ${filteredStudents.length}</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>District</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredStudents.map((student, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${student.girl_name}</td>
+                  <td>${student.mobile_no}</td>
+                  <td>${student.district}</td>
+                  <td>${student.status || 'pending'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+    
+    // Write the content to the new window
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    // Wait for the content to load before printing
+    printWindow.onload = function() {
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -225,6 +350,24 @@ const AllStudentsData = () => {
                     ))}
                   </Form.Select>
                 </div>
+                <Button 
+                  variant="success" 
+                  onClick={downloadExcel}
+                  disabled={loading || filteredStudents.length === 0}
+                  className="d-flex align-items-center gap-1 all-exel-download-btn" 
+                >
+                  <AiOutlineDownload size={16} />
+                  Excel
+                </Button>
+                <Button 
+                  variant="primary" 
+                  onClick={handlePrint}
+                  disabled={loading || filteredStudents.length === 0}
+                  className="d-flex align-items-center gap-1 all-exel-download-btn"
+                >
+                  <AiOutlinePrinter size={18} />
+                  Print
+                </Button>
               </div>
             </div>
             

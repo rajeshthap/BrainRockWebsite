@@ -422,7 +422,7 @@ const ManageProject = () => {
                               </Card.Subtitle>
                             </div>
                           </div>
-                          <Card.Text className="mb-2">{project.description}</Card.Text>
+                          <Card.Text className="mb-2 preline-textarea">{project.description}</Card.Text>
                           <div className="mb-2">
                             <small className="text-muted">Status: </small>
                             <Badge bg={project.status === 'ongoing' ? 'warning' : 'success'}>
@@ -520,9 +520,10 @@ const ManageProject = () => {
               <Form.Control
                 as="textarea"
                 rows={3}
-                name="description"
-                value={editFormData.description}
-                onChange={handleEditChange}
+                name="description" className="preline-textarea"
+               
+                value={editFormData.description }
+                onChange={handleEditChange} 
                 required
               />
             </Form.Group>

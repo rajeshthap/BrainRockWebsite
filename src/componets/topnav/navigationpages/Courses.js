@@ -14,7 +14,7 @@ function Courses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  //   15 WORDS ONLY
+  // 15 WORDS ONLY
   const getShortDescription = (text, words = 15) => {
     if (!text) return "";
     const splitText = text.split(" ");
@@ -33,25 +33,19 @@ function Courses() {
         const coursesData = result.data || result;
 
         const processedCourses = coursesData.map(course => {
-          // Format both regular price and offer price
-          const formattedPrice = new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR'
-          }).format(course.price);
-          
-          let formattedOfferPrice = null;
-          if (course.offer_price) {
-            formattedOfferPrice = new Intl.NumberFormat('en-IN', {
+          const formatCurrency = (value) =>
+            new Intl.NumberFormat('en-IN', {
               style: 'currency',
               currency: 'INR'
-            }).format(course.offer_price);
-          }
+            }).format(value);
 
           return {
             ...course,
             icon: course.icon ? `${API_BASE_URL}${course.icon}?t=${Date.now()}` : null,
-            formattedPrice,
-            formattedOfferPrice
+            formattedPrice: formatCurrency(course.price),
+            formattedOfferPrice: course.offer_price
+              ? formatCurrency(course.offer_price)
+              : null
           };
         });
 
@@ -96,46 +90,68 @@ function Courses() {
             <Row className="g-4" style={{ margin: '0' }}>
               {courses.map((course) => (
                 <Col key={course.id} lg={3} md={4} sm={6} xs={12} style={{ padding: '10px' }}>
-                  <div className="service-box equal-card" style={{
-                    height: 'auto',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}>
+                  <div
+                    className="service-box equal-card"
+                    style={{
+                      height: 'auto',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                  >
                     <div className="service-icon text-center">
                       {course.icon ? (
-                        <img src={course.icon} alt={course.title} style={{ width: "60px", height: "60px" }} />
+                        <img
+                          src={course.icon}
+                          alt={course.title}
+                          style={{ width: "60px", height: "60px" }}
+                        />
                       ) : (
                         <AiOutlineFileDone size={50} />
                       )}
                     </div>
 
-                    <div className="service-desc course-sub-heading" style={{
-                      flex: '1 0 auto',
-                      display: 'flex',
-                      flexDirection: 'column'
-                    }}>
+                    <div
+                      className="service-desc course-sub-heading"
+                      style={{
+                        flex: '1 0 auto',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
                       <h4 className="heading-5">{course.title}</h4>
 
-                      {/*   ONLY 15 WORDS */}
                       <p style={{ flex: '1 0 auto' }}>
                         {getShortDescription(course.description, 15)}
                       </p>
 
-                      <p className="course-info">
-                        <span className="course-label">Price:</span>
-                        <span className="course-value">{course.formattedPrice}</span>
-                      </p>
+                      {/* ===== AMAZON STYLE PRICE DISPLAY ===== */}
+                      {course.formattedOfferPrice ? (
+                        <>
+                          <p className="course-info" style={{ marginBottom: '4px' }}>
+                           Offer Price <span
+                              className="course-value"
+                             
+                            >
+                              {course.formattedOfferPrice}
+                            </span>
+                          </p>
 
-                      {/* Add offer price if available */}
-                      {course.formattedOfferPrice && (
+                          <p className="course-info" style={{ fontSize: '14px', color: '#555' }}>
+                            Price:&nbsp;
+                            <span style={{ textDecoration: 'line-through' }}>
+                              {course.formattedPrice}
+                            </span>
+                          </p>
+                        </>
+                      ) : (
                         <p className="course-info">
-                          <span className="course-label">Offer Price:</span>
-                          <span className="course-value" style={{ color: 'red', fontWeight: 'bold' }}>
-                            {course.formattedOfferPrice}
+                          <span className="course-value" style={{ fontWeight: 'bold' }}>
+                            {course.formattedPrice}
                           </span>
                         </p>
                       )}
+                      {/* ===== END PRICE DISPLAY ===== */}
 
                       <p className="course-info">
                         <span className="course-label">Duration:</span>

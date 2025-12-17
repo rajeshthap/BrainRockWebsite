@@ -179,7 +179,7 @@ function Career() {
                       <div className="br-career-title">{job.title}</div>
 
                       <p className="br-career-info">
-                        {job.department} — {job.location}
+                 <strong>Location-</strong> {job.location} {job.department} 
                       </p>
 
                       <p><strong>Employment:</strong> {job.employment_type}</p>

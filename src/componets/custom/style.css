@@ -97,20 +97,26 @@ body {
   transform: translateY(-8px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
+.all-exel-download-btn{
+  font-size: 10px;
+}
+.preline-textarea {
+  white-space: pre-line !important;
+}
 
 .breadcrumb-menu li {
   cursor: pointer;
   transition: 0.3s;
-
 }
-
 .breadcrumb-home {
   color: #007bff;
   /* Blue */
   font-weight: 600;
   cursor: pointer;
 }
-
+.service-btn{
+  font-size: 12px;
+}
 .breadcrumb-about {
   color: orange;
   /* Green */

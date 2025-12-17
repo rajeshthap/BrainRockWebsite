@@ -114,6 +114,7 @@ import Purchasehistory from "./componets/training_dashboard/Purchasehistory";
 import AddNotification from "./componets/adminpanel/Notification/AddNotification";
 import EditNotification from "./componets/adminpanel/Notification/EditNotification";
 import AddStudent from "./componets/adminpanel/gallery/AddStudent";
+import ProjectDetail from "./componets/pages/aboutus/ProjectDetails";
 function AppContent() {
   const location = useLocation();
 
@@ -183,7 +184,8 @@ function AppContent() {
     "/EmployeeTransfer",
     "/UserProfile",
     "/AllStudentsData",
-    "/Purchasehistory"
+    "/Purchasehistory",
+    "/ProjectDetail"
   ]);
 
   const hiddenFooter1 = new Set([
@@ -234,12 +236,14 @@ function AppContent() {
         <Route path="/RunningProjects" element={<RunningProjects />} />
         <Route path="/ServicesPage" element={<ServicesPage />} />
         <Route path="/Certificate" element={<Certificate/>} />
+        <Route path="/ProjectDetail" element={<ProjectDetail/>} />
     
 
         
 
         {/* Hr  Payroll (protected) */}
-        <Route
+       
+         <Route
           path="/LeaveStatus"
           element={
             <ProtectedRoute>
