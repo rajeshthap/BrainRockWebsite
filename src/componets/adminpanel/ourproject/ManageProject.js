@@ -14,14 +14,14 @@ const ManageProject = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
-
+  
   // Data state
   const [projects, setProjects] = useState([]);
   const [firms, setFirms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [firmsLoading, setFirmsLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentEditProject, setCurrentEditProject] = useState(null);
@@ -42,7 +42,7 @@ const ManageProject = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [message, setMessage] = useState("");
   const [variant, setVariant] = useState("success");
-
+  
   // Pagination and search state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
@@ -68,13 +68,13 @@ const ManageProject = () => {
         const response = await fetch(`${API_BASE_URL}/api/firm/`, {
           credentials: 'include'
         });
-
+        
         if (!response.ok) {
           throw new Error('Failed to fetch firms');
         }
-
+        
         const result = await response.json();
-
+        
         if (result.success) {
           setFirms(result.data);
         } else {
@@ -109,12 +109,12 @@ const ManageProject = () => {
         // Process data to construct full image URLs and format dates
         const processedProjects = projectsData.map(project => {
           const processedProject = { ...project };
-
+          
           // Format logo URL
           if (project.company_logo) {
             processedProject.company_logo = `${API_BASE_URL}${project.company_logo}?t=${Date.now()}`;
           }
-
+          
           // Format created_at date
           if (project.created_at) {
             const createdDate = new Date(project.created_at);
@@ -124,7 +124,7 @@ const ManageProject = () => {
               day: 'numeric'
             });
           }
-
+          
           return processedProject;
         });
 
@@ -144,24 +144,24 @@ const ManageProject = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   // Filter projects based on search term
-  const filteredProjects = searchTerm.trim() === ''
-    ? projects
+  const filteredProjects = searchTerm.trim() === '' 
+    ? projects 
     : projects.filter((project) => {
-      const lowerSearch = searchTerm.toLowerCase();
-      return (
-        project.title?.toLowerCase().includes(lowerSearch) ||
-        project.firm_name?.toLowerCase().includes(lowerSearch) ||
-        project.status?.toLowerCase().includes(lowerSearch) ||
-        project.description?.toLowerCase().includes(lowerSearch)
-      );
-    });
-
+        const lowerSearch = searchTerm.toLowerCase();
+        return (
+          project.title?.toLowerCase().includes(lowerSearch) ||
+          project.firm_name?.toLowerCase().includes(lowerSearch) ||
+          project.status?.toLowerCase().includes(lowerSearch) ||
+          project.description?.toLowerCase().includes(lowerSearch)
+        );
+      });
+  
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredProjects.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
-
+  
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   // Handle delete
@@ -177,24 +177,24 @@ const ManageProject = () => {
           credentials: 'include',
           body: dataToSend,
         });
-
+        
         if (!response.ok) {
           throw new Error('Failed to delete project');
         }
-
+        
         setProjects(prevData => prevData.filter(item => item.id !== id));
-
+        
         setMessage("Project deleted successfully!");
         setVariant("success");
         setShowAlert(true);
-
+        
         setTimeout(() => setShowAlert(false), 3000);
       } catch (error) {
         console.error('Error deleting project:', error);
         setMessage(error.message || "Failed to delete project");
         setVariant("danger");
         setShowAlert(true);
-
+        
         setTimeout(() => setShowAlert(false), 5000);
       }
     }
@@ -222,7 +222,7 @@ const ManageProject = () => {
   // Handle edit form input changes
   const handleEditChange = (e) => {
     const { name, value, files } = e.target;
-
+    
     if (name === 'company_logo') {
       const file = files[0];
       if (file) {
@@ -253,102 +253,102 @@ const ManageProject = () => {
   // Handle edit form submission
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-
+    
     let tempLogoUrl = null;
     if (hasLogoChanged && editFormData.company_logo) {
       tempLogoUrl = URL.createObjectURL(editFormData.company_logo);
     }
-
+    
     const originalProjectData = projects.find(p => p.id === currentEditProject.id);
-
+    
     // Update UI immediately with new data
-    setProjects(prevData =>
-      prevData.map(item =>
-        item.id === currentEditProject.id
+    setProjects(prevData => 
+      prevData.map(item => 
+        item.id === currentEditProject.id 
           ? {
-            ...item,
-            title: editFormData.title,
-            description: editFormData.description,
-            company_logo: hasLogoChanged ? tempLogoUrl : item.company_logo,
-            firm_id: editFormData.firm_id,
-            firm_name: editFormData.firm_name,
-            project_link: editFormData.project_link,
-            status: editFormData.status
-          }
+              ...item,
+              title: editFormData.title,
+              description: editFormData.description,
+              company_logo: hasLogoChanged ? tempLogoUrl : item.company_logo,
+              firm_id: editFormData.firm_id,
+              firm_name: editFormData.firm_name,
+              project_link: editFormData.project_link,
+              status: editFormData.status
+            } 
           : item
       )
     );
-
+    
     setShowEditModal(false);
-
+    
     const dataToSend = new FormData();
     // MANDATORY: Send project_id in payload
-    dataToSend.append('project_id', currentEditProject.project_id);
+    dataToSend.append('project_id', currentEditProject.project_id); 
     dataToSend.append('title', editFormData.title);
     dataToSend.append('description', editFormData.description);
     dataToSend.append('firm_id', editFormData.firm_id);
     dataToSend.append('firm_name', editFormData.firm_name);
     dataToSend.append('project_link', editFormData.project_link);
     dataToSend.append('status', editFormData.status);
-
+    
     if (hasLogoChanged && editFormData.company_logo) {
       dataToSend.append('company_logo', editFormData.company_logo);
     }
-
+    
     try {
       const response = await fetch(`${API_BASE_URL}/api/ourproject-items/`, {
         method: 'PUT',
         credentials: 'include',
         body: dataToSend,
       });
-
+      
       if (!response.ok) {
         // Revert to original data if update fails
-        setProjects(prevData =>
-          prevData.map(item =>
+        setProjects(prevData => 
+          prevData.map(item => 
             item.id === currentEditProject.id ? originalProjectData : item
           )
         );
         throw new Error('Failed to update project');
       }
-
+      
       const apiResponseData = await response.json();
-
+      
       if (tempLogoUrl) {
         URL.revokeObjectURL(tempLogoUrl);
       }
-
+      
       // Final update with data from API response (e.g., new logo URL)
-      setProjects(prevData =>
-        prevData.map(item =>
-          item.id === currentEditProject.id
+      setProjects(prevData => 
+        prevData.map(item => 
+          item.id === currentEditProject.id 
             ? {
-              ...item,
-              title: editFormData.title,
-              description: editFormData.description,
-              company_logo: hasLogoChanged && apiResponseData.data && apiResponseData.data.company_logo
-                ? `${API_BASE_URL}${apiResponseData.data.company_logo}?t=${Date.now()}`
-                : item.company_logo,
-              firm_id: editFormData.firm_id,
-              firm_name: editFormData.firm_name,
-              project_link: editFormData.project_link,
-              status: editFormData.status
-            }
+                ...item,
+                title: editFormData.title,
+                description: editFormData.description,
+                company_logo: hasLogoChanged && apiResponseData.data && apiResponseData.data.company_logo
+                    ? `${API_BASE_URL}${apiResponseData.data.company_logo}?t=${Date.now()}`
+                    : item.company_logo,
+                firm_id: editFormData.firm_id,
+                firm_name: editFormData.firm_name,
+                project_link: editFormData.project_link,
+                status: editFormData.status
+              } 
             : item
         )
       );
-
+      
       setMessage("Project updated successfully!"); // Updated success message
       setVariant("success");
       setShowAlert(true);
-
+      
       setTimeout(() => setShowAlert(false), 3000);
     } catch (error) {
       console.error('Error updating project:', error);
       setMessage(error.message || "Failed to update project");
       setVariant("danger");
       setShowAlert(true);
-
+      
       setTimeout(() => setShowAlert(false), 5000);
     }
   };
@@ -380,13 +380,13 @@ const ManageProject = () => {
                 />
               </div>
             </div>
-
+            
             {showAlert && (
               <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
                 {message}
               </Alert>
             )}
-
+            
             {loading ? (
               <div className="text-center my-5">
                 <Spinner animation="border" role="status">
@@ -422,7 +422,7 @@ const ManageProject = () => {
                               </Card.Subtitle>
                             </div>
                           </div>
-                          <Card.Text className="mb-2">{project.description}</Card.Text>
+                          <Card.Text className="mb-2 preline-textarea">{project.description}</Card.Text>
                           <div className="mb-2">
                             <small className="text-muted">Status: </small>
                             <Badge bg={project.status === 'ongoing' ? 'warning' : 'success'}>
@@ -496,7 +496,7 @@ const ManageProject = () => {
           </div>
         </Container>
       </div>
-
+      
       {/* Edit Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
         <Modal.Header closeButton>
@@ -514,7 +514,7 @@ const ManageProject = () => {
                 required
               />
             </Form.Group>
-
+            
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
               <Form.Control
@@ -527,7 +527,7 @@ const ManageProject = () => {
                 required
               />
             </Form.Group>
-
+            
             <Row>
               <Col lg={6} md={6} sm={12}>
                 <Form.Group className="mb-3">
@@ -579,7 +579,7 @@ const ManageProject = () => {
                 placeholder="https://example.com"
               />
             </Form.Group>
-
+            
             <Form.Group className="mb-3">
               <Form.Label>Company Logo</Form.Label>
               <Form.Control
@@ -590,10 +590,10 @@ const ManageProject = () => {
               />
               {logoPreview && (
                 <div className="mt-3">
-                  <img
-                    src={logoPreview}
-                    alt="Company Logo Preview"
-                    style={{ maxWidth: '100px', maxHeight: '100px' }}
+                  <img 
+                    src={logoPreview} 
+                    alt="Company Logo Preview" 
+                    style={{ maxWidth: '100px', maxHeight: '100px' }} 
                   />
                 </div>
               )}
