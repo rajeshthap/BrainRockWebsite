@@ -254,6 +254,7 @@ const ManageStudent = () => {
                           <th>Email</th>
                           <th>Phone</th>
                           <th>Course</th>
+                          <th>Mode</th>
                           <th>Status</th>
                           <th>Date</th>
                           <th>Action</th>
@@ -267,6 +268,7 @@ const ManageStudent = () => {
                               <td data-th="Email">{student.email}</td>
                               <td data-th="Phone">{student.mobile_no}</td>
                               <td data-th="Course">{formatCourseList(student.application_for_course)}</td>
+                               <td data-th="Mode">{student.course_mode}</td>
                               <td data-th="Status">
                                 <span className={`badge bg-${getStatusVariant(student.course_status)} me-2`}>
                                   {student.course_status}
