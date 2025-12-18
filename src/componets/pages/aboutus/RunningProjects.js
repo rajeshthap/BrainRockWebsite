@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import FooterPage from "../../footer/FooterPage";
 import "../../../assets/css/aboutus.css";
 import "../../../assets/css/project.css";
+import { FaArrowRight } from "react-icons/fa";
 
 const API_BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
 
@@ -90,9 +91,9 @@ function RunningProjects() {
                     {project.description?.slice(0, 120)}...
                   </p>
 
-                  <div className="read-more-btn" style={{ color: "blue" }}>
-  Read More
-</div>
+                  <Link to className="feature-btn">
+                    Read More<i class="ti-arrow-right"><FaArrowRight /></i>
+</Link>
 
                 </div>
               </div>
