@@ -57,14 +57,14 @@ function UserPage() {
     description: "",
     image: null,
   });
-  const [techStackLoading, setTechStackLoading] = useState(true);
-  const [techStackError, setTechStackError] = useState(null);
+  const [, setTechStackLoading] = useState(true);
+  const [, setTechStackError] = useState(null);
   const [techImageTimestamp, setTechImageTimestamp] = useState(Date.now());
 
   // State for IT service data
-  const [itServiceData, setItServiceData] = useState([]);
-  const [itServiceLoading, setItServiceLoading] = useState(true);
-  const [itServiceError, setItServiceError] = useState(null);
+  const [, setItServiceData] = useState([]);
+  const [, setItServiceLoading] = useState(true);
+  const [, setItServiceError] = useState(null);
 
   useEffect(() => {
     // Function to fetch carousel data from API
