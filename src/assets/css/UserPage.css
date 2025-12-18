@@ -384,6 +384,10 @@
     color: var(--br-white);
 }
 
+.feature-box:hover .feature-btn {
+    color: var(--br-white);
+}
+
 .feature-btn {
     color: #1973d8;
     text-decoration: none;
