@@ -129,15 +129,15 @@ function Courses() {
                       {course.formattedOfferPrice ? (
                         <>
                           <p className="course-info" style={{ marginBottom: '4px' }}>
-                           Offer Price <span
+                            Offer Price <span
                               className="course-value"
-                             
+
                             >
                               {course.formattedOfferPrice}
                             </span>
                           </p>
 
-                          <p className="course-info" style={{ fontSize: '14px', color: '#555' }}>
+                          <p className="course-info" >
                             Price:&nbsp;
                             <span style={{ textDecoration: 'line-through' }}>
                               {course.formattedPrice}
