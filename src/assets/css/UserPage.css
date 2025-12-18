@@ -4,7 +4,9 @@
     background-position: center;
     background-repeat: no-repeat;
 }
-
+.feature-desc p{
+    text-align: justify !important;
+}
 .flaticon-cloud img {
     border-radius: 10px !important;
 }
