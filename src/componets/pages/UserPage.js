@@ -10,9 +10,7 @@ import Banner1 from "../../assets/images/banner-1.png";
 import Banner2 from "../../assets/images/banner-2.png";
 
 import "../../assets/css/slider.css";
-import { LuBrainCircuit } from "react-icons/lu";
-import { SiCircuitverse } from "react-icons/si";
-import { SiAmazoncloudwatch } from "react-icons/si";
+
 import TechImg from "../../assets/images/shield-bg.png";
 import { TbSettingsCode } from "react-icons/tb";
 import { GrShieldSecurity } from "react-icons/gr";
@@ -23,7 +21,7 @@ import TestimonialCarousel from "./TestimonialCarousel";
 import TopNotificationBanner from "./TopNotificationBanner";
 import { GoCodeReview } from "react-icons/go";
 import { MdEngineering } from "react-icons/md";
-import { Link } from "react-router-dom";
+
 import FooterPage from "../footer/FooterPage";
 import ServicesPage from "./ServicesPage";
 

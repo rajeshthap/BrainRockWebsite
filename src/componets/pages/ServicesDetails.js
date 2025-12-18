@@ -4,8 +4,15 @@ import "../../assets/css/aboutus.css";
 import { useLocation, Link } from "react-router-dom";
 import { LuBrainCircuit } from "react-icons/lu";
 import FooterPage from "../footer/FooterPage";
+import { FaArrowLeft } from "react-icons/fa";
+import "../../assets/css/UserPage.css"
 
 const ServicesDetails = () => {
+
+  // Scroll to top when component mounts
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   const location = useLocation();
   const serviceId = location.state?.serviceId;
   const serviceData = location.state?.serviceData;
@@ -79,7 +86,7 @@ const ServicesDetails = () => {
         <Container className="ourteam-box">
           <div className="my-3 main-mt-0 text-center">
             <p>Error: {error}</p>
-            <Link to="/services" className="btn btn-primary mt-3">Back to Services</Link>
+            <Link to="/ServicesPage" className="btn btn-primary mt-3">Back to Services</Link>
           </div>
         </Container>
       </div>
@@ -93,7 +100,7 @@ const ServicesDetails = () => {
         <Container className="ourteam-box">
           <div className="my-3 main-mt-0 text-center">
             <p>No service data available</p>
-            <Link to="/services" className="btn btn-primary mt-3">Back to Services</Link>
+            <Link to="/ServicesPage" className="btn btn-primary mt-3">Back to Services</Link>
           </div>
         </Container>
       </div>
@@ -125,10 +132,13 @@ const ServicesDetails = () => {
         <Container className="ourteam-box">
           <div className="my-3 main-mt-0">
             <Row>
-              <Col md={12} className="text-center mb-4">
+              <div className="text-center d-flex justify-content-between">
               
-                <h2 className="section-heading mt-3">{service.title}</h2>
-              </Col>
+                <h2 className="section-heading">{service.title}</h2>
+                
+                <Link to="/ServicesPage" className="btn back-btn"> <i className="feature-btn"><FaArrowLeft /> </i>Back to Services</Link>
+          
+              </div>
               <Col md={12}>
                 <div className="service-details-content">
                   <p style={{ whiteSpace: "pre-line" }}>{service.description}</p>
@@ -146,9 +156,7 @@ const ServicesDetails = () => {
                   )}
                 </div>
               </Col>
-              <Col md={12} className="text-center mt-4">
-                <Link to="/ServicesPage" className="btn btn-primary back-btn">Back to Services</Link>
-              </Col>
+              
             </Row>
           </div>
         </Container>

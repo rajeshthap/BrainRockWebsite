@@ -185,7 +185,7 @@ function AppContent() {
     "/UserProfile",
     "/AllStudentsData",
     "/Purchasehistory",
-    "/ProjectDetail"
+  
   ]);
 
   const hiddenFooter1 = new Set([

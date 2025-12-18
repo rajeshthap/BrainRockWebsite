@@ -82,9 +82,9 @@ console.log("Fetching details for project ID:", projectId);
       <Container className="ourteam-box-training mt-4 mb-3">
         <div className="my-3 main-mt-0">
           <div className="m-3 mobile-register">
-            <h3 className="section-heading m-0">
+            <h2 className="section-heading  m-0">
               {project.title}
-            </h3>
+            </h2>
           </div>
 
           <div className="training-wrapper p-2">
