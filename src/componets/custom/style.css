@@ -103,7 +103,9 @@ body {
 .preline-textarea {
   white-space: pre-line !important;
 }
-
+.back-btn{
+font-size: 12px;
+}
 .breadcrumb-menu li {
   cursor: pointer;
   transition: 0.3s;

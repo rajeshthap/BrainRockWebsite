@@ -25,6 +25,7 @@ import { GoCodeReview } from "react-icons/go";
 import { MdEngineering } from "react-icons/md";
 import { Link } from "react-router-dom";
 import FooterPage from "../footer/FooterPage";
+import ServicesPage from "./ServicesPage";
 
 function UserPage() {
   // Helper function to truncate text to 20 words
@@ -366,7 +367,7 @@ function UserPage() {
                     </div>
                   </Col>
                   <Col lg={5} md={5} sm={12} className="banner-img">
-                   / <div>
+                   <div>
                       <i>
                         {/* <img
                           src={item.image || Banner1} // Use fallback image if item.image is null
@@ -385,190 +386,8 @@ function UserPage() {
       </div>
       <div />
       <Container>
-        <Row className="feature-area feature-minus">
-          <Container>
-            <div className="feature-wpr grid-3">
-              {itServiceLoading ? (
-                // Show loading state while fetching data
-                Array(3)
-                  .fill()
-                  .map((_, index) => (
-                    <div className="feature-box" key={index}>
-                      <div className="feature-icon">
-                        <i class="flaticon-cloud">
-                          <div
-                            className="spinner-border spinner-border-sm"
-                            role="status"
-                          >
-                            <span className="visually-hidden">Loading...</span>
-                          </div>
-                        </i>
-                      </div>
-                      <div className="flaticon-cloud"></div>
-                      <div className="feature-desc">
-                        <h4>Loading...</h4>
-                        <p>Loading content...</p>
-                        <Link to="/ServicesPage" className="feature-btn">
-                          Read More
-                          <i className="ti-arrow-right">
-                            <FaArrowRight />
-                          </i>
-                        </Link>
-                      </div>
-                    </div>
-                  ))
-              ) : itServiceError ? (
-                // Show error state if API call fails
-                Array(3)
-                  .fill()
-                  .map((_, index) => (
-                    <div className="feature-box" key={index}>
-                      <div className="feature-icon">
-                        <i class="flaticon-cloud">
-                          <LuBrainCircuit />
-                        </i>
-                      </div>
-                      <div className="flaticon-cloud"></div>
-                      <div className="feature-desc">
-                        <h4>Error Loading Data</h4>
-                        <p>
-                          Unable to load service information. Please try again
-                          later.
-                        </p>
-                        <Link to="/ServicesPage" className="feature-btn">
-                          Read More
-                          <i className="ti-arrow-right">
-                            <FaArrowRight />
-                          </i>
-                        </Link>
-                      </div>
-                    </div>
-                  ))
-              ) : itServiceData.length > 0 ? (
-                // Map over the IT service data to render items dynamically
-                itServiceData.map((item, index) => (
-                  <div className="feature-box" key={item.id}>
-                    <div className="feature-icon">
-                      <i class="flaticon-cloud">{renderIcon(item.icon)}</i>
-                    </div>
-                    <div className="flaticon-cloud"></div>
-                    <div className="feature-desc">
-                      <h4>{item.title}</h4>
-                      {/* MODIFIED: Added truncateText function with 20 word limit */}
-                      <p style={{ whiteSpace: "pre-line" }}>
-                        {truncateText(item.description)}
-                      </p>
-                      {/* MODIFIED: Updated Link to navigate to ServicesPage and pass full description in state */}
-                      <Link
-                        to="/ServicesPage"
-                        state={{ 
-                          serviceId: item.id,
-                          fullDescription: item.description // Pass full description
-                        }}
-                        className="feature-btn"
-                      >
-                        Read More
-                        <i className="ti-arrow-right">
-                          <FaArrowRight />
-                        </i>
-                      </Link>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                // Fallback to hardcoded data if no data is available
-                <>
-                  <div className="feature-box">
-                    <div className="feature-icon">
-                      <i class="flaticon-cloud">
-                        <LuBrainCircuit />
-                      </i>
-                    </div>
-                    <div className="flaticon-cloud"></div>
-                    <div className="feature-desc">
-                      <h4>It Solution</h4>
-                      {/* MODIFIED: Added truncateText function with 20 word limit */}
-                      <p>
-                        {truncateText("It Solution It is a long established fact that a reader will be distracted by the readable content fact that a reader will")}
-                      </p>
-                      {/* MODIFIED: Updated Link to navigate to ServicesPage and pass full description in state */}
-                      <Link
-                        to="/ServicesPage"
-                        state={{ 
-                          serviceId: 1,
-                          fullDescription: "It Solution It is a long established fact that a reader will be distracted by the readable content fact that a reader will"
-                        }}
-                        className="feature-btn"
-                      >
-                        Read More
-                        <i className="ti-arrow-right">
-                          <FaArrowRight />
-                        </i>
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="feature-box">
-                    <div className="feature-icon">
-                      <i class="flaticon-cloud">
-                        <SiCircuitverse />
-                      </i>
-                    </div>
-                    <div className="flaticon-cloud"></div>
-                    <div className="feature-desc">
-                      <h4>It Management</h4>
-                      {/* MODIFIED: Added truncateText function with 20 word limit */}
-                      <p>
-                        {truncateText("It is a long established fact that a reader will be distracted by the readable content fact that a reader will")}
-                      </p>
-                      {/* MODIFIED: Updated Link to navigate to ServicesPage and pass full description in state */}
-                      <Link
-                        to="/ServicesPage"
-                        state={{ 
-                          serviceId: 2,
-                          fullDescription: "It is a long established fact that a reader will be distracted by the readable content fact that a reader will"
-                        }}
-                        className="feature-btn"
-                      >
-                        Read More
-                        <i className="ti-arrow-right">
-                          <FaArrowRight />
-                        </i>
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="feature-box">
-                    <div className="feature-icon">
-                      <i class="flaticon-cloud">
-                        <SiAmazoncloudwatch />
-                      </i>
-                    </div>
-                    <div className="flaticon-cloud"></div>
-                    <div className="feature-desc">
-                      <h4>It Consultancy</h4>
-                      {/* MODIFIED: Added truncateText function with 20 word limit */}
-                      <p>
-                        {truncateText("It is a long established fact that a reader will be distracted by the readable content fact that a reader will")}
-                      </p>
-                      {/* MODIFIED: Updated Link to navigate to ServicesPage and pass full description in state */}
-                      <Link
-                        to="/ServicesPage"
-                        state={{ 
-                          serviceId: 3,
-                          fullDescription: "It is a long established fact that a reader will be distracted by the readable content fact that a reader will"
-                        }}
-                        className="feature-btn"
-                      >
-                        Read More
-                        <i className="ti-arrow-right">
-                          <FaArrowRight />
-                        </i>
-                      </Link>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </Container>
+        <Row className="feature-area feature-minus ">
+        <ServicesPage showBannerAndFooter={false}/>
         </Row>
       </Container>
       <Container fluid>

@@ -1,63 +1,63 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card } from "react-bootstrap";
-import "../../assets/css/course.css";
+import { Container, Row, Col } from "react-bootstrap";
+import "../../assets/css/aboutus.css";
 import { useLocation, Link } from "react-router-dom";
+import { LuBrainCircuit } from "react-icons/lu";
 import FooterPage from "../footer/FooterPage";
 
 const ServicesDetails = () => {
   const location = useLocation();
-  const serviceId = location.state?.serviceId; // Get the service ID from navigation state
-  const [serviceData, setServiceData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const serviceId = location.state?.serviceId;
+  const serviceData = location.state?.serviceData;
+  
+  const [service, setService] = useState(serviceData || null);
+  const [loading, setLoading] = useState(!serviceData);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch all services and then find the specific one by ID
-    const fetchData = async () => {
-      try {
-        if (!serviceId) {
-          throw new Error('No service ID provided');
-        }
-        
-        // Fetch all services
-        const response = await fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/itservice-items/`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch services data');
-        }
-        const result = await response.json();
-        
-        // Check if the API response is successful
-        if (result.success && result.data) {
-          // Find the specific service by ID from the response
-          const foundService = result.data.find(service => service.id == serviceId);
-          
-          if (!foundService) {
-            throw new Error(`Service with ID ${serviceId} not found`);
-          }
-          
-          // Process the data
-          const processedData = {
-            id: foundService.id,
-            title: foundService.title,
-            description: foundService.description,
-            modules: foundService.modules || [],
-            icon: foundService.icon
-              ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${foundService.icon}`
-              : null,
-          };
-          setServiceData(processedData);
-        } else {
-          throw new Error("API returned unsuccessful response");
-        }
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+    // If we don't have service data from state, fetch it using the ID
+    if (!serviceData && serviceId) {
+      const fetchServiceData = async () => {
+        try {
+          const response = await fetch(
+            `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/itservice-items/${serviceId}`
+          );
 
-    fetchData();
-  }, [serviceId]); // Re-run effect when serviceId changes
+          if (!response.ok) {
+            throw new Error("Failed to fetch service data");
+          }
+
+          const result = await response.json();
+
+          if (result.success) {
+            const data = {
+              ...result.data,
+              icon: result.data.icon
+                ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${result.data.icon}`
+                : null,
+            };
+            setService(data);
+          } else {
+            throw new Error("API returned unsuccessful response");
+          }
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchServiceData();
+    } else if (serviceData) {
+      setLoading(false);
+    }
+  }, [serviceId, serviceData]);
+
+  // Render icon from URL OR default icon
+  const renderIcon = (iconUrl) => {
+    if (!iconUrl) return <LuBrainCircuit />;
+    return <img src={iconUrl} alt="service-icon" style={{ width: "80px" }} />;
+  };
 
   // Render loading state
   if (loading) {
@@ -79,102 +79,85 @@ const ServicesDetails = () => {
         <Container className="ourteam-box">
           <div className="my-3 main-mt-0 text-center">
             <p>Error: {error}</p>
-            <Link to="/" className="btn btn-primary mt-3">Back to Home</Link>
+            <Link to="/services" className="btn btn-primary mt-3">Back to Services</Link>
           </div>
         </Container>
       </div>
     );
   }
 
-  // Check if serviceData exists
-  if (!serviceData) {
+  // Check if service data exists
+  if (!service) {
     return (
       <div className="ourteam-section">
         <Container className="ourteam-box">
           <div className="my-3 main-mt-0 text-center">
             <p>No service data available</p>
-            <Link to="/" className="btn btn-primary mt-3">Back to Home</Link>
+            <Link to="/services" className="btn btn-primary mt-3">Back to Services</Link>
           </div>
         </Container>
       </div>
     );
   }
 
-  // Render the component with fetched data
   return (
-    <div className="ourteam-section">
-      <div className='serviceimg-banner'>
-                <div className='site-breadcrumb-wpr'>
-                  <h2 className='breadcrumb-title'>Our Services</h2>
-               <ul className='breadcrumb-menu clearfix'>
-          <li>
-            <Link className="breadcrumb-home" to="/">Home</Link>
-          </li>
-        
-          <li className='px-2'>/</li>
-        
-          <li>
-            <Link className="breadcrumb-about" to="/">Services</Link>
-          </li>
-        </ul>
-        
-                </div>
-              </div>
-      <Container className="ourteam-box">
-        <div className="my-3 main-mt-0">
-          {/* Title Section */}
-          <div className="m-3 mobile-register">
-            <div className="d-flex justify-content-between align-items-center">
-              <h3 className="section-heading m-0">
-                📚 {serviceData.title}
-              </h3>
-            </div>
-          </div>
-
-          <div className="training-wrapper p-2">
+    <>
+      <div className='Services-banner'>
+        <div className='site-breadcrumb-wpr'>
+          <h2 className='breadcrumb-title'>Our Services</h2>
+          <ul className='breadcrumb-menu clearfix'>
+            <li>
+              <Link className="breadcrumb-home" to="/">Home</Link>
+            </li>
+            <li className='px-2'>/</li>
+            <li>
+              <Link className="breadcrumb-about" to="/ServicesPage">Services</Link>
+            </li>
+            <li className='px-2'>/</li>
+            <li>
+              <span className="breadcrumb-current">{service.title}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div className="ourteam-section">
+        <Container className="ourteam-box">
+          <div className="my-3 main-mt-0">
             <Row>
-              {/* Left Column (Course Content) */}
-              <Col md={12} sm={12} className="mb-4">
-                {/* Service Description */}
-                <div className="module-container">
-                  <div className="module-card">
-                    <div>
-                      <p>{serviceData.description}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Dynamically render modules from API */}
-                {serviceData.modules && serviceData.modules.length > 0 && (
-                  <>
-                    <h4 className="text-center my-4">Course Modules</h4>
-                    {serviceData.modules.map((module, index) => (
-                      <div className="module-container" key={index}>
-                        <h4 className="module-heading">
-                          <span className="module-number">{index + 1}</span>
-                          {module[0] || `Module ${index + 1}`}
-                        </h4>
-                        <div className="module-card">
-                          <div>
-                            <p>{module[1] || 'Module description'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
+              <Col md={12} className="text-center mb-4">
+              
+                <h2 className="section-heading mt-3">{service.title}</h2>
               </Col>
-              <div className="text-center">
-                <Link to="/ServicePage" className="btn btn-primary mt-3">Back to Services</Link>
-              </div>
+              <Col md={12}>
+                <div className="service-details-content">
+                  <p style={{ whiteSpace: "pre-line" }}>{service.description}</p>
+                  
+                  {service.modules && service.modules.length > 0 && (
+                    <div className="service-modules mt-4">
+                      <h3>Service Modules</h3>
+                      {service.modules.map((module, index) => (
+                        <div key={index} className="module-item">
+                          <h4>{module.title || `Module ${index + 1}`}</h4>
+                          <p>{module.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Col>
+              <Col md={12} className="text-center mt-4">
+                <Link to="/ServicesPage" className="btn btn-primary back-btn">Back to Services</Link>
+              </Col>
             </Row>
           </div>
-        </div>
-      </Container>
-      <Container fluid className="br-footer-box">
+        </Container>
+      </div>
+    
+      <Container fluid className="br-footer-box mt-4">
         <FooterPage />
       </Container>
-    </div>
+    </>
   );
 };
 
