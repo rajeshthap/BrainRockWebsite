@@ -75,7 +75,6 @@ function Courses() {
 
       <Container className='ourteam-box mt-4 mb-3' style={{ overflow: 'hidden' }}>
         <div className="ourteam-section">
-
           {loading && (
             <div className="text-center my-5">
               <Spinner animation="border" />
@@ -89,14 +88,19 @@ function Courses() {
           {!loading && !error && (
             <Row className="g-4" style={{ margin: '0' }}>
               {courses.map((course) => (
-                <Col key={course.id} lg={3} md={4} sm={6} xs={12} style={{ padding: '10px' }}>
+                <Col
+                  key={course.id}
+                  lg={3}
+                  md={4}
+                  sm={6}
+                  xs={12}
+                  className="d-flex"  // Add this to make column flex container
+                  style={{ padding: '10px' }}
+                >
                   <div
-                    className="service-box equal-card"
+                    className="service-box equal-card flex-fill d-flex flex-column"  // Added flex utilities
                     style={{
-                      height: 'auto',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      flexDirection: 'column'
+                      overflow: 'hidden'  // Removed height: auto as it's redundant
                     }}
                   >
                     <div className="service-icon text-center">
@@ -112,16 +116,11 @@ function Courses() {
                     </div>
 
                     <div
-                      className="service-desc course-sub-heading"
-                      style={{
-                        flex: '1 0 auto',
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}
+                      className="service-desc course-sub-heading flex-fill d-flex flex-column"  // Added flex utilities
                     >
                       <h4 className="heading-5">{course.title}</h4>
 
-                      <p style={{ flex: '1 0 auto' }}>
+                      <p className="flex-grow-1">  // Replaced custom flex with Bootstrap utility
                         {getShortDescription(course.description, 15)}
                       </p>
 
@@ -129,15 +128,12 @@ function Courses() {
                       {course.formattedOfferPrice ? (
                         <>
                           <p className="course-info" style={{ marginBottom: '4px' }}>
-                            Offer Price <span
-                              className="course-value"
-
-                            >
+                            Offer Price <span className="course-value">
                               {course.formattedOfferPrice}
                             </span>
                           </p>
 
-                          <p className="course-info" >
+                          <p className="course-info">
                             Price:&nbsp;
                             <span style={{ textDecoration: 'line-through' }}>
                               {course.formattedPrice}
@@ -159,7 +155,7 @@ function Courses() {
                       </p>
 
                       <button
-                        className="service-btn-read"
+                        className="service-btn-read mt-auto"  // Added mt-auto to push button to bottom
                         onClick={() =>
                           navigate("/Training", {
                             state: { courseId: course.id }
