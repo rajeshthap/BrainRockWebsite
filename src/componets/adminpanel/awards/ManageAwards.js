@@ -209,17 +209,26 @@ const ManageAwards = () => {
           [name]: file
         }));
       }
-    } else if (name.startsWith('module')) {
-      // Handle module inputs (string array)
+    } else if (name.startsWith('moduletitle')) {
+      // Handle module title
       const moduleIndex = parseInt(name.split('-')[1]);
+      setEditFormData(prev => {
+        const newModules = [...prev.modules];
+        newModules[moduleIndex] = { ...newModules[moduleIndex], title: value };
+        return { ...prev, modules: newModules };
+      });
+    } else if (name.startsWith('submodule')) {
+      // Handle submodule (point) input
+      const [_, moduleIndex, submoduleIndex] = name.split('-');
+      const mIndex = parseInt(moduleIndex);
+      const sIndex = parseInt(submoduleIndex);
       
       setEditFormData(prev => {
         const newModules = [...prev.modules];
-        newModules[moduleIndex] = value;
-        return {
-          ...prev,
-          modules: newModules
-        };
+        const newSubmodules = [...newModules[mIndex].submodules];
+        newSubmodules[sIndex] = value;
+        newModules[mIndex] = { ...newModules[mIndex], submodules: newSubmodules };
+        return { ...prev, modules: newModules };
       });
     } else {
       setEditFormData(prev => ({
@@ -233,7 +242,7 @@ const ManageAwards = () => {
   const addModuleToEdit = () => {
     setEditFormData(prev => ({
       ...prev,
-      modules: [...prev.modules, ""]
+      modules: [...prev.modules, { title: "", submodules: [""] }]
     }));
   };
 
@@ -243,6 +252,30 @@ const ManageAwards = () => {
       ...prev,
       modules: prev.modules.filter((_, i) => i !== index)
     }));
+  };
+
+  // Add a submodule (point) to a module in edit form
+  const addSubmoduleToEdit = (moduleIndex) => {
+    setEditFormData(prev => {
+      const newModules = [...prev.modules];
+      newModules[moduleIndex] = {
+        ...newModules[moduleIndex],
+        submodules: [...newModules[moduleIndex].submodules, ""]
+      };
+      return { ...prev, modules: newModules };
+    });
+  };
+
+  // Remove a submodule from a module in edit form
+  const removeSubmoduleFromEdit = (moduleIndex, submoduleIndex) => {
+    setEditFormData(prev => {
+      const newModules = [...prev.modules];
+      newModules[moduleIndex] = {
+        ...newModules[moduleIndex],
+        submodules: newModules[moduleIndex].submodules.filter((_, i) => i !== submoduleIndex)
+      };
+      return { ...prev, modules: newModules };
+    });
   };
 
   // Handle edit form submission
@@ -430,10 +463,20 @@ const ManageAwards = () => {
                             {item.description}
                           </Card.Text>
                           {item.modules && item.modules.length > 0 && (
-                            <div className="mt-2">
-                              <small style={{ color: '#666' }}>
-                                <strong>Modules: </strong>{item.modules.join(', ')}
-                              </small>
+                            <div className="mt-3" style={{ fontSize: '0.9rem' }}>
+                              <strong>Modules:</strong>
+                              {item.modules.map((module, idx) => (
+                                <div key={idx} style={{ marginTop: '8px', paddingLeft: '10px', borderLeft: '3px solid #007bff' }}>
+                                  <strong>{module.title || `Module ${idx + 1}`}</strong>
+                                  {module.submodules && module.submodules.length > 0 && (
+                                    <ul style={{ marginTop: '5px', marginBottom: '0', fontSize: '0.85rem' }}>
+                                      {module.submodules.map((point, pIdx) => (
+                                        <li key={pIdx}>{point}</li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           )}
                         </Card.Body>
@@ -525,28 +568,75 @@ const ManageAwards = () => {
             <Form.Group className="mb-3">
               <Form.Label>Award Modules/Details</Form.Label>
               <div className="modules-container">
-                {editFormData.modules && editFormData.modules.map((module, index) => (
-                  <div key={index} className="module-item mb-2 p-2 border rounded">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <small>Module {index + 1}</small>
+                {editFormData.modules && editFormData.modules.map((module, moduleIndex) => (
+                  <div key={moduleIndex} className="module-item mb-3 p-3 border rounded" style={{ backgroundColor: '#f9f9f9' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <small><strong>Module {moduleIndex + 1}</strong></small>
                       {editFormData.modules.length > 1 && (
                         <Button 
                           variant="outline-danger" 
                           size="sm"
-                          onClick={() => removeModuleFromEdit(index)}
+                          onClick={() => removeModuleFromEdit(moduleIndex)}
                         >
-                          Remove
+                          Remove Module
                         </Button>
                       )}
                     </div>
-                    <Form.Control
-                      as="textarea"
-                      rows={2}
-                      placeholder={`Enter module ${index + 1} description`}
-                      name={`module-${index}`}
-                      value={module}
-                      onChange={handleEditChange}
-                    />
+                    
+                    <Form.Group className="mb-2">
+                      <Form.Label className="small"><strong>Module Title</strong></Form.Label>
+                      <Form.Control
+                        type="text"
+                        size="sm"
+                        placeholder={`Enter module ${moduleIndex + 1} title`}
+                        name={`moduletitle-${moduleIndex}`}
+                        value={module.title || ""}
+                        onChange={handleEditChange}
+                        required
+                      />
+                    </Form.Group>
+
+                    <Form.Group>
+                      <Form.Label className="small"><strong>Module Points/Descriptions</strong></Form.Label>
+                      <div className="submodules-container" style={{ paddingLeft: '15px' }}>
+                        {module.submodules && module.submodules.map((submodule, submoduleIndex) => (
+                          <div key={submoduleIndex} className="mb-2 p-2 bg-white border rounded">
+                            <div className="d-flex justify-content-between align-items-start  gap-2">
+                              <div style={{ flex: 1 }}>
+                                <Form.Label className="small">Point {submoduleIndex + 1}</Form.Label>
+                                <Form.Control
+                                  as="textarea"
+                                  rows={2}
+                                  size="sm"
+                                  placeholder={`Enter point ${submoduleIndex + 1} description`}
+                                  name={`submodule-${moduleIndex}-${submoduleIndex}`}
+                                  value={submodule || ""}
+                                  onChange={handleEditChange}
+                                />
+                              </div>
+                              {module.submodules.length > 1 && (
+                                <Button 
+                                  variant="outline-danger" 
+                                  size="sm"
+                                  onClick={() => removeSubmoduleFromEdit(moduleIndex, submoduleIndex)}
+                                >
+                                  Remove
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        <Button 
+                          variant="outline-success" 
+                          size="sm"
+                          onClick={() => addSubmoduleToEdit(moduleIndex)}
+                          className="mt-2"
+                        >
+                          Add Point
+                        </Button>
+                      </div>
+                    </Form.Group>
                   </div>
                 ))}
                 
