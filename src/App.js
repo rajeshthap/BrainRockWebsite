@@ -115,6 +115,8 @@ import AddNotification from "./componets/adminpanel/Notification/AddNotification
 import EditNotification from "./componets/adminpanel/Notification/EditNotification";
 import AddStudent from "./componets/adminpanel/gallery/AddStudent";
 import ProjectDetail from "./componets/pages/aboutus/ProjectDetails";
+import AddAwards from "./componets/adminpanel/awards/AddAwards";
+import ManageAwards from "./componets/adminpanel/awards/ManageAwards";
 function AppContent() {
   const location = useLocation();
 
@@ -167,6 +169,8 @@ function AppContent() {
     "/ManageItServices",
     "/AddItServices",
     "/Feedbackget",
+    "/AddAwards",
+    "/ManageAwards",
     "/AddClient",
     "/EditClient",
     "/AddProject",
@@ -641,6 +645,24 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageItServices />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/AddAwards"
+          element={
+            <ProtectedRoute>
+              <AddAwards />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ManageAwards"
+          element={
+            <ProtectedRoute>
+              <ManageAwards />
             </ProtectedRoute>
           }
         />

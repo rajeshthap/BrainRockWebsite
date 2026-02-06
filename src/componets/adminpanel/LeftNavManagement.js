@@ -244,6 +244,22 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
             active: true,
         },
         {
+            icon: <FaTachometerAlt />,  // Updated icon
+            label: "Awards",
+            submenu: [
+                {
+                    label: "Add Award",
+                    path: "/AddAwards",
+                    icon: <FaPlusCircle />,
+                },
+                {
+                    label: "Manage Awards",
+                    path: "/ManageAwards",
+                    icon: <FaTachometerAlt />,
+                },
+            ],
+        },
+        {
             icon: <FaNetworkWired />,  // Updated icon
             label: "Our Tech Stack",
             submenu: [

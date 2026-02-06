@@ -17,6 +17,7 @@ import { GrShieldSecurity } from "react-icons/gr";
 import { LuSearchCode } from "react-icons/lu";
 import { AiOutlineFileDone } from "react-icons/ai";
 import ServicesCarousel from "./ServicesCarousel";
+import AwardsCarousel from "./AwardsCarousel";
 import TestimonialCarousel from "./TestimonialCarousel";
 import TopNotificationBanner from "./TopNotificationBanner";
 import { GoCodeReview } from "react-icons/go";
@@ -476,6 +477,7 @@ function UserPage() {
       </Container>
 
       <ServicesCarousel />
+      
       <div className="resorce-main-section ">
         <Container>
           <div className="resorce-sub-list-design">
@@ -746,6 +748,7 @@ function UserPage() {
           </div>
         </Container>
       </div>
+      <AwardsCarousel />
       <div>
         <Container fluid className="testimonial-bg">
           <Container>
