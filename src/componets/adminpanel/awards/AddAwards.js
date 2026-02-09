@@ -16,7 +16,7 @@ const AddAwards = () => {
     title: "",
     description: "",
     image: null,
-    modules: [{ title: "", submodules: [""] }] // Initialize with one empty module with submodules
+    modules: [[""]] // Initialize with one empty module [title only]
   });
   
   // State for image preview
@@ -72,24 +72,21 @@ const AddAwards = () => {
         setImagePreview(null);
       }
     } else if (name.startsWith('moduletitle')) {
-      // Handle module title
+      // Handle module title - updates first element of module array
       const moduleIndex = parseInt(name.split('-')[1]);
       setFormData(prev => {
         const newModules = [...prev.modules];
-        newModules[moduleIndex] = { ...newModules[moduleIndex], title: value };
+        newModules[moduleIndex][0] = value;
         return { ...prev, modules: newModules };
       });
-    } else if (name.startsWith('submodule')) {
-      // Handle submodule (point) input
-      const [_, moduleIndex, submoduleIndex] = name.split('-');
+    } else if (name.startsWith('moduledesc')) {
+      // Handle module description - updates subsequent array elements
+      const [_, moduleIndex, descIndex] = name.split('-');
       const mIndex = parseInt(moduleIndex);
-      const sIndex = parseInt(submoduleIndex);
-      
+      const dIndex = parseInt(descIndex);
       setFormData(prev => {
         const newModules = [...prev.modules];
-        const newSubmodules = [...newModules[mIndex].submodules];
-        newSubmodules[sIndex] = value;
-        newModules[mIndex] = { ...newModules[mIndex], submodules: newSubmodules };
+        newModules[mIndex][dIndex + 1] = value; // dIndex + 1 because index 0 is title
         return { ...prev, modules: newModules };
       });
     } else {
@@ -105,7 +102,7 @@ const AddAwards = () => {
   const addModule = () => {
     setFormData(prev => ({
       ...prev,
-      modules: [...prev.modules, { title: "", submodules: [""] }]
+      modules: [...prev.modules, [""]]
     }));
   };
 
@@ -117,26 +114,20 @@ const AddAwards = () => {
     }));
   };
 
-  // Add a submodule (point) to a module
-  const addSubmodule = (moduleIndex) => {
+  // Add a description to a module
+  const addDescriptionToModule = (moduleIndex) => {
     setFormData(prev => {
       const newModules = [...prev.modules];
-      newModules[moduleIndex] = {
-        ...newModules[moduleIndex],
-        submodules: [...newModules[moduleIndex].submodules, ""]
-      };
+      newModules[moduleIndex].push("");
       return { ...prev, modules: newModules };
     });
   };
 
-  // Remove a submodule (point) from a module
-  const removeSubmodule = (moduleIndex, submoduleIndex) => {
+  // Remove a description from a module
+  const removeDescriptionFromModule = (moduleIndex, descIndex) => {
     setFormData(prev => {
       const newModules = [...prev.modules];
-      newModules[moduleIndex] = {
-        ...newModules[moduleIndex],
-        submodules: newModules[moduleIndex].submodules.filter((_, i) => i !== submoduleIndex)
-      };
+      newModules[moduleIndex].splice(descIndex + 1, 1); // descIndex + 1 because index 0 is title
       return { ...prev, modules: newModules };
     });
   };
@@ -147,7 +138,7 @@ const AddAwards = () => {
       title: "",
       description: "",
       image: null,
-      modules: [{ title: "", submodules: [""] }] // Reset to one empty module
+      modules: [[""]]
     });
     setImagePreview(null);
     setMessage("");
@@ -170,8 +161,8 @@ const AddAwards = () => {
       dataToSend.append('image', formData.image, formData.image.name);
     }
     
-    // Add modules as JSON string (array of objects with title and submodules)
-    dataToSend.append('module', JSON.stringify(formData.modules));
+    // Add modules as JSON string (array where first element is title, rest are descriptions)
+    dataToSend.append('modules', JSON.stringify(formData.modules));
     
     try {
       // Using the provided API endpoint for awards
@@ -294,74 +285,72 @@ const AddAwards = () => {
                 <Form.Label>Award Modules/Details</Form.Label>
                 <div className="modules-container">
                   {formData.modules.map((module, moduleIndex) => (
-                    <div key={moduleIndex} className="module-item mb-3 p-3 border rounded" style={{ backgroundColor: '#f9f9f9' }}>
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h5>Module {moduleIndex + 1}</h5>
+                    <div key={moduleIndex} className="mb-3 p-3 border rounded" style={{ backgroundColor: '#f9f9f9' }}>
+                      <div className="d-flex justify-content-between align-items-start gap-3">
+                        <div style={{ flex: 1 }}>
+                          <Form.Group className="mb-3">
+                            <Form.Label className="small"><strong>Module {moduleIndex + 1} Title</strong></Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder={`Enter module ${moduleIndex + 1} title`}
+                              name={`moduletitle-${moduleIndex}`}
+                              value={module[0] || ""}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+
+                          {/* Descriptions for this module */}
+                          {module.map((description, descIndex) => (
+                            descIndex > 0 && (
+                              <div key={descIndex} className="mb-2 p-2 bg-white border rounded">
+                                <div className="d-flex justify-content-between align-items-start gap-2">
+                                  <div style={{ flex: 1 }}>
+                                    <Form.Label className="small"><strong>Description {descIndex}</strong></Form.Label>
+                                    <Form.Control
+                                      as="textarea"
+                                      rows={2}
+                                      placeholder={`Enter description ${descIndex}`}
+                                      name={`moduledesc-${moduleIndex}-${descIndex - 1}`}
+                                      value={description}
+                                      onChange={handleChange}
+                                    />
+                                  </div>
+                                  {module.length > 1 && (
+                                    <Button 
+                                      variant="outline-danger" 
+                                      size="sm"
+                                      onClick={() => removeDescriptionFromModule(moduleIndex, descIndex - 1)}
+                                      className="align-self-start"
+                                    >
+                                      Remove
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          ))}
+
+                          <Button 
+                            variant="outline-success" 
+                            size="sm"
+                            onClick={() => addDescriptionToModule(moduleIndex)}
+                            className="mt-2"
+                          >
+                            Add Description
+                          </Button>
+                        </div>
                         {formData.modules.length > 1 && (
                           <Button 
                             variant="outline-danger" 
                             size="sm"
                             onClick={() => removeModule(moduleIndex)}
+                            className="align-self-start"
                           >
                             Remove Module
                           </Button>
                         )}
                       </div>
-                      
-                      <Form.Group className="mb-3">
-                        <Form.Label><strong>Module Title</strong></Form.Label>
-                        <Form.Control
-                          type="text"
-                          placeholder={`Enter module ${moduleIndex + 1} title`}
-                          name={`moduletitle-${moduleIndex}`}
-                          value={module.title}
-                          onChange={handleChange}
-                          required
-                        />
-                      </Form.Group>
-
-                      <Form.Group>
-                        <Form.Label><strong>Module Points/Descriptions</strong></Form.Label>
-                        <div className="submodules-container" style={{ paddingLeft: '20px' }}>
-                          {module.submodules.map((submodule, submoduleIndex) => (
-                            <div key={submoduleIndex} className="mb-2 p-2 bg-white border rounded">
-                              <div className="d-flex justify-content-between align-items-start">
-                                <div style={{ flex: 1 }}>
-                                  <Form.Label className="small">Point {submoduleIndex + 1}</Form.Label>
-                                  <Form.Control
-                                    as="textarea"
-                                    rows={2}
-                                    placeholder={`Enter point ${submoduleIndex + 1} description`}
-                                    name={`submodule-${moduleIndex}-${submoduleIndex}`}
-                                    value={submodule}
-                                    onChange={handleChange}
-                                    required
-                                  />
-                                </div>
-                                {module.submodules.length > 1 && (
-                                  <Button 
-                                    variant="outline-danger" 
-                                    size="sm"
-                                    onClick={() => removeSubmodule(moduleIndex, submoduleIndex)}
-                                    className="ms-2"
-                                  >
-                                    Remove
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                          
-                          <Button 
-                            variant="outline-success" 
-                            size="sm"
-                            onClick={() => addSubmodule(moduleIndex)}
-                            className="mt-2"
-                          >
-                            Add Point
-                          </Button>
-                        </div>
-                      </Form.Group>
                     </div>
                   ))}
                   
