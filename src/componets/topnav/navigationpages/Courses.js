@@ -120,7 +120,7 @@ function Courses() {
                     >
                       <h4 className="heading-5">{course.title}</h4>
 
-                      <p className="flex-grow-1">  // Replaced custom flex with Bootstrap utility
+                      <p className="flex-grow-1">  
                         {getShortDescription(course.description, 15)}
                       </p>
 
