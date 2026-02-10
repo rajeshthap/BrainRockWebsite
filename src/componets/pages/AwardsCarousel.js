@@ -65,7 +65,7 @@ const AwardsCarousel = () => {
 
   // Helper function to render award box with text on left (8 cols) and image on right (4 cols)
   const renderAwardBox = (award) => (
-    <div className="about-box p-2" key={award.id}>
+    <div className="about-box" key={award.id}>
       <div className="" style={{ height: '100%' }}>
         <Row>
           {/* Left side - Text content (8 columns) */}
