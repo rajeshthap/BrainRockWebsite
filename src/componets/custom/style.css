@@ -3,9 +3,17 @@
 @font-face {
   font-family: 'Poppins', sans-serif;
 }
+.about-box:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
 
-
-
+.service-desc{
+  text-align: justify;
+}
+.bg-br{
+  background-color: #fff;
+}
 body {
 
 

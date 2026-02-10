@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import "../../assets/css/section.css";
-import { Container, Row, Col, Spinner, Modal, Button } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 
 const AwardsCarousel = () => {
-  
   // State for storing awards data
   const [awards, setAwards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // State for detail modal
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedAward, setSelectedAward] = useState(null);
   
   // Base URL for images
   const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
@@ -54,276 +49,234 @@ const AwardsCarousel = () => {
     fetchAwards();
   }, []);
 
-  // Handle opening detail modal
-  const handleAwardClick = (award) => {
-    setSelectedAward(award);
-    setShowDetailModal(true);
+  // Helper function to bold specific text in a string
+  const boldText = (text, target) => {
+    if (!text) return text;
+    const regex = new RegExp(`(${target})`, 'g');
+    return text.split(regex).map((part, index) => 
+      part === target ? (
+        <span key={index} style={{ 
+          color: '#000000', 
+          fontWeight: '700' 
+        }}>{part}</span>
+      ) : part
+    );
   };
 
-  // Handle closing detail modal
-  const handleCloseDetailModal = () => {
-    setShowDetailModal(false);
-    setSelectedAward(null);
-  };
-
-  return (
-    <div className="resorce-main-section">
-      <Container>
-        <div className="resorce-sub-list-design">
-          <div className="text-center">
-            <h1 className="hero-sub-title">
-              Brainrock{" "}
-              <span className="br-span-list1 mt-3">Rewards & Certifications</span>
-            </h1>
-          </div>
-
-          <Row>
-            {loading ? (
-              // Show loading state while fetching data
-              Array(6)
-                .fill()
-                .map((_, index) => (
-                  <Col
-                    lg={3}
-                    md={4}
-                    sm={6}
-                    xs={12}
-                    className="box-info"
-                    key={index}
-                  >
-                    <div className="service-box">
-                      <div className="service-icon" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: '200px'
-                      }}>
-                        <Spinner animation="border" role="status">
-                          <span className="visually-hidden">Loading...</span>
-                        </Spinner>
-                      </div>
-                      <div className="service-desc">
-                        <h4 className="heading-5">Loading...</h4>
-                        <p>Loading content...</p>
-                      </div>
-                    </div>
-                  </Col>
-                ))
-            ) : error ? (
-              // Show error state if API call fails
-              <Col lg={12} md={12} sm={12} className="text-center">
-                <div className="alert alert-danger" role="alert">
-                  <h4>Error loading awards</h4>
-                  <p>{error}</p>
-                </div>
-              </Col>
-            ) : awards.length > 0 ? (
-              // Map over the awards data to render items dynamically
-              awards.map((award) => (
-                <Col
-                  lg={3}
-                  md={4}
-                  sm={6}
-                  xs={12}
-                  key={award.id}
-                  className="box-info"
-                >
-                  <div className="service-box" style={{
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer',
-                    height: '100%'
-                  }}
-                  onClick={() => handleAwardClick(award)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-8px)';
-                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}>
-                    <div className="service-icon" style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minHeight: '200px',
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: '8px',
-                      overflow: 'hidden'
+  // Helper function to render award box with text on left (8 cols) and image on right (4 cols)
+  const renderAwardBox = (award) => (
+    <div className="about-box p-2" key={award.id}>
+      <div className="" style={{ height: '100%' }}>
+        <Row>
+          {/* Left side - Text content (8 columns) */}
+          <Col lg={8} md={8} sm={12} className="service-desc" style={{ padding: '0px 25px 25px 25px' }}>
+            <h4 className="heading-5" style={{ marginBottom: '20px', color: '#1973d8' }}>{award.title}</h4>
+            <p style={{
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: '#333',
+              marginBottom: '20px'
+            }}>
+               {boldText(award.description || "Award earned from Brainrock Consulting Services", "Quality Management System (QMS)")}
+            </p>
+            
+            {/* Business Credibility Highlight */}
+            
+              <p style={{
+                fontSize: '13px',
+                lineHeight: '1.5',
+                margin: '0'
+              }}>
+                
+               
+              </p>
+            
+            
+            {/* Display modules if available */}
+            {award.modules && award.modules.length > 0 && (
+              <div className="award-modules" style={{ marginTop: '20px' }}>
+                {award.modules.map((module, moduleIndex) => (
+                  <div key={moduleIndex} style={{ marginBottom: '20px' }}>
+                    {/* First item as title */}
+                    <p style={{ 
+                      fontWeight: 'bold', 
+                      fontSize: '12px', 
+                      marginBottom: '12px',
+                      color: '#1973d8',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
                     }}>
-                      {award.image ? (
-                        <img 
-                          src={award.image} 
-                          alt={award.title}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover'
-                          }}
-                        />
-                      ) : (
-                        <div style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#999',
-                          fontSize: '14px'
-                        }}>
-                          No Image
-                        </div>
-                      )}
-                    </div>
-                    <div className="service-desc">
-                      <h4 className="heading-5">{award.title}</h4>
-                      <p>
-                        {award.description && award.description.length > 100
-                          ? award.description.substring(0, 100) + "..."
-                          : award.description || "Award earned from Brainrock Consulting Services"}
-                      </p>
-                    </div>
+                      {module[0]}
+                    </p>
+                    {/* Remaining items as bullet points */}
+                    <ul style={{ 
+                      paddingLeft: '20px', 
+                      margin: '0', 
+                      fontSize: '14px',
+                      color: '#000',
+                      lineHeight: '1.5'
+                    }}>
+                      {module.slice(1).map((point, pointIndex) => {
+                        // Split the text at the first colon
+                        const colonIndex = point.indexOf(':');
+                        if (colonIndex !== -1) {
+                          const title = point.substring(0, colonIndex + 1); // Include the colon
+                          const description = point.substring(colonIndex + 1).trim(); // Text after the colon
+                          
+                          return (
+                            <li key={pointIndex} style={{ marginBottom: '8px' }}>
+                              <span style={{ fontWeight: 'bold' }}>{title}</span> {description}
+                            </li>
+                          );
+                        } else {
+                          // If no colon, render the text normally
+                          return (
+                            <li key={pointIndex} style={{ marginBottom: '8px' }}>
+                              {point}
+                            </li>
+                          );
+                        }
+                      })}
+                    </ul>
                   </div>
-                </Col>
-              ))
-            ) : (
-              // Show when no awards are available
-              <Col lg={12} md={12} sm={12} className="text-center">
-                <p>No awards available at the moment.</p>
-              </Col>
+                ))}
+              </div>
             )}
-          </Row>
-        </div>
-      </Container>
-
-      {/* Detail Modal */}
-      <Modal show={showDetailModal} onHide={handleCloseDetailModal} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{selectedAward?.title}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ maxHeight: '75vh', overflowY: 'auto', padding: '30px' }}>
-          {selectedAward && (
-            <div>
-              {/* Award Image */}
-              {selectedAward.image && (
-                <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+          </Col>
+          
+          {/* Right side - Image with button (4 columns) */}
+          <Col lg={4} md={4} sm={12} className="service-icon" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '200px',
+           
+            backgroundColor: '#f8f9fa',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            padding: '20px'
+          }}>
+            {award.image ? (
+              <>
+                <div style={{
+                  width: '100%',
+                  height: '75%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '20px',
+                  overflow: 'hidden',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '6px',
+                  padding: '10px'
+                }}>
                   <img 
-                    src={selectedAward.image} 
-                    alt={selectedAward.title}
+                    src={award.image} 
+                    alt={award.title}
                     style={{
-                      maxWidth: '100%',
-                      maxHeight: '350px',
+                      width: '100%',
+                      height: '100%',
                       objectFit: 'contain',
-                      borderRadius: '8px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      borderRadius: '4px'
                     }}
                   />
                 </div>
-              )}
-
-              {/* Title */}
-              <div style={{ marginBottom: '20px', textAlign: 'center', borderBottom: '2px solid #0056b3', paddingBottom: '15px' }}>
-                <h3 style={{ fontWeight: 'bold', color: '#333', margin: '0' }}>
-                  {selectedAward.title}
-                </h3>
+              
+              </>
+            ) : (
+              <div style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#999',
+                fontSize: '14px'
+              }}>
+                No Image
               </div>
-
-              {/* Description */}
-              <div style={{ marginBottom: '30px' }}>
-                <p style={{
-                  lineHeight: '1.8',
-                  color: '#555',
-                  fontSize: '15px',
-                  textAlign: 'justify'
-                }}>
-                  {selectedAward.description}
-                </p>
-              </div>
-
-              {/* Modules Section */}
-              {selectedAward.modules && selectedAward.modules.length > 0 ? (
-                <div style={{ marginTop: '30px', borderTop: '2px solid #e0e0e0', paddingTop: '25px' }}>
-                  <h4 style={{ marginBottom: '25px', fontWeight: '700', color: '#333', fontSize: '18px' }}>
-                    Core Purpose
-                  </h4>
-                  
-                  {selectedAward.modules.map((module, moduleIndex) => (
-                    <div key={moduleIndex} style={{
-                      marginBottom: '25px',
-                      paddingLeft: '15px',
-                      borderLeft: '4px solid #0056b3',
-                      backgroundColor: '#f8f9ff',
-                      padding: '15px',
-                      borderRadius: '4px'
-                    }}>
-                      {/* Module Title */}
-                      {module.title && (
-                        <h5 style={{
-                          marginBottom: '15px',
-                          color: '#0056b3',
-                          fontWeight: '700',
-                          fontSize: '16px',
-                          margin: '0 0 12px 0'
-                        }}>
-                          {module.title}
-                        </h5>
-                      )}
-
-                      {/* Submodules/Points */}
-                      {module.submodules && module.submodules.length > 0 ? (
-                        <ul style={{
-                          marginLeft: '0',
-                          paddingLeft: '20px',
-                          listStyleType: 'none',
-                          color: '#555'
-                        }}>
-                          {module.submodules.map((point, pointIndex) => (
-                            <li key={pointIndex} style={{
-                              marginBottom: '10px',
-                              lineHeight: '1.6',
-                              fontSize: '14px',
-                              position: 'relative',
-                              paddingLeft: '0'
-                            }}>
-                              <span style={{
-                                display: 'inline-block',
-                                width: '6px',
-                                height: '6px',
-                                backgroundColor: '#0056b3',
-                                borderRadius: '50%',
-                                marginRight: '10px',
-                                marginTop: '5px',
-                                verticalAlign: 'middle'
-                              }}></span>
-                              {point}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p style={{ color: '#999', fontSize: '14px', margin: '0', fontStyle: 'italic' }}>
-                          No details available
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ marginTop: '30px', borderTop: '2px solid #e0e0e0', paddingTop: '25px', textAlign: 'center' }}>
-                  <p style={{ color: '#999', fontSize: '14px', fontStyle: 'italic' }}>
-                    No additional details available for this award
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer style={{ borderTop: '1px solid #e0e0e0', padding: '15px 20px' }}>
-          <Button variant="secondary" onClick={handleCloseDetailModal}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            )}
+          </Col>
+        </Row>
+      </div>
     </div>
+  );
+
+  // Helper function to render loading box
+  const renderLoadingBox = (index) => (
+    <div className="about-box p-2 mb-4" key={index}>
+      <div className="" style={{ height: '100%' }}>
+        <Row>
+          <Col lg={8} md={8} sm={12} className="service-desc" style={{ padding: '25px' }}>
+            <h4 className="heading-5">Loading...</h4>
+            <p>Loading content...</p>
+          </Col>
+          <Col lg={4} md={4} sm={12} className="service-icon" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '200px',
+            height: '300px',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '8px',
+            padding: '20px'
+          }}>
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </Col>
+        </Row>
+      </div>
+    </div>
+  );
+
+  return (
+
+    <div className="resorce-main-section">
+          <Container className="bg-br">
+      <div className="resorce-sub-list-design">
+        <div className="text-center">
+          <h1 className="hero-sub-title">
+            Brainrock{" "}
+            <span className="br-span-list1 mt-3"> Certifications  & Authorizations</span>
+          </h1>
+        </div>
+
+        {loading ? (
+          // Show loading state while fetching data
+          <Row>
+            {Array(4).fill().map((_, index) => renderLoadingBox(index))}
+          </Row>
+        ) : error ? (
+          // Show error state if API call fails
+          <Row>
+            <Col lg={12} md={12} sm={12} className="text-center">
+              <div className="alert alert-danger" role="alert">
+                <h4>Error loading awards</h4>
+                <p>{error}</p>
+              </div>
+            </Col>
+          </Row>
+        ) : awards.length > 0 ? (
+          // Render awards with text on left (8 cols) and image on right (4 cols)
+          <Row>
+            {awards.map(award => renderAwardBox(award))}
+          </Row>
+        ) : (
+          // Show when no awards are available
+          <Row>
+            <Col lg={12} md={12} sm={12} className="text-center">
+              <p>No awards available at the moment.</p>
+            </Col>
+          </Row>
+        )}
+      </div>
+           </Container>
+    </div>
+ 
+  
+   
   );
 };
 
