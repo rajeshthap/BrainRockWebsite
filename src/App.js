@@ -117,6 +117,8 @@ import AddStudent from "./componets/adminpanel/gallery/AddStudent";
 import ProjectDetail from "./componets/pages/aboutus/ProjectDetails";
 import AddAwards from "./componets/adminpanel/awards/AddAwards";
 import ManageAwards from "./componets/adminpanel/awards/ManageAwards";
+import GenerateBill from "./componets/adminpanel/billgeneration/GenerateBill";
+import ManageBills from "./componets/adminpanel/billgeneration/ManageBills";
 function AppContent() {
   const location = useLocation();
 
@@ -189,6 +191,8 @@ function AppContent() {
     "/UserProfile",
     "/AllStudentsData",
     "/Purchasehistory",
+    "/GenerateBill",
+    "/ManageBills",
   
   ]);
 
@@ -663,6 +667,24 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageAwards />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/GenerateBill"
+          element={
+            <ProtectedRoute>
+              <GenerateBill />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ManageBills"
+          element={
+            <ProtectedRoute>
+              <ManageBills />
             </ProtectedRoute>
           }
         />

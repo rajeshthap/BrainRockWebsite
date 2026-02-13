@@ -32,6 +32,7 @@ import {
   FaNetworkWired,    // Added for tech stack
   FaTasks,           // Added for projects
   FaCloud,           // Added for IT services
+  FaFileInvoice,     // Added for bill generation
 } from "react-icons/fa";
 
 import axios from "axios";
@@ -245,15 +246,15 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
         },
         {
             icon: <FaTachometerAlt />,  // Updated icon
-            label: "Awards",
+            label: "BrainRock Certification",
             submenu: [
                 {
-                    label: "Add Award",
+                    label: "Add Certification",
                     path: "/AddAwards",
                     icon: <FaPlusCircle />,
                 },
                 {
-                    label: "Manage Awards",
+                    label: "Manage Certification",
                     path: "/ManageAwards",
                     icon: <FaTachometerAlt />,
                 },
@@ -299,6 +300,22 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
                     label: "Manage ItServices",
                     path: "/ManageItServices",
                     icon: <FaCloud />,
+                },
+            ],
+        },
+        {
+            icon: <FaFileInvoice />,  // Updated icon
+            label: "Bill Generation",
+            submenu: [
+                {
+                    label: "Generate Bill",
+                    path: "/GenerateBill",
+                    icon: <FaPlusCircle />,
+                },
+                {
+                    label: "Manage Bills",
+                    path: "/ManageBills",
+                    icon: <FaFileInvoice />,
                 },
             ],
         },
