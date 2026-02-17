@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner, Table, Pagination } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 import { AiOutlineFileDone, AiOutlineDelete } from "react-icons/ai";
@@ -13,6 +13,7 @@ const ManageBills = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Bill type selection state
   const [selectedBillType, setSelectedBillType] = useState(null);
@@ -50,7 +51,7 @@ const ManageBills = () => {
     cgst: 0,
     sgst: 0,
     total_paid_amount: 0,
-    items: [], // For UKSSOVM and Zee
+    items: [], // For BrainRock and Zee
   });
   const [updating, setUpdating] = useState(false);
 
@@ -70,6 +71,13 @@ const ManageBills = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [message, setMessage] = useState("");
   const [variant, setVariant] = useState("success");
+
+  // Set bill type from navigation state
+  useEffect(() => {
+    if (location.state?.billType) {
+      setSelectedBillType(location.state.billType);
+    }
+  }, [location.state]);
 
   // Responsive check
   useEffect(() => {
@@ -234,7 +242,7 @@ const ManageBills = () => {
     }));
   };
 
-  // Handle item change in edit modal for UKSSOVM
+  // Handle item change in edit modal for BrainRock
   const handleEditItemChange = (index, field, value) => {
     const updatedItems = [...editFormData.items];
     updatedItems[index] = {
@@ -510,7 +518,7 @@ const ManageBills = () => {
     // Create a new window for PDF content
     const printWindow = window.open("", "_blank");
     
-    const billType = selectedBillType === "ukssovm" ? "UKSSOVM" : "Zee Bill";
+    const billType = selectedBillType === "ukssovm" ? "BrainRock" : "Zee Bill";
     const title = `${billType} Bills Report`;
     
     let htmlContent = `
@@ -677,8 +685,8 @@ const ManageBills = () => {
                         e.currentTarget.style.boxShadow = "none";
                       }}
                     >
-                      <h4 className="mb-3">UKSSOVM</h4>
-                      <p className="text-muted">Click to manage UKSSOVM bills</p>
+                      <h4 className="mb-3">BrainRock</h4>
+                      <p className="text-muted">Click to manage BrainRock bills</p>
                     </div>
                   </Col>
 
@@ -713,7 +721,7 @@ const ManageBills = () => {
               // Bills Management Screen
               <>
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h2 className="mb-0">Manage Bills - {selectedBillType === "ukssovm" ? "UKSSOVM" : "Zee Bill"}</h2>
+                  <h2 className="mb-0">Manage Bills - {selectedBillType === "ukssovm" ? "BrainRock" : "Zee Bill"}</h2>
                   <Button variant="secondary" onClick={handleBackToSelection}>
                     ← Back to Selection
                   </Button>

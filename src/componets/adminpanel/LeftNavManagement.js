@@ -150,15 +150,15 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
         },
         {
             icon: <FaHandshakeAngle />,
-            label: "Client",
+            label: "Testimonial",
             submenu: [
                 {
-                    label: "Add Client",
+                    label: "Add Testimonial",
                     path: "/AddClient",
                     icon: <FaUserPlus />,  // Updated icon
                 },
                 {
-                    label: "Edit Client",
+                    label: "Edit Testimonial",
                     path: "/EditClient",
                     icon: <FaEdit />,  // Updated icon
                 },

@@ -33,7 +33,7 @@ const GenerateBill = () => {
   // Bill type selection state
   const [selectedBillType, setSelectedBillType] = useState(null);
 
-  // UKSSOVM specific state
+  // BrainRock specific state
   const [ukssoMFormData, setUkssoMFormData] = useState({
     billDate: new Date().toISOString().split("T")[0],
     billNumber: billNumberPrefix,
@@ -88,7 +88,7 @@ const GenerateBill = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Calculate totals for UKSSOVM
+  // Calculate totals for BrainRock
   const calculateUkssoVMTotals = () => {
     // Calculate raw subtotal from items
     const itemsSubtotal = ukssoMFormData.items.reduce((sum, item) => {
@@ -118,11 +118,13 @@ const GenerateBill = () => {
     };
   };
 
-  // Calculate totals for Zee bills
+  // Calculate totals for Zee bills (phase is treated as quantity)
   const calculateZeeTotals = () => {
     // Calculate subtotal from items and services
     const itemsSubtotal = zeeFormData.items.reduce((sum, item) => {
-      return sum + (parseFloat(item.price) || 0);
+      const quantity = parseFloat(item.phase) || 0; // treat 'phase' as quantity
+      const price = parseFloat(item.price) || 0;
+      return sum + (quantity * price);
     }, 0);
 
     const servicesAmount = parseFloat(zeeFormData.servicesAmount) || 0;
@@ -144,7 +146,7 @@ const GenerateBill = () => {
     };
   };
 
-  // Handle UKSSOVM form changes
+  // Handle BrainRock form changes
   const handleUkssoVMChange = (e) => {
     const { name, value } = e.target;
     setUkssoMFormData((prev) => ({
@@ -153,7 +155,7 @@ const GenerateBill = () => {
     }));
   };
 
-  // Handle item changes for UKSSOVM
+  // Handle item changes for BrainRock
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...ukssoMFormData.items];
     updatedItems[index][field] = value;
@@ -230,7 +232,7 @@ const GenerateBill = () => {
       let dataToSend;
 
       if (selectedBillType === "ukssovm") {
-        // UKSSOVM validation
+        // BrainRock validation
         if (!ukssoMFormData.billNumber || !ukssoMFormData.billTo) {
           throw new Error("Please fill in all required fields");
         }
@@ -282,7 +284,7 @@ const GenerateBill = () => {
           items: zeeFormData.items.map(item => ({
             product: item.product,
             description: item.description,
-            phase: item.phase,
+            phase: item.phase, // backend expects 'phase', but treat as quantity in UI
             price: parseFloat(item.price) || 0
           })),
           subtotal: totals.subtotal,
@@ -429,8 +431,8 @@ const GenerateBill = () => {
                         e.currentTarget.style.boxShadow = "none";
                       }}
                     >
-                      <h4 className="mb-3">UKSSOVM</h4>
-                      <p className="text-muted">Click to generate UKSSOVM bill</p>
+                      <h4 className="mb-3">BrainRock</h4>
+                      <p className="text-muted">Click to generate BrainRock bill</p>
                     </div>
                   </Col>
 
@@ -465,7 +467,7 @@ const GenerateBill = () => {
               // Bill Form Screen
               <>
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h2 className="mb-0">Generate New Bill - {selectedBillType === "ukssovm" ? "UKSSOVM" : "Zee Bill"}</h2>
+                  <h2 className="mb-0">Generate New Bill - {selectedBillType === "ukssovm" ? "BrainRock" : "Zee Bill"}</h2>
                   <Button variant="secondary" onClick={handleBackToSelection}>
                     ← Back to Selection
                   </Button>
@@ -484,7 +486,7 @@ const GenerateBill = () => {
                 )}
 
                 {selectedBillType === "ukssovm" ? (
-                  // UKSSOVM Form
+                  // BrainRock Form
                   <Form onSubmit={handleSubmit}>
                     <Row>
                       <Col lg={4}>
@@ -818,70 +820,81 @@ const GenerateBill = () => {
                             <tr style={{ height: "2rem" }}>
                               <th style={{ padding: "0.4rem" }}>Product</th>
                               <th style={{ padding: "0.4rem" }}>Description</th>
-                              <th style={{ padding: "0.4rem" }}>Phase</th>
+                              <th style={{ padding: "0.4rem" }}>Quantity</th>
                               <th style={{ padding: "0.4rem" }}>Price</th>
+                              <th style={{ padding: "0.4rem" }}>Total</th>
                               <th style={{ padding: "0.4rem" }}>Action</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {zeeFormData.items.map((item, index) => (
-                              <tr key={index} style={{ height: "2.5rem" }}>
-                                <td style={{ padding: "0.3rem" }}>
-                                  <Form.Control
-                                    type="text"
-                                    placeholder="Product name"
-                                    value={item.product}
-                                    onChange={(e) => handleZeeItemChange(index, "product", e.target.value)}
-                                    style={{ fontSize: "0.8rem", padding: "0.3rem" }}
-                                    size="sm"
-                                    required
-                                  />
-                                </td>
-                                <td style={{ padding: "0.3rem" }}>
-                                  <Form.Control
-                                    as="textarea"
-                                    rows={1}
-                                    placeholder="Description"
-                                    value={item.description}
-                                    onChange={(e) => handleZeeItemChange(index, "description", e.target.value)}
-                                    style={{ fontSize: "0.8rem", padding: "0.3rem", resize: "none" }}
-                                    size="sm"
-                                  />
-                                </td>
-                                <td style={{ padding: "0.3rem" }}>
-                                  <Form.Control
-                                    type="text"
-                                    placeholder="Phase"
-                                    value={item.phase}
-                                    onChange={(e) => handleZeeItemChange(index, "phase", e.target.value)}
-                                    style={{ fontSize: "0.8rem", padding: "0.3rem" }}
-                                    size="sm"
-                                  />
-                                </td>
-                                <td style={{ padding: "0.3rem" }}>
-                                  <Form.Control
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="Price"
-                                    value={item.price}
-                                    onChange={(e) => handleZeeItemChange(index, "price", e.target.value)}
-                                    style={{ fontSize: "0.8rem", padding: "0.3rem" }}
-                                    size="sm"
-                                  />
-                                </td>
-                                <td style={{ padding: "0.3rem" }}>
-                                  <Button
-                                    variant="danger"
-                                    size="sm"
-                                    onClick={() => removeZeeItemRow(index)}
-                                    disabled={zeeFormData.items.length === 1}
-                                    style={{ fontSize: "0.75rem", padding: "0.2rem 0.4rem" }}
-                                  >
-                                    Remove
-                                  </Button>
-                                </td>
-                              </tr>
-                            ))}
+                            {zeeFormData.items.map((item, index) => {
+                              const quantity = parseFloat(item.phase) || 0; // treat 'phase' as quantity
+                              const price = parseFloat(item.price) || 0;
+                              const itemTotal = quantity * price;
+                              return (
+                                <tr key={index} style={{ height: "2.5rem" }}>
+                                  <td style={{ padding: "0.3rem" }}>
+                                    <Form.Control
+                                      type="text"
+                                      placeholder="Product name"
+                                      value={item.product}
+                                      onChange={(e) => handleZeeItemChange(index, "product", e.target.value)}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem" }}
+                                      size="sm"
+                                      required
+                                    />
+                                  </td>
+                                  <td style={{ padding: "0.3rem" }}>
+                                    <Form.Control
+                                      as="textarea"
+                                      rows={1}
+                                      placeholder="Description"
+                                      value={item.description}
+                                      onChange={(e) => handleZeeItemChange(index, "description", e.target.value)}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem", resize: "none" }}
+                                      size="sm"
+                                    />
+                                  </td>
+                                  <td style={{ padding: "0.3rem" }}>
+                                    <Form.Control
+                                      type="number"
+                                      min="0"
+                                      placeholder="Quantity"
+                                      value={item.phase}
+                                      onChange={(e) => handleZeeItemChange(index, "phase", e.target.value)}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem" }}
+                                      size="sm"
+                                      required
+                                    />
+                                  </td>
+                                  <td style={{ padding: "0.3rem" }}>
+                                    <Form.Control
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Price"
+                                      value={item.price}
+                                      onChange={(e) => handleZeeItemChange(index, "price", e.target.value)}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem" }}
+                                      size="sm"
+                                    />
+                                  </td>
+                                  <td className="bg-light" style={{ padding: "0.3rem", textAlign: "center" }}>
+                                    <strong style={{ fontSize: "0.8rem" }}>₹{itemTotal.toFixed(2)}</strong>
+                                  </td>
+                                  <td style={{ padding: "0.3rem" }}>
+                                    <Button
+                                      variant="danger"
+                                      size="sm"
+                                      onClick={() => removeZeeItemRow(index)}
+                                      disabled={zeeFormData.items.length === 1}
+                                      style={{ fontSize: "0.75rem", padding: "0.2rem 0.4rem" }}
+                                    >
+                                      Remove
+                                    </Button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </Table>
                       </div>

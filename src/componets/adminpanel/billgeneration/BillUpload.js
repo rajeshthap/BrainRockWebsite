@@ -14,6 +14,7 @@ const BillUpload = () => {
   // Form state
   const [formData, setFormData] = useState({
     title: "",
+    companyName: "BrainRock",
     regards: "",
     gstNumber: "",
     firmName: "",
@@ -34,6 +35,7 @@ const BillUpload = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchField, setSearchField] = useState("all"); // all, title, gst_number, firm_name
   const [financialYearFilter, setFinancialYearFilter] = useState("");
+  const [companyNameFilter, setCompanyNameFilter] = useState("");
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,12 +136,13 @@ const BillUpload = () => {
     if (financialYearFilter && !isInFinancialYear(bill.bill_date, financialYearFilter)) {
       return false;
     }
-
+    // Company name filter
+    if (companyNameFilter && bill.company_name !== companyNameFilter) {
+      return false;
+    }
     // Search filter
     if (!searchTerm) return true;
-
     const lowerSearchTerm = searchTerm.toLowerCase();
-
     switch (searchField) {
       case "title":
         return bill.title.toLowerCase().includes(lowerSearchTerm);
@@ -160,7 +163,7 @@ const BillUpload = () => {
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, searchField, financialYearFilter]);
+  }, [searchTerm, searchField, financialYearFilter, companyNameFilter]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredBills.length / itemsPerPage);
@@ -225,6 +228,7 @@ const BillUpload = () => {
       // Validation
       if (
         !formData.title ||
+        !formData.companyName ||
         !formData.regards ||
         !formData.gstNumber ||
         !formData.firmName ||
@@ -244,6 +248,7 @@ const BillUpload = () => {
         uploadFormData.append("id", editingBillId);
       }
       uploadFormData.append("title", formData.title);
+      uploadFormData.append("company_name", formData.companyName);
       uploadFormData.append("regards", formData.regards);
       uploadFormData.append("gst_number", formData.gstNumber);
       uploadFormData.append("firm_name", formData.firmName);
@@ -311,6 +316,7 @@ const BillUpload = () => {
       // Reset form and editing state
       setFormData({
         title: "",
+        companyName: "BrainRock",
         regards: "",
         gstNumber: "",
         firmName: "",
@@ -348,6 +354,7 @@ const BillUpload = () => {
     setEditingBillId(bill.id);
     setFormData({
       title: bill.title,
+      companyName: bill.company_name || "BrainRock",
       regards: bill.regards,
       gstNumber: bill.gst_number,
       firmName: bill.firm_name,
@@ -363,6 +370,7 @@ const BillUpload = () => {
     setShowEditModal(false);
     setFormData({
       title: "",
+      companyName: "BrainRock",
       regards: "",
       gstNumber: "",
       firmName: "",
@@ -463,7 +471,7 @@ const BillUpload = () => {
 
               <Form onSubmit={handleSubmit}>
                 <Row className="g-2">
-                  <Col lg={4}>
+                  <Col lg={3}>
                     <Form.Group className="mb-2">
                       <Form.Label style={{ fontSize: "0.85rem" }}>
                         Title <span className="text-danger">*</span>
@@ -479,7 +487,24 @@ const BillUpload = () => {
                       />
                     </Form.Group>
                   </Col>
-                  <Col lg={4}>
+                  <Col lg={3}>
+                    <Form.Group className="mb-2">
+                      <Form.Label style={{ fontSize: "0.85rem" }}>
+                        Company Name <span className="text-danger">*</span>
+                      </Form.Label>
+                      <Form.Select
+                        name="companyName"
+                        value={formData.companyName}
+                        onChange={handleChange}
+                        required
+                        style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
+                      >
+                        <option value="BrainRock">BrainRock</option>
+                        <option value="Zee">Zee</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col lg={3}>
                     <Form.Group className="mb-2">
                       <Form.Label style={{ fontSize: "0.85rem" }}>
                         Regards <span className="text-danger">*</span>
@@ -495,7 +520,7 @@ const BillUpload = () => {
                       />
                     </Form.Group>
                   </Col>
-                  <Col lg={4}>
+                  <Col lg={3}>
                     <Form.Group className="mb-2">
                       <Form.Label style={{ fontSize: "0.85rem" }}>
                         Bill Date <span className="text-danger">*</span>
@@ -592,6 +617,7 @@ const BillUpload = () => {
                     onClick={() => {
                       setFormData({
                         title: "",
+                        companyName: "BrainRock",
                         regards: "",
                         gstNumber: "",
                         firmName: "",
@@ -667,19 +693,17 @@ const BillUpload = () => {
                   </Col>
                   <Col lg={3}>
                     <Form.Group className="mb-2">
-                      <Form.Label style={{ fontSize: "0.85rem" }}>&nbsp;</Form.Label>
-                      <Button
+                      <Form.Label style={{ fontSize: "0.85rem" }}>Company Name</Form.Label>
+                      <Form.Select
                         size="sm"
-                        variant="outline-secondary"
-                        onClick={() => {
-                          setSearchTerm("");
-                          setSearchField("all");
-                          setFinancialYearFilter("");
-                        }}
-                        style={{ fontSize: "0.85rem", width: "100%" }}
+                        value={companyNameFilter}
+                        onChange={(e) => setCompanyNameFilter(e.target.value)}
+                        style={{ fontSize: "0.85rem" }}
                       >
-                        Clear Filters
-                      </Button>
+                        <option value="">All Companies</option>
+                        <option value="BrainRock">BrainRock</option>
+                        <option value="Zee">Zee</option>
+                      </Form.Select>
                     </Form.Group>
                   </Col>
                 </Row>
@@ -705,6 +729,7 @@ const BillUpload = () => {
                       <tr>
                         <th>#</th>
                         <th>Title</th>
+                        <th>Company Name</th>
                         <th>Regards</th>
                         <th>GST Number</th>
                         <th>Firm Name</th>
@@ -719,14 +744,11 @@ const BillUpload = () => {
                         <tr key={bill.id}>
                           <td>{startIndex + index + 1}</td>
                           <td>{bill.title}</td>
+                          <td>{bill.company_name || "-"}</td>
                           <td>{bill.regards}</td>
                           <td>{bill.gst_number}</td>
                           <td>{bill.firm_name}</td>
-                          <td>
-                            {new Date(bill.bill_date).toLocaleDateString(
-                              "en-IN"
-                            )}
-                          </td>
+                          <td>{new Date(bill.bill_date).toLocaleDateString("en-IN")}</td>
                           <td>
                             {bill.file ? (
                               <a
@@ -741,11 +763,7 @@ const BillUpload = () => {
                               <span className="text-muted">-</span>
                             )}
                           </td>
-                          <td>
-                            {new Date(bill.uploaded_at || bill.created_at).toLocaleDateString(
-                              "en-IN"
-                            )}
-                          </td>
+                          <td>{new Date(bill.uploaded_at || bill.created_at).toLocaleDateString("en-IN")}</td>
                           <td>
                             <div style={{ display: "flex", gap: "0.3rem" }}>
                               <Button
@@ -819,7 +837,7 @@ const BillUpload = () => {
               <Modal.Body>
                 <Form onSubmit={handleSubmit}>
                   <Row className="g-2">
-                    <Col lg={4}>
+                    <Col lg={3}>
                       <Form.Group className="mb-2">
                         <Form.Label style={{ fontSize: "0.85rem" }}>
                           Title <span className="text-danger">*</span>
@@ -835,7 +853,24 @@ const BillUpload = () => {
                         />
                       </Form.Group>
                     </Col>
-                    <Col lg={4}>
+                    <Col lg={3}>
+                      <Form.Group className="mb-2">
+                        <Form.Label style={{ fontSize: "0.85rem" }}>
+                          Company Name <span className="text-danger">*</span>
+                        </Form.Label>
+                        <Form.Select
+                          name="companyName"
+                          value={formData.companyName}
+                          onChange={handleChange}
+                          required
+                          style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
+                        >
+                          <option value="BrainRock">BrainRock</option>
+                          <option value="Zee">Zee</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                    <Col lg={3}>
                       <Form.Group className="mb-2">
                         <Form.Label style={{ fontSize: "0.85rem" }}>
                           Regards <span className="text-danger">*</span>
@@ -851,7 +886,7 @@ const BillUpload = () => {
                         />
                       </Form.Group>
                     </Col>
-                    <Col lg={4}>
+                    <Col lg={3}>
                       <Form.Group className="mb-2">
                         <Form.Label style={{ fontSize: "0.85rem" }}>
                           Bill Date <span className="text-danger">*</span>

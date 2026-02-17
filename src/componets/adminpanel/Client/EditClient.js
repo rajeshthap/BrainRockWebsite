@@ -260,7 +260,7 @@ const EditClient = () => {
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="mb-0">Manage Clients</h2>
+              <h2 className="mb-0">Manage Testimonial</h2>
               <div style={{ width: '300px' }}>
                 <input
                   type="text"
@@ -366,7 +366,7 @@ const EditClient = () => {
       {/* Edit Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Edit Client</Modal.Title>
+          <Modal.Title>Edit Testimonial</Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleEditSubmit}>
           <Modal.Body>

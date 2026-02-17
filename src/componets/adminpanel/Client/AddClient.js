@@ -159,7 +159,7 @@ const AddClient = () => {
         <AdminHeader toggleSidebar={toggleSidebar} />
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            <h2 className="mb-4">Add New Client</h2>
+            <h2 className="mb-4">Add New Testimonial</h2>
             
             {/* Alert component - same as in EditClient */}
             {showAlert && (
@@ -236,7 +236,7 @@ const AddClient = () => {
                   type="submit" 
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Submitting...' : 'Add Client'}
+                  {isSubmitting ? 'Submitting...' : 'Add Testimonial'}
                 </Button>
               </div>
             </Form>

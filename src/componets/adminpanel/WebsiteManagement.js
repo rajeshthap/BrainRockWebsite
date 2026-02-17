@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Modal, Pagination, Alert, Button } from "react-bootstrap";
-import { FaUsers, FaBook, FaUserGraduate } from "react-icons/fa";
+import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import LeftNavManagement from "./LeftNavManagement";
@@ -17,18 +17,24 @@ const WebsiteManagement = () => {
   const [coursesData, setCoursesData] = useState([]);
   const [employeesData, setEmployeesData] = useState([]);
   const [projectsData, setProjectsData] = useState([]);
+  const [brainrockBillsCount, setBrainrockBillsCount] = useState(0);
+  const [zeeBillsCount, setZeeBillsCount] = useState(0);
 
   // Loading and error states
   const [loading, setLoading] = useState({
     courses: false,
     employees: false,
     projects: false,
+    brainrockBills: false,
+    zeeBills: false,
   });
 
   const [errors, setErrors] = useState({
     courses: null,
     employees: null,
     projects: null,
+    brainrockBills: null,
+    zeeBills: null,
   });
 
   // Table view states
@@ -132,6 +138,14 @@ useEffect(() => {
 const goToNextComponent = () => {
   navigate("/ManageStudent");   // ← change URL as per your route
 };
+
+const goToBrainrockBills = () => {
+  navigate("/ManageBills", { state: { billType: "brainrock" } });
+};
+
+const goToZeeBills = () => {
+  navigate("/ManageBills", { state: { billType: "zee" } });
+};
   // Fetch Employees data
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -207,6 +221,81 @@ const goToNextComponent = () => {
     fetchProjects();
   }, []);
 
+  // Fetch BrainRock Bills count
+  useEffect(() => {
+    const fetchBrainrockBills = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, brainrockBills: true }));
+        const response = await fetch(
+          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-brainrock/",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch BrainRock bills");
+        }
+
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          setBrainrockBillsCount(data.data.length);
+          setErrors((prev) => ({ ...prev, brainrockBills: null }));
+        } else if (Array.isArray(data)) {
+          setBrainrockBillsCount(data.length);
+          setErrors((prev) => ({ ...prev, brainrockBills: null }));
+        } else {
+          throw new Error(data.message || "Failed to fetch BrainRock bills");
+        }
+      } catch (err) {
+        setErrors((prev) => ({ ...prev, brainrockBills: err.message }));
+        setBrainrockBillsCount(0);
+      } finally {
+        setLoading((prev) => ({ ...prev, brainrockBills: false }));
+      }
+    };
+
+    fetchBrainrockBills();
+  }, []);
+
+  // Fetch Zee Bills count
+  useEffect(() => {
+    const fetchZeeBills = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, zeeBills: true }));
+        const response = await fetch(
+          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-zee/",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch Zee bills");
+        }
+
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          setZeeBillsCount(data.data.length);
+          setErrors((prev) => ({ ...prev, zeeBills: null }));
+        } else if (Array.isArray(data)) {
+          setZeeBillsCount(data.length);
+          setErrors((prev) => ({ ...prev, zeeBills: null }));
+        } else {
+          throw new Error(data.message || "Failed to fetch Zee bills");
+        }
+      } catch (err) {
+        setErrors((prev) => ({ ...prev, zeeBills: err.message }));
+        setZeeBillsCount(0);
+      } finally {
+        setLoading((prev) => ({ ...prev, zeeBills: false }));
+      }
+    };
+
+    fetchZeeBills();
+  }, []);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -770,6 +859,40 @@ const goToNextComponent = () => {
     </div>
   </div>
 </Col>
+
+              {/* BrainRock Bills Card */}
+              <Col lg={4} md={6} sm={12} className="mb-3">
+                <div
+                  className="br-stat-card card-blue"
+                  onClick={goToBrainrockBills}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="br-stat-icon">
+                    <FaFileInvoice />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Total BrainRock Bills</h5>
+                    <h2>{brainrockBillsCount}</h2>
+                  </div>
+                </div>
+              </Col>
+
+              {/* Zee Bills Card */}
+              <Col lg={4} md={6} sm={12} className="mb-3">
+                <div
+                  className="br-stat-card card-green"
+                  onClick={goToZeeBills}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="br-stat-icon">
+                    <FaFileInvoice />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Total Zee Bills</h5>
+                    <h2>{zeeBillsCount}</h2>
+                  </div>
+                </div>
+              </Col>
 
             </Row>
           </div>

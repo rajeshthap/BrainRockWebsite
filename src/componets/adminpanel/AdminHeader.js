@@ -4,13 +4,11 @@ import {
   Row,
   Col,
   Button,
-  Badge,
   Dropdown,
   Image,
 } from "react-bootstrap";
 import {
   FaBars,
-  FaBell,
   FaUserCircle,
   FaCog,
   FaSignOutAlt,
@@ -21,34 +19,10 @@ import axios from "axios";
 
 import { AuthContext } from "../context/AuthContext";
 
-// 1. Accept searchTerm and setSearchTerm as props
 function AdminHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      text: "New employee joined - Rahul Sharma",
-      time: "10 min ago",
-      read: false,
-    },
-    {
-      id: 2,
-      text: "HR meeting scheduled at 4 PM",
-      time: "1 hour ago",
-      read: false,
-    },
-    {
-      id: 3,
-      text: "Payroll processed successfully",
-      time: "3 hours ago",
-      read: true,
-    },
-  ]);
-
-  const [unreadCount, setUnreadCount] = useState(2);
-  
   // State for user details
   const [userDetails, setUserDetails] = useState({
     first_name: "",
@@ -68,7 +42,7 @@ function AdminHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
               headers: { "Content-Type": "application/json" }
             }
           );
-          
+
           if (response.data) {
             setUserDetails({
               first_name: response.data.first_name || "",
@@ -85,23 +59,9 @@ function AdminHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     fetchUserDetails();
   }, [user]);
 
-  const markAsRead = (id) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-    setUnreadCount((prev) => prev - 1);
-  };
-
-  // Get user display name
+  // Get user display name - returns ADMIN AD
   const getDisplayName = () => {
-    if (userDetails.first_name && userDetails.last_name) {
-      return `${userDetails.first_name} ${userDetails.last_name}`;
-    } else if (userDetails.first_name) {
-      return userDetails.first_name;
-    } else if (user && (user.first_name || user.last_name)) {
-      return `${user.first_name || ""} ${user.last_name || ""}`.trim() || "User";
-    }
-    return "User";
+    return "ADMIN AD";
   };
 
   // Get user photo URL
@@ -109,8 +69,8 @@ function AdminHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     if (userDetails.profile_photo) {
       return `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${userDetails.profile_photo}`;
     }
-    // Fallback to a default avatar with user initials
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(getDisplayName())}&background=0d6efd&color=fff&size=40`;
+    // Fallback to a default avatar
+    return `https://ui-avatars.com/api/?name=ADMIN&background=0d6efd&color=fff&size=40`;
   };
 
   return (
@@ -127,42 +87,10 @@ function AdminHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             </Button>
           </Col>
 
-          <Col>
-          
-          </Col>
+          <Col></Col>
 
           <Col xs="auto">
             <div className="header-actions">
-              <Dropdown align="end">
-                <Dropdown.Toggle variant="light" className="notification-btn">
-                  <FaBell />
-                  {unreadCount > 0 && (
-                    <Badge pill bg="danger" className="notification-badge">
-                      {unreadCount}
-                    </Badge>
-                  )}
-                </Dropdown.Toggle>
-
-                <Dropdown.Menu className="notification-dropdown">
-                  <div className="notification-header">
-                    <h6>Notifications</h6>
-                  </div>
-
-                  {notifications.map((notif) => (
-                    <Dropdown.Item
-                      key={notif.id}
-                      className={`notification-item ${
-                        !notif.read ? "unread" : ""
-                      }`}
-                      onClick={() => markAsRead(notif.id)}
-                    >
-                      <p>{notif.text}</p>
-                      <small>{notif.time}</small>
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
-
               <Dropdown align="end">
                 <Dropdown.Toggle variant="light" className="user-profile-btn">
                   <Image
@@ -170,15 +98,13 @@ function AdminHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
                     roundedCircle
                     className="user-avatar"
                     onError={(e) => {
-                      // Fallback to UI Avatars if image fails to load
-                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(getDisplayName())}&background=0d6efd&color=fff&size=40`;
+                      e.target.src = `https://ui-avatars.com/api/?name=ADMIN&background=0d6efd&color=fff&size=40`;
                     }}
                   />
                   <span className="user-name d-none d-md-inline">{getDisplayName()}</span>
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  
                   <Dropdown.Item onClick={logout}>
                     <FaSignOutAlt className="me-2" /> Logout
                   </Dropdown.Item>
