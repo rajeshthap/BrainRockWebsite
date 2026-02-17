@@ -11,13 +11,32 @@ const GenerateBill = () => {
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
 
+  // Generate financial year and month prefix for bill number
+  const generateBillNumberPrefix = () => {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+    const currentMonthNumber = new Date().getMonth() + 1; // Get month as 1-12
+    
+    // If before April, current FY started in previous calendar year
+    const fyStartYear = currentMonth < 3 ? currentYear - 1 : currentYear;
+    const fyEndYear = fyStartYear + 1;
+    const fyPrefix = `${fyStartYear}-${String(fyEndYear).slice(-2)}`;
+    
+    // Format month as 2 digits
+    const monthPadded = String(currentMonthNumber).padStart(2, '0');
+    
+    return `${fyPrefix}/${monthPadded}/`;
+  };
+
+  const billNumberPrefix = generateBillNumberPrefix();
+
   // Bill type selection state
   const [selectedBillType, setSelectedBillType] = useState(null);
 
   // UKSSOVM specific state
   const [ukssoMFormData, setUkssoMFormData] = useState({
     billDate: new Date().toISOString().split("T")[0],
-    billNumber: "",
+    billNumber: billNumberPrefix,
     billTo: "",
     natureOfWork: "",
     natureOfWorkDescription: "service",
@@ -35,7 +54,7 @@ const GenerateBill = () => {
   // Zee bill specific state
   const [zeeFormData, setZeeFormData] = useState({
     invoiceDate: new Date().toISOString().split("T")[0],
-    billNo: "",
+    billNo: billNumberPrefix,
     billTo: "",
     natureOfWork: "",
     servicesAmount: 0,
@@ -327,7 +346,7 @@ const GenerateBill = () => {
       if (selectedBillType === "ukssovm") {
         setUkssoMFormData({
           billDate: new Date().toISOString().split("T")[0],
-          billNumber: "",
+          billNumber: billNumberPrefix,
           billTo: "",
           natureOfWork: "",
           natureOfWorkDescription: "service",
@@ -337,7 +356,7 @@ const GenerateBill = () => {
       } else if (selectedBillType === "zee") {
         setZeeFormData({
           invoiceDate: new Date().toISOString().split("T")[0],
-          billNo: "",
+          billNo: billNumberPrefix,
           billTo: "",
           natureOfWork: "",
           servicesAmount: 0,
@@ -468,21 +487,22 @@ const GenerateBill = () => {
                   // UKSSOVM Form
                   <Form onSubmit={handleSubmit}>
                     <Row>
-                      <Col lg={6}>
+                      <Col lg={4}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Bill Date *</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Bill Date *</Form.Label>
                           <Form.Control
                             type="date"
                             name="billDate"
                             value={ukssoMFormData.billDate}
                             onChange={handleUkssoVMChange}
                             required
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
                         </Form.Group>
                       </Col>
-                      <Col lg={6}>
+                      <Col lg={4}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Bill Number *</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Bill Number *</Form.Label>
                           <Form.Control
                             type="text"
                             placeholder="Enter bill number"
@@ -490,15 +510,13 @@ const GenerateBill = () => {
                             value={ukssoMFormData.billNumber}
                             onChange={handleUkssoVMChange}
                             required
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
                         </Form.Group>
                       </Col>
-                    </Row>
-
-                    <Row>
-                      <Col lg={6}>
+                      <Col lg={4}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Bill To *</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Bill To *</Form.Label>
                           <Form.Control
                             type="text"
                             placeholder="Enter bill recipient"
@@ -506,6 +524,7 @@ const GenerateBill = () => {
                             value={ukssoMFormData.billTo}
                             onChange={handleUkssoVMChange}
                             required
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
                         </Form.Group>
                       </Col>
@@ -514,12 +533,13 @@ const GenerateBill = () => {
                     <Row>
                       <Col lg={6}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Nature of Work Description *</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Nature of Work *</Form.Label>
                           <Form.Select
                             name="natureOfWorkDescription"
                             value={ukssoMFormData.natureOfWorkDescription}
                             onChange={handleUkssoVMChange}
                             required
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           >
                             <option value="service">Service</option>
                             <option value="product">Product</option>
@@ -529,82 +549,94 @@ const GenerateBill = () => {
                       </Col>
                       <Col lg={6}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Nature of Work</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Nature of Work Description</Form.Label>
                           <Form.Control
-                            type="text"
-                            placeholder="Enter nature of work"
+                            as="textarea"
+                            rows={3}
+                            placeholder="Enter description"
                             name="natureOfWork"
                             value={ukssoMFormData.natureOfWork}
                             onChange={handleUkssoVMChange}
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
                         </Form.Group>
                       </Col>
                     </Row>
 
                     {/* Items Table */}
-                    <div className="mb-4">
-                      <h5 className="mb-3">Bill Items</h5>
+                    <div className="mb-2">
+                      <h6 className="mb-2" style={{ fontSize: "0.95rem" }}>Bill Items</h6>
                       <div className="table-responsive">
-                        <Table bordered>
-                          <thead>
-                            <tr>
-                              <th>Product Name</th>
-                              <th>Description</th>
-                              <th>Qty</th>
-                              <th>Rate</th>
-                              <th>Total</th>
-                              <th>Action</th>
+                        <Table bordered size="sm" style={{ fontSize: "0.8rem", marginBottom: "0.5rem" }}>
+                          <thead className="bg-light">
+                            <tr style={{ height: "2rem" }}>
+                              <th style={{ padding: "0.4rem" }}>Product Name</th>
+                              <th style={{ padding: "0.4rem" }}>Description</th>
+                              <th style={{ padding: "0.4rem" }}>Qty</th>
+                              <th style={{ padding: "0.4rem" }}>Rate</th>
+                              <th style={{ padding: "0.4rem" }}>Total</th>
+                              <th style={{ padding: "0.4rem" }}>Action</th>
                             </tr>
                           </thead>
                           <tbody>
                             {ukssoMFormData.items.map((item, index) => {
                               const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0);
                               return (
-                                <tr key={index}>
-                                  <td>
+                                <tr key={index} style={{ height: "2.5rem" }}>
+                                  <td style={{ padding: "0.3rem" }}>
                                     <Form.Control
                                       type="text"
                                       placeholder="Product name"
                                       value={item.productName}
                                       onChange={(e) => handleItemChange(index, "productName", e.target.value)}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem" }}
                                       required
+                                      size="sm"
                                     />
                                   </td>
-                                  <td>
+                                  <td style={{ padding: "0.3rem" }}>
                                     <Form.Control
-                                      type="text"
+                                      as="textarea"
+                                      rows={1}
                                       placeholder="Description"
                                       value={item.description}
                                       onChange={(e) => handleItemChange(index, "description", e.target.value)}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem", resize: "none" }}
+                                      size="sm"
                                     />
                                   </td>
-                                  <td>
+                                  <td style={{ padding: "0.3rem" }}>
                                     <Form.Control
                                       type="number"
                                       placeholder="Qty"
                                       value={item.quantity}
                                       onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem" }}
                                       min="1"
+                                      size="sm"
                                     />
                                   </td>
-                                  <td>
+                                  <td style={{ padding: "0.3rem" }}>
                                     <Form.Control
                                       type="number"
                                       step="0.01"
                                       placeholder="Rate"
                                       value={item.rate}
                                       onChange={(e) => handleItemChange(index, "rate", e.target.value)}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem" }}
+                                      size="sm"
                                     />
                                   </td>
-                                  <td className="bg-light">
-                                    <strong>₹{itemTotal.toFixed(2)}</strong>
+                                  <td className="bg-light" style={{ padding: "0.3rem", textAlign: "center" }}>
+                                    <strong style={{ fontSize: "0.8rem" }}>₹{itemTotal.toFixed(2)}</strong>
                                   </td>
-                                  <td>
+                                  <td style={{ padding: "0.3rem" }}>
                                     <Button
                                       variant="danger"
                                       size="sm"
                                       onClick={() => removeItemRow(index)}
                                       disabled={ukssoMFormData.items.length === 1}
+                                      style={{ fontSize: "0.75rem", padding: "0.2rem 0.4rem" }}
                                     >
                                       Remove
                                     </Button>
@@ -615,23 +647,25 @@ const GenerateBill = () => {
                           </tbody>
                         </Table>
                       </div>
-                      <Button variant="outline-primary" onClick={addItemRow} className="mb-3">
+                      <Button variant="outline-primary" onClick={addItemRow} className="mb-2" size="sm" style={{ fontSize: "0.8rem" }}>
                         + Add Item
                       </Button>
                     </div>
 
                     {/* Services Amount */}
-                    <Row className="mb-4">
-                      <Col lg={6}>
+                    <Row className="mb-2">
+                      <Col lg={4}>
                         <Form.Group>
-                          <Form.Label>Services Amount</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem", marginBottom: "0.3rem" }}>Services Amount</Form.Label>
                           <Form.Control
                             type="number"
                             step="0.01"
-                            placeholder="Enter additional services amount"
+                            placeholder="Amount"
                             name="servicesAmount"
                             value={ukssoMFormData.servicesAmount}
                             onChange={handleUkssoVMChange}
+                            style={{ fontSize: "0.85rem", padding: "0.4rem" }}
+                            size="sm"
                           />
                         </Form.Group>
                       </Col>
@@ -641,10 +675,10 @@ const GenerateBill = () => {
                     {(() => {
                       const totals = calculateUkssoVMTotals();
                       return (
-                        <Row className="mt-4">
+                        <Row className="mt-2 mb-2">
                           <Col lg={6} className="ms-auto">
-                            <div className="bg-light p-3 rounded">
-                              <Row className="mb-2">
+                            <div className="bg-light p-2 rounded" style={{ fontSize: "0.85rem" }}>
+                              <Row className="mb-1">
                                 <Col sm={8} className="text-end">
                                   <strong>Subtotal:</strong>
                                 </Col>
@@ -652,7 +686,7 @@ const GenerateBill = () => {
                                   <strong>₹{totals.subtotal.toFixed(2)}</strong>
                                 </Col>
                               </Row>
-                              <Row className="mb-2">
+                              <Row className="mb-1">
                                 <Col sm={8} className="text-end">
                                   <strong>CGST (9%):</strong>
                                 </Col>
@@ -660,7 +694,7 @@ const GenerateBill = () => {
                                   <strong>₹{totals.cgstAmount.toFixed(2)}</strong>
                                 </Col>
                               </Row>
-                              <Row className="mb-2">
+                              <Row className="mb-1">
                                 <Col sm={8} className="text-end">
                                   <strong>SGST (9%):</strong>
                                 </Col>
@@ -668,13 +702,13 @@ const GenerateBill = () => {
                                   <strong>₹{totals.sgstAmount.toFixed(2)}</strong>
                                 </Col>
                               </Row>
-                              <hr />
+                              <hr style={{ margin: "0.5rem 0" }} />
                               <Row>
                                 <Col sm={8} className="text-end">
-                                  <h5>Total:</h5>
+                                  <strong>Total:</strong>
                                 </Col>
                                 <Col sm={4} className="text-end">
-                                  <h5>₹{totals.totalPaid.toFixed(2)}</h5>
+                                  <strong style={{ fontSize: "1rem" }}>₹{totals.totalPaid.toFixed(2)}</strong>
                                 </Col>
                               </Row>
                             </div>
@@ -697,7 +731,7 @@ const GenerateBill = () => {
                         onClick={() => {
                           setUkssoMFormData({
                             billDate: new Date().toISOString().split("T")[0],
-                            billNumber: "",
+                            billNumber: billNumberPrefix,
                             billTo: "",
                             natureOfWork: "",
                             natureOfWorkDescription: "service",
@@ -715,21 +749,22 @@ const GenerateBill = () => {
                   // Zee Bill Form
                   <Form onSubmit={handleSubmit}>
                     <Row>
-                      <Col lg={6}>
+                      <Col lg={4}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Invoice Date *</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Invoice Date *</Form.Label>
                           <Form.Control
                             type="date"
                             name="invoiceDate"
                             value={zeeFormData.invoiceDate}
                             onChange={handleZeeChange}
                             required
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
                         </Form.Group>
                       </Col>
-                      <Col lg={6}>
+                      <Col lg={4}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Bill Number *</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Bill Number *</Form.Label>
                           <Form.Control
                             type="text"
                             placeholder="Enter bill number"
@@ -737,6 +772,21 @@ const GenerateBill = () => {
                             value={zeeFormData.billNo}
                             onChange={handleZeeChange}
                             required
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col lg={4}>
+                        <Form.Group className="mb-3">
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Bill To *</Form.Label>
+                          <Form.Control
+                            type="text"
+                            placeholder="Enter bill recipient"
+                            name="billTo"
+                            value={zeeFormData.billTo}
+                            onChange={handleZeeChange}
+                            required
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
                         </Form.Group>
                       </Col>
@@ -745,88 +795,87 @@ const GenerateBill = () => {
                     <Row>
                       <Col lg={6}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Bill To *</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem" }}>Nature of Work</Form.Label>
                           <Form.Control
-                            type="text"
-                            placeholder="Enter bill recipient"
-                            name="billTo"
-                            value={zeeFormData.billTo}
-                            onChange={handleZeeChange}
-                            required
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col lg={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Nature of Work</Form.Label>
-                          <Form.Control
-                            type="text"
+                            as="textarea"
+                            rows={3}
                             placeholder="Enter nature of work"
                             name="natureOfWork"
                             value={zeeFormData.natureOfWork}
                             onChange={handleZeeChange}
+                            style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
                         </Form.Group>
                       </Col>
                     </Row>
 
                     {/* Items Table for Zee */}
-                    <div className="mb-4">
-                      <h5 className="mb-3">Bill Items</h5>
+                    <div className="mb-2">
+                      <h6 className="mb-2" style={{ fontSize: "0.95rem" }}>Bill Items</h6>
                       <div className="table-responsive">
-                        <Table bordered>
-                          <thead>
-                            <tr>
-                              <th>Product</th>
-                              <th>Description</th>
-                              <th>Phase</th>
-                              <th>Price</th>
-                              <th>Action</th>
+                        <Table bordered size="sm" style={{ fontSize: "0.8rem", marginBottom: "0.5rem" }}>
+                          <thead className="bg-light">
+                            <tr style={{ height: "2rem" }}>
+                              <th style={{ padding: "0.4rem" }}>Product</th>
+                              <th style={{ padding: "0.4rem" }}>Description</th>
+                              <th style={{ padding: "0.4rem" }}>Phase</th>
+                              <th style={{ padding: "0.4rem" }}>Price</th>
+                              <th style={{ padding: "0.4rem" }}>Action</th>
                             </tr>
                           </thead>
                           <tbody>
                             {zeeFormData.items.map((item, index) => (
-                              <tr key={index}>
-                                <td>
+                              <tr key={index} style={{ height: "2.5rem" }}>
+                                <td style={{ padding: "0.3rem" }}>
                                   <Form.Control
                                     type="text"
                                     placeholder="Product name"
                                     value={item.product}
                                     onChange={(e) => handleZeeItemChange(index, "product", e.target.value)}
+                                    style={{ fontSize: "0.8rem", padding: "0.3rem" }}
+                                    size="sm"
                                     required
                                   />
                                 </td>
-                                <td>
+                                <td style={{ padding: "0.3rem" }}>
                                   <Form.Control
-                                    type="text"
+                                    as="textarea"
+                                    rows={1}
                                     placeholder="Description"
                                     value={item.description}
                                     onChange={(e) => handleZeeItemChange(index, "description", e.target.value)}
+                                    style={{ fontSize: "0.8rem", padding: "0.3rem", resize: "none" }}
+                                    size="sm"
                                   />
                                 </td>
-                                <td>
+                                <td style={{ padding: "0.3rem" }}>
                                   <Form.Control
                                     type="text"
                                     placeholder="Phase"
                                     value={item.phase}
                                     onChange={(e) => handleZeeItemChange(index, "phase", e.target.value)}
+                                    style={{ fontSize: "0.8rem", padding: "0.3rem" }}
+                                    size="sm"
                                   />
                                 </td>
-                                <td>
+                                <td style={{ padding: "0.3rem" }}>
                                   <Form.Control
                                     type="number"
                                     step="0.01"
                                     placeholder="Price"
                                     value={item.price}
                                     onChange={(e) => handleZeeItemChange(index, "price", e.target.value)}
+                                    style={{ fontSize: "0.8rem", padding: "0.3rem" }}
+                                    size="sm"
                                   />
                                 </td>
-                                <td>
+                                <td style={{ padding: "0.3rem" }}>
                                   <Button
                                     variant="danger"
                                     size="sm"
                                     onClick={() => removeZeeItemRow(index)}
                                     disabled={zeeFormData.items.length === 1}
+                                    style={{ fontSize: "0.75rem", padding: "0.2rem 0.4rem" }}
                                   >
                                     Remove
                                   </Button>
@@ -836,23 +885,25 @@ const GenerateBill = () => {
                           </tbody>
                         </Table>
                       </div>
-                      <Button variant="outline-primary" onClick={addZeeItemRow} className="mb-3">
+                      <Button variant="outline-primary" onClick={addZeeItemRow} className="mb-2" size="sm" style={{ fontSize: "0.8rem" }}>
                         + Add Item
                       </Button>
                     </div>
 
                     {/* Services Amount */}
-                    <Row className="mb-4">
-                      <Col lg={6}>
+                    <Row className="mb-2">
+                      <Col lg={4}>
                         <Form.Group>
-                          <Form.Label>Services Amount</Form.Label>
+                          <Form.Label style={{ fontSize: "0.85rem", marginBottom: "0.3rem" }}>Services Amount</Form.Label>
                           <Form.Control
                             type="number"
                             step="0.01"
-                            placeholder="Enter additional services amount"
+                            placeholder="Amount"
                             name="servicesAmount"
                             value={zeeFormData.servicesAmount}
                             onChange={handleZeeChange}
+                            style={{ fontSize: "0.85rem", padding: "0.4rem" }}
+                            size="sm"
                           />
                         </Form.Group>
                       </Col>
@@ -862,10 +913,10 @@ const GenerateBill = () => {
                     {(() => {
                       const totals = calculateZeeTotals();
                       return (
-                        <Row className="mt-4">
+                        <Row className="mt-2 mb-2">
                           <Col lg={6} className="ms-auto">
-                            <div className="bg-light p-3 rounded">
-                              <Row className="mb-2">
+                            <div className="bg-light p-2 rounded" style={{ fontSize: "0.85rem" }}>
+                              <Row className="mb-1">
                                 <Col sm={8} className="text-end">
                                   <strong>Subtotal:</strong>
                                 </Col>
@@ -873,7 +924,7 @@ const GenerateBill = () => {
                                   <strong>₹{totals.subtotal.toFixed(2)}</strong>
                                 </Col>
                               </Row>
-                              <Row className="mb-2">
+                              <Row className="mb-1">
                                 <Col sm={8} className="text-end">
                                   <strong>CGST (9%):</strong>
                                 </Col>
@@ -881,7 +932,7 @@ const GenerateBill = () => {
                                   <strong>₹{totals.cgst.toFixed(2)}</strong>
                                 </Col>
                               </Row>
-                              <Row className="mb-2">
+                              <Row className="mb-1">
                                 <Col sm={8} className="text-end">
                                   <strong>SGST (9%):</strong>
                                 </Col>
@@ -889,13 +940,13 @@ const GenerateBill = () => {
                                   <strong>₹{totals.sgst.toFixed(2)}</strong>
                                 </Col>
                               </Row>
-                              <hr />
+                              <hr style={{ margin: "0.5rem 0" }} />
                               <Row>
                                 <Col sm={8} className="text-end">
-                                  <h5>Total:</h5>
+                                  <strong>Total:</strong>
                                 </Col>
                                 <Col sm={4} className="text-end">
-                                  <h5>₹{totals.totalPaidAmount.toFixed(2)}</h5>
+                                  <strong style={{ fontSize: "1rem" }}>₹{totals.totalPaidAmount.toFixed(2)}</strong>
                                 </Col>
                               </Row>
                             </div>
@@ -918,7 +969,7 @@ const GenerateBill = () => {
                         onClick={() => {
                           setZeeFormData({
                             invoiceDate: new Date().toISOString().split("T")[0],
-                            billNo: "",
+                            billNo: billNumberPrefix,
                             billTo: "",
                             natureOfWork: "",
                             servicesAmount: 0,

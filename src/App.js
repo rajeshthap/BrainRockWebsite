@@ -119,6 +119,7 @@ import AddAwards from "./componets/adminpanel/awards/AddAwards";
 import ManageAwards from "./componets/adminpanel/awards/ManageAwards";
 import GenerateBill from "./componets/adminpanel/billgeneration/GenerateBill";
 import ManageBills from "./componets/adminpanel/billgeneration/ManageBills";
+import BillUpload from "./componets/adminpanel/billgeneration/BillUpload";
 function AppContent() {
   const location = useLocation();
 
@@ -193,6 +194,7 @@ function AppContent() {
     "/Purchasehistory",
     "/GenerateBill",
     "/ManageBills",
+    "/BillUpload",
   
   ]);
 
@@ -676,6 +678,15 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <GenerateBill />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/BillUpload"
+          element={
+            <ProtectedRoute>
+              <BillUpload />
             </ProtectedRoute>
           }
         />

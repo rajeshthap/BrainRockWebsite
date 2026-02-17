@@ -313,6 +313,11 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
                     icon: <FaPlusCircle />,
                 },
                 {
+                    label: "Upload Bill",
+                    path: "/BillUpload",
+                    icon: <FaFileInvoice />,
+                },
+                {
                     label: "Manage Bills",
                     path: "/ManageBills",
                     icon: <FaFileInvoice />,
