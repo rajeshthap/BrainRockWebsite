@@ -29,6 +29,10 @@ const ManageStudent = () => {
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+  // Selected students for deletion
+  const [selectedStudents, setSelectedStudents] = useState([]);
   
   // Responsive check
   useEffect(() => {
@@ -161,6 +165,69 @@ const ManageStudent = () => {
     setSelectedStudent(student);
     setShowViewModal(true);
   };
+  
+  // Handle student selection for deletion
+  const handleSelectStudent = (studentId) => {
+    setSelectedStudents(prev => {
+      if (prev.includes(studentId)) {
+        return prev.filter(id => id !== studentId);
+      } else {
+        return [...prev, studentId];
+      }
+    });
+  };
+  
+  // Handle select all students on current page
+  const handleSelectAll = () => {
+    if (selectedStudents.length === currentItems.length) {
+      setSelectedStudents([]);
+    } else {
+      setSelectedStudents(currentItems.map(student => student.applicant_id));
+    }
+  };
+  
+  // Handle delete selected students
+  const handleDeleteStudents = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/course-registration/`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ applicant_id: selectedStudents }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete students');
+      }
+      
+      const data = await response.json();
+      if (data.success) {
+        // Remove deleted students from the state
+        setStudents(prev => prev.filter(student => !selectedStudents.includes(student.applicant_id)));
+        setSelectedStudents([]);
+        setShowDeleteModal(false);
+      } else {
+        throw new Error(data.message || 'Failed to delete students');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Open delete confirmation modal
+  const openDeleteModal = () => {
+    setShowDeleteModal(true);
+  };
+  
+  // Close delete confirmation modal
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
 
   // Handle status filter change
   const handleStatusFilterChange = (e) => {
@@ -203,6 +270,15 @@ const ManageStudent = () => {
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="mb-0">Manage Students</h2>
               <div className="d-flex gap-2">
+                {selectedStudents.length > 0 && (
+                  <Button  className="btn-delete"
+                    variant="danger" 
+                    onClick={openDeleteModal}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    Delete Selected ({selectedStudents.length})
+                  </Button>
+                )}
                 <div style={{ width: '200px' }}>
                   <Form.Select
                     value={statusFilter}
@@ -249,6 +325,14 @@ const ManageStudent = () => {
                     <table className="temp-rwd-table">
                       <tbody>
                         <tr>
+                          <th>
+                            <Form.Check 
+                              type="checkbox"
+                              checked={selectedStudents.length === currentItems.length && currentItems.length > 0}
+                              onChange={handleSelectAll}
+                              label=""
+                            />
+                          </th>
                           <th>S.No</th>
                           <th>Name</th>
                           <th>Email</th>
@@ -263,12 +347,20 @@ const ManageStudent = () => {
                         {currentItems.length > 0 ? (
                           currentItems.map((student, index) => (
                             <tr key={student.id}>
+                              <td data-th="Select">
+                                <Form.Check 
+                                  type="checkbox"
+                                  checked={selectedStudents.includes(student.applicant_id)}
+                                  onChange={() => handleSelectStudent(student.applicant_id)}
+                                  label=""
+                                />
+                              </td>
                               <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                               <td data-th="Name">{student.candidate_name}</td>
                               <td data-th="Email">{student.email}</td>
                               <td data-th="Phone">{student.mobile_no}</td>
                               <td data-th="Course">{formatCourseList(student.application_for_course)}</td>
-                               <td data-th="Mode">{student.course_mode}</td>
+                              <td data-th="Mode">{student.course_mode}</td>
                               <td data-th="Status">
                                 <span className={`badge bg-${getStatusVariant(student.course_status)} me-2`}>
                                   {student.course_status}
@@ -288,7 +380,7 @@ const ManageStudent = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="8" className="text-center">
+                            <td colSpan="10" className="text-center">
                               No student data available.
                             </td>
                           </tr>
@@ -328,6 +420,25 @@ const ManageStudent = () => {
         </Container>
       </div>
       
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={closeDeleteModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to delete {selectedStudents.length} selected student(s)?</p>
+          <p>This action cannot be undone.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeDeleteModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDeleteStudents}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* View Student Details Modal */}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg">
         <Modal.Header closeButton>
