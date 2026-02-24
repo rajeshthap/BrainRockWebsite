@@ -197,11 +197,11 @@ const ManageBills = () => {
         items: items,
       });
     } else if (selectedBillType === "zee") {
-      // Handle Zee bill items
+      // Handle Zee bill items - map backend 'phase' to frontend 'quantity'
       const items = (bill.items || []).map(item => ({
         product: item.product || "",
         description: item.description || "",
-        phase: item.phase || "",
+        quantity: parseFloat(item.phase) || 0,
         price: parseFloat(item.price) || 0,
       }));
 
@@ -359,7 +359,15 @@ const ManageBills = () => {
         ? `${API_BASE_URL}/api/bill-brainrock/`
         : `${API_BASE_URL}/api/bill-zee/`;
 
-      const bodyData = { ...editFormData, id: currentEditItem.id };
+      // Map frontend 'quantity' back to backend 'phase' for zee bills
+      let bodyData = { ...editFormData, id: currentEditItem.id };
+      if (selectedBillType === "zee" && bodyData.items) {
+        bodyData.items = bodyData.items.map(item => ({
+          ...item,
+          phase: item.quantity,
+          quantity: undefined // Remove quantity field before sending
+        }));
+      }
 
       const response = await fetch(apiEndpoint, {
         method: "PUT",
@@ -1359,8 +1367,9 @@ const ManageBills = () => {
                         <tr>
                           <th style={{ padding: "0.4rem 0.6rem" }}>Product</th>
                           <th style={{ padding: "0.4rem 0.6rem" }}>Description</th>
-                          <th style={{ padding: "0.4rem 0.6rem" }}>Phase</th>
+                          <th style={{ padding: "0.4rem 0.6rem" }}>Quantity</th>
                           <th style={{ padding: "0.4rem 0.6rem" }}>Price</th>
+                          <th style={{ padding: "0.4rem 0.6rem" }}>Total</th>
                           <th style={{ padding: "0.4rem 0.6rem" }}>Action</th>
                         </tr>
                       </thead>
@@ -1397,15 +1406,34 @@ const ManageBills = () => {
                             </td>
                             <td style={{ padding: "0.4rem 0.6rem" }}>
                               <Form.Control
-                                type="text"
+                                type="number"
                                 size="sm"
-                                value={item.phase}
+                                value={item.quantity}
                                 onChange={(e) => {
                                   const updatedItems = [...editFormData.items];
-                                  updatedItems[index] = { ...updatedItems[index], phase: e.target.value };
-                                  setEditFormData((prev) => ({ ...prev, items: updatedItems }));
+                                  updatedItems[index] = { ...updatedItems[index], quantity: parseFloat(e.target.value) || 0 };
+                                  
+                                  // Recalculate totals
+                                  const itemsSubtotal = updatedItems.reduce((sum, i) => sum + ((parseFloat(i.quantity) || 0) * (parseFloat(i.price) || 0)), 0);
+                                  const servicesAmount = parseFloat(editFormData.services_amount) || 0;
+                                  const subtotal = parseFloat((itemsSubtotal + servicesAmount).toFixed(2));
+                                  const roundedSubtotal = Math.round(subtotal);
+                                  const cgstAmount = parseFloat((Math.round(roundedSubtotal * 0.09)).toFixed(2));
+                                  const sgstAmount = parseFloat((Math.round(roundedSubtotal * 0.09)).toFixed(2));
+                                  const totalPaidAmount = parseFloat((roundedSubtotal + cgstAmount + sgstAmount).toFixed(2));
+
+                                  setEditFormData((prev) => ({
+                                    ...prev,
+                                    items: updatedItems,
+                                    subtotal: roundedSubtotal,
+                                    cgst: cgstAmount,
+                                    sgst: sgstAmount,
+                                    total_paid_amount: totalPaidAmount,
+                                  }));
                                 }}
-                                placeholder="Phase"
+                                min="1"
+                                step="1"
+                                placeholder="Quantity"
                                 style={{ fontSize: "12px" }}
                               />
                             </td>
@@ -1419,7 +1447,7 @@ const ManageBills = () => {
                                   updatedItems[index] = { ...updatedItems[index], price: parseFloat(e.target.value) || 0 };
                                   
                                   // Recalculate totals
-                                  const itemsSubtotal = updatedItems.reduce((sum, i) => sum + (parseFloat(i.price) || 0), 0);
+                                  const itemsSubtotal = updatedItems.reduce((sum, i) => sum + ((parseFloat(i.quantity) || 0) * (parseFloat(i.price) || 0)), 0);
                                   const servicesAmount = parseFloat(editFormData.services_amount) || 0;
                                   const subtotal = parseFloat((itemsSubtotal + servicesAmount).toFixed(2));
                                   const roundedSubtotal = Math.round(subtotal);
@@ -1441,6 +1469,9 @@ const ManageBills = () => {
                               />
                             </td>
                             <td style={{ padding: "0.4rem 0.6rem" }}>
+                              ₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0)).toFixed(2)}
+                            </td>
+                            <td style={{ padding: "0.4rem 0.6rem" }}>
                               <Button
                                 variant="danger"
                                 size="sm"
@@ -1448,7 +1479,7 @@ const ManageBills = () => {
                                   const updatedItems = editFormData.items.filter((_, i) => i !== index);
                                   
                                   // Recalculate totals
-                                  const itemsSubtotal = updatedItems.reduce((sum, i) => sum + (parseFloat(i.price) || 0), 0);
+                                  const itemsSubtotal = updatedItems.reduce((sum, i) => sum + ((parseFloat(i.quantity) || 0) * (parseFloat(i.price) || 0)), 0);
                                   const servicesAmount = parseFloat(editFormData.services_amount) || 0;
                                   const subtotal = parseFloat((itemsSubtotal + servicesAmount).toFixed(2));
                                   const roundedSubtotal = Math.round(subtotal);
@@ -1476,10 +1507,10 @@ const ManageBills = () => {
                   </div>
                   <Button variant="success" size="sm" onClick={() => {
                     setEditFormData((prev) => {
-                      const newItems = [...prev.items, { product: "", description: "", phase: "", price: 0 }];
+                      const newItems = [...prev.items, { product: "", description: "", quantity: 1, price: 0 }];
                       
                       // Recalculate totals
-                      const itemsSubtotal = newItems.reduce((sum, i) => sum + (parseFloat(i.price) || 0), 0);
+                      const itemsSubtotal = newItems.reduce((sum, i) => sum + ((parseFloat(i.quantity) || 0) * (parseFloat(i.price) || 0)), 0);
                       const servicesAmount = parseFloat(prev.services_amount) || 0;
                       const subtotal = parseFloat((itemsSubtotal + servicesAmount).toFixed(2));
                       const roundedSubtotal = Math.round(subtotal);
