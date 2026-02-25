@@ -140,7 +140,7 @@ const goToNextComponent = () => {
 };
 
 const goToBrainrockBills = () => {
-  navigate("/ManageBills", { state: { billType: "brainrock" } });
+  navigate("/ManageBills", { state: { billType: "ukssovm" } });
 };
 
 const goToZeeBills = () => {
