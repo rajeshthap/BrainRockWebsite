@@ -26,7 +26,21 @@ body {
 
 
 }
+.tearm-condition ol li{
+  font-size: 14px;
+  line-height: 26px;
+  text-align: justify;
 
+}
+.tearm-condition h3{
+  font-size: 18px;
+  color: #000;
+  font-weight: 600;
+}
+.term{
+  color: #0056b3 !important;
+}
+.tearm-condition 
 /* svg {
       fill: #0d77cb;
     } */

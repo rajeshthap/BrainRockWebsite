@@ -120,6 +120,9 @@ import ManageAwards from "./componets/adminpanel/awards/ManageAwards";
 import GenerateBill from "./componets/adminpanel/billgeneration/GenerateBill";
 import ManageBills from "./componets/adminpanel/billgeneration/ManageBills";
 import BillUpload from "./componets/adminpanel/billgeneration/BillUpload";
+import Terms from "./componets/pdf_page/Terms";
+
+// import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
   const location = useLocation();
 
@@ -247,6 +250,7 @@ function AppContent() {
         <Route path="/ServicesPage" element={<ServicesPage />} />
         <Route path="/Certificate" element={<Certificate/>} />
         <Route path="/ProjectDetail" element={<ProjectDetail/>} />
+        <Route path="/Terms" element={<Terms/>} />
     
 
         

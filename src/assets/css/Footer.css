@@ -190,7 +190,7 @@ li {
 }
 li:hover {
     list-style: none;
-    color: orange !important;
+    /* color: orange !important; */
 }
 
 .i-space {
