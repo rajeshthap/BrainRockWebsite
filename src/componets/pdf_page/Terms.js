@@ -203,15 +203,14 @@ services for which we consider such information to be necessary.</p>
 update this Privacy Policy to reflect changes to our information practices. We may alert / notify you 
 about the significant changes to the Privacy Policy, in the manner as may be required under applicable 
 laws.</p>
-<p><h3>Grievance Officer</h3>Insert Name of the Office:</p>
-<p>Designation:</p>
-<p>Insert Name and Address of the Company:</p>
-<p>Contact us:</p>
-<p>Phone: Time: Monday - Friday(9:00 - 18:00)</p>
+<p><h3>Grievance Officer</h3><strong>Insert Name of the Office:</strong> Brainrock Consulting Services </p>
+<p><strong>Designation:</strong> Director</p>
+<p><strong>Insert Name and Address of the Company:</strong> 32 New Park Road, Gandhi Gram Near Kanwali Road Dehradun, Uttarakhand</p>
+<p><strong>Contact us:</strong> 8193991148</p>
+<p><strong>Phone: Time:</strong> Monday - Friday(9:00 - 18:00)</p>
 <h2 className="section-heading">Refund and Cancellation policy</h2>
-<p>This refund and cancellation policy outlines how you can cancel or seek a refund for a product / service 
-that you have purchased through the Platform. Under this policy</p>
-<ol>
+<p>If any refund approved by the company it will take 7 working days to credit to your original source account</p>
+{/* <ol>
     <li><strong>1.</strong>Cancellations will only be considered if the request is made <strong>7 days</strong> of placing the order. However, 
 cancellation requests may not be entertained if the orders have been communicated to such sellers / 
 merchant(s) listed on the Platform and they have initiated the process of shipping them, or the 
@@ -230,8 +229,8 @@ please refer the issue to them</li>
 <li><strong>5. </strong>In case of any refunds approved by <strong>8193991148,</strong> it will take 5 days for the refund to be processed 
 to you.</li>
 
-</ol>
-<h2 className="section-heading">Return Policy</h2>
+</ol> */}
+{/* <h2 className="section-heading">Return Policy</h2>
 <p>We offer refund / exchange within first <strong>7 days</strong> from the date of your purchase. If <strong>7 days</strong> have passed 
 since your purchase, you will not be offered a return, exchange or refund of any kind. In order to become 
 eligible for a return or an exchange, (i) the purchased item should be unused and in the same condition as 
@@ -253,7 +252,7 @@ post office norms. Platform Owner shall not be liable for any delay in delivery 
 postal authority. Delivery of all orders will be made to the address provided by the buyer at the time of 
 purchase. Delivery of our services will be confirmed on your email ID as specified at the time of 
 registration. If there are any shipping cost(s) levied by the seller or the Platform Owner (as the case be), 
-the same is not refundable.</p>
+the same is not refundable.</p> */}
           </div>
         </div>
       </Container>
