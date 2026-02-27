@@ -14,7 +14,8 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
+const [acceptTerms, setAcceptTerms] = useState(false);
+const [termsError, setTermsError] = useState("");
   // Password visibility states
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -202,12 +203,22 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
       isValid = false;
     }
 
+    if (!acceptTerms) {
+      setTermsError("Please accept the terms and conditions");
+      isValid = false;
+    }
+
     setErrors(temp);
     return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!acceptTerms) {
+      setTermsError("Please accept the terms and conditions");
+      return;
+    }
 
     if (!validateFormBeforeSubmit()) return;
 
@@ -661,7 +672,33 @@ function TrainingRegistration({ courseTitle, courseDuration }) {
                   </Form.Group>
                 </Col>
               </Row>
-
+<Form.Group className="mt-3">
+  <Form.Check
+    type="checkbox"
+    id="terms"
+    label={
+      <>
+       I accept the {" "}
+        <Link
+          to="/Terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          terms and conditions
+        </Link>
+      </>
+    }
+    checked={acceptTerms}
+    onChange={(e) => {
+      setAcceptTerms(e.target.checked);
+      setTermsError("");
+    }}
+  />
+  {termsError && (
+    <div className="text-danger mt-1">{termsError}</div>
+  )}
+</Form.Group>
               <div className="text-center mt-4">
                 <Button
                   type="submit"

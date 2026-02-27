@@ -4,11 +4,11 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import FooterPage from "../footer/FooterPage";
 
 // Make sure to import the CSS files that contain the module styles
-
-
-
 function Terms() {
  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <>
