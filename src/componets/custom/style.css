@@ -110,7 +110,9 @@ body {
 .main-mobile-header {
   display: none;
 }
-
+.tearm-condition p{
+  text-align: justify;
+}
 .br-alert-feedback {
   font-size: var(--br-space-250);
   color: #ff0000;
