@@ -35,7 +35,7 @@ function Faq() {
           <div className="training-wrapper tearm-condition p-2">
             <ol type="numeric">
               <li><strong>1. What is Brainrock Consulting Services?</strong><br />
-                Brainrock Consulting Services (BCS) is a professional web development and IT consulting company that provides customized web portals, software solutions, and technical training programs to individuals and organizations.
+                <strong>Brainrock Consulting Services (BCS)</strong> is a professional web development and IT consulting company that provides customized web portals, software solutions, and technical training programs to individuals and organizations.
               </li>
               
               <li><strong>2. What services does Brainrock Consulting Services provide?</strong><br />
@@ -62,7 +62,7 @@ function Faq() {
               </li>
               
               <li><strong>4. Do you provide internship programs?</strong><br />
-                Yes, Brainrock Consulting Services provides industry-oriented internship programs for students and professionals in:<br />
+                Yes, Brainrock Consulting Services provides <strong>industry-oriented internship programs</strong> for students and professionals in:<br />
                 • Web Development<br />
                 • PHP Programming<br />
                 • Python Programming<br />
@@ -82,11 +82,11 @@ function Faq() {
               </li>
               
               <li><strong>6. Do you provide certificates after internship completion?</strong><br />
-                Yes, we provide Internship Completion Certificates after successful completion of the internship program.
+                Yes, we provide <strong>Internship Completion Certificates</strong> after successful completion of the internship program.
               </li>
               
               <li><strong>7. Do you develop custom web portals?</strong><br />
-                Yes, we develop customized web portals based on client requirements, including government projects, business portals, and management systems.
+                Yes, we develop <strong>customized web portals based on client requirements</strong>, including government projects, business portals, and management systems.
               </li>
               
               <li><strong>8. How can we contact Brainrock Consulting Services?</strong><br />
@@ -98,11 +98,11 @@ function Faq() {
               </li>
               
               <li><strong>9. Do you provide support after project completion?</strong><br />
-                Yes, we provide technical support and maintenance services after project delivery.
+                Yes, we provide <strong>technical support and maintenance services</strong> after project delivery.
               </li>
               
               <li><strong>10. Do you develop government projects?</strong><br />
-                Yes, Brainrock Consulting Services has experience in developing customized portals and applications for government departments and organizations.
+                Yes, Brainrock Consulting Services has experience in <strong>developing customized portals and applications for government departments and organizations</strong>.
               </li>
             </ol>
           </div>
