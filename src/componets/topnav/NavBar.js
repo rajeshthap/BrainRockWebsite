@@ -100,9 +100,9 @@ useEffect(() => {
                <NavDropdown.Item as={Link} to="/Feedback" onClick={closeMenu}>
                   Feedback
                 </NavDropdown.Item>
-                 <NavDropdown.Item as={Link} to="/FAQ" onClick={closeMenu}>
-                  FAQ
-                </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/faq" onClick={closeMenu}>
+                   FAQ
+                 </NavDropdown.Item>
 </NavDropdown>
  {showCareer && (
         <Nav.Link as={Link} to="/Career" onClick={closeMenu}>

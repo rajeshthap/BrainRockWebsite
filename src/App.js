@@ -121,6 +121,7 @@ import GenerateBill from "./componets/adminpanel/billgeneration/GenerateBill";
 import ManageBills from "./componets/adminpanel/billgeneration/ManageBills";
 import BillUpload from "./componets/adminpanel/billgeneration/BillUpload";
 import Terms from "./componets/pdf_page/Terms";
+import Faq from "./componets/pdf_page/Faq";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -251,6 +252,7 @@ function AppContent() {
         <Route path="/Certificate" element={<Certificate/>} />
         <Route path="/ProjectDetail" element={<ProjectDetail/>} />
         <Route path="/Terms" element={<Terms/>} />
+        <Route path="/faq" element={<Faq/>} />
     
 
         
