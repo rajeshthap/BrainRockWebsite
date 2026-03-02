@@ -128,9 +128,17 @@
 
 /* Training Wrapper */
 .training-wrapper {
-
   border-radius: 10px;
   /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); */
+}
+
+/* FAQ and Terms Conditions List Styles */
+.training-wrapper.tearm-condition ol li {
+  margin-top: 0; /* Reset default margin for all li */
+}
+
+.training-wrapper.tearm-condition ol li:nth-child(n+2) {
+  margin-top: 14px; /* Apply margin-top: 14px to li elements from 2nd to last */
 }
 
 /* Responsive adjustments */

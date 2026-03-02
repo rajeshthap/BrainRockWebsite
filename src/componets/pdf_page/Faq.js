@@ -91,9 +91,10 @@ function Faq() {
               
               <li><strong>8. How can we contact Brainrock Consulting Services?</strong><br />
                 You can contact us through:<br />
-                • Email<br />
-                • Phone<br />
-                • Website Contact Form
+                • Email: info.brainrock@gmail.com
+ <br />
+                • Phone: 81939-91148<br />
+                • Website Contact Form: <Link to="/contact">Contact Us</Link>
               </li>
               
               <li><strong>9. Do you provide support after project completion?</strong><br />
