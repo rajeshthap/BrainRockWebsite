@@ -150,7 +150,7 @@ const EmployeeRegistration = () => {
       try {
         console.log("Fetching managers...");
         const response = await axios.get(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-name-details/",
+          "https://brainrock.in/brainrock/backend/api/get-employee-name-details/",
           {
             withCredentials: true
           }
@@ -180,7 +180,7 @@ const EmployeeRegistration = () => {
       setLoading(true);
       try {
         const res = await axios.get(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/roles-list/"
+          "https://brainrock.in/brainrock/backend/api/roles-list/"
         );
         if (res.data.success && Array.isArray(res.data.roles)) {
           setDepartments(res.data.roles);
@@ -198,7 +198,7 @@ const EmployeeRegistration = () => {
     const fetchBranches = async () => {
       try {
         const res = await axios.get(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/branch-names/",
+          "https://brainrock.in/brainrock/backend/api/branch-names/",
           { withCredentials: true }
         );
         if (res.data.success && Array.isArray(res.data.data)) {
@@ -298,7 +298,7 @@ const EmployeeRegistration = () => {
   const fetchBankDetails = async (ifscCode) => {
     try {
       const response = await fetch(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-bank-details/?ifsc_code=${ifscCode}`,
+        `https://brainrock.in/brainrock/backend/api/get-bank-details/?ifsc_code=${ifscCode}`,
         {
           method: "GET",
           headers: {
@@ -846,7 +846,7 @@ const EmployeeRegistration = () => {
 
     try {
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-register/",
+        "https://brainrock.in/brainrock/backend/api/all-register/",
         {
           method: "POST",
           body: payload,

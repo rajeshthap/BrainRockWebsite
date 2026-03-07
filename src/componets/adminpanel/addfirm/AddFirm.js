@@ -96,7 +96,7 @@ const AddFirm = () => {
     }
     
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/firm/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/firm/', {
         method: 'POST',
         credentials: 'include',
         body: dataToSend,

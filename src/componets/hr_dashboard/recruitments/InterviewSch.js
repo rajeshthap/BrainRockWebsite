@@ -8,7 +8,7 @@ import { Container, Modal, Button, Card, Row, Col, Spinner, Alert, Badge, Form, 
 import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
 
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 function InterviewSch() {
   const [sidebarOpen, setSidebarOpen] = useState(true);

@@ -166,7 +166,7 @@ const AddAwards = () => {
     
     try {
       // Using the provided API endpoint for awards
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/award-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/award-items/', {
         method: 'POST',
         credentials: 'include', // Include credentials for authentication
         body: dataToSend,

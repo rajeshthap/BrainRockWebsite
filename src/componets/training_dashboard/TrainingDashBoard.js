@@ -35,7 +35,7 @@ const TrainingDashBoard = () => {
   const [completingCourse, setCompletingCourse] = useState(false); // State to track course completion process
  
   const navigate = useNavigate();
-  const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const BASE_URL = "https://brainrock.in/brainrock/backend";
 
   // Redirect Function
   const openVideoPage = (course) => {

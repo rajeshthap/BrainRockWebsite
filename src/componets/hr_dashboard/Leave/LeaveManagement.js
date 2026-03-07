@@ -89,10 +89,10 @@ useEffect(() => {
   const empId = user?.unique_id;
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`;
-  const ALL_API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`;
-  const EMPLOYEE_API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${employee_id}`;
-  const GENDER_API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`;
+  const API_URL = `https://brainrock.in/brainrock/backend/api/leave-balance/?employee_id=${employee_id}`;
+  const ALL_API_URL = `https://brainrock.in/brainrock/backend/api/leave-balance/`;
+  const EMPLOYEE_API_URL = `https://brainrock.in/brainrock/backend/api/employee-details/?emp_id=${employee_id}`;
+  const GENDER_API_URL = `https://brainrock.in/brainrock/backend/api/get-employee-gender-salary/?employee_id=${employee_id}`;
 
   // ========================================
   // NOTIFICATION
@@ -353,7 +353,7 @@ useEffect(() => {
       };
 
       await axios.post(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-approve/",
+        "https://brainrock.in/brainrock/backend/api/leaves-approve/",
         payload,
         {
           withCredentials: true,

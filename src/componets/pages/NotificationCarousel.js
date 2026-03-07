@@ -14,7 +14,7 @@ const NotificationCarousel = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-notification-post/",
+          "https://brainrock.in/brainrock/backend/api/all-notification-post/",
           {
             method: "GET",
             credentials: "include",

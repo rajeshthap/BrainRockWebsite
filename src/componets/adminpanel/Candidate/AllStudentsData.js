@@ -6,7 +6,7 @@ import AdminHeader from "../AdminHeader";
 import * as XLSX from 'xlsx'; // Import xlsx library for Excel export
 
 // Define base URL for your API
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 // Define all 13 districts
 const ALL_DISTRICTS = [

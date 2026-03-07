@@ -121,7 +121,7 @@ const CreateTeam = () => {
   const fetchTeamsData = async () => {
     try {
       const teamsResponse = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/",
+        "https://brainrock.in/brainrock/backend/api/all-teams/",
         {
           method: "GET",
           credentials: "include",
@@ -162,7 +162,7 @@ const CreateTeam = () => {
         const [teamsResponse, employeesResponse, projectsResponse] =
           await Promise.all([
             fetch(
-              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/",
+              "https://brainrock.in/brainrock/backend/api/all-teams/",
               {
                 method: "GET",
                 credentials: "include",
@@ -170,7 +170,7 @@ const CreateTeam = () => {
               }
             ),
             fetch(
-              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/",
+              "https://brainrock.in/brainrock/backend/api/employee-list/",
               {
                 method: "GET",
                 credentials: "include",
@@ -178,7 +178,7 @@ const CreateTeam = () => {
               }
             ),
             fetch(
-              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourproject-items/",
+              "https://brainrock.in/brainrock/backend/api/ourproject-items/",
               {
                 method: "GET",
                 credentials: "include",
@@ -358,7 +358,7 @@ const handleSubmit = async (e) => {
 
   try {
     const response = await fetch(
-      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/",
+      "https://brainrock.in/brainrock/backend/api/all-teams/",
       {
         method: "POST",
         credentials: "include",

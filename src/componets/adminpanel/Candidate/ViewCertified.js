@@ -40,7 +40,7 @@ const ViewCertified = () => {
     const fetchCertificates = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/certificate/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/certificate/', {
           method: 'GET',
           credentials: 'include',
         });

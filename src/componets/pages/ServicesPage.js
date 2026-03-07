@@ -29,7 +29,7 @@ function ServicesPage({ showBannerAndFooter = true }) {
     const fetchItServiceData = async () => {
       try {
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/itservice-items/"
+          "https://brainrock.in/brainrock/backend/api/itservice-items/"
         );
 
         if (!response.ok) {
@@ -42,7 +42,7 @@ function ServicesPage({ showBannerAndFooter = true }) {
           const data = result.data.map((item) => ({
             ...item,
             icon: item.icon
-              ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.icon}`
+              ? `https://brainrock.in/brainrock/backend${item.icon}`
               : null,
           }));
           setItServiceData(data);

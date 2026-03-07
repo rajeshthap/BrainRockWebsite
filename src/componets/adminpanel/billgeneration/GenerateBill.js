@@ -296,8 +296,8 @@ const GenerateBill = () => {
 
       // Send to API
       const apiUrl = selectedBillType === "ukssovm" 
-        ? "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-brainrock/"
-        : "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-zee/";
+        ? "https://brainrock.in/brainrock/backend/api/bill-brainrock/"
+        : "https://brainrock.in/brainrock/backend/api/bill-zee/";
 
       const response = await fetch(apiUrl, {
         method: "POST",

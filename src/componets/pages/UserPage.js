@@ -73,7 +73,7 @@ function UserPage() {
       try {
         // Using the provided API endpoint
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/carousel-items/"
+          "https://brainrock.in/brainrock/backend/api/carousel-items/"
         );
 
         if (!response.ok) {
@@ -89,7 +89,7 @@ function UserPage() {
             ...item,
             // Construct full image URL if image path is provided
             image: item.image
-              ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.image}`
+              ? `https://brainrock.in/brainrock/backend${item.image}`
               : null,
           }));
           setCarouselData(data);
@@ -128,7 +128,7 @@ function UserPage() {
     const fetchAboutData = async () => {
       try {
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/aboutus-item/"
+          "https://brainrock.in/brainrock/backend/api/aboutus-item/"
         );
         if (!response.ok) {
           throw new Error("Failed to fetch data");
@@ -145,7 +145,7 @@ function UserPage() {
             title: item.title,
             description: item.description,
             image: item.image
-              ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.image}`
+              ? `https://brainrock.in/brainrock/backend${item.image}`
               : null,
           };
 
@@ -161,7 +161,7 @@ function UserPage() {
     const fetchDesignDevData = async () => {
       try {
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/design-development-items/"
+          "https://brainrock.in/brainrock/backend/api/design-development-items/"
         );
 
         if (!response.ok) {
@@ -177,7 +177,7 @@ function UserPage() {
             ...item,
             // Construct full image URL if image path is provided
             icon: item.icon
-              ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.icon}`
+              ? `https://brainrock.in/brainrock/backend${item.icon}`
               : null,
           }));
           setDesignDevData(data);
@@ -195,7 +195,7 @@ function UserPage() {
     const fetchTechStackData = async () => {
       try {
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourtechstack-item/"
+          "https://brainrock.in/brainrock/backend/api/ourtechstack-item/"
         );
 
         if (!response.ok) {
@@ -214,7 +214,7 @@ function UserPage() {
             title: item.title,
             description: item.description,
             image: item.image
-              ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.image}`
+              ? `https://brainrock.in/brainrock/backend${item.image}`
               : null,
           };
 
@@ -233,7 +233,7 @@ function UserPage() {
     const fetchItServiceData = async () => {
       try {
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/itservice-items/"
+          "https://brainrock.in/brainrock/backend/api/itservice-items/"
         );
 
         if (!response.ok) {
@@ -249,7 +249,7 @@ function UserPage() {
             ...item,
             // Construct full image URL if image path is provided
             icon: item.icon
-              ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.icon}`
+              ? `https://brainrock.in/brainrock/backend${item.icon}`
               : null,
           }));
           setItServiceData(data);

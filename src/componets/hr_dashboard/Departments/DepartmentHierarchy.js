@@ -8,7 +8,7 @@ import { FaCalendar } from 'react-icons/fa';
 import { FaTimes } from 'react-icons/fa';
 
 const DepartmentHierarchy = () => {
-  const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const baseUrl = "https://brainrock.in/brainrock/backend";
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [treeData, setTreeData] = useState([]);

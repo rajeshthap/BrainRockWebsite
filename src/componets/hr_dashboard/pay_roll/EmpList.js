@@ -56,7 +56,7 @@ const EmpList = () => {
     try {
       // Create an array of promises to fetch salary status for all employees
       const statusPromises = employees.map(emp => 
-        fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-structure/?employee_id=${emp.emp_id}`, {
+        fetch(`https://brainrock.in/brainrock/backend/api/salary-structure/?employee_id=${emp.emp_id}`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -108,7 +108,7 @@ const EmpList = () => {
     try {
       // Create an array of promises to fetch salary calculation status for all employees
       const statusPromises = employees.map(emp => 
-        fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-calculation/?employee_id=${emp.emp_id}`, {
+        fetch(`https://brainrock.in/brainrock/backend/api/salary-calculation/?employee_id=${emp.emp_id}`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -160,7 +160,7 @@ const EmpList = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/employee-list/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -275,7 +275,7 @@ const EmpList = () => {
   // Calculate total pages
   const totalPages = Math.ceil(allFilteredEmployees.length / itemsPerPage);
 
-  const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+  const baseUrl = 'https://brainrock.in/brainrock/backend';
 
   // Check if user is an employee (not admin)
   const isEmployee = user && user.role !== 'hr';

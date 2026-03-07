@@ -125,7 +125,7 @@ const EmployeeManagement = () => {
     const fetchEmployees = async () => {
       try {
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/",
+          "https://brainrock.in/brainrock/backend/api/employee-list/",
           {
             method: "GET",
             credentials: "include",
@@ -188,7 +188,7 @@ const EmployeeManagement = () => {
 
   const totalPages = Math.ceil(allFilteredEmployees.length / itemsPerPage);
 
-  const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const baseUrl = "https://brainrock.in/brainrock/backend";
 
   // axios instance that sends cookies (mirrors HrProfile)
   const axiosInstance = axios.create({

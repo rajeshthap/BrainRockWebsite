@@ -69,7 +69,7 @@ function Feedback() {
 
     try {
       const response = await axios.post(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/feedback/",
+        "https://brainrock.in/brainrock/backend/api/feedback/",
         formData
       );
 

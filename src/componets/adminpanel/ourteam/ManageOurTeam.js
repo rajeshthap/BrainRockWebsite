@@ -50,7 +50,7 @@ const ManageOurTeam = () => {
   const [showAlert, setShowAlert] = useState(false);
 
   // Base URL for images
-  const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const BASE_URL = "https://brainrock.in/brainrock/backend";
 
   // Responsive check
   useEffect(() => {
@@ -95,7 +95,7 @@ const ManageOurTeam = () => {
   // Fetch team members from API
   const fetchTeamMembers = async () => {
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourteam-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/ourteam-items/', {
         method: 'GET',
         credentials: 'include',
       });
@@ -196,7 +196,7 @@ const ManageOurTeam = () => {
     
     try {
       // Modified to send ID in payload, not in URL path
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourteam-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/ourteam-items/', {
         method: 'PUT',
         credentials: 'include',
         body: dataToSend,
@@ -256,7 +256,7 @@ const ManageOurTeam = () => {
     
     try {
       // Modified to send ID in payload, not in URL path
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourteam-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/ourteam-items/', {
         method: 'DELETE',
         credentials: 'include',
         headers: {

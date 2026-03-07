@@ -79,7 +79,7 @@ const [isMobile, setIsMobile] = useState(false);
     
     setEmployeesLoading(true);
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/employee-list/', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -402,7 +402,7 @@ const [isMobile, setIsMobile] = useState(false);
     
     try {
       const { start, end } = getDateRange(date, mode);
-      let apiUrl = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/attendance/report/?employee_id=${targetEmployeeId}`;
+      let apiUrl = `https://brainrock.in/brainrock/backend/api/attendance/report/?employee_id=${targetEmployeeId}`;
       
       // Add date range parameters based on view mode
       if (mode === 'day') {
@@ -580,7 +580,7 @@ const [isMobile, setIsMobile] = useState(false);
     }
   };
 
-  const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+  const baseUrl = 'https://brainrock.in/brainrock/backend';
 
   // Render employee list (only for admin)
   const renderEmployeeList = () => {

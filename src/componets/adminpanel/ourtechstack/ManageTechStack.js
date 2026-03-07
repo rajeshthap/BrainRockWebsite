@@ -7,7 +7,7 @@ import AdminHeader from "../AdminHeader";
 import { AiOutlineFileDone } from 'react-icons/ai'; // Default icon
 
 // Define the base URL for your API
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 const ManageTechStack = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);

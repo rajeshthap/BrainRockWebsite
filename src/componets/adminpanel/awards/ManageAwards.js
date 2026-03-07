@@ -7,7 +7,7 @@ import AdminHeader from "../AdminHeader";
 import { AiOutlineFileDone, AiOutlineDelete } from 'react-icons/ai';
 
 // Define the base URL for your API
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 const ManageAwards = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);

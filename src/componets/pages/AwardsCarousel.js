@@ -9,13 +9,13 @@ const AwardsCarousel = () => {
   const [error, setError] = useState(null);
   
   // Base URL for images
-  const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const BASE_URL = "https://brainrock.in/brainrock/backend";
 
   // Fetch awards from API
   useEffect(() => {
     const fetchAwards = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/award-items/');
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/award-items/');
         
         if (!response.ok) {
           throw new Error('Failed to fetch awards');

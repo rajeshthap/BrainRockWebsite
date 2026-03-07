@@ -82,7 +82,7 @@ const HrDashBoard = () => {
   // Employee data state
   const [employees, setEmployees] = useState({});
   const [employeesLoading, setEmployeesLoading] = useState(true);
-  const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/";
+  const baseUrl = "https://brainrock.in/brainrock/backend/";
 
   // Fetch current user details for post form
   useEffect(() => {
@@ -167,7 +167,7 @@ const HrDashBoard = () => {
   useEffect(() => {
     const fetchEmployeeCount = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employees-count/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/get-employees-count/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -191,7 +191,7 @@ const HrDashBoard = () => {
   useEffect(() => {
     const fetchAttendanceSummary = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/today-attendance-summary/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/today-attendance-summary/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -224,7 +224,7 @@ const HrDashBoard = () => {
   useEffect(() => {
     const fetchBirthdays = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-birthday-list/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/get-birthday-list/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -253,7 +253,7 @@ const HrDashBoard = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-post/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/all-post/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -335,7 +335,7 @@ const HrDashBoard = () => {
         image: postImage
       };
       
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-post/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/all-post/', {
         method: 'POST',
         credentials: 'include',
         headers: { 
@@ -362,7 +362,7 @@ const HrDashBoard = () => {
         // Refresh posts
         const fetchPosts = async () => {
           try {
-            const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-post/', {
+            const response = await fetch('https://brainrock.in/brainrock/backend/api/all-post/', {
               method: 'GET',
               credentials: 'include',
               headers: { 'Content-Type': 'application/json' }

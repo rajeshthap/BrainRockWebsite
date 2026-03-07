@@ -91,7 +91,7 @@ const handleSendOtp = async (e) => {
 
   try {
     const response = await fetch(
-      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/send-otp-password-change/",
+      "https://brainrock.in/brainrock/backend/api/send-otp-password-change/",
       {
         method: "POST",
         headers: {
@@ -134,7 +134,7 @@ const handleSendOtp = async (e) => {
 
     try {
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/verify-otp/",
+        "https://brainrock.in/brainrock/backend/api/verify-otp/",
         {
           method: "POST",
           headers: {
@@ -177,7 +177,7 @@ const handleSendOtp = async (e) => {
 
     try {
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/change-password/",
+        "https://brainrock.in/brainrock/backend/api/change-password/",
         {
           method: "POST",
           headers: {
@@ -214,7 +214,7 @@ const handleSendOtp = async (e) => {
 
     try {
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/send-otp-password-change/",
+        "https://brainrock.in/brainrock/backend/api/send-otp-password-change/",
         {
           method: "POST",
           headers: {

@@ -41,7 +41,7 @@ function Career() {
   // Fetch Jobs
   useEffect(() => {
     fetch(
-      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/"
+      "https://brainrock.in/brainrock/backend/api/job-opening/"
     )
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load job openings");
@@ -105,7 +105,7 @@ function Career() {
     if (resume) formData.append("resume", resume);
 
     fetch(
-      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-application/",
+      "https://brainrock.in/brainrock/backend/api/job-application/",
       {
         method: "POST",
         body: formData,

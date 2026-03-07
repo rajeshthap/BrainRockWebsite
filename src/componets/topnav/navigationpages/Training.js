@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import TrainingRegistration from "./TrainingRegistration";
 import FooterPage from "../../footer/FooterPage";
 
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 const Training = () => {
   const location = useLocation();

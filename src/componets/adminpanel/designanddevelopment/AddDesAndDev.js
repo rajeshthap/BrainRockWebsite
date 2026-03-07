@@ -110,7 +110,7 @@ const AddDesAndDev = () => {
     
     try {
       // Using the provided API endpoint
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/design-development-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/design-development-items/', {
         method: 'POST',
         credentials: 'include', // Include credentials as requested
         body: dataToSend,

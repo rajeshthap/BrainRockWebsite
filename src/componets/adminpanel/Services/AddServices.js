@@ -105,7 +105,7 @@ const AddServices = () => {
     
     try {
       // Using the provided API endpoint for services
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/innovative-service-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/innovative-service-items/', {
         method: 'POST',
         credentials: 'include', // Include credentials as requested
         body: dataToSend,

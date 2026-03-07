@@ -7,7 +7,7 @@ import "../../../assets/css/course.css";
 import "../../../assets/css/aboutus.css";
 import "../../../assets/css/project.css";
 
-const API_BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+const API_BASE_URL = "https://brainrock.in/brainrock/backend";
 
 function ProjectDetail() {
   const location = useLocation();
@@ -32,7 +32,7 @@ console.log("Fetching details for project ID:", projectId);
     try {
       const response = await fetch(
      
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourproject-items/?project_id=${projectId}`
+        `https://brainrock.in/brainrock/backend/api/ourproject-items/?project_id=${projectId}`
       );
       if (!response.ok) throw new Error("Project not found");
 

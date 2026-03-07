@@ -24,7 +24,7 @@ import { UserProfileContext } from "../context/UserProfileContext";
 import BRLogo from "../../assets/images/brainrock_logo.png";
 
 // Base URL used by the backend for media/API
-const BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 // 1. Accept searchTerm and setSearchTerm as props
 function TrainingHeader({ toggleSidebar, searchTerm, setSearchTerm }) {

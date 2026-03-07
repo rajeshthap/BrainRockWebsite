@@ -55,7 +55,7 @@ const LeaveHistory = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`;
+  const API_URL = `https://brainrock.in/brainrock/backend/api/leave-balance/?employee_id=${employee_id}`;
 
   useEffect(() => {
     fetchLeaveHistory();
@@ -79,7 +79,7 @@ const LeaveHistory = () => {
     const fetchEmployeeData = async () => {
       try {
         const apiURL =
-          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${employee_id}`;
+          `https://brainrock.in/brainrock/backend/api/employee-details/?emp_id=${employee_id}`;
 
         const res = await axios.get(apiURL, { withCredentials: true });
 

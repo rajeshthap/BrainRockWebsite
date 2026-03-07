@@ -43,7 +43,7 @@ const ViewServices = () => {
   const [showAlert, setShowAlert] = useState(false);
 
   // Base URL for images
-  const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const BASE_URL = "https://brainrock.in/brainrock/backend";
 
   // Responsive check
   useEffect(() => {
@@ -77,7 +77,7 @@ const ViewServices = () => {
   // Fetch services from API
   const fetchServices = async () => {
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/innovative-service-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/innovative-service-items/', {
         method: 'GET',
         credentials: 'include',
       });
@@ -177,7 +177,7 @@ const ViewServices = () => {
     }
     
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/innovative-service-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/innovative-service-items/', {
         method: 'PUT',
         credentials: 'include',
         body: dataToSend,
@@ -231,7 +231,7 @@ const ViewServices = () => {
     }
     
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/innovative-service-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/innovative-service-items/', {
         method: 'DELETE',
         credentials: 'include',
         headers: {

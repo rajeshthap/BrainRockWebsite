@@ -102,7 +102,7 @@ const AddClient = () => {
     
     try {
       // Client API endpoint
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourclient-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/ourclient-items/', {
         method: 'POST',
         credentials: 'include',
         body: dataToSend,

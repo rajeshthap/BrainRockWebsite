@@ -197,7 +197,7 @@ const SalaryStructure = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/employee-list/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -259,7 +259,7 @@ const SalaryStructure = () => {
   // Function to check salary structure status for an employee
   const checkSalaryStatus = async (employeeId) => {
     try {
-      const response = await fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-structure/?employee_id=${employeeId}`, {
+      const response = await fetch(`https://brainrock.in/brainrock/backend/api/salary-structure/?employee_id=${employeeId}`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -406,7 +406,7 @@ const SalaryStructure = () => {
     
     try {
       const response = await axios.get(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employeeId}`,
+        `https://brainrock.in/brainrock/backend/api/get-employee-gender-salary/?employee_id=${employeeId}`,
         { withCredentials: true }
       );
       
@@ -701,7 +701,7 @@ const handleDownload = () => {
       
       // Make API call to save salary structure
       const response = await axios.post(
-        'https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-structure/',
+        'https://brainrock.in/brainrock/backend/api/salary-structure/',
         salaryData,
         { withCredentials: true }
       );
@@ -840,7 +840,7 @@ const handleDownload = () => {
     return rangeWithDots;
   };
 
-  const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+  const baseUrl = 'https://brainrock.in/brainrock/backend';
 
   // If showing salary form, render salary structure form
   if (showSalaryForm && selectedEmployee) {

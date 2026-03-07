@@ -6,7 +6,7 @@ import "../../../assets/css/aboutus.css";
 import "../../../assets/css/project.css";
 import { FaArrowRight } from "react-icons/fa";
 
-const API_BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+const API_BASE_URL = "https://brainrock.in/brainrock/backend";
 
 function RunningProjects() {
   const navigate = useNavigate();

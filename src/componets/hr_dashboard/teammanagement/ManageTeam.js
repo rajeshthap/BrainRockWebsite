@@ -188,17 +188,17 @@ const ManageTeam = () => {
 
         // Use Promise.all to fetch all data concurrently
         const [teamsResponse, employeesResponse, projectsResponse] = await Promise.all([
-          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/', {
+          fetch('https://brainrock.in/brainrock/backend/api/all-teams/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
           }),
-          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+          fetch('https://brainrock.in/brainrock/backend/api/employee-list/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
           }),
-          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourproject-items/', {
+          fetch('https://brainrock.in/brainrock/backend/api/ourproject-items/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
@@ -393,7 +393,7 @@ const ManageTeam = () => {
       };
       
       // Use all-teams endpoint for PATCH
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/all-teams/', {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

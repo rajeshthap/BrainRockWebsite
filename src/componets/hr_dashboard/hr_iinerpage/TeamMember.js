@@ -18,7 +18,7 @@ const TeamMember = () => {
   useEffect(() => {
     const fetchEmployeeNames = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/get-employee-names-list/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -53,7 +53,7 @@ const TeamMember = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourproject-items/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/ourproject-items/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -88,7 +88,7 @@ const TeamMember = () => {
     setErrorTeams(null);
     
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/all-teams/', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -273,7 +273,7 @@ const TeamMember = () => {
                   <div className="project-logo me-3">
                     {project.company_logo ? (
                       <img 
-                        src={`https://mahadevaaya.com/brainrock.in/brainrock/backendbr${project.company_logo}`} 
+                        src={`https://brainrock.in/brainrock/backend${project.company_logo}`} 
                         alt={project.company_name} 
                         style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
                       />

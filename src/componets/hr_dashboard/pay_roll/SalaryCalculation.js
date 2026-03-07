@@ -34,7 +34,7 @@ const SalaryCalculation = ({ employee }) => {
   const [saveSuccess, setSaveSuccess] = useState(null);
   const [saveError, setSaveError] = useState(null);
  
-  const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const BASE_URL = "https://brainrock.in/brainrock/backend";
  
   // Axios instance with credentials
   const axiosInstance = useMemo(() => axios.create({
@@ -296,7 +296,7 @@ const SalaryCalculation = ({ employee }) => {
       
       // Make API call to save salary calculation
       const response = await axios.post(
-        'https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-calculation/',
+        'https://brainrock.in/brainrock/backend/api/salary-calculation/',
         salaryCalculationData,
         { withCredentials: true }
       );

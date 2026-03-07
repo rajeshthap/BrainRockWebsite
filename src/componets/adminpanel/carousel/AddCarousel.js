@@ -103,7 +103,7 @@ const AddCarousel = () => {
     
     try {
       // IMPORTANT: Replace this with your actual API endpoint
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/carousel-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/carousel-items/', {
         method: 'POST',
         headers: {
           // 'Content-Type' should be omitted when sending FormData

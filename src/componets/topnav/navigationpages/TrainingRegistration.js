@@ -27,6 +27,7 @@ const [termsError, setTermsError] = useState("");
   const [formData, setFormData] = useState({
     application_for_course: "",
     application_for_course_id: "",
+    course_fee: "", // Added course_fee field
     candidate_name: "",
     guardian_name: "",
     address: "",
@@ -70,7 +71,7 @@ const [termsError, setTermsError] = useState("");
 
   useEffect(() => {
     axios
-      .get("https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-list/")
+      .get("https://brainrock.in/brainrock/backend/api/course-list/")
       .then((res) => {
         if (res.data && res.data.success && Array.isArray(res.data.courses)) {
           setCourseData(res.data.courses);
@@ -86,7 +87,8 @@ const [termsError, setTermsError] = useState("");
               setFormData(prev => ({
                 ...prev,
                 application_for_course: courseName,
-                application_for_course_id: matchingCourse.course_id
+                application_for_course_id: matchingCourse.course_id,
+                course_fee: matchingCourse.price.toString() // Set course fee when initializing from state
               }));
             }
           }
@@ -145,7 +147,7 @@ const [termsError, setTermsError] = useState("");
     return msg === "";
   };
 
-  const handleChange = (e) => {
+   const handleChange = (e) => {
     const { name, value, files } = e.target;
     
     // Handle course selection differently
@@ -154,7 +156,8 @@ const [termsError, setTermsError] = useState("");
       setFormData(prev => ({
         ...prev,
         application_for_course: value,
-        application_for_course_id: selectedCourse ? selectedCourse.course_id : ""
+        application_for_course_id: selectedCourse ? selectedCourse.course_id : "",
+        course_fee: selectedCourse ? selectedCourse.price.toString() : "" // Set course fee from selected course
       }));
       validateField(name, value);
     } else {
@@ -229,7 +232,7 @@ const [termsError, setTermsError] = useState("");
     // Create FormData for file upload
     const payload = new FormData();
     
-    // Add all form fields as strings
+     // Add all form fields as strings
     payload.append("candidate_name", formData.candidate_name);
     payload.append("guardian_name", formData.guardian_name);
     payload.append("address", formData.address);
@@ -241,6 +244,7 @@ const [termsError, setTermsError] = useState("");
     payload.append("highest_education", formData.highest_education);
     payload.append("course_status", "pending");
     payload.append("course_mode", formData.course_mode); // Added course_mode to payload
+    payload.append("course_fee", formData.course_fee); // Added course_fee to payload
     
     // Add course fields as arrays
     payload.append("application_for_course", JSON.stringify([formData.application_for_course]));
@@ -254,7 +258,7 @@ const [termsError, setTermsError] = useState("");
     
     try {
       const response = await axios.post(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/",
+        "https://brainrock.in/brainrock/backend/api/course-registration/",
         payload,
         { 
           headers: { 
@@ -264,38 +268,27 @@ const [termsError, setTermsError] = useState("");
         }
       );
 
-      // Store registration details for success message
-      setRegistrationDetails({
-        candidateName: formData.candidate_name,
-        courseName: formData.application_for_course,
-        email: formData.email,
-        mobile: formData.mobile_no
-      });
+      // Debug: Log entire response to check payment order data
+      console.log("API Response:", response);
+      
+      // Check if payment URL is present in response
+      if (response.data.payment_order && response.data.payment_order.redirectUrl) {
+        // Debug: Log payment URL
+        console.log("Payment URL:", response.data.payment_order.redirectUrl);
+        // Open payment URL in new tab
+        window.open(response.data.payment_order.redirectUrl, '_blank');
+      } else {
+        // Debug: Log if payment order or redirect URL is missing
+        console.warn("Payment order or redirect URL not found in response");
+        console.log("Response data:", response.data);
+        // Debug: Log which course was registered
+        console.log("Registered Course:", formData.application_for_course);
+        console.log("Course ID:", formData.application_for_course_id);
+        console.log("Course Fee:", formData.course_fee);
+      }
 
-      setSuccessMsg("Training Registration Successful!");
-      setShowSuccess(true);
-
-      setFormData({
-        application_for_course: "",
-        application_for_course_id: "",
-        candidate_name: "",
-        guardian_name: "",
-        address: "",
-        date_of_birth: "",
-        email: "",
-        password: "",
-        confirm_password: "",
-        mobile_no: "",
-        school_college_name: "",
-        highest_education: "",
-        profile_photo: null,
-        course_mode: "", // Reset course_mode
-      });
-
-      setErrors({});
-
-      // Keep success message visible longer
-      setTimeout(() => setShowSuccess(false), 10000);
+      // Redirect to login page after successful registration and payment
+      window.location.href = "https://brjobsedu.com/login";
     } catch (error) {
       if (error.response && error.response.data) {
         const apiErrors = {};

@@ -110,7 +110,7 @@ const shouldShowCheckInOutButtons = () => {
   const fetchEmployees = async () => {
     setEmployeesLoading(true);
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/employee-list/', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -561,7 +561,7 @@ const handleDownload = () => {
 
     try {
       const checkInTime = new Date().toISOString();
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee/check-in/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/employee/check-in/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -625,7 +625,7 @@ const handleDownload = () => {
     setMessage({ type: "", text: "" });
 
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee/check-out/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/employee/check-out/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -679,7 +679,7 @@ const handleDownload = () => {
     if (!hasCheckedIn || hasCheckedOut) return;
 
     try {
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee/check-out/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/employee/check-out/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -713,7 +713,7 @@ const handleDownload = () => {
     setLoading(true);
     try {
       const { start, end } = getDateRange(date, mode);
-      let apiUrl = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/attendance/report/?employee_id=${employeeId}`;
+      let apiUrl = `https://brainrock.in/brainrock/backend/api/attendance/report/?employee_id=${employeeId}`;
       
       // Add date range parameters based on view mode
       if (mode === 'day') {
@@ -954,7 +954,7 @@ const handleDownload = () => {
 
     try {
       const recordId = attendanceData[index].id;
-      const response = await fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/attendance/${recordId}`, {
+      const response = await fetch(`https://brainrock.in/brainrock/backend/api/attendance/${recordId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1022,7 +1022,7 @@ const handleDownload = () => {
   };
 
   const withinTimeWindow = isWithinAllowedTime();
-  const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+  const baseUrl = 'https://brainrock.in/brainrock/backend';
 
   // Render employee list
   const renderEmployeeList = () => {

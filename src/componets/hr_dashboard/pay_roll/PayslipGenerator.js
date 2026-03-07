@@ -61,7 +61,7 @@ const PayslipGenerator = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/employee-list/', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -95,7 +95,7 @@ const PayslipGenerator = () => {
       // For non-HR users, just get their own data
       const fetchUserData = async () => {
         try {
-          const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+          const response = await fetch('https://brainrock.in/brainrock/backend/api/employee-list/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
@@ -140,7 +140,7 @@ const PayslipGenerator = () => {
     try {
       // Create an array of promises to fetch salary calculation status for all employees
       const statusPromises = employees.map(emp => 
-        fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-calculation/?employee_id=${emp.emp_id}`, {
+        fetch(`https://brainrock.in/brainrock/backend/api/salary-calculation/?employee_id=${emp.emp_id}`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -203,7 +203,7 @@ const PayslipGenerator = () => {
     setPayslipError(null);
     
     try {
-      const response = await fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/salary-calculation/?employee_id=${employee.emp_id}`, {
+      const response = await fetch(`https://brainrock.in/brainrock/backend/api/salary-calculation/?employee_id=${employee.emp_id}`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -317,7 +317,7 @@ const PayslipGenerator = () => {
   // Calculate total pages
   const totalPages = Math.ceil(allFilteredEmployees.length / itemsPerPage);
 
-  const baseUrl = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+  const baseUrl = 'https://brainrock.in/brainrock/backend';
  const [isMobile, setIsMobile] = useState(false); 
   const [isTablet, setIsTablet] = useState(false);
     useEffect(() => {

@@ -49,7 +49,7 @@ const Feedbackget = () => {
     const fetchFeedbacks = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/feedback/', {
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/feedback/', {
           method: 'GET',
           credentials: 'include',
         });
@@ -130,7 +130,7 @@ const Feedbackget = () => {
     try {
       // Log the request details for debugging
       console.log("Sending reply to API:", {
-        url: 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/reply-feedback/',
+        url: 'https://brainrock.in/brainrock/backend/api/reply-feedback/',
         method: 'PUT',
         body: {
           id: selectedFeedback.id,
@@ -138,7 +138,7 @@ const Feedbackget = () => {
         }
       });
       
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/reply-feedback/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/reply-feedback/', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

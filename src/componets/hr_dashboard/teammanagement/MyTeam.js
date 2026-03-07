@@ -60,17 +60,17 @@ const MyTeam = () => {
 
         // Use Promise.all to fetch all data concurrently
         const [teamsResponse, employeesResponse, projectsResponse] = await Promise.all([
-          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-teams/', {
+          fetch('https://brainrock.in/brainrock/backend/api/all-teams/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
           }),
-          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/', {
+          fetch('https://brainrock.in/brainrock/backend/api/employee-list/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
           }),
-          fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/project-list/', {
+          fetch('https://brainrock.in/brainrock/backend/api/project-list/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }

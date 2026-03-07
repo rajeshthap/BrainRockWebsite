@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "./LeftNavManagement";
 import AdminHeader from "./AdminHeader";
 import "../../assets/css/websitemanagement.css";
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
 const WebsiteManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -54,7 +54,7 @@ useEffect(() => {
     try {
       setLoading(true);
 
-      const response = await fetch(`https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-registration/`, {
+      const response = await fetch(`https://brainrock.in/brainrock/backend/api/course-registration/`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -108,7 +108,7 @@ useEffect(() => {
       try {
         setLoading((prev) => ({ ...prev, courses: true }));
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/course-items/",
+          "https://brainrock.in/brainrock/backend/api/course-items/",
           {
             method: "GET",
             credentials: "include",
@@ -152,7 +152,7 @@ const goToZeeBills = () => {
       try {
         setLoading((prev) => ({ ...prev, employees: true }));
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-list/",
+          "https://brainrock.in/brainrock/backend/api/employee-list/",
           {
             method: "GET",
             credentials: "include",
@@ -193,7 +193,7 @@ const goToZeeBills = () => {
       try {
         setLoading((prev) => ({ ...prev, projects: true }));
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/project-list/",
+          "https://brainrock.in/brainrock/backend/api/project-list/",
           {
             method: "GET",
             credentials: "include",
@@ -227,7 +227,7 @@ const goToZeeBills = () => {
       try {
         setLoading((prev) => ({ ...prev, brainrockBills: true }));
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-brainrock/",
+          "https://brainrock.in/brainrock/backend/api/bill-brainrock/",
           {
             method: "GET",
             credentials: "include",
@@ -265,7 +265,7 @@ const goToZeeBills = () => {
       try {
         setLoading((prev) => ({ ...prev, zeeBills: true }));
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-zee/",
+          "https://brainrock.in/brainrock/backend/api/bill-zee/",
           {
             method: "GET",
             credentials: "include",

@@ -6,7 +6,7 @@ import "../../../assets/css/course.css";
 import { Link, useNavigate } from "react-router-dom";
 import FooterPage from '../../footer/FooterPage';
 
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 function Courses() {
   const navigate = useNavigate();

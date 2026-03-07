@@ -15,7 +15,7 @@ useEffect(() => {
   const fetchJobOpenings = async () => {
     try {
       const res = await axios.get(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/"
+        "https://brainrock.in/brainrock/backend/api/job-opening/"
       );
 
       if (Array.isArray(res.data) && res.data.length > 0) {

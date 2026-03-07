@@ -27,7 +27,7 @@ useEffect(() => {
       const fetchServiceData = async () => {
         try {
           const response = await fetch(
-            `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/itservice-items/${serviceId}`
+            `https://brainrock.in/brainrock/backend/api/itservice-items/${serviceId}`
           );
 
           if (!response.ok) {
@@ -40,7 +40,7 @@ useEffect(() => {
             const data = {
               ...result.data,
               icon: result.data.icon
-                ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${result.data.icon}`
+                ? `https://brainrock.in/brainrock/backend${result.data.icon}`
                 : null,
             };
             setService(data);

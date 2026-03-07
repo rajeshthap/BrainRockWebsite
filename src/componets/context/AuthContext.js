@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const isRefreshing = useRef(false);
  
   const axiosInstance = axios.create({
-    baseURL: "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/",
+    baseURL: "https://brainrock.in/brainrock/backend/api/",
     withCredentials: true,
   });
  

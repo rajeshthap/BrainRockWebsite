@@ -6,7 +6,7 @@ import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 import { AiOutlineFileDone, AiOutlineDelete } from "react-icons/ai";
 
-const API_BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+const API_BASE_URL = "https://brainrock.in/brainrock/backend";
 
 const ManageBills = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);

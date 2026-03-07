@@ -11,7 +11,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { UserProfileContext } from "../../context/UserProfileContext";
 
 // Base URL for media and API resources
-const BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 const UserProfile = () => {
   const { user } = useContext(AuthContext);

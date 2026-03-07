@@ -57,7 +57,7 @@ const JobOpenings = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/",
+        "https://brainrock.in/brainrock/backend/api/job-opening/",
         {
           method: "GET",
           credentials: "include",
@@ -172,7 +172,7 @@ const handleSubmitJob = async (e) => {
 
   try {
     // Always use the base endpoint for both POST and PUT
-    const url = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/";
+    const url = "https://brainrock.in/brainrock/backend/api/job-opening/";
     const method = editingJobId ? "PUT" : "POST";
 
     // Create FormData to send job_id in payload
@@ -232,7 +232,7 @@ const handleDeleteJob = async (jobId) => {
 
     // Use the base endpoint without ID in the path
     const response = await fetch(
-      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/",
+      "https://brainrock.in/brainrock/backend/api/job-opening/",
       {
         method: "DELETE",
         credentials: "include",
@@ -269,7 +269,7 @@ const handleStatusChange = async (jobId, newStatus) => {
 
     // Use the base endpoint without ID in the path
     const response = await fetch(
-      "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/job-opening/",
+      "https://brainrock.in/brainrock/backend/api/job-opening/",
       {
         method: "PUT",
         credentials: "include",

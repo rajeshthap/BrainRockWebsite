@@ -64,7 +64,7 @@ const CreateMeetingModal = ({
         // Method 1: Using Bearer token only
         try {
           response = await axios.get(
-            "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/",
+            "https://brainrock.in/brainrock/backend/api/get-employee-names-list/",
             {
               headers: {
                 'Authorization': `Bearer ${authToken}`,
@@ -79,7 +79,7 @@ const CreateMeetingModal = ({
           // Method 2: Using withCredentials only
           try {
             response = await axios.get(
-              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/",
+              "https://brainrock.in/brainrock/backend/api/get-employee-names-list/",
               {
                 withCredentials: true
               }
@@ -90,7 +90,7 @@ const CreateMeetingModal = ({
             
             // Method 3: Using both
             response = await axios.get(
-              "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-names-list/",
+              "https://brainrock.in/brainrock/backend/api/get-employee-names-list/",
               {
                 withCredentials: true,
                 headers: {
@@ -293,14 +293,14 @@ const CreateMeetingModal = ({
       if (existingMeeting) {
         // Update meeting - use the general endpoint and include meeting_id in payload
         response = await axios.put(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meetings/",
+          "https://brainrock.in/brainrock/backend/api/meetings/",
           meetingData,
           config
         );
       } else {
         // Create new meeting
         response = await axios.post(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meeting-schedule/",
+          "https://brainrock.in/brainrock/backend/api/meeting-schedule/",
           meetingData,
           config
         );

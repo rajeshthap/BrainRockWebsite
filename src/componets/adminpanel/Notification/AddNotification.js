@@ -64,7 +64,7 @@ const AddNotification = () => {
     
     try {
       // Updated API endpoint with credentials
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/all-notification-post/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/all-notification-post/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

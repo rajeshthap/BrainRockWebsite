@@ -86,8 +86,8 @@ const ApplyLeaveCalendar = () => {
       
       // Different API endpoints based on user role
       const apiUrl = userRole === 'employee' 
-        ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`
-        : 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/'; // For admin/HR, get all employees
+        ? `https://brainrock.in/brainrock/backend/api/leave-balance/?employee_id=${employee_id}`
+        : 'https://brainrock.in/brainrock/backend/api/leave-balance/'; // For admin/HR, get all employees
 
       const res = await axios.get(apiUrl);
       
@@ -223,7 +223,7 @@ const fetchMeetingData = async () => {
 
     // Updated API endpoint with credentials
     const res = await axios.get(
-      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/meeting-schedule/`,
+      `https://brainrock.in/brainrock/backend/api/meeting-schedule/`,
       { withCredentials: true }
     );
 

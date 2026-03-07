@@ -6,7 +6,7 @@ import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 
 // Define the base URL as a constant to avoid repetition
-const API_BASE_URL = 'https://mahadevaaya.com/brainrock.in/brainrock/backendbr';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 const EditCarousel = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);

@@ -52,7 +52,7 @@ const EmployeeTransfer = () => {
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferError, setTransferError] = useState(null);
 
-  const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const baseUrl = "https://brainrock.in/brainrock/backend";
 
   const axiosInstance = axios.create({
     baseURL: `${baseUrl}/api/`,

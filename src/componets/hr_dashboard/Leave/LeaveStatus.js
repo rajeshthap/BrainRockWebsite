@@ -49,7 +49,7 @@ const LeaveStatus = () => {
   const empId = user?.unique_id;
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const API_URL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/?employee_id=${employee_id}`;
+  const API_URL = `https://brainrock.in/brainrock/backend/api/leave-balance/?employee_id=${employee_id}`;
 
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
@@ -78,7 +78,7 @@ const LeaveStatus = () => {
       try {
         console.log("Fetching employee details for ID:", employee_id);
 
-        const apiURL = `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${employee_id}`;
+        const apiURL = `https://brainrock.in/brainrock/backend/api/employee-details/?emp_id=${employee_id}`;
         console.log("API URL:", apiURL);
 
         const res = await axios.get(apiURL, { withCredentials: true });
@@ -151,7 +151,7 @@ const LeaveStatus = () => {
       };
 
       await axios.post(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-action/",
+        "https://brainrock.in/brainrock/backend/api/leave-action/",
         payload,
         {
           withCredentials: true,

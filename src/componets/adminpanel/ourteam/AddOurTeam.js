@@ -120,7 +120,7 @@ const AddOurTeam = () => {
     
     try {
       // Using the provided API endpoint
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourteam-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/ourteam-items/', {
         method: 'POST',
         credentials: 'include', // Include credentials as requested
         body: dataToSend,

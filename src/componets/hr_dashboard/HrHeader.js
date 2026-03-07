@@ -61,7 +61,7 @@ function HrHeader({ toggleSidebar }) {
       if (user && user.unique_id) {
         try {
           const response = await axios.get(
-            `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/employee-details/?emp_id=${user.unique_id}`,
+            `https://brainrock.in/brainrock/backend/api/employee-details/?emp_id=${user.unique_id}`,
             {
               withCredentials: true,
               headers: { "Content-Type": "application/json" }
@@ -106,7 +106,7 @@ function HrHeader({ toggleSidebar }) {
   // Get user photo URL
   const getUserPhotoUrl = () => {
     if (userDetails.profile_photo) {
-      return `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${userDetails.profile_photo}`;
+      return `https://brainrock.in/brainrock/backend${userDetails.profile_photo}`;
     }
     // Fallback to a default avatar with user initials
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(getDisplayName())}&background=0d6efd&color=fff&size=40`;

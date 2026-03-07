@@ -31,7 +31,7 @@ function Contact() {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/company-details/');
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/company-details/');
 
         if (!response.ok) {
           throw new Error('Failed to fetch company details');
@@ -116,7 +116,7 @@ function Contact() {
       };
 
       // Send data to API
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/contact-us/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/contact-us/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

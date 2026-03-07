@@ -34,7 +34,7 @@ const HrProfile = () => {
     window.addEventListener("resize", checkDevice);
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
-  const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+  const BASE_URL = "https://brainrock.in/brainrock/backend";
 
   const [data, setData] = useState({});
   const [empId, setEmpId] = useState(null);

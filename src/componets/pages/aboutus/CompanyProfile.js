@@ -17,7 +17,7 @@ function CompanyProfile() {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/aboutus-item/');
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/aboutus-item/');
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
@@ -32,7 +32,7 @@ function CompanyProfile() {
           const processedData = {
             title: item.title,
             description: item.description,
-            image: item.image ? `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${item.image}` : null
+            image: item.image ? `https://brainrock.in/brainrock/backend${item.image}` : null
           };
 
           setAboutData(processedData);

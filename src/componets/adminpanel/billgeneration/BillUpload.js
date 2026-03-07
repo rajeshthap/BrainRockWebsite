@@ -63,7 +63,7 @@ const BillUpload = () => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-upload/",
+        "https://brainrock.in/brainrock/backend/api/bill-upload/",
         {
           method: "GET",
           credentials: "include",
@@ -260,7 +260,7 @@ const BillUpload = () => {
       // Send to API
       const method = editingBillId ? "PUT" : "POST";
       const response = await fetch(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-upload/",
+        "https://brainrock.in/brainrock/backend/api/bill-upload/",
         {
           method: method,
           credentials: "include",
@@ -390,7 +390,7 @@ const BillUpload = () => {
         deletePayload.append("id", billId);
 
         const response = await fetch(
-          "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/bill-upload/",
+          "https://brainrock.in/brainrock/backend/api/bill-upload/",
           {
             method: "DELETE",
             credentials: "include",
@@ -752,7 +752,7 @@ const BillUpload = () => {
                           <td>
                             {bill.file ? (
                               <a
-                                href={bill.file.startsWith('http') ? bill.file : `https://mahadevaaya.com/brainrock.in/brainrock/backendbr${bill.file}`}
+                                href={bill.file.startsWith('http') ? bill.file : `https://brainrock.in/brainrock/backend${bill.file}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-sm btn-outline-primary"

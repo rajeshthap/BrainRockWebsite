@@ -5,7 +5,7 @@ import FooterPage from "../../footer/FooterPage";
 import { Link } from "react-router-dom";
 
 // Define the base URL for your API
-const API_BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+const API_BASE_URL = "https://brainrock.in/brainrock/backend";
 
 function Gallery() {
   const [galleryItems, setGalleryItems] = useState([]);

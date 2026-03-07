@@ -12,7 +12,7 @@ function OurTeam() {
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/ourteam-items/');
+        const response = await fetch('https://brainrock.in/brainrock/backend/api/ourteam-items/');
         if (!response.ok) {
           throw new Error('Failed to fetch team members');
         }
@@ -29,7 +29,7 @@ function OurTeam() {
           teamData = [data];
         }
 
-        const BASE_URL = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+        const BASE_URL = "https://brainrock.in/brainrock/backend";
         const membersWithFullImageUrl = teamData.map(member => ({
           ...member,
           image: member.image ? `${BASE_URL}${member.image}` : null

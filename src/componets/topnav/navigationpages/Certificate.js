@@ -27,7 +27,7 @@ const Certificate = () => {
     try {
       // First, fetch all certificates
       const allCertificatesResponse = await axios.get(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/certificate/"
+        "https://brainrock.in/brainrock/backend/api/certificate/"
       );
 
       if (allCertificatesResponse.data.success && allCertificatesResponse.data.data.length > 0) {
@@ -60,7 +60,7 @@ const Certificate = () => {
   const getPdfUrl = () => {
     if (!certificateData || !certificateData.pdf_file) return null;
     // The base URL is the same as the API endpoint
-    const baseUrl = "https://mahadevaaya.com/brainrock.in/brainrock/backendbr";
+    const baseUrl = "https://brainrock.in/brainrock/backend";
     return `${baseUrl}${certificateData.pdf_file}`;
   };
 

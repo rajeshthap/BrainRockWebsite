@@ -92,7 +92,7 @@ useEffect(() => {
  
   axios
     .get(
-      `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/get-employee-gender-salary/?employee_id=${employee_id}`
+      `https://brainrock.in/brainrock/backend/api/get-employee-gender-salary/?employee_id=${employee_id}`
     )
     .then((res) => {
       const gender = String(res.data.data.gender).trim().toLowerCase();
@@ -172,7 +172,7 @@ useEffect(() => {
 
     axios
       .get(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`
+        `https://brainrock.in/brainrock/backend/api/leave-balance/`
       )
       .then((res) => {
         // Find current employee in response
@@ -218,7 +218,7 @@ useEffect(() => {
       };
 
       const response = await axios.post(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-apply/",
+        "https://brainrock.in/brainrock/backend/api/leaves-apply/",
         payload,
         {
           withCredentials: true,
@@ -249,7 +249,7 @@ useEffect(() => {
       // Refresh leave balance after submission
       axios
         .get(
-          `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`
+          `https://brainrock.in/brainrock/backend/api/leave-balance/`
         )
         .then((res) => {
           const currentEmployee = res.data.employees.find(
@@ -303,7 +303,7 @@ useEffect(() => {
 
     try {
       await axios.post(
-        "https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leaves-approve/",
+        "https://brainrock.in/brainrock/backend/api/leaves-approve/",
         {
           leave_request_id: leaveId.toString(),
           action: action === "accepted" ? "approve" : "reject"
@@ -368,7 +368,7 @@ useEffect(() => {
 
     axios
       .get(
-        `https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/leave-balance/`,
+        `https://brainrock.in/brainrock/backend/api/leave-balance/`,
         { withCredentials: true }
       )
       .then((res) => {

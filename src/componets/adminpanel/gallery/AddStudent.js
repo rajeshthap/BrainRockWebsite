@@ -107,7 +107,7 @@ const AddStudent = () => {
     
     try {
       // Using the provided API endpoint
-      const response = await fetch('https://mahadevaaya.com/brainrock.in/brainrock/backendbr/api/gallery-items/', {
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/gallery-items/', {
         method: 'POST',
         credentials: 'include', // Include credentials as requested
         body: dataToSend,
