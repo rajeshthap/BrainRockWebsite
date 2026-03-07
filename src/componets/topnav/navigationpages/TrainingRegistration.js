@@ -275,8 +275,8 @@ const [termsError, setTermsError] = useState("");
       if (response.data.payment_order && response.data.payment_order.redirectUrl) {
         // Debug: Log payment URL
         console.log("Payment URL:", response.data.payment_order.redirectUrl);
-        // Open payment URL in new tab
-        window.open(response.data.payment_order.redirectUrl, '_blank');
+        // Redirect to payment URL on the same tab
+        window.location.href = response.data.payment_order.redirectUrl;
       } else {
         // Debug: Log if payment order or redirect URL is missing
         console.warn("Payment order or redirect URL not found in response");
@@ -286,9 +286,6 @@ const [termsError, setTermsError] = useState("");
         console.log("Course ID:", formData.application_for_course_id);
         console.log("Course Fee:", formData.course_fee);
       }
-
-      // Redirect to login page after successful registration and payment
-      window.location.href = "https://brjobsedu.com/login";
     } catch (error) {
       if (error.response && error.response.data) {
         const apiErrors = {};
