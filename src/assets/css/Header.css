@@ -32,9 +32,17 @@
   border: none;
   cursor: pointer;
   color: var(--br-white);
-
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  margin-right: 8px;
+  font-weight: 500;
+  font-size: inherit;
 }
 
 .login-button:hover {
   background-color: #ff8700;
+  text-decoration: none;
+  color: var(--br-white);
 }

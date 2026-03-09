@@ -35,6 +35,16 @@ function Header() {
 
           <ul className="d-flex mb-0 list-unstyled br-header">
             <li className="">
+              <a
+                href="https://brjobsedu.com/login"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="login-button"
+              >
+                <span>Course Login</span>
+              </a>
+            </li>
+            <li className="">
               <button
                 type="button"
                 onClick={handleLoginClick}
@@ -88,8 +98,16 @@ function Header() {
       <div className="main-mobile-header">
         <div className="d-flex justify-content-between align-items-center main-header">
           <ul className="d-flex mb-0 list-unstyled br-header">
-            <li className="">
-              <button
+            <li className="">              <a
+                href="https://brjobsedu.com/login"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="login-button"
+              >
+                <span>Course Login</span>
+              </a>
+            </li>
+            <li className="">              <button
                 type="button"
                 onClick={handleLoginClick}
                 className="login-button "
