@@ -13,35 +13,52 @@ const Training = () => {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [allCourses, setAllCourses] = useState([]);
 
   useEffect(() => {
-    if (location.state?.courseId) {
-      fetchCourseDetails(location.state.courseId);
-    } else {
-      setError("No course selected.");
-      setLoading(false);
-    }
-  }, [location.state]);
+    // Fetch all courses initially
+    fetchAllCourses();
+  }, []);
 
-  const fetchCourseDetails = async (courseId) => {
+  const fetchAllCourses = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/course-items/`);
       if (!response.ok) throw new Error("Failed to fetch course details");
 
       const result = await response.json();
       const coursesData = result.data || result;
+      setAllCourses(coursesData);
 
-      const selectedCourse = coursesData.find(c => c.id === courseId);
-
-      if (selectedCourse) {
-        setCourse(selectedCourse);
+      if (location.state?.courseId) {
+        const selectedCourse = coursesData.find(c => c.id === location.state.courseId);
+        if (selectedCourse) {
+          setCourse(selectedCourse);
+        } else {
+          setError("Course not found");
+        }
       } else {
-        setError("Course not found");
+        setError("No course selected.");
       }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCourseChange = (selectedCourse) => {
+    console.log('Selected course from TrainingRegistration:', selectedCourse);
+    console.log('All courses from course-items:', allCourses);
+    
+    // Find the corresponding course in allCourses using course name
+    if (selectedCourse && selectedCourse.course_name) {
+      const matchingCourse = allCourses.find(c => c.title === selectedCourse.course_name || c.title.includes(selectedCourse.course_name));
+      if (matchingCourse) {
+        console.log('Found matching course:', matchingCourse);
+        setCourse(matchingCourse);
+      } else {
+        console.log('Course not found in allCourses');
+      }
     }
   };
 
@@ -125,6 +142,7 @@ const Training = () => {
                 <TrainingRegistration
                   courseTitle={course.title}
                   courseDuration={course.duration}
+                  onCourseChange={handleCourseChange}
                 />
               </Col>
             </Row>

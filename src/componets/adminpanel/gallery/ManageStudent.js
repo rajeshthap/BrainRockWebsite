@@ -340,6 +340,8 @@ const ManageStudent = () => {
                           <th>Course</th>
                           <th>Mode</th>
                           <th>Status</th>
+                          <th>Course Fee</th>
+                          <th>Payment Status</th>
                           <th>Date</th>
                           <th>Action</th>
                         </tr>
@@ -366,6 +368,12 @@ const ManageStudent = () => {
                                   {student.course_status}
                                 </span>
                               </td>
+                              <td data-th="Course Fee">₹{parseFloat(student.course_fee).toFixed(2)}</td>
+                              <td data-th="Payment Status">
+                                <span className={`badge bg-${student.payment_status === 'completed' ? 'success' : 'warning'}`}>
+                                  {student.payment_status}
+                                </span>
+                              </td>
                               <td data-th="Date">{formatDate(student.created_at)}</td>
                               <td data-th="Action">
                                 <Button 
@@ -380,12 +388,32 @@ const ManageStudent = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="10" className="text-center">
+                            <td colSpan="12" className="text-center">
                               No student data available.
                             </td>
                           </tr>
                         )}
                       </tbody>
+                      <tfoot>
+                        <tr style={{ backgroundColor: '#f0f8ff', fontWeight: 'bold', borderTop: '2px solid #0066cc' }}>
+                          <td colSpan="8" className="text-end pe-3" style={{ color: '#333' }}>
+                            <strong>Payment Summary:</strong>
+                          </td>
+                          <td colSpan="4" style={{ paddingLeft: '20px' }}>
+                            <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
+                              <div style={{ color: '#27ae60', fontWeight: '600' }}>
+                                ✓ Completed: {filteredStudents.filter(s => s.payment_status === 'completed').length} | ₹{parseFloat(filteredStudents.filter(s => s.payment_status === 'completed').reduce((sum, s) => sum + (parseFloat(s.course_fee) || 0), 0)).toFixed(2)}
+                              </div>
+                              <div style={{ color: '#e74c3c', fontWeight: '600' }}>
+                                ✗ Unsuccessful: {filteredStudents.filter(s => s.payment_status !== 'completed').length} | ₹{parseFloat(filteredStudents.filter(s => s.payment_status !== 'completed').reduce((sum, s) => sum + (parseFloat(s.course_fee) || 0), 0)).toFixed(2)}
+                              </div>
+                              <div style={{ marginTop: '8px', borderTop: '1px solid #bdc3c7', paddingTop: '8px', color: '#0066cc', fontWeight: '700' }}>
+                                Total: ₹{parseFloat(filteredStudents.reduce((sum, s) => sum + (parseFloat(s.course_fee) || 0), 0)).toFixed(2)}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tfoot>
                     </table>
                   </div>
                 </Row>
@@ -483,6 +511,18 @@ const ManageStudent = () => {
                 <Col md={6} className="mb-3">
                   <p><strong>Date of Birth:</strong> {selectedStudent.date_of_birth}</p>
                   <p><strong>Highest Education:</strong> {selectedStudent.highest_education}</p>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={6} className="mb-3">
+                  <p><strong>Course Fee:</strong> ₹{parseFloat(selectedStudent.course_fee).toFixed(2)}</p>
+                </Col>
+                <Col md={6} className="mb-3">
+                  <p><strong>Payment Status:</strong> 
+                    <span className={`badge bg-${selectedStudent.payment_status === 'completed' ? 'success' : 'warning'} ms-2`}>
+                      {selectedStudent.payment_status}
+                    </span>
+                  </p>
                 </Col>
               </Row>
               <Row>

@@ -6,7 +6,7 @@ import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import "../../../assets/css/Trainingregistration.css";
 import FooterPage from "../../footer/FooterPage";
 
-function TrainingRegistration({ courseTitle, courseDuration }) {
+function TrainingRegistration({ courseTitle, courseDuration, onCourseChange }) {
   const location = useLocation();
   const [courseData, setCourseData] = useState([]);
   const [maxDate, setMaxDate] = useState("");
@@ -135,8 +135,14 @@ const [termsError, setTermsError] = useState("");
         if (!value.trim()) msg = "Please select a course";
         break;
 
-      case "course_mode": // Added validation for course_mode
-        if (!value.trim()) msg = "Please select course mode";
+       case "course_mode": // Added validation for course_mode
+         if (!value.trim()) msg = "Please select course mode";
+         break;
+
+      case "highest_education":
+        if (formData.school_college_name.trim() && !value.trim()) {
+          msg = "Please select highest education";
+        }
         break;
 
       default:
@@ -150,16 +156,21 @@ const [termsError, setTermsError] = useState("");
    const handleChange = (e) => {
     const { name, value, files } = e.target;
     
-    // Handle course selection differently
-    if (name === "application_for_course") {
-      const selectedCourse = courseData.find(course => course.course_name === value);
-      setFormData(prev => ({
-        ...prev,
-        application_for_course: value,
-        application_for_course_id: selectedCourse ? selectedCourse.course_id : "",
-        course_fee: selectedCourse ? selectedCourse.price.toString() : "" // Set course fee from selected course
-      }));
-      validateField(name, value);
+     // Handle course selection differently
+     if (name === "application_for_course") {
+       const selectedCourse = courseData.find(course => course.course_name === value);
+       setFormData(prev => ({
+         ...prev,
+         application_for_course: value,
+         application_for_course_id: selectedCourse ? selectedCourse.course_id : "",
+         course_fee: selectedCourse ? selectedCourse.price.toString() : "" // Set course fee from selected course
+       }));
+       validateField(name, value);
+       
+       // Notify parent component about course change
+       if (onCourseChange) {
+         onCourseChange(selectedCourse);
+       }
     } else {
       const newValue = files ? files[0] : value;
       setFormData({ ...formData, [name]: newValue });
@@ -176,8 +187,13 @@ const [termsError, setTermsError] = useState("");
       isValid = false;
     }
 
-    if (!formData.course_mode) { // Added validation for course_mode
+     if (!formData.course_mode) { // Added validation for course_mode
       temp.course_mode = "Please select course mode";
+      isValid = false;
+    }
+
+    if (formData.school_college_name.trim() && !formData.highest_education) {
+      temp.highest_education = "Please select highest education";
       isValid = false;
     }
 
@@ -617,7 +633,7 @@ const [termsError, setTermsError] = useState("");
                 <Col md={6} className="mt-3">
                   <Form.Group>
                     <Form.Label className="br-label">
-                      School / College Name
+                      Institution/School Name (IF ANY)
                     </Form.Label>
                     <Form.Control
                       type="text"
@@ -625,7 +641,7 @@ const [termsError, setTermsError] = useState("");
                       name="school_college_name"
                       value={formData.school_college_name}
                       onChange={handleChange}
-                      placeholder="Enter your college name"
+                      placeholder="Enter your Institution/School Name"
                     />
                   </Form.Group>
                 </Col>
@@ -634,14 +650,24 @@ const [termsError, setTermsError] = useState("");
                 <Col md={6} className="mt-3">
                   <Form.Group>
                     <Form.Label className="br-label">Highest Education</Form.Label>
-                    <Form.Control
-                      type="text"
-                      className="br-form-control"
+                    <Form.Select
+                      className={`br-form-control ${errors.highest_education ? "is-invalid" : ""}`}
                       name="highest_education"
                       value={formData.highest_education}
                       onChange={handleChange}
-                      placeholder="Enter your highest education"
-                    />
+                    >
+                      <option value="">-- Select Highest Education --</option>
+                      <option value="10th">10th</option>
+                      <option value="12th">12th</option>
+                      <option value="Graduation">Graduation</option>
+                      <option value="Post Graduation">Post Graduation</option>
+                      <option value="Diploma">Diploma</option>
+                    </Form.Select>
+                    {errors.highest_education && (
+                      <div className="invalid-feedback d-block">
+                        {errors.highest_education}
+                      </div>
+                    )}
                   </Form.Group>
                 </Col>
 
