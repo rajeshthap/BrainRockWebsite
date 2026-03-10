@@ -71,6 +71,7 @@ import EditCarousel from "./componets/adminpanel/carousel/EditCarousel";
 import AddCourses from "./componets/adminpanel/courses/AddCourses";
 import EditCourses from "./componets/adminpanel/courses/EditCourses";
 import ManageStudent from "./componets/adminpanel/gallery/ManageStudent";
+import ManagePaymentsRefunds from "./componets/adminpanel/gallery/ManagePaymentsRefunds";
 import EditAboutUs from "./componets/adminpanel/aboutus/EditAboutUs";
 import Contact from "./componets/topnav/navigationpages/Contact";
 import TrainingDashBoard from "./componets/training_dashboard/TrainingDashBoard";
@@ -161,6 +162,7 @@ function AppContent() {
     "/AddCourses",
     "/EditCourses",
     "/ManageStudent",
+    "/ManagePaymentsRefunds",
     "/AddStudent",
     "/EditAboutUs",
     "/TrainingDashBoard",
@@ -568,6 +570,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageStudent />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ManagePaymentsRefunds"
+          element={
+            <ProtectedRoute>
+              <ManagePaymentsRefunds />
             </ProtectedRoute>
           }
         />

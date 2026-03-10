@@ -30,35 +30,6 @@ function AdminHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     profile_photo: null,
   });
 
-  // Fetch user details when component mounts or user changes
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      if (user && user.unique_id) {
-        try {
-          const response = await axios.get(
-            `https://brainrock.in/brainrock/backend/api/employee-details/?emp_id=${user.unique_id}`,
-            {
-              withCredentials: true,
-              headers: { "Content-Type": "application/json" }
-            }
-          );
-
-          if (response.data) {
-            setUserDetails({
-              first_name: response.data.first_name || "",
-              last_name: response.data.last_name || "",
-              profile_photo: response.data.profile_photo || null,
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching user details:", error);
-        }
-      }
-    };
-
-    fetchUserDetails();
-  }, [user]);
-
   // Get user display name - returns ADMIN AD
   const getDisplayName = () => {
     return "ADMIN ";

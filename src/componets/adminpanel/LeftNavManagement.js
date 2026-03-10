@@ -191,6 +191,17 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
             ],
         },
         {
+            icon: <FaFileInvoice />,  // Updated icon for payments
+            label: "Payments & Refunds",
+            submenu: [
+                {
+                    label: "Manage Payments & Refunds",
+                    path: "/ManagePaymentsRefunds",
+                    icon: <FaFileInvoice />,
+                },
+            ],
+        },
+        {
             icon: <FaCog />,  // Updated icon
             label: "Services",
             submenu: [
