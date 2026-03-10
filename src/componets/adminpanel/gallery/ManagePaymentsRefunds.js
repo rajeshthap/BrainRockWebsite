@@ -76,7 +76,6 @@ const ManagePaymentsRefunds = () => {
         }
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching refunds:', err);
       } finally {
         setLoading(false);
       }
@@ -152,20 +151,30 @@ const ManagePaymentsRefunds = () => {
       setLoading(true);
       setError(null);
       
+      const payload = { applicant_id: applicantId };
+      
       const response = await fetch(INITIATE_REFUND_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ applicant_id: applicantId }),
+        body: JSON.stringify(payload),
         credentials: 'include',
       });
       
+      const responseText = await response.text();
+      
       if (!response.ok) {
-        throw new Error('Failed to process refund');
+        throw new Error(`Failed to process refund: ${response.status} - ${responseText}`);
       }
       
-      const data = await response.json();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error('Invalid response format from server');
+      }
+      
       if (data.success) {
         setSuccessMessage(`Refund initiated successfully for ${applicantId}`);
         setShowRefundModal(false);
@@ -186,7 +195,6 @@ const ManagePaymentsRefunds = () => {
       }
     } catch (err) {
       setError(err.message);
-      console.error('Error initiating refund:', err);
     } finally {
       setLoading(false);
     }
@@ -348,7 +356,7 @@ const ManagePaymentsRefunds = () => {
                                 <strong>{refund.request_id || 'N/A'}</strong>
                               </td>
                               <td data-th="Applicant ID">
-                                <strong className="text-success">{refund.applicant_id || 'N/A'}</strong>
+                                <strong className="text-success">{refund.applicant_id || refund.request_id || 'N/A'}</strong>
                               </td>
                               <td data-th="Full Name">{refund.full_name || 'N/A'}</td>
                               <td data-th="Phone">{refund.phone || 'N/A'}</td>
@@ -461,7 +469,7 @@ const ManagePaymentsRefunds = () => {
            {refundingItem && (
             <div>
               <p><strong>Request ID:</strong> {refundingItem.request_id}</p>
-              <p><strong>Applicant ID:</strong> <span className="text-success">{refundingItem.applicant_id}</span></p>
+              <p><strong>Applicant ID:</strong> <span className="text-success">{refundingItem.applicant_id || refundingItem.request_id}</span></p>
               <p><strong>Name:</strong> {refundingItem.full_name}</p>
               <p><strong>Amount:</strong> {refundingItem.amount ? `₹${refundingItem.amount}` : 'N/A'}</p>
               <p><strong>Course ID:</strong> {refundingItem.course_id || 'N/A'}</p>
@@ -479,7 +487,7 @@ const ManagePaymentsRefunds = () => {
           </Button>
           <Button 
             variant="success" 
-            onClick={() => handleInitiateRefund(refundingItem?.applicant_id)}
+            onClick={() => handleInitiateRefund(refundingItem?.applicant_id || refundingItem?.request_id)}
             disabled={loading}
           >
             {loading ? 'Processing...' : 'Process Refund'}
@@ -498,7 +506,7 @@ const ManagePaymentsRefunds = () => {
               <Row>
                 <Col md={6} className="mb-3">
                   <p><strong>Request ID:</strong> <span className="text-primary">{selectedRefund.request_id}</span></p>
-                  <p><strong>Applicant ID:</strong> <span className="text-success">{selectedRefund.applicant_id}</span></p>
+                  <p><strong>Applicant ID:</strong> <span className="text-success">{selectedRefund.applicant_id || selectedRefund.request_id}</span></p>
                   <p><strong>Full Name:</strong> {selectedRefund.full_name}</p>
                   <p><strong>Email:</strong> {selectedRefund.email}</p>
                 </Col>
