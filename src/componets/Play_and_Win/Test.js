@@ -1,71 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../assets/css/Test.css';
+
+// Define the base URL for your API
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 function Test() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const questions = [
-    {
-      question: "What does CPU stand for?",
-      options: ["Computer Personal Unit", "Central Processor Unit", "Central Processing Unit", "Computer Processing Unit"],
-      correct: 2
-    },
-    {
-      question: "Which of the following is an input device?",
-      options: ["Printer", "Monitor", "Keyboard", "Speaker"],
-      correct: 2
-    },
-    {
-      question: "What is the primary function of RAM?",
-      options: ["Storage", "Processing", "Memory", "Display"],
-      correct: 2
-    },
-    {
-      question: "Which operating system is developed by Microsoft?",
-      options: ["MacOS", "Linux", "Windows", "Android"],
-      correct: 2
-    },
-    {
-      question: "What does HTML stand for?",
-      options: ["Hyper Text Markup Language", "High Tech Modern Language", "Hyperlinks and Text Markup Language", "Home Tool Markup Language"],
-      correct: 0
-    },
-    {
-      question: "Which of the following is a web browser?",
-      options: ["Microsoft Word", "Google Chrome", "Adobe Photoshop", "Windows Media Player"],
-      correct: 1
-    },
-    {
-      question: "What is the file extension for a Microsoft Word document?",
-      options: [".pdf", ".docx", ".txt", ".xlsx"],
-      correct: 1
-    },
-    {
-      question: "Which component stores data permanently?",
-      options: ["RAM", "CPU", "Hard Disk Drive", "Motherboard"],
-      correct: 2
-    },
-    {
-      question: "What does USB stand for?",
-      options: ["Universal Serial Bus", "United System Bus", "Universal System Buffer", "United Serial Buffer"],
-      correct: 0
-    },
-    {
-      question: "Which of the following is an output device?",
-      options: ["Mouse", "Keyboard", "Scanner", "Monitor"],
-      correct: 3
-    }
-  ];
+  // Fetch questions from API
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/khelo-jito/questions/`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch questions');
+        }
+        const result = await response.json();
+        const questionsData = result.data || result;
+        setQuestions(questionsData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
 
   const handleOptionSelect = (optionIndex) => {
     setSelectedOption(optionIndex);
   };
 
   const handleNextQuestion = () => {
-    if (selectedOption === questions[currentQuestion].correct) {
+    if (selectedOption === questions[currentQuestion].correct_answer) {
       setScore(score + 1);
     }
 
@@ -84,6 +58,36 @@ function Test() {
     setShowResults(false);
     setSelectedOption(null);
   };
+
+  if (loading) {
+    return (
+      <div className="test-container">
+        <div className="test-card">
+          <div className="loading">Loading questions...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="test-container">
+        <div className="test-card">
+          <div className="error">Error: {error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="test-container">
+        <div className="test-card">
+          <div className="no-questions">No questions available. Please check back later.</div>
+        </div>
+      </div>
+    );
+  }
 
   if (showResults) {
     return (
@@ -117,7 +121,7 @@ function Test() {
         <div className="question-number">
           Question {currentQuestion + 1} of {questions.length}
         </div>
-        <h2 className="question">{questions[currentQuestion].question}</h2>
+        <h2 className="question">{questions[currentQuestion].question_text}</h2>
         <div className="options">
           {questions[currentQuestion].options.map((option, index) => (
             <div 

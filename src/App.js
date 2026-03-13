@@ -122,6 +122,8 @@ import Terms from "./componets/pdf_page/Terms";
 import Faq from "./componets/pdf_page/Faq";
 import KheloJito from "./componets/Play_and_Win/KheloJito";
 import Test from "./componets/Play_and_Win/Test";
+import AddPlay from "./componets/adminpanel/khelo_jito/AddPlay";
+import ManagePlay from "./componets/adminpanel/khelo_jito/ManagePlay";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -195,6 +197,8 @@ function AppContent() {
     "/GenerateBill",
     "/ManageBills",
     "/BillUpload",
+    "/AddPlay",
+    "/ManagePlay",
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -753,6 +757,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageFirm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/AddPlay"
+          element={
+            <ProtectedRoute>
+              <AddPlay />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ManagePlay"
+          element={
+            <ProtectedRoute>
+              <ManagePlay />
             </ProtectedRoute>
           }
         />

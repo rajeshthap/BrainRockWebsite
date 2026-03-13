@@ -33,6 +33,7 @@ import {
   FaTasks,           // Added for projects
   FaCloud,           // Added for IT services
   FaFileInvoice,     // Added for bill generation
+  FaTrophy,          // Added for Khelo Jito
 } from "react-icons/fa";
 
 import axios from "axios";
@@ -332,6 +333,22 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
                     label: "Manage Bills",
                     path: "/ManageBills",
                     icon: <FaFileInvoice />,
+                },
+            ],
+        },
+        {
+            icon: <FaTrophy />,  // Added for Khelo Jito
+            label: "Khelo Jito",
+            submenu: [
+                {
+                    label: "Add Question",
+                    path: "/AddPlay",
+                    icon: <FaPlusCircle />,
+                },
+                {
+                    label: "Manage Questions",
+                    path: "/ManagePlay",
+                    icon: <FaEdit />,
                 },
             ],
         },
