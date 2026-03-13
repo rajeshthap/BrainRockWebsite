@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../assets/css/Test.css';
 import axios from 'axios';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 // Define the base URL for your API
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
@@ -9,6 +9,7 @@ const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 function Test() {
   // Get user_id from localStorage
   const userId = localStorage.getItem('test_user_id');
+  const navigate = useNavigate();
   console.log('Test component - User ID from localStorage:', userId);
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -155,10 +156,9 @@ function Test() {
   };
 
   const handleRestart = () => {
-    setCurrentQuestion(0);
-    setScore(0);
-    setShowResults(false);
-    setSelectedOption(null);
+    // Clear localStorage and redirect to KheloJito for re-registration
+    localStorage.removeItem('test_user_id');
+    navigate('/KheloJito');
   };
 
   if (loading) {
