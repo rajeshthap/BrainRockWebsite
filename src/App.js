@@ -28,13 +28,16 @@ import HrProfile from "./componets/all_profile/HrProfile";
 import ForgotPassword from "./componets/all_login/ForgotPassword";
 
 //Hr Payroll
-import AddEmployeeForm from './componets/Payroll_dashboard/AddEmployeeForm';
-import EmployeeList from './componets/Payroll_dashboard/EmployeeList';
-import { PayrollCalculations, calculateTotals } from "./utils/PayrollCalculations";
+import AddEmployeeForm from "./componets/Payroll_dashboard/AddEmployeeForm";
+import EmployeeList from "./componets/Payroll_dashboard/EmployeeList";
+import {
+  PayrollCalculations,
+  calculateTotals,
+} from "./utils/PayrollCalculations";
 
 import MyTeam from "./componets/hr_dashboard/teammanagement/MyTeam";
-import PayrollCharts from './componets/Payroll_dashboard/PayrollCharts';
-import PayDashBoard from './componets/Payroll_dashboard/PayDashBoard';
+import PayrollCharts from "./componets/Payroll_dashboard/PayrollCharts";
+import PayDashBoard from "./componets/Payroll_dashboard/PayDashBoard";
 import LeaveCalendar from "./componets/hr_dashboard/hr_iinerpage/LeaveCalendar";
 import EmpList from "./componets/hr_dashboard/pay_roll/EmpList";
 import SalaryCalculation from "./componets/hr_dashboard/pay_roll/SalaryCalculation";
@@ -55,12 +58,7 @@ import Courses from "./componets/topnav/navigationpages/Courses";
 import Gallery from "./componets/topnav/navigationpages/Gallery";
 
 import TrainingRegistration from "./componets/topnav/navigationpages/TrainingRegistration";
-import Python from "./componets/topnav/navigationpages/Python";
-import TrainingPHP from "./componets/topnav/navigationpages/TrainingPHP";
-import UIUXTraining from "./componets/topnav/navigationpages/UIUXTraining";
-import TrainingBootstrap from "./componets/topnav/navigationpages/TrainingBootstrap";
-import TrainingMySql from "./componets/topnav/navigationpages/TrainingMySql";
-import TrainingWebDesign from "./componets/topnav/navigationpages/TrainingWebDesign";
+
 import PayslipGenerator from "./componets/hr_dashboard/pay_roll/PayslipGenerator";
 import WebsiteManagement from "./componets/adminpanel/WebsiteManagement";
 import LeftNavManagement from "./componets/adminpanel/LeftNavManagement";
@@ -74,11 +72,10 @@ import ManageStudent from "./componets/adminpanel/gallery/ManageStudent";
 import ManagePaymentsRefunds from "./componets/adminpanel/gallery/ManagePaymentsRefunds";
 import EditAboutUs from "./componets/adminpanel/aboutus/EditAboutUs";
 import Contact from "./componets/topnav/navigationpages/Contact";
-import TrainingDashBoard from "./componets/training_dashboard/TrainingDashBoard";
-import TrainingLeftnav from "./componets/training_dashboard/TrainingLeftnav";
+
 import EditContactUs from "./componets/adminpanel/aboutus/EditContactUs";
 import ContactUsQuery from "./componets/adminpanel/aboutus/ContactUsQuery";
-import TrainingVideoPlayer from "./componets/training_dashboard/TrainingVideoPlayer";
+
 import AddOurTeam from "./componets/adminpanel/ourteam/AddOurTeam";
 import ManageOurTeam from "./componets/adminpanel/ourteam/ManageOurTeam";
 // import Services from "./componets/topnav/navigationpages/Services";
@@ -109,9 +106,9 @@ import OfferLetters from "./componets/hr_dashboard/recruitments/OfferLetters";
 import Shortlisting from "./componets/hr_dashboard/recruitments/Shortlisting";
 import Career from "./componets/topnav/navigationpages/Career";
 import EmployeeTransfer from "./componets/hr_dashboard/hr_iinerpage/EmployeeTransfer";
-import UserProfile from "./componets/training_dashboard/training_profile/UserProfile";
+
 import AllStudentsData from "./componets/adminpanel/Candidate/AllStudentsData";
-import Purchasehistory from "./componets/training_dashboard/Purchasehistory";
+
 import AddNotification from "./componets/adminpanel/Notification/AddNotification";
 import EditNotification from "./componets/adminpanel/Notification/EditNotification";
 import AddStudent from "./componets/adminpanel/gallery/AddStudent";
@@ -165,11 +162,8 @@ function AppContent() {
     "/ManagePaymentsRefunds",
     "/AddStudent",
     "/EditAboutUs",
-    "/TrainingDashBoard",
-    "/TrainingLeftnav",
     "/EditContactUs",
     "/ContactUsQuery",
-    "/TrainingVideoPlayer",
     "/AddOurTeam",
     "/ManageOurTeam",
     "/AddDesAndDev",
@@ -195,23 +189,13 @@ function AppContent() {
     "/Shortlisting",
     "/InterviewSch",
     "/EmployeeTransfer",
-    "/UserProfile",
     "/AllStudentsData",
-    "/Purchasehistory",
     "/GenerateBill",
     "/ManageBills",
     "/BillUpload",
-  
   ]);
 
-  const hiddenFooter1 = new Set([
-    "",
-  ]);
-
-
-
-
-
+  const hiddenFooter1 = new Set([""]);
 
   const shouldHideNavbar = hiddenPaths.has(location.pathname);
   const shouldHideFooter1 = hiddenFooter1.has(location.pathname);
@@ -231,37 +215,30 @@ function AppContent() {
         <Route path="/Courses" element={<Courses />} />
         <Route path="/Gallery" element={<Gallery />} />
         <Route path="/Training" element={<Training />} />
-        <Route path="/TrainingRegistration" element={<TrainingRegistration />} />
-        <Route path="/Python" element={<Python />} />
-        <Route path="/TrainingPHP" element={<TrainingPHP />} />
-        <Route path="/TrainingBootstrap" element={<TrainingBootstrap />} />
-        <Route path="/TrainingMySql" element={<TrainingMySql />} />
-        <Route path="/TrainingPHP" element={<TrainingPHP />} />
-        <Route path="/TrainingWebDesign" element={<TrainingWebDesign />} />
-        <Route path="/UIUXTraining" element={<UIUXTraining />} />
+        <Route
+          path="/TrainingRegistration"
+          element={<TrainingRegistration />}
+        />
+
         <Route path="/WebsiteManagement" element={<WebsiteManagement />} />
         <Route path="/LeftNavManagement" element={<LeftNavManagement />} />
         <Route path="/AddServices" element={<AddServices />} />
         <Route path="/ViewServices" element={<ViewServices />} />
-        <Route path="/TrainingDashBoard" element={<TrainingDashBoard />} />
+
         <Route path="/Contact" element={<Contact />} />
-        <Route path="/Feedback" element={<Feedback/>} />
-        <Route path="/TrainingLeftnav" element={<TrainingLeftnav />} />
-        <Route path="/TrainingVideoPlayer" element={<TrainingVideoPlayer />} />
+        <Route path="/Feedback" element={<Feedback />} />
+
         {/* <Route path="/Services" element={<Services />} /> */}
         <Route path="/RunningProjects" element={<RunningProjects />} />
         <Route path="/ServicesPage" element={<ServicesPage />} />
-        <Route path="/Certificate" element={<Certificate/>} />
-        <Route path="/ProjectDetail" element={<ProjectDetail/>} />
-        <Route path="/Terms" element={<Terms/>} />
-        <Route path="/faq" element={<Faq/>} />
-    
-
-        
+        <Route path="/Certificate" element={<Certificate />} />
+        <Route path="/ProjectDetail" element={<ProjectDetail />} />
+        <Route path="/Terms" element={<Terms />} />
+        <Route path="/faq" element={<Faq />} />
 
         {/* Hr  Payroll (protected) */}
-       
-         <Route
+
+        <Route
           path="/LeaveStatus"
           element={
             <ProtectedRoute>
@@ -269,34 +246,17 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
-          path="/Purchasehistory"
-          element={
-            <ProtectedRoute>
-              <Purchasehistory />
-            </ProtectedRoute>
-          }
-        />
-       
-         <Route
-          path="/UserProfile"
-          element={
-            <ProtectedRoute>
-              <UserProfile />
-            </ProtectedRoute>
-          }
-        />
-        
+
         <Route
           path="/LeaveHistory"
           element={
             <ProtectedRoute>
-              < LeaveHistory />
+              <LeaveHistory />
             </ProtectedRoute>
           }
         />
-       
-         <Route
+
+        <Route
           path="/AddEmployeeForm"
           element={
             <ProtectedRoute>
@@ -344,8 +304,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        
-        
+
         <Route
           path="/PayDashBoard"
           element={
@@ -354,7 +313,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/CreateTeam"
           element={
             <ProtectedRoute>
@@ -362,7 +321,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/ManageTeam"
           element={
             <ProtectedRoute>
@@ -370,7 +329,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/MyTeam"
           element={
             <ProtectedRoute>
@@ -450,11 +409,11 @@ function AppContent() {
           }
         />
 
-          <Route
+        <Route
           path="/DepartmentHierarchy"
           element={
             <ProtectedRoute>
-              <DepartmentHierarchy/>
+              <DepartmentHierarchy />
             </ProtectedRoute>
           }
         />
@@ -523,7 +482,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/AllStudentsData"
           element={
             <ProtectedRoute>
@@ -560,11 +519,11 @@ function AppContent() {
           path="/AddStudent"
           element={
             <ProtectedRoute>
-              <AddStudent/>
+              <AddStudent />
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/ManageStudent"
           element={
@@ -637,7 +596,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/ManageTechStack"
           element={
             <ProtectedRoute>
@@ -645,7 +604,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/AddItServices"
           element={
             <ProtectedRoute>
@@ -657,12 +616,12 @@ function AppContent() {
           path="/Feedbackget"
           element={
             <ProtectedRoute>
-              <Feedbackget/>
+              <Feedbackget />
             </ProtectedRoute>
           }
         />
 
-         <Route
+        <Route
           path="/ManageItServices"
           element={
             <ProtectedRoute>
@@ -720,7 +679,7 @@ function AppContent() {
           path="/AddClient"
           element={
             <ProtectedRoute>
-              <AddClient/>
+              <AddClient />
             </ProtectedRoute>
           }
         />
@@ -729,7 +688,7 @@ function AppContent() {
           path="/EditClient"
           element={
             <ProtectedRoute>
-              <EditClient/>
+              <EditClient />
             </ProtectedRoute>
           }
         />
@@ -738,7 +697,7 @@ function AppContent() {
           path="/AddProject"
           element={
             <ProtectedRoute>
-              <AddProject/>
+              <AddProject />
             </ProtectedRoute>
           }
         />
@@ -746,16 +705,16 @@ function AppContent() {
           path="/ManageProject"
           element={
             <ProtectedRoute>
-              <ManageProject/>
+              <ManageProject />
             </ProtectedRoute>
           }
         />
 
-         <Route
+        <Route
           path="/AddNotification"
           element={
             <ProtectedRoute>
-              <AddNotification/>
+              <AddNotification />
             </ProtectedRoute>
           }
         />
@@ -764,17 +723,16 @@ function AppContent() {
           path="/EditNotification"
           element={
             <ProtectedRoute>
-              <EditNotification/>
+              <EditNotification />
             </ProtectedRoute>
           }
         />
-        
 
         <Route
           path="/ViewCertified"
           element={
             <ProtectedRoute>
-              <ViewCertified/>
+              <ViewCertified />
             </ProtectedRoute>
           }
         />
@@ -782,7 +740,7 @@ function AppContent() {
           path="/AddFirm"
           element={
             <ProtectedRoute>
-              <AddFirm/>
+              <AddFirm />
             </ProtectedRoute>
           }
         />
@@ -790,14 +748,11 @@ function AppContent() {
           path="/ManageFirm"
           element={
             <ProtectedRoute>
-              <ManageFirm/>
+              <ManageFirm />
             </ProtectedRoute>
           }
         />
-
       </Routes>
-      
-      
 
       {!shouldHideFooter1 && <Footer />}
     </>

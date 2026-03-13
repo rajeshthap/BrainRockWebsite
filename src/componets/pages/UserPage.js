@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import "../../assets/css/UserPage.css";
 // import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
@@ -25,14 +25,15 @@ import { MdEngineering } from "react-icons/md";
 
 import FooterPage from "../footer/FooterPage";
 import ServicesPage from "./ServicesPage";
+import KheloJito from "../Play_and_Win/KheloJito";
 
 function UserPage() {
   // Helper function to truncate text to 20 words
   const truncateText = (text, wordLimit = 20) => {
     if (!text) return "";
-    const words = text.split(' ');
+    const words = text.split(" ");
     if (words.length <= wordLimit) return text;
-    return words.slice(0, wordLimit).join(' ') + '...';
+    return words.slice(0, wordLimit).join(" ") + "...";
   };
 
   const [carouselData, setCarouselData] = useState([]);
@@ -73,7 +74,7 @@ function UserPage() {
       try {
         // Using the provided API endpoint
         const response = await fetch(
-          "https://brainrock.in/brainrock/backend/api/carousel-items/"
+          "https://brainrock.in/brainrock/backend/api/carousel-items/",
         );
 
         if (!response.ok) {
@@ -128,7 +129,7 @@ function UserPage() {
     const fetchAboutData = async () => {
       try {
         const response = await fetch(
-          "https://brainrock.in/brainrock/backend/api/aboutus-item/"
+          "https://brainrock.in/brainrock/backend/api/aboutus-item/",
         );
         if (!response.ok) {
           throw new Error("Failed to fetch data");
@@ -153,15 +154,14 @@ function UserPage() {
           // Update timestamp to force image refresh
           setImageTimestamp(Date.now());
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     };
 
     // Function to fetch design and development data from API
     const fetchDesignDevData = async () => {
       try {
         const response = await fetch(
-          "https://brainrock.in/brainrock/backend/api/design-development-items/"
+          "https://brainrock.in/brainrock/backend/api/design-development-items/",
         );
 
         if (!response.ok) {
@@ -195,7 +195,7 @@ function UserPage() {
     const fetchTechStackData = async () => {
       try {
         const response = await fetch(
-          "https://brainrock.in/brainrock/backend/api/ourtechstack-item/"
+          "https://brainrock.in/brainrock/backend/api/ourtechstack-item/",
         );
 
         if (!response.ok) {
@@ -233,7 +233,7 @@ function UserPage() {
     const fetchItServiceData = async () => {
       try {
         const response = await fetch(
-          "https://brainrock.in/brainrock/backend/api/itservice-items/"
+          "https://brainrock.in/brainrock/backend/api/itservice-items/",
         );
 
         if (!response.ok) {
@@ -297,7 +297,7 @@ function UserPage() {
   return (
     <div className="container-fluid p-0">
       <TopNotificationBanner />
-      <div className="craousal-main" style={{ overflow: 'hidden' }}>
+      <div className="craousal-main" style={{ overflow: "hidden" }}>
         <Carousel className="resorce-craousal" interval={3000} pause={false}>
           {loading ? (
             // Show loading state or fallback content while fetching data
@@ -342,23 +342,20 @@ function UserPage() {
             carouselData.map((item) => (
               <Carousel.Item key={item.id}>
                 <Row className="resorce-img">
-                  <Col lg={7} md={7} sm={12} >
+                  <Col lg={7} md={7} sm={12}>
                     <div className=" d-flex flex-column  align-items-start justify-content-center bottom-0 resorce-sub-title ">
                       <h1 className=" bg-opacity-50 py-2 px-4">
-                       <span
-  className="hero-sub-title mb-2"
-  style={{ 
-    whiteSpace: "pre-line",
-    lineHeight: 2
-  }}
->
- <p>
-  {item.subtitle.replace(/\.\s*/g, ".\n")}
-</p>
-</span>
-
+                        <span
+                          className="hero-sub-title mb-2"
+                          style={{
+                            whiteSpace: "pre-line",
+                            lineHeight: 2,
+                          }}
+                        >
+                          <p>{item.subtitle.replace(/\.\s*/g, ".\n")}</p>
+                        </span>
                         <br></br>
-                        <span className="br-span-title" >{item.title}</span>{" "}
+                        <span className="br-span-title">{item.title}</span>{" "}
                       </h1>
                       <p className=" bg-opacity-50 py-2 px-4">
                         {item.description}
@@ -366,14 +363,17 @@ function UserPage() {
                     </div>
                   </Col>
                   <Col lg={5} md={5} sm={12} className="banner-img">
-                   <div>
+                    <div className="mt-4">
+                          <KheloJito />
                       <i>
                         {/* <img
                           src={item.image || Banner1} // Use fallback image if item.image is null
                           alt={item.alt || "Carousel image"}
                           className="img-fluid"
                         ></img> */}
+                    
                       </i>
+
                     </div>
                   </Col>
                 </Row>
@@ -386,7 +386,7 @@ function UserPage() {
       <div />
       <Container>
         <Row className="feature-area feature-minus ">
-        <ServicesPage showBannerAndFooter={false}/>
+          <ServicesPage showBannerAndFooter={false} />
         </Row>
       </Container>
       <Container fluid>
@@ -467,9 +467,7 @@ function UserPage() {
               {/* Dynamic title from API */}
               <h2 className="heading-1">{aboutData.title}</h2>
               {/* Dynamic description from API - using p tag instead of ul */}
-              <p style={{ whiteSpace: "pre-line" }}>
-                {aboutData.description}
-              </p>
+              <p style={{ whiteSpace: "pre-line" }}>{aboutData.description}</p>
               {/* Static list items */}
             </Col>
           </Row>
@@ -477,7 +475,7 @@ function UserPage() {
       </Container>
 
       <ServicesCarousel />
-      
+
       <div className="resorce-main-section ">
         <Container>
           <div className="resorce-sub-list-design">
