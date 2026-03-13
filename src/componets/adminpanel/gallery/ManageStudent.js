@@ -24,7 +24,7 @@ const ManageStudent = () => {
   
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // New state for status filter
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('all'); // New state for payment status filter
   
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
@@ -129,7 +129,7 @@ const ManageStudent = () => {
     return String(courses);
   };
   
-  // Filter students based on search term and status
+  // Filter students based on search term and payment status
   const filteredStudents = students.filter((student) => {
     const lowerSearch = searchTerm.toLowerCase();
     const courseString = formatCourseList(student.application_for_course).toLowerCase();
@@ -141,9 +141,9 @@ const ManageStudent = () => {
       courseString.includes(lowerSearch)
     );
     
-    const matchesStatus = statusFilter === 'all' || student.course_status === statusFilter;
+    const matchesPaymentStatus = paymentStatusFilter === 'all' || student.payment_status === paymentStatusFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesPaymentStatus;
   });
   
   // Pagination calculations
@@ -229,9 +229,9 @@ const ManageStudent = () => {
     setShowDeleteModal(false);
   };
 
-  // Handle status filter change
-  const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
+  // Handle payment status filter change
+  const handlePaymentStatusFilterChange = (e) => {
+    setPaymentStatusFilter(e.target.value);
     setCurrentPage(1); // Reset to first page when filter changes
   };
 
@@ -281,13 +281,13 @@ const ManageStudent = () => {
                 )}
                 <div style={{ width: '200px' }}>
                   <Form.Select
-                    value={statusFilter}
-                    onChange={handleStatusFilterChange}
+                    value={paymentStatusFilter}
+                    onChange={handlePaymentStatusFilterChange}
                   >
-                    <option value="all">All Status</option>
+                    <option value="all">All Payment Status</option>
                     <option value="pending">Pending</option>
                     <option value="completed">Completed</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="failed">Failed</option>
                   </Form.Select>
                 </div>
                 <div style={{ width: '300px' }}>
