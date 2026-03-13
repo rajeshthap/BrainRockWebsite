@@ -363,8 +363,8 @@ function UserPage() {
                     </div>
                   </Col>
                   <Col lg={5} md={5} sm={12} className="banner-img">
-                    <div className="mt-4">
-                          <KheloJito />
+                    <div className=" btn-khelo">
+                          {/* <KheloJito /> */}
                       <i>
                         {/* <img
                           src={item.image || Banner1} // Use fallback image if item.image is null

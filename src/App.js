@@ -120,6 +120,8 @@ import ManageBills from "./componets/adminpanel/billgeneration/ManageBills";
 import BillUpload from "./componets/adminpanel/billgeneration/BillUpload";
 import Terms from "./componets/pdf_page/Terms";
 import Faq from "./componets/pdf_page/Faq";
+import KheloJito from "./componets/Play_and_Win/KheloJito";
+import Test from "./componets/Play_and_Win/Test";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -235,6 +237,8 @@ function AppContent() {
         <Route path="/ProjectDetail" element={<ProjectDetail />} />
         <Route path="/Terms" element={<Terms />} />
         <Route path="/faq" element={<Faq />} />
+        <Route path="/KheloJito" element={<KheloJito />} />
+        <Route path="/test" element={<Test />} />
 
         {/* Hr  Payroll (protected) */}
 
