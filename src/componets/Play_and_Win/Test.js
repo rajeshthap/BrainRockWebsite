@@ -23,6 +23,8 @@ function Test() {
   const [userAnswers, setUserAnswers] = useState([]);
   const [timeLeft, setTimeLeft] = useState(30);
   const [testResult, setTestResult] = useState(null);
+  const [tabSwitchWarning, setTabSwitchWarning] = useState(false); // New state for tab switch warning
+  const [tabSwitchCount, setTabSwitchCount] = useState(0); // New state for tab switch count
   
   
   // Start test and fetch questions from API
@@ -87,10 +89,23 @@ function Test() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && !loading && !showResults) {
-        // User switched tabs, fail the test
-        setShowResults(true);
-        setScore(0);
-        console.log('Test failed: User switched tabs');
+        // User switched tabs
+        setTabSwitchCount(prevCount => {
+          const newCount = prevCount + 1;
+          
+          if (newCount === 1) {
+            // First warning
+            setTabSwitchWarning(true);
+            console.log('Test warning: First tab switch');
+          } else if (newCount === 2) {
+            // Second time, fail the test
+            setShowResults(true);
+            setScore(0);
+            console.log('Test failed: Second tab switch');
+          }
+          
+          return newCount;
+        });
       }
     };
 
@@ -244,6 +259,13 @@ function Test() {
   return (
     <div className="test-container">
       <div className="test-card">
+        {/* Tab switch warning */}
+        {tabSwitchWarning && (
+          <div className="warning-message">
+            ⚠️ Warning: You have switched tabs once. Switching again will end your test.
+          </div>
+        )}
+        
         <div className="progress-bar">
           <div 
             className="progress-fill" 

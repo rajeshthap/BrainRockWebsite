@@ -83,6 +83,30 @@
 .timer{
     color: rgb(137, 48, 48);
 }
+
+.warning-message {
+  background: #fff3cd;
+  color: #856404;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ffeaa7;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .next-button {
   width: 100%;
   padding: 15px;
