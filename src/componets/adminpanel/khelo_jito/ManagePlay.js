@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import axios from "axios";
 
 // Define the base URL for your API
-const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
+const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api/module-question/';
 
 const ManagePlay = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -57,12 +58,13 @@ const ManagePlay = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/khelo-jito/questions/`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch questions');
-        }
-        const result = await response.json();
-        const questionsData = result.data || result;
+        const response = await axios.get(API_BASE_URL, {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const questionsData = response.data.data || response.data;
         setQuestions(questionsData);
       } catch (err) {
         setError(err.message);
@@ -99,18 +101,16 @@ const ManagePlay = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
       try {
-        const dataToSend = new FormData();
-        dataToSend.append('id', id);
-
-        const response = await fetch(`${API_BASE_URL}/api/khelo-jito/questions/`, {
-          method: 'DELETE',
-          credentials: 'include',
-          body: dataToSend,
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to delete question');
-        }
+        const response = await axios.delete(
+          API_BASE_URL,
+          {
+            data: { id: id },
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
 
         setQuestions(prevData => prevData.filter(item => item.id !== id));
 
@@ -179,17 +179,19 @@ const ManagePlay = () => {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/khelo-jito/questions/`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataToSend),
-      });
+      const response = await axios.put(
+        API_BASE_URL,
+        dataToSend,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Server error' }));
+      if (response.status < 200 || response.status >= 300) {
+        const errorData = response.data || { message: 'Server error' };
         throw new Error(errorData.message || `Failed to update question (Status: ${response.status})`);
       }
 

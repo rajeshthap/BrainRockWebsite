@@ -40,7 +40,7 @@ function Header() {
                 rel="noopener noreferrer"
                 className="login-button">
             
-                <span>Khelo and Jito</span>
+                <span>Khelo aur Jito</span>
          
            </Link> </li>
             <li className="">

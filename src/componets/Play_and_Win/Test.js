@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import '../../assets/css/Test.css';
+import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
 
 // Define the base URL for your API
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 function Test() {
+  // Get user_id from localStorage
+  const userId = localStorage.getItem('test_user_id');
+  console.log('Test component - User ID from localStorage:', userId);
+  
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
@@ -12,18 +18,37 @@ function Test() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Fetch questions from API
+  const [attemptId, setAttemptId] = useState(null);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [testResult, setTestResult] = useState(null);
+  
+  
+  // Start test and fetch questions from API
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const startTest = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/khelo-jito/questions/`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch questions');
+        if (!userId) {
+          throw new Error('User ID not found. Please register first.');
         }
-        const result = await response.json();
-        const questionsData = result.data || result;
-        setQuestions(questionsData);
+        
+        const response = await axios.post(
+          'https://brainrock.in/brainrock/backend/api/start-test/',
+          { user_id: userId },
+          {
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.data.status) {
+          setQuestions(response.data.questions);
+          setAttemptId(response.data.attempt_id);
+        } else {
+          throw new Error(response.data.message || 'Failed to start test');
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -31,14 +56,63 @@ function Test() {
       }
     };
 
-    fetchQuestions();
-  }, []);
+    startTest();
+  }, [userId]);
+
+  // Timer effect
+  useEffect(() => {
+    if (loading || showResults || !questions.length) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prevTime => {
+        if (prevTime <= 1) {
+          // Time's up, move to next question
+          handleNextQuestion();
+          return 10; // Reset timer for next question
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [currentQuestion, loading, showResults, questions.length]);
+
+  // Reset timer when current question or selected option changes
+  useEffect(() => {
+    setTimeLeft(10);
+  }, [currentQuestion, selectedOption]);
+
+  // Tab switch detection
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && !loading && !showResults) {
+        // User switched tabs, fail the test
+        setShowResults(true);
+        setScore(0);
+        console.log('Test failed: User switched tabs');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loading, showResults]);
 
   const handleOptionSelect = (optionIndex) => {
     setSelectedOption(optionIndex);
   };
 
   const handleNextQuestion = () => {
+    // Save user's answer for current question (even if no answer selected)
+    const newAnswers = [...userAnswers, {
+      question_id: questions[currentQuestion].id,
+      selected_option: selectedOption
+    }];
+    setUserAnswers(newAnswers);
+
+    // Check if answer is correct and update score
     if (selectedOption === questions[currentQuestion].correct_answer) {
       setScore(score + 1);
     }
@@ -48,7 +122,35 @@ function Test() {
       setCurrentQuestion(nextQuestion);
       setSelectedOption(null);
     } else {
+      // All questions completed, submit test
+      submitTest(newAnswers);
+    }
+  };
+
+  // Submit test to API
+  const submitTest = async (answers) => {
+    try {
+      const response = await axios.post(
+        'https://brainrock.in/brainrock/backend/api/submit-test/',
+        {
+          user_id: userId,
+          answers: answers
+        },
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Test submission successful:', response.data);
+      // Save API response data for display
+      setTestResult(response.data);
       setShowResults(true);
+    } catch (err) {
+      console.error('Error submitting test:', err);
+      setError(err.message);
     }
   };
 
@@ -90,17 +192,47 @@ function Test() {
   }
 
   if (showResults) {
+    // Check if test was failed due to tab switch
+    const isTabSwitchFailed = score === 0 && userAnswers.length < questions.length;
+    
     return (
       <div className="test-container">
         <div className="test-card">
           <h1>Test Results</h1>
-          <div className="score-display">
-            <p>Your Score: <strong>{score} / {questions.length}</strong></p>
-            <p>Percentage: <strong>{Math.round((score / questions.length) * 100)}%</strong></p>
-          </div>
-          <div className="result-message">
-            {score >= 8 ? "Excellent!" : score >= 6 ? "Good Job!" : score >= 4 ? "Fair" : "Need Improvement"}
-          </div>
+          {isTabSwitchFailed ? (
+            <>
+              <div className="score-display">
+                <p>Your Score: <strong>0 / {questions.length}</strong></p>
+                <p>Percentage: <strong>0%</strong></p>
+              </div>
+              <div className="result-message failed">
+                Test Failed: You switched tabs during the test
+              </div>
+            </>
+          ) : testResult ? (
+            <>
+              <div className="score-display">
+                <p>Your Score: <strong>{testResult.score} / {questions.length}</strong></p>
+                <p>Pass Marks: <strong>{testResult.pass_marks}</strong></p>
+                <p>Percentage: <strong>{Math.round((testResult.score / questions.length) * 100)}%</strong></p>
+              </div>
+              <div className={`result-message ${testResult.status === 'failed' ? 'failed' : 'passed'}`}>
+                {testResult.status === 'failed' ? 
+                  `Test Failed: You need ${testResult.pass_marks} marks to pass` : 
+                  "Test Passed: Congratulations!"}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="score-display">
+                <p>Your Score: <strong>{score} / {questions.length}</strong></p>
+                <p>Percentage: <strong>{Math.round((score / questions.length) * 100)}%</strong></p>
+              </div>
+              <div className="result-message">
+                {score >= 8 ? "Excellent!" : score >= 6 ? "Good Job!" : score >= 4 ? "Fair" : "Need Improvement"}
+              </div>
+            </>
+          )}
           <button className="restart-button" onClick={handleRestart}>
             Retake Test
           </button>
@@ -120,6 +252,9 @@ function Test() {
         </div>
         <div className="question-number">
           Question {currentQuestion + 1} of {questions.length}
+        </div>
+        <div className="timer">
+          Time Left: {timeLeft} seconds
         </div>
         <h2 className="question">{questions[currentQuestion].question_text}</h2>
         <div className="options">

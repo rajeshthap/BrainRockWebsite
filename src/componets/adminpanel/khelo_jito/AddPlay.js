@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import axios from "axios";
 
 const AddPlay = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -93,18 +94,20 @@ const AddPlay = () => {
         marks: formData.marks
       };
       
-      // Using the API endpoint for khelo jito questions
-      const response = await fetch('https://brainrock.in/brainrock/backend/api/khelo-jito/questions/', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataToSend),
-      });
+      // Using the API endpoint for module questions
+      const response = await axios.post(
+        'https://brainrock.in/brainrock/backend/api/module-question/',
+        dataToSend,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Server error' }));
+      if (response.status < 200 || response.status >= 300) {
+        const errorData = response.data || { message: 'Server error' };
         throw new Error(errorData.message || 'Failed to add question');
       }
       
