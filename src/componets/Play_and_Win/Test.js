@@ -29,6 +29,7 @@ function Test() {
   const [testResult, setTestResult] = useState(null);
   const [tabSwitchWarning, setTabSwitchWarning] = useState(false); // New state for tab switch warning
   const [tabSwitchCount, setTabSwitchCount] = useState(0); // New state for tab switch count
+  const [animateScore, setAnimateScore] = useState(false); // For score animation
   
   
   // Start test and fetch questions from API
@@ -135,6 +136,13 @@ function Test() {
     };
   }, [loading, showResults]);
 
+  // Trigger score animation when results are shown
+  useEffect(() => {
+    if (showResults) {
+      setTimeout(() => setAnimateScore(true), 100);
+    }
+  }, [showResults]);
+
   const handleOptionSelect = (optionIndex) => {
     setSelectedOption(optionIndex);
   };
@@ -228,48 +236,54 @@ function Test() {
   if (showResults) {
     // Check if test was failed due to tab switch
     const isTabSwitchFailed = score === 0 && userAnswers.length < questions.length;
+    // Calculate percentage
+    const percentage = Math.round((testResult?.score || score) / questions.length * 100);
+    // Determine if passed based on API response or score
+    const isPassed = testResult ? testResult.status === 'passed' : percentage >= 60;
     
     return (
       <div className="test-container">
-        <div className="test-card">
-          <h1>Test Results</h1>
-          {isTabSwitchFailed ? (
-            <>
-              <div className="score-display">
-                <p>Your Score: <strong>0 / {questions.length}</strong></p>
-                <p>Percentage: <strong>0%</strong></p>
+        <div className="test-card results-card">
+          <div className="results-header">
+            <h1 className="results-title">Test Results</h1>
+          </div>
+          
+          <div className="circular-progress-container">
+            <div className={`circular-progress ${animateScore ? 'animate' : ''}`}>
+              <svg className="progress-ring" width="200" height="200">
+                <circle
+                  className="progress-ring-circle-bg"
+                  cx="100"
+                  cy="100"
+                  r="90"
+                />
+                <circle
+                  className={`progress-ring-circle ${isPassed ? 'pass' : 'fail'}`}
+                  cx="100"
+                  cy="100"
+                  r="90"
+                  strokeDasharray={`${2 * Math.PI * 90}`}
+                  strokeDashoffset={`${2 * Math.PI * 90 * (1 - percentage / 100)}`}
+                />
+              </svg>
+              <div className="progress-text">
+                <div className="score-display">{testResult?.score || score}/{questions.length}</div>
+                <div className="percentage-display">{percentage}%</div>
               </div>
-              <div className="result-message failed">
-                Test Failed: You switched tabs during the test
-              </div>
-            </>
-          ) : testResult ? (
-            <>
-              <div className="score-display">
-                <p>Your Score: <strong>{testResult.score} / {questions.length}</strong></p>
-                <p>Pass Marks: <strong>{testResult.pass_marks}</strong></p>
-                <p>Percentage: <strong>{Math.round((testResult.score / questions.length) * 100)}%</strong></p>
-              </div>
-              <div className={`result-message ${testResult.status === 'failed' ? 'failed' : 'passed'}`}>
-                {testResult.status === 'failed' ? 
-                  `Test Failed: You need ${testResult.pass_marks} marks to pass` : 
-                  "Test Passed: Congratulations!"}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="score-display">
-                <p>Your Score: <strong>{score} / {questions.length}</strong></p>
-                <p>Percentage: <strong>{Math.round((score / questions.length) * 100)}%</strong></p>
-              </div>
-              <div className="result-message">
-                {score >= 8 ? "Excellent!" : score >= 6 ? "Good Job!" : score >= 4 ? "Fair" : "Need Improvement"}
-              </div>
-            </>
-          )}
-          <button className="restart-button" onClick={handleRestart}>
-            Retake Test
-          </button>
+            </div>
+          </div>
+          
+          <div className={`result-message ${isPassed ? 'passed' : 'failed'}`}>
+            {isTabSwitchFailed ? 
+              "Test Failed: You switched tabs during the test" : 
+              (isPassed ? "Test Passed: Congratulations!" : "Test Failed: Better luck next time")}
+          </div>
+          
+          <div className="results-actions">
+            <button className="restart-button" onClick={handleRestart}>
+              Retake Test
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -281,7 +295,7 @@ function Test() {
         {/* Tab switch warning */}
         {tabSwitchWarning && (
           <div className="warning-message">
-            ⚠️ Warning: You have switched tabs once. Switching again will end your test.
+             Warning: You have switched tabs once. Switching again will end your test.
           </div>
         )}
         
