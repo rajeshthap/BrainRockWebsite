@@ -163,7 +163,7 @@
 .restart-button {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(90deg,#13539d 0%,#1d71ce);
   color: white;
   border: none;
   border-radius: 10px;
@@ -330,7 +330,7 @@
 }
 
 .restart-button {
-  background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(90deg,#13539d 0%,#1d71ce);
   color: white;
   border: none;
   padding: 15px 40px;

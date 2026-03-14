@@ -109,7 +109,7 @@ function Header() {
                 <Link to="/KheloJito"
                  className="login-button">
             
-                 <span>Khelo and Jito</span>
+                 <span>Khelo Aur Jito</span>
           
             </Link> </li>
             <li className="">              <a
