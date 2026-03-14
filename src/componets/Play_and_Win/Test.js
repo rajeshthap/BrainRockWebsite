@@ -57,7 +57,22 @@ function Test() {
           throw new Error(response.data.message || 'Failed to start test');
         }
       } catch (err) {
-        setError(err.message);
+        let errorMessage = 'Failed to start test';
+        if (err.response) {
+          // Server responded with error status (400, 401, 403, 500, etc.)
+          if (err.response.data && err.response.data.message) {
+            errorMessage = err.response.data.message;
+          } else {
+            errorMessage = `Server error: ${err.response.status}`;
+          }
+        } else if (err.request) {
+          // Request made but no response
+          errorMessage = 'No response from server. Please check your connection.';
+        } else {
+          // Error in request setup
+          errorMessage = err.message;
+        }
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
