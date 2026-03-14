@@ -1,6 +1,5 @@
 // App.js
 
-import React from "react";
 import "./App.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -13,7 +12,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import "../src/componets/custom/style.css";
- 
+
 import Home from "./componets/pages/Home";
 import Footer from "./componets/footer/Footer";
 import NavBar from "./componets/topnav/NavBar";
@@ -129,31 +128,6 @@ import ManagePlay from "./componets/adminpanel/khelo_jito/ManagePlay";
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
   const location = useLocation();
-  
-  // Version check to detect app updates
-  const [showUpdatePrompt, setShowUpdatePrompt] = React.useState(false);
-  const currentVersion = "1.0.0"; // Increment this when deploying updates
-
-  React.useEffect(() => {
-    // Check if version exists in localStorage
-    const savedVersion = localStorage.getItem('appVersion');
-    
-    // If first time or version mismatch
-    if (!savedVersion || savedVersion !== currentVersion) {
-      // Show update prompt
-      setShowUpdatePrompt(true);
-      // Save new version to localStorage
-      localStorage.setItem('appVersion', currentVersion);
-    }
-  }, [currentVersion]);
-
-  const handleUpdate = () => {
-    window.location.reload();
-  };
-
-  const handleCancel = () => {
-    setShowUpdatePrompt(false);
-  };
 
   const hiddenPaths = new Set([
     "/HrDashBoard",
@@ -234,27 +208,6 @@ function AppContent() {
 
   return (
     <>
-      {/* Update Notification Modal */}
-      {showUpdatePrompt && (
-        <div className="update-modal-overlay">
-          <div className="update-modal">
-            <h3 className="update-modal-title">New Update Available!</h3>
-            <p className="update-modal-text">
-              A new version of the application has been released. Please refresh
-              the page to get the latest updates and features.
-            </p>
-            <div className="update-modal-buttons">
-              <button className="update-btn" onClick={handleUpdate}>
-                Refresh Now
-              </button>
-              <button className="cancel-btn" onClick={handleCancel}>
-                Later
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {!shouldHideNavbar && <NavBar />}
       <Routes>
         {/* Public Routes */}
