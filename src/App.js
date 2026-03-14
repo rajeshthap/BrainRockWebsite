@@ -5,6 +5,8 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fontsource/poppins";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import UpdateNotification from "./components/UpdateNotification";
+import { useVersionChecker } from "./utils/versionChecker";
 import {
   BrowserRouter as Router,
   Routes,
@@ -128,6 +130,7 @@ import ManagePlay from "./componets/adminpanel/khelo_jito/ManagePlay";
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
   const location = useLocation();
+  const { updateAvailable, handleRefresh } = useVersionChecker();
 
   const hiddenPaths = new Set([
     "/HrDashBoard",
@@ -208,6 +211,7 @@ function AppContent() {
 
   return (
     <>
+      {updateAvailable && <UpdateNotification onRefresh={handleRefresh} />}
       {!shouldHideNavbar && <NavBar />}
       <Routes>
         {/* Public Routes */}
