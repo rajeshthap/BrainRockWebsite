@@ -21,15 +21,21 @@ export const useVersionChecker = () => {
       }
 
       const data = await response.json();
-      const currentVersion = data.version;
+      const latestVersion = data.version;
       
       const storedVersion = localStorage.getItem('appVersion');
 
-      if (storedVersion && storedVersion !== currentVersion) {
-        setUpdateAvailable(true);
+      // Initialize localStorage with current version on first load
+      if (!storedVersion) {
+        localStorage.setItem('appVersion', latestVersion);
+        return;
       }
 
-      localStorage.setItem('appVersion', currentVersion);
+      // Check if version differs
+      if (storedVersion !== latestVersion) {
+        setUpdateAvailable(true);
+      }
+      
     } catch (error) {
       console.error('Error checking for updates:', error);
     }
@@ -44,7 +50,24 @@ export const useVersionChecker = () => {
   }, []);
 
   const handleRefresh = () => {
-    window.location.reload(true);
+    // Get the latest version from version.json before reloading
+    fetch('/version.json', {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        localStorage.setItem('appVersion', data.version);
+        window.location.reload(true);
+      })
+      .catch(error => {
+        console.error('Error fetching latest version before refresh:', error);
+        window.location.reload(true);
+      });
   };
 
   return { updateAvailable, handleRefresh };
