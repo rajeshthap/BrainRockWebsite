@@ -115,21 +115,21 @@ function KheloJito() {
       );
       
       console.log('Registration successful:', response.data);
-      console.log('User ID:', response.data.data.user_id);
+      console.log('User ID:', response.data.user_id);
       
       // Store user_id in localStorage for Test component to retrieve
-      localStorage.setItem('test_user_id', response.data.data.user_id);
+      localStorage.setItem('test_user_id', response.data.user_id);
       
       // Clear form
       setFormData({ full_name: '', email: '', phone: '', fee: 1 });
       
-      // Show success message
-      setShowSuccess(true);
-      
-      // Redirect to test page after a short delay
-      setTimeout(() => {
+      // Redirect directly to payment URL without showing success message
+      if (response.data.payment_order && response.data.payment_order.redirectUrl) {
+        window.location.href = response.data.payment_order.redirectUrl;
+      } else {
+        // If no payment required, redirect directly to test page
         navigate('/test');
-      }, 2000);
+      }
     } catch (error) {
       console.error('Error during registration:', error);
       

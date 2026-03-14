@@ -7,10 +7,14 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
 
 function Test() {
-  // Get user_id from localStorage
-  const userId = localStorage.getItem('test_user_id');
+  // Get user_id from URL search parameters or localStorage
+  const [searchParams] = useSearchParams();
+  const urlUserId = searchParams.get('user_id');
+  const storageUserId = localStorage.getItem('test_user_id');
+  const userId = urlUserId || storageUserId;
   const navigate = useNavigate();
-  console.log('Test component - User ID from localStorage:', userId);
+  console.log('Test component - User ID from URL:', urlUserId);
+  console.log('Test component - User ID from localStorage:', storageUserId);
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
