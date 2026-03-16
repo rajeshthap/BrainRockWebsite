@@ -61,7 +61,7 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
         {
             icon: <FaTachometerAlt />,
             label: "Dashboard",
-            path: "#",
+            path: "/UserDashBoard",
             active: true,
         },
        
