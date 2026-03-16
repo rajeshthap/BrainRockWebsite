@@ -273,7 +273,7 @@ function KheloJito() {
                 </Col>
 
                 {/* Fee */}
-                <Col md={6} className="mt-3">
+               {/* <Col md={6} className="mt-3">
                   <Form.Group>
                     <Form.Label className="br-label">Fee</Form.Label>
                     <Form.Control
@@ -285,7 +285,7 @@ function KheloJito() {
                       onChange={handleInputChange}
                     />
                   </Form.Group>
-                </Col>
+                </Col> */}
 
                 {/* Submit Button */}
                 <Col md={12} className="mt-4">
@@ -304,7 +304,9 @@ function KheloJito() {
         </Container>
       </div>
 
- 
+  <Container fluid className="br-footer-box">
+        <FooterPage />
+      </Container>
     </>
   );
 }

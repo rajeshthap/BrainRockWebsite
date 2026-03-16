@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import '../../assets/css/Test.css';
-import axios from 'axios';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import "../../assets/css/Test.css";
+import axios from "axios";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import FooterPage from "../footer/FooterPage";
+import { Container } from "react-bootstrap";
 
 // Define the base URL for your API
-const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
+const API_BASE_URL = "https://brainrock.in/brainrock/backend";
 
 function Test() {
   // Get user_id from URL search parameters or localStorage
   const [searchParams] = useSearchParams();
-  const urlUserId = searchParams.get('user_id');
-  const storageUserId = localStorage.getItem('test_user_id');
+  const urlUserId = searchParams.get("user_id");
+  const storageUserId = localStorage.getItem("test_user_id");
   const userId = urlUserId || storageUserId;
   const navigate = useNavigate();
-  console.log('Test component - User ID from URL:', urlUserId);
-  console.log('Test component - User ID from localStorage:', storageUserId);
-  
+  console.log("Test component - User ID from URL:", urlUserId);
+  console.log("Test component - User ID from localStorage:", storageUserId);
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
@@ -30,35 +32,34 @@ function Test() {
   const [tabSwitchWarning, setTabSwitchWarning] = useState(false); // New state for tab switch warning
   const [tabSwitchCount, setTabSwitchCount] = useState(0); // New state for tab switch count
   const [animateScore, setAnimateScore] = useState(false); // For score animation
-  
-  
+
   // Start test and fetch questions from API
   useEffect(() => {
     const startTest = async () => {
       try {
         if (!userId) {
-          throw new Error('User ID not found. Please register first.');
+          throw new Error("User ID not found. Please register first.");
         }
-        
+
         const response = await axios.post(
-          'https://brainrock.in/brainrock/backend/api/start-test/',
+          "https://brainrock.in/brainrock/backend/api/start-test/",
           { user_id: userId },
           {
             withCredentials: true,
             headers: {
-              'Content-Type': 'application/json'
-            }
-          }
+              "Content-Type": "application/json",
+            },
+          },
         );
 
         if (response.data.status) {
           setQuestions(response.data.questions);
           setAttemptId(response.data.attempt_id);
         } else {
-          throw new Error(response.data.message || 'Failed to start test');
+          throw new Error(response.data.message || "Failed to start test");
         }
       } catch (err) {
-        let errorMessage = 'Failed to start test';
+        let errorMessage = "Failed to start test";
         if (err.response) {
           // Server responded with error status (400, 401, 403, 500, etc.)
           if (err.response.data && err.response.data.message) {
@@ -68,7 +69,8 @@ function Test() {
           }
         } else if (err.request) {
           // Request made but no response
-          errorMessage = 'No response from server. Please check your connection.';
+          errorMessage =
+            "No response from server. Please check your connection.";
         } else {
           // Error in request setup
           errorMessage = err.message;
@@ -87,7 +89,7 @@ function Test() {
     if (loading || showResults || !questions.length) return;
 
     const timer = setInterval(() => {
-      setTimeLeft(prevTime => {
+      setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           // Time's up, move to next question
           handleNextQuestion();
@@ -110,29 +112,29 @@ function Test() {
     const handleVisibilityChange = () => {
       if (document.hidden && !loading && !showResults) {
         // User switched tabs
-        setTabSwitchCount(prevCount => {
+        setTabSwitchCount((prevCount) => {
           const newCount = prevCount + 1;
-          
+
           if (newCount === 1) {
             // First warning
             setTabSwitchWarning(true);
-            console.log('Test warning: First tab switch');
+            console.log("Test warning: First tab switch");
           } else if (newCount === 2) {
             // Second time, fail the test
             setShowResults(true);
             setScore(0);
-            console.log('Test failed: Second tab switch');
+            console.log("Test failed: Second tab switch");
           }
-          
+
           return newCount;
         });
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [loading, showResults]);
 
@@ -149,10 +151,13 @@ function Test() {
 
   const handleNextQuestion = () => {
     // Save user's answer for current question (even if no answer selected)
-    const newAnswers = [...userAnswers, {
-      question_id: questions[currentQuestion].id,
-      selected_option: selectedOption
-    }];
+    const newAnswers = [
+      ...userAnswers,
+      {
+        question_id: questions[currentQuestion].id,
+        selected_option: selectedOption,
+      },
+    ];
     setUserAnswers(newAnswers);
 
     // Check if answer is correct and update score
@@ -174,33 +179,33 @@ function Test() {
   const submitTest = async (answers) => {
     try {
       const response = await axios.post(
-        'https://brainrock.in/brainrock/backend/api/submit-test/',
+        "https://brainrock.in/brainrock/backend/api/submit-test/",
         {
           user_id: userId,
-          answers: answers
+          answers: answers,
         },
         {
           withCredentials: true,
           headers: {
-            'Content-Type': 'application/json'
-          }
-        }
+            "Content-Type": "application/json",
+          },
+        },
       );
 
-      console.log('Test submission successful:', response.data);
+      console.log("Test submission successful:", response.data);
       // Save API response data for display
       setTestResult(response.data);
       setShowResults(true);
     } catch (err) {
-      console.error('Error submitting test:', err);
+      console.error("Error submitting test:", err);
       setError(err.message);
     }
   };
 
   const handleRestart = () => {
     // Clear localStorage and redirect to KheloJito for re-registration
-    localStorage.removeItem('test_user_id');
-    navigate('/KheloJito');
+    localStorage.removeItem("test_user_id");
+    navigate("/KheloJito");
   };
 
   if (loading) {
@@ -227,7 +232,9 @@ function Test() {
     return (
       <div className="test-container">
         <div className="test-card">
-          <div className="no-questions">No questions available. Please check back later.</div>
+          <div className="no-questions">
+            No questions available. Please check back later.
+          </div>
         </div>
       </div>
     );
@@ -235,21 +242,28 @@ function Test() {
 
   if (showResults) {
     // Check if test was failed due to tab switch
-    const isTabSwitchFailed = score === 0 && userAnswers.length < questions.length;
+    const isTabSwitchFailed =
+      score === 0 && userAnswers.length < questions.length;
     // Calculate percentage
-    const percentage = Math.round((testResult?.score || score) / questions.length * 100);
+    const percentage = Math.round(
+      ((testResult?.score || score) / questions.length) * 100,
+    );
     // Determine if passed based on API response or score
-    const isPassed = testResult ? testResult.status === 'passed' : percentage >= 60;
-    
+    const isPassed = testResult
+      ? testResult.status === "passed"
+      : percentage >= 60;
+
     return (
       <div className="test-container">
         <div className="test-card results-card">
           <div className="results-header">
             <h1 className="results-title">Test Results</h1>
           </div>
-          
+
           <div className="circular-progress-container">
-            <div className={`circular-progress ${animateScore ? 'animate' : ''}`}>
+            <div
+              className={`circular-progress ${animateScore ? "animate" : ""}`}
+            >
               <svg className="progress-ring" width="200" height="200">
                 <circle
                   className="progress-ring-circle-bg"
@@ -258,7 +272,7 @@ function Test() {
                   r="90"
                 />
                 <circle
-                  className={`progress-ring-circle ${isPassed ? 'pass' : 'fail'}`}
+                  className={`progress-ring-circle ${isPassed ? "pass" : "fail"}`}
                   cx="100"
                   cy="100"
                   r="90"
@@ -267,18 +281,22 @@ function Test() {
                 />
               </svg>
               <div className="progress-text">
-                <div className="score-display">{testResult?.score || score}/{questions.length}</div>
+                <div className="score-display">
+                  {testResult?.score || score}/{questions.length}
+                </div>
                 <div className="percentage-display">{percentage}%</div>
               </div>
             </div>
           </div>
-          
-          <div className={`result-message ${isPassed ? 'passed' : 'failed'}`}>
-            {isTabSwitchFailed ? 
-              "Test Failed: You switched tabs during the test" : 
-              (isPassed ? "Test Passed: Congratulations!" : "Test Failed: Better luck next time")}
+
+          <div className={`result-message ${isPassed ? "passed" : "failed"}`}>
+            {isTabSwitchFailed
+              ? "Test Failed: You switched tabs during the test"
+              : isPassed
+                ? "Test Passed: Congratulations!"
+                : "Test Failed: Better luck next time"}
           </div>
-          
+
           <div className="results-actions">
             <button className="restart-button" onClick={handleRestart}>
               Retake Test
@@ -290,48 +308,56 @@ function Test() {
   }
 
   return (
-    <div className="test-container">
-      <div className="test-card">
-        {/* Tab switch warning */}
-        {tabSwitchWarning && (
-          <div className="warning-message">
-             Warning: You have switched tabs once. Switching again will end your test.
-          </div>
-        )}
-        
-        <div className="progress-bar">
-          <div 
-            className="progress-fill" 
-            style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-          ></div>
-        </div>
-        <div className="question-number">
-          Question {currentQuestion + 1} of {questions.length}
-        </div>
-        <div className="timer">
-          Time Left: {timeLeft} seconds
-        </div>
-        <h2 className="question">{questions[currentQuestion].question_text}</h2>
-        <div className="options">
-          {questions[currentQuestion].options.map((option, index) => (
-            <div 
-              key={index} 
-              className={`option ${selectedOption === index ? 'selected' : ''}`}
-              onClick={() => handleOptionSelect(index)}
-            >
-              {option}
+    <>
+      <div className="test-container">
+        <div className="test-card">
+          {/* Tab switch warning */}
+          {tabSwitchWarning && (
+            <div className="warning-message">
+              Warning: You have switched tabs once. Switching again will end
+              your test.
             </div>
-          ))}
+          )}
+
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{
+                width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+              }}
+            ></div>
+          </div>
+          <div className="question-number">
+            Question {currentQuestion + 1} of {questions.length}
+          </div>
+          <div className="timer">Time Left: {timeLeft} seconds</div>
+          <h2 className="question">
+            {questions[currentQuestion].question_text}
+          </h2>
+          <div className="options">
+            {questions[currentQuestion].options.map((option, index) => (
+              <div
+                key={index}
+                className={`option ${selectedOption === index ? "selected" : ""}`}
+                onClick={() => handleOptionSelect(index)}
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+          <button
+            className="next-button"
+            onClick={handleNextQuestion}
+            disabled={selectedOption === null}
+          >
+            {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
+          </button>
         </div>
-        <button 
-          className="next-button" 
-          onClick={handleNextQuestion}
-          disabled={selectedOption === null}
-        >
-          {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
-        </button>
       </div>
-    </div>
+      <Container fluid className="br-footer-box">
+        <FooterPage />
+      </Container>
+    </>
   );
 }
 
