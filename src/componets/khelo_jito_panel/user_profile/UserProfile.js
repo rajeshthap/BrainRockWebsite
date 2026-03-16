@@ -70,8 +70,10 @@ const UserProfile = () => {
     fetchUserProfile();
   }, [user]);
 
-  const toCamelLabel = (str) =>
-    str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  const toCamelLabel = (str) => {
+    const label = str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    return label === "Cashback" ? "Wallet" : label;
+  };
 
   return (
     <div className="dashboard-container">
@@ -103,40 +105,19 @@ const UserProfile = () => {
           ) : userData ? (
             <div className="br-box-container mt-4">
               <Row className="br-stats-row">
-                {/* Student Profile Section */}
+                {/* User Profile Section */}
                 <Col lg={12} className="mb-4">
                   <Card>
                     <Card.Header className="bg-primary text-white">
-                      <h4>Student Profile</h4>
+                      <h4>User Profile</h4>
                     </Card.Header>
                     <Card.Body>
                       <Row>
-                        {Object.entries(userData.student_profile || {}).map(([key, value]) => (
-                          <Col lg={6} md={6} sm={12} key={key}>
-                            <Form.Group className="mb-3">
-                              <Form.Label className="br-label fw-bold">{toCamelLabel(key)}</Form.Label>
-                              <Form.Control
-                                className="br-form-control"
-                                value={value || ""}
-                                disabled
-                              />
-                            </Form.Group>
-                          </Col>
-                        ))}
-                      </Row>
-                    </Card.Body>
-                  </Card>
-                </Col>
-
-                {/* Winner Details Section */}
-                <Col lg={12} className="mb-4">
-                  <Card>
-                    <Card.Header className="bg-success text-white">
-                      <h4>Winner Details</h4>
-                    </Card.Header>
-                    <Card.Body>
-                      <Row>
-                        {Object.entries(userData.winner_details || {}).map(([key, value]) => (
+                        {/* Combine student_profile and winner_details, excluding specified fields */}
+                        {Object.entries({
+                          ...(userData.student_profile || {}),
+                          ...(userData.winner_details || {})
+                        }).filter(([key]) => !['payment_status', 'transaction_id', 'created_at', 'score'].includes(key)).map(([key, value]) => (
                           <Col lg={6} md={6} sm={12} key={key}>
                             <Form.Group className="mb-3">
                               <Form.Label className="br-label fw-bold">{toCamelLabel(key)}</Form.Label>
