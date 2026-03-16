@@ -33,7 +33,7 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
 
   // Get user display name - returns ADMIN AD
   const getDisplayName = () => {
-    return "ADMIN ";
+    return "User ";
   };
 
   // Get user photo URL

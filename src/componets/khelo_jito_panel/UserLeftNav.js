@@ -169,7 +169,7 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
                 enforceFocus={false}
             >
                 <Offcanvas.Header closeButton className="br-offcanvas-header">
-                    <Offcanvas.Title className="br-off-title">Admin Dashboard</Offcanvas.Title>
+                    <Offcanvas.Title className="br-off-title">User Dashboard</Offcanvas.Title>
                 </Offcanvas.Header>
 
                 <Offcanvas.Body className="br-offcanvas">
