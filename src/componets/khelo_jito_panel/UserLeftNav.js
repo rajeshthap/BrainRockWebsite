@@ -68,7 +68,7 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
        
         {
             icon: <FaFileInvoice />,  // Updated icon
-            label: "Bill Generation",
+            label: "test",
             submenu: [
                 {
                     label: "Test 1",
@@ -89,7 +89,7 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
             >
                 <div className="sidebar-header">
                     <div className="logo-container text-center">
-                        <h5 className="mb-0 text-white">Admin Dashboard</h5>
+                        <h5 className="mb-0 text-white">User DashBoard</h5>
                     </div>
                 </div>
 

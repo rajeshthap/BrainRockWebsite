@@ -166,7 +166,7 @@ const Registerduser = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user_id: selectedUsers }),
+        body: JSON.stringify({ user_ids: selectedUsers }),
       });
       
       if (!response.ok) {
@@ -174,7 +174,7 @@ const Registerduser = () => {
       }
       
       const data = await response.json();
-      if (data.success) {
+      if (data.status) {
         // Remove deleted users from the state
         setUsers(prev => prev.filter(user => !selectedUsers.includes(user.user_id)));
         setSelectedUsers([]);

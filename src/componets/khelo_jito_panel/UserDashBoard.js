@@ -60,7 +60,7 @@ const UserDashBoard = () => {
         <UserHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="dashboard-body">
-          <h1 className="page-title"> Admin Dashboard</h1>
+          <h1 className="page-title">User DashBoard</h1>
           <div className="br-box-container mt-4">
             <Row className="br-stats-row">
              User DashBoard
