@@ -5,11 +5,12 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 
-import "../../assets/css/websitemanagement.css";
-import UserHeader from "./UserHeader";
-import UserLeftNav from "./UserLeftNav";
+import "../../../assets/css/userLeftNav.css"
+import UserLeftNav from "../UserLeftNav";
+import UserHeader from "../UserHeader";
+
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
-const UserDashBoard = () => {
+const UserProfile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -32,20 +33,6 @@ const UserDashBoard = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  
- 
-
- 
-
-
-
-
-
-
- 
-
-
-  
 
   return (
     <div className="dashboard-container">
@@ -60,7 +47,7 @@ const UserDashBoard = () => {
         <UserHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="dashboard-body">
-          <h1 className="page-title">User DashBoard</h1>
+          <h1 className="page-title">User Profile</h1>
           <div className="br-box-container mt-4">
             <Row className="br-stats-row">
              
@@ -77,4 +64,4 @@ const UserDashBoard = () => {
   );
 };
 
-export default UserDashBoard;
+export default UserProfile;

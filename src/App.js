@@ -128,6 +128,7 @@ import AddPlay from "./componets/adminpanel/khelo_jito/AddPlay";
 import ManagePlay from "./componets/adminpanel/khelo_jito/ManagePlay";
 import Registerduser from "./componets/adminpanel/khelo_jito_registerd_user/Registerduser";
 import UserDashBoard from "./componets/khelo_jito_panel/UserDashBoard";
+import UserProfile from "./componets/khelo_jito_panel/user_profile/UserProfile";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -205,7 +206,8 @@ function AppContent() {
     "/AddPlay",
     "/ManagePlay",
     "/Registerduser",
-    "/UserDashBoard"
+    "/UserDashBoard",
+    "/UserProfile"
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -326,6 +328,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <PayslipGenerator />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/UserProfile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
             </ProtectedRoute>
           }
         />

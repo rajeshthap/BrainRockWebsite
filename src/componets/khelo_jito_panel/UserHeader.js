@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { AuthContext } from "../context/AuthContext";
+import { FaUser } from "react-icons/fa6";
 
 function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const { user, logout } = useContext(AuthContext);
@@ -76,6 +77,9 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => navigate('/UserProfile')}>
+      <FaUser className="me-2" /> My Profile
+    </Dropdown.Item>
                   <Dropdown.Item onClick={logout}>
                     <FaSignOutAlt className="me-2" /> Logout
                   </Dropdown.Item>
