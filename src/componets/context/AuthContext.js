@@ -15,12 +15,14 @@ export const AuthProvider = ({ children }) => {
     withCredentials: true,
   });
  
-  const login = async (email_or_phone, password) => {
+  const login = async (email_or_phone, password, role = null) => {
     try {
-      const res = await axiosInstance.post("login/", {
+      const loginData = {
         email_or_phone,
         password,
-      });
+        ...(role && { role }),
+      };
+      const res = await axiosInstance.post("login/", loginData);
  
       setUser({
         id: res.data.user?.id || res.data.user_id || res.data.id,

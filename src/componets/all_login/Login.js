@@ -12,6 +12,7 @@ export default function Login() {
   const [formData, setFormData] = useState({
     email_or_phone: "",
     password: "",
+    role: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showModifyAlert, setShowModifyAlert] = useState(false);
@@ -64,6 +65,15 @@ export default function Login() {
         return;
       }
 
+      // Check for khelo-aur-jeeto role
+      if (user.role === "khelo-aur-jeeto") {
+        navigate("/UserDashBoard ", {
+          state: { unique_id: user.id },
+          replace: true,
+        });
+        return;
+      }
+
       // Check if user role matches any course name
       const matchingCourse = courses.find(course => 
         course.course_name.toLowerCase() === user.role.toLowerCase()
@@ -94,13 +104,13 @@ export default function Login() {
     e.preventDefault();
     setAlertMessage("");
 
-    if (!formData.email_or_phone || !formData.password) {
+    if (!formData.email_or_phone || !formData.password || !formData.role) {
       setAlertMessage("Please fill in all fields");
       setShowModifyAlert(true);
       return;
     }
 
-    const result = await login(formData.email_or_phone, formData.password);
+    const result = await login(formData.email_or_phone, formData.password, formData.role);
 
     if (!result || !result.success) {
       setAlertMessage(result?.error?.message || "Login failed. Please check your credentials.");
@@ -167,6 +177,26 @@ export default function Login() {
                           }}
                         ></i>
                       </div>
+                    </Form.Group>
+
+                    {/* Role */}
+                    <Form.Group className="mb-3">
+                      <Form.Label className="br-label">
+                        Role <span className="br-span-star">*</span>
+                      </Form.Label>
+                      <Form.Select
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        className="br-form-control"
+                        disabled={authLoading}
+                      >
+                        <option value="">Select Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="training">Training</option>
+                        <option value="khelo-aur-jeeto">Khelo Aur Jeeto</option>
+                        <option value="hr">HR</option>
+                      </Form.Select>
                     </Form.Group>
                     <div> <span
                       className="forgot-btn mx-1"

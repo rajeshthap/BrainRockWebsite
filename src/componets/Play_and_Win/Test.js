@@ -32,6 +32,14 @@ function Test() {
   const [tabSwitchWarning, setTabSwitchWarning] = useState(false); // New state for tab switch warning
   const [tabSwitchCount, setTabSwitchCount] = useState(0); // New state for tab switch count
   const [animateScore, setAnimateScore] = useState(false); // For score animation
+  const [showWinnerForm, setShowWinnerForm] = useState(false); // State for winner form visibility
+  const [winnerFormData, setWinnerFormData] = useState({
+    phone: "",
+    password: "",
+    account_holder_name: "",
+    account_number: "",
+    ifsc_code: "",
+  }); // State for winner form data
 
   // Start test and fetch questions from API
   useEffect(() => {
@@ -208,6 +216,45 @@ function Test() {
     navigate("/KheloJito");
   };
 
+  // Handle winner form input changes
+  const handleWinnerFormChange = (e) => {
+    const { name, value } = e.target;
+    setWinnerFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Submit winner form to API
+  const submitWinnerForm = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "https://brainrock.in/brainrock/backend/api/test-winners/",
+        {
+          user_id: userId,
+          score: testResult?.score || score,
+          ...winnerFormData
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      console.log("Winner form submission successful:", response.data);
+      // Show success message and redirect to login page
+      alert("Congratulations! Your details have been submitted successfully. You will receive your winning amount soon.");
+      localStorage.removeItem("test_user_id");
+      navigate("/login");
+    } catch (err) {
+      console.error("Error submitting winner form:", err);
+      alert("Failed to submit details. Please try again.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="test-container">
@@ -252,6 +299,112 @@ function Test() {
     const isPassed = testResult
       ? testResult.status === "passed"
       : percentage >= 60;
+
+    // If user passed and showWinnerForm is true, display the winner form
+    if (isPassed && showWinnerForm) {
+      return (
+        <div className="test-container">
+          <div className="test-card results-card">
+            <div className="results-header">
+              <h1 className="results-title">Congratulations! You Won!</h1>
+              <p className="results-subtitle">Please fill in your details to receive your winning amount</p>
+            </div>
+
+            <form className="winner-form" onSubmit={submitWinnerForm}>
+              <div className="form-group">
+                <label>User ID</label>
+                <input
+                  type="text"
+                  name="user_id"
+                  value={userId}
+                  disabled
+                  className="form-control"
+                />
+              </div>
+              <div className="form-group">
+                <label>Score</label>
+                <input
+                  type="text"
+                  name="score"
+                  value={testResult?.score || score}
+                  disabled
+                  className="form-control"
+                />
+              </div>
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={winnerFormData.phone}
+                  onChange={handleWinnerFormChange}
+                  placeholder="Enter your phone number"
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={winnerFormData.password}
+                  onChange={handleWinnerFormChange}
+                  placeholder="Enter password"
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Account Holder Name</label>
+                <input
+                  type="text"
+                  name="account_holder_name"
+                  value={winnerFormData.account_holder_name}
+                  onChange={handleWinnerFormChange}
+                  placeholder="Enter account holder name"
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Account Number</label>
+                <input
+                  type="text"
+                  name="account_number"
+                  value={winnerFormData.account_number}
+                  onChange={handleWinnerFormChange}
+                  placeholder="Enter account number"
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>IFSC Code</label>
+                <input
+                  type="text"
+                  name="ifsc_code"
+                  value={winnerFormData.ifsc_code}
+                  onChange={handleWinnerFormChange}
+                  placeholder="Enter IFSC code"
+                  className="form-control"
+                  required
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="submit-button">
+                  Submit Details
+                </button>
+                <button type="button" className="cancel-button" onClick={() => setShowWinnerForm(false)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="test-container">
@@ -298,6 +451,11 @@ function Test() {
           </div>
 
           <div className="results-actions">
+            {isPassed && (
+              <button className="claim-button" onClick={() => setShowWinnerForm(true)}>
+                Claim Your Prize
+              </button>
+            )}
             <button className="restart-button" onClick={handleRestart}>
               Retake Test
             </button>
