@@ -129,6 +129,7 @@ import ManagePlay from "./componets/adminpanel/khelo_jito/ManagePlay";
 import Registerduser from "./componets/adminpanel/khelo_jito_registerd_user/Registerduser";
 import UserDashBoard from "./componets/khelo_jito_panel/UserDashBoard";
 import UserProfile from "./componets/khelo_jito_panel/user_profile/UserProfile";
+import TestWinner from "./componets/khelo_jito_panel/TestWinner";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -207,7 +208,8 @@ function AppContent() {
     "/ManagePlay",
     "/Registerduser",
     "/UserDashBoard",
-    "/UserProfile"
+    "/UserProfile",
+    "/TestWinner"
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -387,6 +389,15 @@ function AppContent() {
             }
           />
         }
+        <Route
+            path="/TestWinner"
+            element={
+              <ProtectedRoute>
+                <TestWinner />
+              </ProtectedRoute>
+            }
+          />
+        
         <Route
           path="/EmployeeRegistration"
           element={
