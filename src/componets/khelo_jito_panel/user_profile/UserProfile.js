@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Container, Row, Col, Modal, Pagination, Alert, Button, Card, Form } from "react-bootstrap";
-import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice } from "react-icons/fa";
+import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice, FaEdit, FaUser, FaIdCard, FaEnvelope, FaPhone, FaUniversity, FaMapMarkerAlt, FaCalendar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
@@ -75,6 +75,18 @@ const UserProfile = () => {
     return label === "Cashback" ? "Wallet" : label;
   };
 
+  const getIconForField = (fieldName) => {
+    const lowerField = fieldName.toLowerCase();
+    if (lowerField.includes('name')) return <FaUser className="me-2" />;
+    if (lowerField.includes('email')) return <FaEnvelope className="me-2" />;
+    if (lowerField.includes('phone')) return <FaPhone className="me-2" />;
+    if (lowerField.includes('bank') || lowerField.includes('account') || lowerField.includes('ifsc')) return <FaUniversity className="me-2" />;
+    if (lowerField.includes('user') || lowerField.includes('id')) return <FaIdCard className="me-2" />;
+    if (lowerField.includes('address') || lowerField.includes('location')) return <FaMapMarkerAlt className="me-2" />;
+    if (lowerField.includes('date') || lowerField.includes('dob')) return <FaCalendar className="me-2" />;
+    return null;
+  };
+
   return (
     <div className="dashboard-container">
       <UserLeftNav
@@ -105,34 +117,60 @@ const UserProfile = () => {
           ) : userData ? (
             <div className="br-box-container mt-4">
               <Row className="br-stats-row">
-                {/* User Profile Section */}
+                {/* Profile Header Card */}
                 <Col lg={12} className="mb-4">
-                  <Card>
-                    <Card.Header className="bg-primary text-white">
-                      <h4>User Profile</h4>
-                    </Card.Header>
-                    <Card.Body>
-                      <Row>
-                        {/* Combine student_profile and winner_details, excluding specified fields */}
-                        {Object.entries({
-                          ...(userData.student_profile || {}),
-                          ...(userData.winner_details || {})
-                        }).filter(([key]) => !['payment_status', 'transaction_id', 'created_at', 'score'].includes(key)).map(([key, value]) => (
-                          <Col lg={6} md={6} sm={12} key={key}>
-                            <Form.Group className="mb-3">
-                              <Form.Label className="br-label fw-bold">{toCamelLabel(key)}</Form.Label>
-                              <Form.Control
-                                className="br-form-control"
-                                value={value || ""}
-                                disabled
-                              />
-                            </Form.Group>
-                          </Col>
-                        ))}
+                  <Card className="shadow-lg border-0 rounded-3">
+                    <Card.Body className="p-4">
+                      <Row className="align-items-start">
+                        {/* Profile Photo */}
+                        <Col lg={3} md={4} sm={12} className="text-center mb-4 mb-md-0">
+                          <div className="position-relative d-inline-block">
+                            <div className="profile-photo-circle" style={{ 
+                              width: '150px', 
+                              height: '150px', 
+                              borderRadius: '50%', 
+                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center', 
+                              border: '4px solid #ffffff',
+                              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                              overflow: 'hidden'
+                            }}>
+                              <FaUser size={70} className="text-white" />
+                            </div>
+                          </div>
+                          <h4 className="mt-3 fw-bold text-primary">{userData.student_profile?.full_name || "User"}</h4>
+                          <p className="text-muted">{userData.student_profile?.email || "email@example.com"}</p>
+                        </Col>
+
+                        {/* Personal Information - Right Side */}
+                        <Col lg={9} md={8} sm={12}>
+                          <div className="bg-light rounded-2 p-4">
+                            <h5 className="fw-bold text-primary mb-3"><FaUser className="me-2" />Personal Information</h5>
+                            <Row>
+                              {Object.entries({
+                                ...(userData.student_profile || {})
+                              }).filter(([key]) => !['payment_status', 'transaction_id', 'created_at', 'score'].includes(key)).map(([key, value]) => (
+                                <Col lg={6} md={6} sm={12} key={key} className="mb-3">
+                                  <div className="d-flex align-items-center">
+                                    <span className="text-primary">{getIconForField(key)}</span>
+                                    <h6 className="fw-bold mb-0 me-2">{toCamelLabel(key)}:</h6>
+                                    <span className="text-muted">{value || "N/A"}</span>
+                                  </div>
+                                </Col>
+                              ))}
+                            </Row>
+                          </div>
+                        </Col>
                       </Row>
                     </Card.Body>
                   </Card>
                 </Col>
+
+            
+
+            
               </Row>
             </div>
           ) : (
