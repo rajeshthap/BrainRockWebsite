@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Form, Button, Alert, Card } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import '../../assets/css/KheloJito.css';
-import axios from 'axios';
-import FooterPage from '../footer/FooterPage';
-
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Alert,
+  Card,
+} from "react-bootstrap";
+import { Link } from "react-router-dom";
+import "../../assets/css/KheloJito.css";
+import axios from "axios";
+import FooterPage from "../footer/FooterPage";
 
 function KheloJito() {
   // State to hold the form data
   const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    fee: 1
+    full_name: "",
+    email: "",
+    phone: "",
+    fee: 1,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -27,9 +34,9 @@ function KheloJito() {
   // Handler for input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
     validateField(name, value);
   };
@@ -104,35 +111,38 @@ function KheloJito() {
 
     try {
       const response = await axios.post(
-        'https://brainrock.in/brainrock/backend/api/register-test/',
+        "https://brainrock.in/brainrock/backend/api/register-test/",
         formData,
         {
           withCredentials: true,
           headers: {
-            'Content-Type': 'application/json'
-          }
-        }
+            "Content-Type": "application/json",
+          },
+        },
       );
-      
-      console.log('Registration successful:', response.data);
-      console.log('User ID:', response.data.user_id);
-      
+
+      console.log("Registration successful:", response.data);
+      console.log("User ID:", response.data.user_id);
+
       // Store user_id in localStorage for Test component to retrieve
-      localStorage.setItem('test_user_id', response.data.user_id);
-      
+      localStorage.setItem("test_user_id", response.data.user_id);
+
       // Clear form
-      setFormData({ full_name: '', email: '', phone: '', fee: 1 });
-      
+      setFormData({ full_name: "", email: "", phone: "", fee: 1 });
+
       // Redirect directly to payment URL without showing success message
-      if (response.data.payment_order && response.data.payment_order.redirectUrl) {
+      if (
+        response.data.payment_order &&
+        response.data.payment_order.redirectUrl
+      ) {
         window.location.href = response.data.payment_order.redirectUrl;
       } else {
         // If no payment required, redirect directly to test page
-        navigate('/test');
+        navigate("/test");
       }
     } catch (error) {
-      console.error('Error during registration:', error);
-      
+      console.error("Error during registration:", error);
+
       if (error.response && error.response.data) {
         const apiErrors = {};
 
@@ -145,16 +155,18 @@ function KheloJito() {
         }
 
         if (Object.keys(apiErrors).length > 0) {
-          setErrors(prev => ({ ...prev, ...apiErrors }));
+          setErrors((prev) => ({ ...prev, ...apiErrors }));
         } else if (error.response.data.message) {
           setErrorMessage(error.response.data.message);
           setShowError(true);
-        } else if (typeof error.response.data === 'string') {
+        } else if (typeof error.response.data === "string") {
           setErrorMessage(error.response.data);
           setShowError(true);
         }
       } else {
-        setErrorMessage("Registration failed. Please check your connection and try again.");
+        setErrorMessage(
+          "Registration failed. Please check your connection and try again.",
+        );
         setShowError(true);
       }
     } finally {
@@ -165,32 +177,38 @@ function KheloJito() {
   return (
     <>
       {/* Banner Section */}
-      <div className='KheloJito-banner'>
-        <div className='site-breadcrumb-wpr'>
-          <h2 className='breadcrumb-title'>Khelo aur Jito</h2>
-          <ul className='breadcrumb-menu clearfix'>
+      <div className="KheloJito-banner">
+        <div className="site-breadcrumb-wpr">
+          <h2 className="breadcrumb-title">Khelo aur Jeeto</h2>
+          <ul className="breadcrumb-menu clearfix">
             <li>
-              <Link className="breadcrumb-home" to="/">Home</Link>
+              <Link className="breadcrumb-home" to="/">
+                Home
+              </Link>
             </li>
-            <li className='px-2'>/</li>
+            <li className="px-2">/</li>
             <li>
-              <Link className="breadcrumb-about" to="/">Khelo aur Jito</Link>
+              <Link className="breadcrumb-about" to="/">
+                Khelo aur Jeeto
+              </Link>
             </li>
           </ul>
         </div>
       </div>
 
-      <div className='khelojito-section'>
+      <div className="khelojito-section">
         <Container className="mt-4 mb-3">
           <div className="khelojito-box text-heading">
-            
             {/* Success Alert */}
             {showSuccess && (
               <Card className="mb-4 border-success success-card">
                 <Card.Body className="text-center">
-                  <Card.Title className="text-success mt-3">Registration Successful!</Card.Title>
+                  <Card.Title className="text-success mt-3">
+                    Registration Successful!
+                  </Card.Title>
                   <Card.Text>
-                    Thank you for registering! You will be redirected to the test page shortly.
+                    Thank you for registering! You will be redirected to the
+                    test page shortly.
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -198,7 +216,11 @@ function KheloJito() {
 
             {/* Error Alert */}
             {showError && (
-              <Alert variant="danger" onClose={() => setShowError(false)} dismissible>
+              <Alert
+                variant="danger"
+                onClose={() => setShowError(false)}
+                dismissible
+              >
                 {errorMessage}
               </Alert>
             )}
@@ -221,9 +243,7 @@ function KheloJito() {
                       placeholder="Enter your full name"
                     />
                     {errors.full_name && (
-                      <div className="invalid-feedback">
-                        {errors.full_name}
-                      </div>
+                      <div className="invalid-feedback">{errors.full_name}</div>
                     )}
                   </Form.Group>
                 </Col>
@@ -243,9 +263,7 @@ function KheloJito() {
                       placeholder="Enter your email"
                     />
                     {errors.email && (
-                      <div className="invalid-feedback">
-                        {errors.email}
-                      </div>
+                      <div className="invalid-feedback">{errors.email}</div>
                     )}
                   </Form.Group>
                 </Col>
@@ -265,15 +283,13 @@ function KheloJito() {
                       placeholder="Enter your phone number"
                     />
                     {errors.phone && (
-                      <div className="invalid-feedback">
-                        {errors.phone}
-                      </div>
+                      <div className="invalid-feedback">{errors.phone}</div>
                     )}
                   </Form.Group>
                 </Col>
 
                 {/* Fee */}
-               {/* <Col md={6} className="mt-3">
+                {/* <Col md={6} className="mt-3">
                   <Form.Group>
                     <Form.Label className="br-label">Fee</Form.Label>
                     <Form.Control
@@ -289,13 +305,13 @@ function KheloJito() {
 
                 {/* Submit Button */}
                 <Col md={12} className="mt-4">
-                  <Button 
-                    variant="primary" 
-                    type="submit" 
+                  <Button
+                    variant="primary"
+                    type="submit"
                     className="br-button"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Registering...' : 'Register'}
+                    {isLoading ? "Registering..." : "Register"}
                   </Button>
                 </Col>
               </Row>
@@ -304,7 +320,7 @@ function KheloJito() {
         </Container>
       </div>
 
-  <Container fluid className="br-footer-box">
+      <Container fluid className="br-footer-box">
         <FooterPage />
       </Container>
     </>

@@ -115,7 +115,7 @@ const UserProfile = () => {
               <p>{error}</p>
             </Alert>
           ) : userData ? (
-            <div className="br-box-container mt-4">
+            <div className=" mt-4">
               <Row className="br-stats-row">
                 {/* Profile Header Card */}
                 <Col lg={12} className="mb-4">
