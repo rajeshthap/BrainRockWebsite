@@ -8,16 +8,20 @@ import axios from "axios";
 import "../../assets/css/websitemanagement.css";
 import UserHeader from "./UserHeader";
 import UserLeftNav from "./UserLeftNav";
+import Test from "../Play_and_Win/Test";
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
 const UserDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [selectedCardType, setSelectedCardType] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [coursesData, setCoursesData] = useState([]);
   const navigate = useNavigate();
 
   
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
 
 
   useEffect(() => {
@@ -34,7 +38,11 @@ const UserDashBoard = () => {
 
   
  
-
+  const handleCardClick = (cardType) => {
+    setSelectedCardType(cardType);
+    setCurrentPage(1);
+    setSearchTerm("");
+  };
  
 
 
@@ -63,8 +71,22 @@ const UserDashBoard = () => {
           <h1 className="page-title">User DashBoard</h1>
           <div className="br-box-container mt-4">
             <Row className="br-stats-row">
-             
-        
+                <Col lg={4} md={6} sm={12} className="mb-3">
+                              <div
+                                className="br-stat-card card-blue"
+                                onClick={() => handleCardClick("courses")}
+                                style={{ cursor: "pointer" }}
+                              >
+                                <div className="br-stat-icon">
+                                  <FaBook />
+                                </div>
+                                <div className="br-stat-details">
+                                  <h5>Khelo and Jito</h5>
+                                  <h2>{coursesData.length}</h2>
+                                </div>
+                              </div>
+                            </Col>
+     
             </Row>
           </div>
 
