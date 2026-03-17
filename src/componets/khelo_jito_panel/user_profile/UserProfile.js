@@ -52,7 +52,7 @@ const UserProfile = () => {
           { withCredentials: true }
         );
 
-        console.log("User profile response:", response.data);
+
 
         if (response.data.status) {
           setUserData(response.data.data);

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "../../assets/css/Test.css";
 import axios from "axios";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import FooterPage from "../footer/FooterPage";
 import { Container } from "react-bootstrap";
+import { AuthContext } from "../context/AuthContext";
 
 // Define the base URL for your API
 const API_BASE_URL = "https://brainrock.in/brainrock/backend";
@@ -210,10 +211,51 @@ function Test() {
     }
   };
 
+  const { user } = useContext(AuthContext);
+
+  // Handle claim prize
+  const handleClaimPrize = async () => {
+    // Use user from AuthContext if available, otherwise use test user ID
+    const claimUserId = (user && user.unique_id) || userId;
+    
+    if (claimUserId) {
+      try {
+        // Call add-cashback API to add won amount to wallet
+        const response = await axios.put(
+          "https://brainrock.in/brainrock/backend/api/add-cashback/",
+          { user_id: claimUserId },
+          { withCredentials: true }
+        );
+
+        if (response.data.status) {
+          // Store winning amount (amount_added) in localStorage for display in dashboard
+          localStorage.setItem("winningAmount", response.data.amount_added || 0);
+          
+          // If user_id is available (authenticated), redirect to user dashboard without showing form
+          navigate("/UserDashBoard");
+        }
+      } catch (error) {
+        console.error("Error adding cashback:", error);
+        alert("Failed to claim prize. Please try again.");
+      }
+    } else {
+      // For unauthorized users without test user ID, show winner form
+      setShowWinnerForm(true);
+    }
+  };
+
   const handleRestart = () => {
-    // Clear localStorage and redirect to KheloJito for re-registration
+    // Clear localStorage
     localStorage.removeItem("test_user_id");
-    navigate("/KheloJito");
+    
+    // Redirect based on user authorization
+    if (user && user.unique_id) {
+      // Authorized user - redirect to user dashboard
+      navigate("/UserDashBoard");
+    } else {
+      // Unauthorized user - redirect to KheloJito for re-registration
+      navigate("/KheloJito");
+    }
   };
 
   // Handle winner form input changes
@@ -396,7 +438,15 @@ function Test() {
                 <button type="submit" className="submit-button">
                   Submit Details
                 </button>
-                <button type="button" className="cancel-button" onClick={() => setShowWinnerForm(false)}>
+                <button type="button" className="cancel-button" onClick={() => {
+                  setShowWinnerForm(false);
+                  // Redirect based on user authorization
+                  if (user && user.unique_id) {
+                    navigate("/UserDashBoard");
+                  } else {
+                    navigate("/KheloJito");
+                  }
+                }}>
                   Cancel
                 </button>
               </div>
@@ -452,7 +502,7 @@ function Test() {
 
           <div className="results-actions">
             {isPassed && (
-              <button className="claim-button" onClick={() => setShowWinnerForm(true)}>
+              <button className="claim-button" onClick={handleClaimPrize}>
                 Claim Your Prize
               </button>
             )}
