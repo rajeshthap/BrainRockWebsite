@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Nav, Offcanvas, Collapse } from "react-bootstrap";
 import { FaHandshakeAngle } from "react-icons/fa6";
 
@@ -7,49 +7,16 @@ import {
   FaSignOutAlt,
   FaChevronDown,
   FaChevronRight,
-  FaImages,
-  FaInfoCircle,
-  FaUsers,
-  FaBook,
-  FaBuilding,
-  FaImage,
-  FaTools,
-  FaComments,
-  FaCube,
-  FaProjectDiagram,
-  FaServer,
-  FaGraduationCap,  // Added for courses
-  FaBell,            // Added for notifications
-  FaUserPlus,        // Added for client management
-  FaEdit,            // Added for edit operations
-  FaPlusCircle,      // Added for add operations
-  FaEnvelope,        // Added for contact queries
-  FaUserCheck,       // Added for certified students
-  FaDatabase,        // Added for student data
-  FaLaptopCode,      // Added for design & dev
-  FaCog,             // Added for services
-  FaIndustry,        // Added for firm management
-  FaNetworkWired,    // Added for tech stack
-  FaTasks,           // Added for projects
-  FaCloud,           // Added for IT services
-  FaFileInvoice,     // Added for bill generation
-  FaTrophy,          // Added for Khelo Jito
-} from "react-icons/fa";
 
-import axios from "axios";
+} from "react-icons/fa";
 
 import "../../assets/css/emp_dashboard.css";
 import { Link } from "react-router-dom";
-
-import BRLogo from "../../assets/images/brainrock_logo.png";
-
 import { AuthContext } from "../context/AuthContext";
-
-
 const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     const { logout } = useContext(AuthContext);
     const { user } = useContext(AuthContext);
-    const emp_id = user?.unique_id;  // This is the correct value
+    // const emp_id = user?.unique_id;  // This is the correct value
 
     const [userRole, setUserRole] = useState(null);
     const [openSubmenu, setOpenSubmenu] = useState(null);
@@ -84,7 +51,7 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
             >
                 <div className="sidebar-header">
                     <div className="logo-container text-center">
-                        <h5 className="mb-0 text-white">User DashBoard</h5>
+                        {sidebarOpen && <h5 className="mb-0 text-white">User DashBoard</h5>}
                     </div>
                 </div>
 
