@@ -64,20 +64,15 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
             path: "/UserDashBoard",
             active: true,
         },
-       
-       
         {
-            icon: <FaFileInvoice />,  // Updated icon
-            label: "test",
-            submenu: [
-                {
-                    label: "Test 1",
-                    path: "#",
-                    icon: <FaPlusCircle />,
-                },
-              
-            ],
+            icon: <FaTachometerAlt />,
+            label: "Test Details",
+            path: "/TestWinner",
+            active: true,
         },
+       
+       
+    
        
     ];
 

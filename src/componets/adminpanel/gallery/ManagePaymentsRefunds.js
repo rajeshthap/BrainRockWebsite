@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Table, Badge, Button, Pagination, Alert, Modal, Form } from "react-bootstrap";
+import { Container, Row, Col, Table, Badge, Button, Pagination, Alert, Modal, Form, Nav, NavDropdown } from "react-bootstrap";
 import { AiFillEdit } from "react-icons/ai";
 import { AiOutlineUser } from 'react-icons/ai';
 import LeftNavManagement from "../LeftNavManagement";
@@ -8,14 +8,20 @@ import AdminHeader from "../AdminHeader";
 // Define base URLs for your APIs
 const REFUND_API_URL = 'https://brjobsedu.com/girls_course/girls_course_backend/api/refund-request/';
 const INITIATE_REFUND_API_URL = 'https://brainrock.in/brainrock/backend/api/initiate-refund/';
+const WALLET_WITHDRAW_API_URL = 'https://brainrock.in/brainrock/backend/api/wallet-withdraw/';
 
 const ManagePaymentsRefunds = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   
+  // Tab state
+  const [activeTab, setActiveTab] = useState('refunds');
+  
   // Refund data state
   const [refunds, setRefunds] = useState([]);
+  // Wallet withdrawal data state
+  const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -31,6 +37,8 @@ const ManagePaymentsRefunds = () => {
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedRefund, setSelectedRefund] = useState(null);
+  const [showWithdrawalViewModal, setShowWithdrawalViewModal] = useState(false);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundingItem, setRefundingItem] = useState(null);
   
@@ -53,27 +61,58 @@ const ManagePaymentsRefunds = () => {
 
   // Fetch refund data
   useEffect(() => {
-    const fetchRefunds = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(REFUND_API_URL, {
+        
+        // Fetch refunds
+        const refundsResponse = await fetch(REFUND_API_URL, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
         
-        if (!response.ok) {
+        if (!refundsResponse.ok) {
           throw new Error('Failed to fetch refund data');
         }
         
-        const data = await response.json();
-        if (data.success && Array.isArray(data.data)) {
-          setRefunds(data.data);
+        const refundsData = await refundsResponse.json();
+        if (refundsData.success && Array.isArray(refundsData.data)) {
+          setRefunds(refundsData.data);
         } else {
-          throw new Error(data.message || 'Failed to fetch refund data');
+          throw new Error(refundsData.message || 'Failed to fetch refund data');
         }
+        
+        // Fetch wallet withdrawals
+        try {
+          const withdrawalsResponse = await fetch(WALLET_WITHDRAW_API_URL, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          });
+          
+          if (!withdrawalsResponse.ok) {
+            throw new Error(`HTTP error! status: ${withdrawalsResponse.status}`);
+          }
+          
+          const withdrawalsData = await withdrawalsResponse.json();
+          console.log('Wallet withdrawals API response:', withdrawalsData);
+          
+          if (withdrawalsData.status && Array.isArray(withdrawalsData.data)) {
+            setWithdrawals(withdrawalsData.data);
+          } else {
+            console.error('Invalid wallet withdrawals data format:', withdrawalsData);
+            setWithdrawals([]);
+          }
+        } catch (withdrawalsErr) {
+          console.error('Error fetching wallet withdrawals:', withdrawalsErr);
+          setWithdrawals([]);
+        }
+        
       } catch (err) {
         setError(err.message);
       } finally {
@@ -81,7 +120,7 @@ const ManagePaymentsRefunds = () => {
       }
     };
     
-    fetchRefunds();
+    fetchData();
   }, []);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -105,11 +144,35 @@ const ManagePaymentsRefunds = () => {
     return matchesSearch && matchesStatus;
   });
   
-  // Pagination calculations
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredRefunds.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredRefunds.length / itemsPerPage);
+  // Filter wallet withdrawals based on search term and status
+  const filteredWithdrawals = withdrawals.filter((withdrawal) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    
+    const matchesSearch = (
+      withdrawal.withdraw_id?.toLowerCase().includes(lowerSearch) ||
+      withdrawal.user_id?.toLowerCase().includes(lowerSearch) ||
+      withdrawal.account_holder_name?.toLowerCase().includes(lowerSearch) ||
+      withdrawal.account_number?.toString().includes(lowerSearch) ||
+      withdrawal.ifsc_code?.toLowerCase().includes(lowerSearch) ||
+      withdrawal.withdraw_amount?.toString().includes(lowerSearch)
+    );
+    
+    const matchesStatus = statusFilter === 'all' || withdrawal.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+  
+  // Pagination calculations for refunds
+  const indexOfLastRefund = currentPage * itemsPerPage;
+  const indexOfFirstRefund = indexOfLastRefund - itemsPerPage;
+  const currentRefunds = filteredRefunds.slice(indexOfFirstRefund, indexOfLastRefund);
+  const totalRefundPages = Math.ceil(filteredRefunds.length / itemsPerPage);
+  
+  // Pagination calculations for withdrawals
+  const indexOfLastWithdrawal = currentPage * itemsPerPage;
+  const indexOfFirstWithdrawal = indexOfLastWithdrawal - itemsPerPage;
+  const currentWithdrawals = filteredWithdrawals.slice(indexOfFirstWithdrawal, indexOfFirstWithdrawal + itemsPerPage);
+  const totalWithdrawalPages = Math.ceil(filteredWithdrawals.length / itemsPerPage);
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
   
@@ -125,6 +188,12 @@ const ManagePaymentsRefunds = () => {
     setShowViewModal(true);
   };
   
+  // Handle view withdrawal details
+  const handleViewWithdrawal = (withdrawal) => {
+    setSelectedWithdrawal(withdrawal);
+    setShowWithdrawalViewModal(true);
+  };
+  
   // Handle refund selection
   const handleSelectRefund = (id) => {
     setSelectedRefunds(prev => {
@@ -138,10 +207,10 @@ const ManagePaymentsRefunds = () => {
   
   // Handle select all refunds on current page
   const handleSelectAll = () => {
-    if (selectedRefunds.length === currentItems.length) {
+    if (selectedRefunds.length === currentRefunds.length) {
       setSelectedRefunds([]);
     } else {
-      setSelectedRefunds(currentItems.map(refund => refund.id));
+      setSelectedRefunds(currentRefunds.map(refund => refund.id));
     }
   };
   
@@ -306,153 +375,294 @@ const ManagePaymentsRefunds = () => {
               </Alert>
             )}
             
+            {/* Tab Navigation */}
+            <Nav variant="tabs" defaultActiveKey="refunds" activeKey={activeTab} onSelect={(key) => setActiveTab(key)} className="mb-3">
+              <Nav.Item>
+                <Nav.Link eventKey="refunds">Refunds</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="withdrawals">Wallet Withdrawals</Nav.Link>
+              </Nav.Item>
+            </Nav>
+            
             {loading ? (
               <div className="text-center py-5">
                 <div className="spinner-border text-primary" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
-                <p className="mt-2">Loading refund data...</p>
+                <p className="mt-2">Loading data...</p>
               </div>
             ) : (
               <>
-                <Row className="mt-3">
-                  <div className="col-md-12">
-                    <table className="temp-rwd-table">
-                      <tbody>
-                        <tr>
-                          <th>
-                            <Form.Check 
-                              type="checkbox"
-                              checked={selectedRefunds.length === currentItems.length && currentItems.length > 0}
-                              onChange={handleSelectAll}
-                              label=""
-                            />
-                          </th>
-                          <th>Request ID</th>
-                          <th>Applicant ID</th>
-                          <th>Full Name</th>
-                          <th>Phone</th>
-                          <th>Transaction ID</th>
-                          <th>Amount</th>
-                          <th>Course ID</th>
-                          <th>Reason</th>
-                          <th>Status</th>
-                          <th>Date</th>
-                          <th>Action</th>
-                        </tr>
-                        
-                        {currentItems.length > 0 ? (
-                          currentItems.map((refund, index) => (
-                            <tr key={refund.id}>
-                              <td data-th="Select">
+                {/* Refunds Tab */}
+                {activeTab === 'refunds' && (
+                  <>
+                    <Row className="mt-3">
+                      <div className="col-md-12">
+                        <table className="temp-rwd-table">
+                          <tbody>
+                            <tr>
+                              <th>
                                 <Form.Check 
                                   type="checkbox"
-                                  checked={selectedRefunds.includes(refund.id)}
-                                  onChange={() => handleSelectRefund(refund.id)}
+                                  checked={selectedRefunds.length === currentRefunds.length && currentRefunds.length > 0}
+                                  onChange={handleSelectAll}
                                   label=""
                                 />
+                              </th>
+                              <th>Request ID</th>
+                              <th>Applicant ID</th>
+                              <th>Full Name</th>
+                              <th>Phone</th>
+                              <th>Transaction ID</th>
+                              <th>Amount</th>
+                              <th>Course ID</th>
+                              <th>Reason</th>
+                              <th>Status</th>
+                              <th>Date</th>
+                              <th>Action</th>
+                            </tr>
+                            
+                            {currentRefunds.length > 0 ? (
+                              currentRefunds.map((refund, index) => (
+                                <tr key={refund.id}>
+                                  <td data-th="Select">
+                                    <Form.Check 
+                                      type="checkbox"
+                                      checked={selectedRefunds.includes(refund.id)}
+                                      onChange={() => handleSelectRefund(refund.id)}
+                                      label=""
+                                    />
+                                  </td>
+                                  <td data-th="Request ID">
+                                    <strong>{refund.request_id || 'N/A'}</strong>
+                                  </td>
+                                  <td data-th="Applicant ID">
+                                    <strong className="text-success">{refund.applicant_id || refund.request_id || 'N/A'}</strong>
+                                  </td>
+                                  <td data-th="Full Name">{refund.full_name || 'N/A'}</td>
+                                  <td data-th="Phone">{refund.phone || 'N/A'}</td>
+                                  <td data-th="Transaction ID">{refund.transaction_id || 'N/A'}</td>
+                                  <td data-th="Amount">{refund.amount ? `₹${refund.amount}` : 'N/A'}</td>
+                                  <td data-th="Course ID">{refund.course_id || 'N/A'}</td>
+                                  <td data-th="Reason">{refund.reason || 'N/A'}</td>
+                                  <td data-th="Status">
+                                    <span className={`badge bg-${getStatusVariant(refund.status)}`}>
+                                      {refund.status || 'N/A'}
+                                    </span>
+                                  </td>
+                                  <td data-th="Date">{formatDate(refund.created_at)}</td>
+                                  <td data-th="Action">
+                                    <div className="d-flex gap-2">
+                                      <Button 
+                                        variant="primary" 
+                                        size="sm" 
+                                        onClick={() => handleViewRefund(refund)}
+                                      >
+                                        View
+                                      </Button>
+                                      {refund.status?.toLowerCase() === 'pending' && (
+                                        <Button 
+                                          variant="success" 
+                                          size="sm" 
+                                          onClick={() => openRefundModal(refund)}
+                                        >
+                                          Process
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan="12" className="text-center">
+                                  No refund data available.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                          <tfoot>
+                            <tr style={{ backgroundColor: '#f0f8ff', fontWeight: 'bold', borderTop: '2px solid #0066cc' }}>
+                              <td colSpan="8" className="text-end pe-3" style={{ color: '#333' }}>
+                                <strong>Refund Summary:</strong>
                               </td>
-                              <td data-th="Request ID">
-                                <strong>{refund.request_id || 'N/A'}</strong>
-                              </td>
-                              <td data-th="Applicant ID">
-                                <strong className="text-success">{refund.applicant_id || refund.request_id || 'N/A'}</strong>
-                              </td>
-                              <td data-th="Full Name">{refund.full_name || 'N/A'}</td>
-                              <td data-th="Phone">{refund.phone || 'N/A'}</td>
-                              <td data-th="Transaction ID">{refund.transaction_id || 'N/A'}</td>
-                              <td data-th="Amount">{refund.amount ? `₹${refund.amount}` : 'N/A'}</td>
-                              <td data-th="Course ID">{refund.course_id || 'N/A'}</td>
-                              <td data-th="Reason">{refund.reason || 'N/A'}</td>
-                              <td data-th="Status">
-                                <span className={`badge bg-${getStatusVariant(refund.status)}`}>
-                                  {refund.status || 'N/A'}
-                                </span>
-                              </td>
-                              <td data-th="Date">{formatDate(refund.created_at)}</td>
-                              <td data-th="Action">
-                                <div className="d-flex gap-2">
-                                  <Button 
-                                    variant="primary" 
-                                    size="sm" 
-                                    onClick={() => handleViewRefund(refund)}
-                                  >
-                                    View
-                                  </Button>
-                                  {refund.status?.toLowerCase() === 'pending' && (
-                                    <Button 
-                                      variant="success" 
-                                      size="sm" 
-                                      onClick={() => openRefundModal(refund)}
-                                    >
-                                      Process
-                                    </Button>
-                                  )}
+                              <td colSpan="4" style={{ paddingLeft: '20px' }}>
+                                <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
+                                  <div style={{ color: '#e67e22', fontWeight: '600' }}>
+                                    ⏳ Pending: {filteredRefunds.filter(r => r.status?.toLowerCase() === 'pending').length}
+                                  </div>
+                                  <div style={{ color: '#3498db', fontWeight: '600' }}>
+                                    ⏸ Processing: {filteredRefunds.filter(r => r.status?.toLowerCase() === 'processing').length}
+                                  </div>
+                                  <div style={{ color: '#27ae60', fontWeight: '600' }}>
+                                    ✓ Approved: {filteredRefunds.filter(r => r.status?.toLowerCase() === 'approved').length}
+                                  </div>
+                                  <div style={{ color: '#e74c3c', fontWeight: '600' }}>
+                                    ✗ Rejected: {filteredRefunds.filter(r => r.status?.toLowerCase() === 'rejected').length}
+                                  </div>
+                                  <div style={{ marginTop: '8px', borderTop: '1px solid #bdc3c7', paddingTop: '8px', color: '#0066cc', fontWeight: '700' }}>
+                                    Total Refund Requests: {filteredRefunds.length}
+                                  </div>
                                 </div>
                               </td>
                             </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan="12" className="text-center">
-                              No refund data available.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                      <tfoot>
-                        <tr style={{ backgroundColor: '#f0f8ff', fontWeight: 'bold', borderTop: '2px solid #0066cc' }}>
-                          <td colSpan="8" className="text-end pe-3" style={{ color: '#333' }}>
-                            <strong>Refund Summary:</strong>
-                          </td>
-                          <td colSpan="4" style={{ paddingLeft: '20px' }}>
-                            <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
-                              <div style={{ color: '#e67e22', fontWeight: '600' }}>
-                                ⏳ Pending: {filteredRefunds.filter(r => r.status?.toLowerCase() === 'pending').length}
-                              </div>
-                              <div style={{ color: '#3498db', fontWeight: '600' }}>
-                                ⏸ Processing: {filteredRefunds.filter(r => r.status?.toLowerCase() === 'processing').length}
-                              </div>
-                              <div style={{ color: '#27ae60', fontWeight: '600' }}>
-                                ✓ Approved: {filteredRefunds.filter(r => r.status?.toLowerCase() === 'approved').length}
-                              </div>
-                              <div style={{ color: '#e74c3c', fontWeight: '600' }}>
-                                ✗ Rejected: {filteredRefunds.filter(r => r.status?.toLowerCase() === 'rejected').length}
-                              </div>
-                              <div style={{ marginTop: '8px', borderTop: '1px solid #bdc3c7', paddingTop: '8px', color: '#0066cc', fontWeight: '700' }}>
-                                Total Refund Requests: {filteredRefunds.length}
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </Row>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </Row>
+                    
+                    {/* Pagination for Refunds */}
+                    {totalRefundPages > 1 && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.Prev 
+                            onClick={() => handlePageChange(currentPage - 1)} 
+                            disabled={currentPage === 1}
+                          />
+                          {[...Array(totalRefundPages).keys()].map(page => (
+                            <Pagination.Item 
+                              key={page + 1} 
+                              active={page + 1 === currentPage}
+                              onClick={() => handlePageChange(page + 1)}
+                            >
+                              {page + 1}
+                            </Pagination.Item>
+                          ))}
+                          <Pagination.Next 
+                            onClick={() => handlePageChange(currentPage + 1)} 
+                            disabled={currentPage === totalRefundPages}
+                          />
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
+                )}
                 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="d-flex justify-content-center mt-4">
-                    <Pagination>
-                      <Pagination.Prev 
-                        onClick={() => handlePageChange(currentPage - 1)} 
-                        disabled={currentPage === 1}
-                      />
-                      {[...Array(totalPages).keys()].map(page => (
-                        <Pagination.Item 
-                          key={page + 1} 
-                          active={page + 1 === currentPage}
-                          onClick={() => handlePageChange(page + 1)}
-                        >
-                          {page + 1}
-                        </Pagination.Item>
-                      ))}
-                      <Pagination.Next 
-                        onClick={() => handlePageChange(currentPage + 1)} 
-                        disabled={currentPage === totalPages}
-                      />
-                    </Pagination>
-                  </div>
+                {/* Wallet Withdrawals Tab */}
+                {activeTab === 'withdrawals' && (
+                  <>
+                    <Row className="mt-3">
+                      <div className="col-md-12">
+                        <table className="temp-rwd-table">
+                          <tbody>
+                            <tr>
+                              <th>Withdraw ID</th>
+                              <th>User ID</th>
+                              <th>Account Holder Name</th>
+                         
+                              <th>Account Number</th>
+                              <th>IFSC Code</th>
+                              <th>Withdraw Amount</th>
+                              <th>Status</th>
+                              <th>Requested At</th>
+                              {/* <th>Processed At</th> */}
+                              <th>Action</th>
+                            </tr>
+                            
+                            {currentWithdrawals.length > 0 ? (
+                              currentWithdrawals.map((withdrawal, index) => (
+                                <tr key={withdrawal.withdraw_id}>
+                                  <td data-th="Withdraw ID">
+                                    <strong>{withdrawal.withdraw_id || 'N/A'}</strong>
+                                  </td>
+                                  <td data-th="User ID">{withdrawal.user_id || 'N/A'}</td>
+                                  <td data-th="Account Holder Name">{withdrawal.account_holder_name || 'N/A'}</td>
+                                  {/* <td data-th="Phone">{withdrawal.phone || 'N/A'}</td> */}
+                                  <td data-th="Account Number">{withdrawal.account_number || 'N/A'}</td>
+                                  <td data-th="IFSC Code">{withdrawal.ifsc_code || 'N/A'}</td>
+                                  <td data-th="Withdraw Amount">{withdrawal.withdraw_amount ? `₹${withdrawal.withdraw_amount}` : 'N/A'}</td>
+                                  <td data-th="Status">
+                                    <span className={`badge bg-${getStatusVariant(withdrawal.status)}`}>
+                                      {withdrawal.status || 'N/A'}
+                                    </span>
+                                  </td>
+                                  <td data-th="Requested At">{formatDate(withdrawal.requested_at)}</td>
+                                  {/* <td data-th="Processed At">{withdrawal.processed_at ? formatDate(withdrawal.processed_at) : 'N/A'}</td> */}
+                                   <td data-th="Action">
+                                     <div className="d-flex gap-2">
+                                       <Button 
+                                         variant="primary" 
+                                         size="sm" 
+                                         onClick={() => handleViewWithdrawal(withdrawal)}
+                                       >
+                                         View
+                                       </Button>
+                                       {withdrawal.status?.toLowerCase() === 'pending' && (
+                                         <Button 
+                                           variant="success" 
+                                           size="sm" 
+                                         >
+                                           Process
+                                         </Button>
+                                       )}
+                                     </div>
+                                   </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan="11" className="text-center">
+                                  No wallet withdrawal data available.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                          <tfoot>
+                            <tr style={{ backgroundColor: '#f0f8ff', fontWeight: 'bold', borderTop: '2px solid #0066cc' }}>
+                              <td colSpan="8" className="text-end pe-3" style={{ color: '#333' }}>
+                                <strong>Withdrawal Summary:</strong>
+                              </td>
+                              <td colSpan="3" style={{ paddingLeft: '20px' }}>
+                                <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
+                                  <div style={{ color: '#e67e22', fontWeight: '600' }}>
+                                    ⏳ Pending: {filteredWithdrawals.filter(w => w.status?.toLowerCase() === 'pending').length}
+                                  </div>
+                                  <div style={{ color: '#3498db', fontWeight: '600' }}>
+                                    ⏸ Processing: {filteredWithdrawals.filter(w => w.status?.toLowerCase() === 'processing').length}
+                                  </div>
+                                  <div style={{ color: '#27ae60', fontWeight: '600' }}>
+                                    ✓ Approved: {filteredWithdrawals.filter(w => w.status?.toLowerCase() === 'approved').length}
+                                  </div>
+                                  <div style={{ color: '#e74c3c', fontWeight: '600' }}>
+                                    ✗ Rejected: {filteredWithdrawals.filter(w => w.status?.toLowerCase() === 'rejected').length}
+                                  </div>
+                                  <div style={{ marginTop: '8px', borderTop: '1px solid #bdc3c7', paddingTop: '8px', color: '#0066cc', fontWeight: '700' }}>
+                                    Total Withdrawals: {filteredWithdrawals.length}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </Row>
+                    
+                    {/* Pagination for Withdrawals */}
+                    {totalWithdrawalPages > 1 && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.Prev 
+                            onClick={() => handlePageChange(currentPage - 1)} 
+                            disabled={currentPage === 1}
+                          />
+                          {[...Array(totalWithdrawalPages).keys()].map(page => (
+                            <Pagination.Item 
+                              key={page + 1} 
+                              active={page + 1 === currentPage}
+                              onClick={() => handlePageChange(page + 1)}
+                            >
+                              {page + 1}
+                            </Pagination.Item>
+                          ))}
+                          <Pagination.Next 
+                            onClick={() => handlePageChange(currentPage + 1)} 
+                            disabled={currentPage === totalWithdrawalPages}
+                          />
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -554,9 +764,52 @@ const ManagePaymentsRefunds = () => {
             </Button>
           )}
         </Modal.Footer>
-      </Modal>
-    </div>
-  );
-};
+       </Modal>
 
-export default ManagePaymentsRefunds;
+       {/* View Withdrawal Details Modal */}
+       <Modal show={showWithdrawalViewModal} onHide={() => setShowWithdrawalViewModal(false)} size="lg">
+         <Modal.Header closeButton>
+           <Modal.Title>Wallet Withdrawal Details</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+           {selectedWithdrawal && (
+             <div>
+               <Row>
+                 <Col md={6} className="mb-3">
+                   <p><strong>Withdraw ID:</strong> <span className="text-primary">{selectedWithdrawal.withdraw_id}</span></p>
+                   <p><strong>User ID:</strong> <span className="text-success">{selectedWithdrawal.user_id}</span></p>
+                   <p><strong>Account Holder Name:</strong> {selectedWithdrawal.account_holder_name}</p>
+                 </Col>
+                 <Col md={6} className="mb-3">
+                   <p><strong>Account Number:</strong> {selectedWithdrawal.account_number}</p>
+                   <p><strong>IFSC Code:</strong> {selectedWithdrawal.ifsc_code}</p>
+                   <p><strong>Withdraw Amount:</strong> {selectedWithdrawal.withdraw_amount ? `₹${selectedWithdrawal.withdraw_amount}` : 'N/A'}</p>
+                   <p><strong>Status:</strong>
+                     <span className={`badge bg-${getStatusVariant(selectedWithdrawal.status)} ms-2`}>
+                       {selectedWithdrawal.status}
+                     </span>
+                   </p>
+                 </Col>
+               </Row>
+               <Row>
+                 <Col md={6} className="mb-3">
+                   <p><strong>Requested At:</strong> {formatDate(selectedWithdrawal.requested_at)}</p>
+                 </Col>
+                 <Col md={6} className="mb-3">
+                   <p><strong>Processed At:</strong> {selectedWithdrawal.processed_at ? formatDate(selectedWithdrawal.processed_at) : 'N/A'}</p>
+                 </Col>
+               </Row>
+             </div>
+           )}
+         </Modal.Body>
+         <Modal.Footer>
+           <Button variant="secondary" onClick={() => setShowWithdrawalViewModal(false)}>
+             Close
+           </Button>
+         </Modal.Footer>
+       </Modal>
+     </div>
+   );
+ };
+
+ export default ManagePaymentsRefunds;
