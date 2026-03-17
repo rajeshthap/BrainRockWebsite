@@ -37,6 +37,8 @@ const ManagePaymentsRefunds = () => {
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedRefund, setSelectedRefund] = useState(null);
+  const [showWithdrawalViewModal, setShowWithdrawalViewModal] = useState(false);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundingItem, setRefundingItem] = useState(null);
   
@@ -184,6 +186,12 @@ const ManagePaymentsRefunds = () => {
   const handleViewRefund = (refund) => {
     setSelectedRefund(refund);
     setShowViewModal(true);
+  };
+  
+  // Handle view withdrawal details
+  const handleViewWithdrawal = (withdrawal) => {
+    setSelectedWithdrawal(withdrawal);
+    setShowWithdrawalViewModal(true);
   };
   
   // Handle refund selection
@@ -571,18 +579,25 @@ const ManagePaymentsRefunds = () => {
                                   </td>
                                   <td data-th="Requested At">{formatDate(withdrawal.requested_at)}</td>
                                   {/* <td data-th="Processed At">{withdrawal.processed_at ? formatDate(withdrawal.processed_at) : 'N/A'}</td> */}
-                                  <td data-th="Action">
-                                    <div className="d-flex gap-2">
-                                      {withdrawal.status?.toLowerCase() === 'pending' && (
-                                        <Button 
-                                          variant="success" 
-                                          size="sm" 
-                                        >
-                                          Process
-                                        </Button>
-                                      )}
-                                    </div>
-                                  </td>
+                                   <td data-th="Action">
+                                     <div className="d-flex gap-2">
+                                       <Button 
+                                         variant="primary" 
+                                         size="sm" 
+                                         onClick={() => handleViewWithdrawal(withdrawal)}
+                                       >
+                                         View
+                                       </Button>
+                                       {withdrawal.status?.toLowerCase() === 'pending' && (
+                                         <Button 
+                                           variant="success" 
+                                           size="sm" 
+                                         >
+                                           Process
+                                         </Button>
+                                       )}
+                                     </div>
+                                   </td>
                                 </tr>
                               ))
                             ) : (
@@ -749,9 +764,52 @@ const ManagePaymentsRefunds = () => {
             </Button>
           )}
         </Modal.Footer>
-      </Modal>
-    </div>
-  );
-};
+       </Modal>
 
-export default ManagePaymentsRefunds;
+       {/* View Withdrawal Details Modal */}
+       <Modal show={showWithdrawalViewModal} onHide={() => setShowWithdrawalViewModal(false)} size="lg">
+         <Modal.Header closeButton>
+           <Modal.Title>Wallet Withdrawal Details</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+           {selectedWithdrawal && (
+             <div>
+               <Row>
+                 <Col md={6} className="mb-3">
+                   <p><strong>Withdraw ID:</strong> <span className="text-primary">{selectedWithdrawal.withdraw_id}</span></p>
+                   <p><strong>User ID:</strong> <span className="text-success">{selectedWithdrawal.user_id}</span></p>
+                   <p><strong>Account Holder Name:</strong> {selectedWithdrawal.account_holder_name}</p>
+                 </Col>
+                 <Col md={6} className="mb-3">
+                   <p><strong>Account Number:</strong> {selectedWithdrawal.account_number}</p>
+                   <p><strong>IFSC Code:</strong> {selectedWithdrawal.ifsc_code}</p>
+                   <p><strong>Withdraw Amount:</strong> {selectedWithdrawal.withdraw_amount ? `₹${selectedWithdrawal.withdraw_amount}` : 'N/A'}</p>
+                   <p><strong>Status:</strong>
+                     <span className={`badge bg-${getStatusVariant(selectedWithdrawal.status)} ms-2`}>
+                       {selectedWithdrawal.status}
+                     </span>
+                   </p>
+                 </Col>
+               </Row>
+               <Row>
+                 <Col md={6} className="mb-3">
+                   <p><strong>Requested At:</strong> {formatDate(selectedWithdrawal.requested_at)}</p>
+                 </Col>
+                 <Col md={6} className="mb-3">
+                   <p><strong>Processed At:</strong> {selectedWithdrawal.processed_at ? formatDate(selectedWithdrawal.processed_at) : 'N/A'}</p>
+                 </Col>
+               </Row>
+             </div>
+           )}
+         </Modal.Body>
+         <Modal.Footer>
+           <Button variant="secondary" onClick={() => setShowWithdrawalViewModal(false)}>
+             Close
+           </Button>
+         </Modal.Footer>
+       </Modal>
+     </div>
+   );
+ };
+
+ export default ManagePaymentsRefunds;
