@@ -49,8 +49,6 @@ const UserDashBoard = () => {
       }
     };
 
-    fetchWalletAmount();
-
     // Check for winning amount in localStorage
     const winningAmount = localStorage.getItem("winningAmount");
     if (winningAmount) {
@@ -58,6 +56,11 @@ const UserDashBoard = () => {
       alert(`Congratulations! You won ₹${parseFloat(winningAmount).toFixed(2)}! The amount has been added to your wallet.`);
       // Remove from localStorage
       localStorage.removeItem("winningAmount");
+      // Fetch updated wallet amount
+      fetchWalletAmount();
+    } else {
+      // Fetch initial wallet amount if no winning amount
+      fetchWalletAmount();
     }
   }, [user]);
 
@@ -131,7 +134,7 @@ const UserDashBoard = () => {
 
       if (response.data.status && response.data.payment_order) {
         // Save user ID to localStorage for Test component
-        localStorage.setItem("test_user_id", user.unique_id);
+        localStorage.setItem("test_user_id", response.data.user_id || user.unique_id);
         // Redirect to payment gateway URL
         window.location.href = response.data.payment_order.redirectUrl;
       }

@@ -18,6 +18,11 @@ function Test() {
   const navigate = useNavigate();
   console.log("Test component - User ID from URL:", urlUserId);
   console.log("Test component - User ID from localStorage:", storageUserId);
+  console.log("Test component - Final User ID:", userId);
+  // Check if localStorage has the test_user_id
+  if (!userId) {
+    console.error("User ID not found in URL or localStorage");
+  }
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -217,6 +222,9 @@ function Test() {
   const handleClaimPrize = async () => {
     // Use user from AuthContext if available, otherwise use test user ID
     const claimUserId = (user && user.unique_id) || userId;
+    console.log("handleClaimPrize - Auth user:", user);
+    console.log("handleClaimPrize - userId from Test:", userId);
+    console.log("handleClaimPrize - claimUserId:", claimUserId);
     
     if (claimUserId) {
       try {
@@ -227,11 +235,13 @@ function Test() {
           { withCredentials: true }
         );
 
+        console.log("handleClaimPrize - API response:", response.data);
+
         if (response.data.status) {
           // Store winning amount (amount_added) in localStorage for display in dashboard
           localStorage.setItem("winningAmount", response.data.amount_added || 0);
           
-          // If user_id is available (authenticated), redirect to user dashboard without showing form
+          // Redirect to user dashboard
           navigate("/UserDashBoard");
         }
       } catch (error) {
@@ -342,7 +352,22 @@ function Test() {
       ? testResult.status === "passed"
       : percentage >= 60;
 
-    // If user passed and showWinnerForm is true, display the winner form
+    // If user passed and user_id is available, automatically claim prize
+    if (isPassed && (userId || (user && user.unique_id))) {
+      handleClaimPrize();
+      return (
+        <div className="test-container">
+          <div className="test-card results-card">
+            <div className="results-header">
+              <h1 className="results-title">Processing Your Prize...</h1>
+              <p className="results-subtitle">Please wait while we add your winning amount to your wallet</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // If user passed and user_id is NOT available, show winner form
     if (isPassed && showWinnerForm) {
       return (
         <div className="test-container">
