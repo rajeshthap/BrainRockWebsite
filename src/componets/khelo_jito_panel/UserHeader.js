@@ -45,6 +45,12 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const [withdrawError, setWithdrawError] = useState("");
   const [withdrawSuccess, setWithdrawSuccess] = useState("");
 
+  // State for add wallet modal
+  const [showAddWalletModal, setShowAddWalletModal] = useState(false);
+  const [addAmount, setAddAmount] = useState("");
+  const [addError, setAddError] = useState("");
+  const [addSuccess, setAddSuccess] = useState("");
+
   // Fetch wallet amount and user details
   useEffect(() => {
     const fetchData = async () => {
@@ -85,6 +91,41 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   // Get user display name
   const getDisplayName = () => {
     return userDetails.full_name || "User";
+  };
+
+  // Handle add wallet
+  const handleAddWallet = async () => {
+    setAddError("");
+    setAddSuccess("");
+
+    const amount = parseFloat(addAmount);
+
+    // Validation
+    if (!amount || amount <= 0) {
+      setAddError("Please enter a valid amount");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/add-wallet/`,
+        {
+          user_id: user.unique_id,
+          amount: amount,
+        },
+        { withCredentials: true }
+      );
+
+      if (response.data.status && response.data.payment_data && response.data.payment_data.redirectUrl) {
+        // Redirect to payment gateway URL
+        window.location.href = response.data.payment_data.redirectUrl;
+      } else {
+        setAddError(response.data.message || "Failed to initiate payment");
+      }
+    } catch (error) {
+      console.error("Error adding wallet amount:", error);
+      setAddError("Failed to add amount to wallet. Please try again.");
+    }
   };
 
   // Handle withdrawal
@@ -165,13 +206,23 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
           </Col>
 
           <Col className="d-flex align-items-center justify-content-end">
-            <div 
-              className="wallet-info d-flex align-items-center bg-light px-3 py-2 rounded-pill me-3"
-              style={{ cursor: 'pointer' }}
-              onClick={() => setShowWithdrawModal(true)}
-            >
-              <span className="wallet-label me-2 text-muted">Wallet:</span>
-              <span className="wallet-amount fw-bold text-primary">₹{walletAmount.toFixed(2)}</span>
+            <div className="d-flex align-items-center me-3">
+              <div 
+                className="wallet-info d-flex align-items-center bg-light px-3 py-2 rounded-pill"
+                style={{ cursor: 'pointer' }}
+                onClick={() => setShowWithdrawModal(true)}
+              >
+                <span className="wallet-label me-2 text-muted">Wallet:</span>
+                <span className="wallet-amount fw-bold text-primary">₹{walletAmount.toFixed(2)}</span>
+              </div>
+              <Button 
+                variant="primary" 
+                size="sm" 
+                className="ms-2"
+                onClick={() => setShowAddWalletModal(true)}
+              >
+                + Add
+              </Button>
             </div>
 
             <div className="header-actions">
@@ -201,6 +252,54 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
           </Col>
         </Row>
       </Container>
+
+      {/* Add Wallet Modal */}
+      <Modal
+        show={showAddWalletModal}
+        onHide={() => setShowAddWalletModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Add to Wallet</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-3">
+            <strong>Current Balance:</strong> ₹{walletAmount.toFixed(2)}
+          </p>
+          
+          <Form.Group controlId="addAmount">
+            <Form.Label>Amount to Add (₹)</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="Enter amount to add"
+              min="0.01"
+              step="0.01"
+              value={addAmount}
+              onChange={(e) => setAddAmount(e.target.value)}
+            />
+          </Form.Group>
+
+          {addError && (
+            <div className="mt-3 text-danger">{addError}</div>
+          )}
+
+          {addSuccess && (
+            <div className="mt-3 text-success">{addSuccess}</div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAddWalletModal(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={handleAddWallet}
+            disabled={!addAmount || parseFloat(addAmount) <= 0}
+          >
+            Add to Wallet
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Withdrawal Modal */}
       <Modal
