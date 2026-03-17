@@ -184,6 +184,7 @@ const handleSendOtp = async (e) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            role,
             phone,
             new_password: newPassword,
           }),
@@ -323,13 +324,14 @@ const handleSendOtp = async (e) => {
                   <Form onSubmit={handleSendOtp}>
                     <Form.Group className="mb-3" controlId="role">
                       <Form.Label className="br-label">Select Role</Form.Label>
-                      <Form.Select
+                       <Form.Select
                         className="br-form-control"
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
                       >
+                        <option value="admin">Admin</option>
                         <option value="hr">HR</option>
-                        <option value="employee">Employee</option>
+                        <option value="khelo-aur-jeeto">Khelo aur Jeeto</option>
                       </Form.Select>
                     </Form.Group>
 

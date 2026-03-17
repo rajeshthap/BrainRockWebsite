@@ -193,7 +193,6 @@ export default function Login() {
                       >
                         <option value="">Select Role</option>
                         <option value="admin">Admin</option>
-                        <option value="training">Training</option>
                         <option value="khelo-aur-jeeto">Khelo Aur Jeeto</option>
                         <option value="hr">HR</option>
                       </Form.Select>
