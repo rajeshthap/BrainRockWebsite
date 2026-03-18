@@ -190,6 +190,10 @@ const UserDashBoard = () => {
       );
 
       if (response.data.status && response.data.payment_data && response.data.payment_data.redirectUrl) {
+        // Save order_id to localStorage for payment tracking
+        if (response.data.order_id) {
+          localStorage.setItem("wallet_payment_order_id", response.data.order_id);
+        }
         // Redirect to payment gateway URL
         window.location.href = response.data.payment_data.redirectUrl;
       } else {

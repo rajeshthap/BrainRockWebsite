@@ -130,6 +130,7 @@ import Registerduser from "./componets/adminpanel/khelo_jito_registerd_user/Regi
 import UserDashBoard from "./componets/khelo_jito_panel/UserDashBoard";
 import UserProfile from "./componets/khelo_jito_panel/user_profile/UserProfile";
 import TestWinner from "./componets/khelo_jito_panel/TestWinner";
+import WalletPaymentStatus from "./componets/khelo_jito_panel/WalletPaymentStatus";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -207,9 +208,10 @@ function AppContent() {
     "/AddPlay",
     "/ManagePlay",
     "/Registerduser",
-    "/UserDashBoard",
-    "/UserProfile",
-    "/TestWinner"
+     "/UserDashBoard",
+        "/UserProfile",
+        "/TestWinner",
+        "/WalletPaymentStatus"
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -251,7 +253,8 @@ function AppContent() {
         <Route path="/ServicesPage" element={<ServicesPage />} />
         <Route path="/Certificate" element={<Certificate />} />
         <Route path="/ProjectDetail" element={<ProjectDetail />} />
-        <Route path="/Terms" element={<Terms />} />
+         <Route path="/Terms" element={<Terms />} />
+         <Route path="/WalletPaymentStatus" element={<WalletPaymentStatus />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/KheloJito" element={<KheloJito />} />
         <Route path="/test" element={<Test />} />
