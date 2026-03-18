@@ -506,13 +506,14 @@
   color: white;
   border: none;
   padding: 15px 40px;
-  font-size: 1.1rem;
+  font-size: 12px;
   font-weight: 600;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
   margin: 0 10px;
+  margin-bottom: 12px;
 }
 
 .wrong-answers-button:hover {
