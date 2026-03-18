@@ -53,6 +53,26 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const [addError, setAddError] = useState("");
   const [addSuccess, setAddSuccess] = useState("");
 
+  // Debug log for withdrawal button state
+  useEffect(() => {
+    const isDisabled = !withdrawAmount || parseFloat(withdrawAmount) <= 0;
+    const maxAllowed = totalAmount - MIN_BALANCE;
+    const exceedsMax = parseFloat(withdrawAmount) > maxAllowed;
+    
+    console.log("Withdrawal button state:", {
+      withdrawAmount,
+      totalAmount,
+      walletAmount,
+      cashback,
+      MIN_BALANCE,
+      maxAllowed,
+      isDisabled,
+      exceedsMax,
+      condition1: !withdrawAmount,
+      condition2: parseFloat(withdrawAmount) <= 0
+    });
+  }, [withdrawAmount, totalAmount, walletAmount, cashback]);
+
   // Fetch wallet amount and user details
   useEffect(() => {
     const fetchData = async () => {
@@ -149,25 +169,36 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
       return;
     }
 
-    if (walletAmount - amount < MIN_BALANCE) {
+    if (totalAmount - amount < MIN_BALANCE) {
       setWithdrawError(`You must keep at least ₹${MIN_BALANCE} in your wallet`);
       return;
     }
 
     try {
+      console.log("Submitting withdrawal request for user:", user.unique_id, "Amount:", amount);
+      
       const response = await axios.post(
         `${API_BASE_URL}/wallet-withdraw/`,
         {
           user_id: user.unique_id,
           withdraw_amount: amount,
         },
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
       );
 
-      if (response.data.status) {
+      console.log("Withdrawal response:", response);
+
+      if (response.data && response.data.status) {
         setWithdrawSuccess("Withdrawal request submitted successfully!");
         setWithdrawAmount("");
-          // Fetch updated wallet amount and cashback
+        
+        // Fetch updated wallet amount and cashback
+        try {
           const walletResponse = await axios.get(
             `${API_BASE_URL}/test-winner-cashback/?user_id=${user.unique_id}`,
             { withCredentials: true }
@@ -182,17 +213,41 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             setWalletAmount(walletBalance);
             setTotalAmount(total);
           }
+        } catch (fetchError) {
+          console.error("Error fetching updated wallet data:", fetchError);
+        }
+        
         // Close modal after 2 seconds
         setTimeout(() => {
           setShowWithdrawModal(false);
           setWithdrawSuccess("");
         }, 2000);
       } else {
-        setWithdrawError(response.data.message || "Failed to submit withdrawal request");
+        const errorMessage = response.data?.message || "Failed to submit withdrawal request";
+        console.error("Withdrawal failed with message:", errorMessage);
+        setWithdrawError(errorMessage);
       }
     } catch (error) {
       console.error("Error submitting withdrawal request:", error);
-      setWithdrawError("Failed to submit withdrawal request. Please try again.");
+      let errorMessage = "Failed to submit withdrawal request. Please try again.";
+      
+      if (error.response) {
+        // Server responded with error status
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+        console.error("Response headers:", error.response.headers);
+        errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        // Request made but no response
+        console.error("No response received");
+        errorMessage = "No response from server. Please check your internet connection.";
+      } else {
+        // Error in request setup
+        console.error("Request error:", error.message);
+        errorMessage = error.message;
+      }
+      
+      setWithdrawError(errorMessage);
     }
   };
 
@@ -226,7 +281,7 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
                 style={{ cursor: 'pointer' }}
                 onClick={() => setShowWithdrawModal(true)}
               >
-                <span className="wallet-label me-2 text-muted">Total Balance:</span>
+                <span className="wallet-label me-2 text-muted">Wallet Balance:</span>
                 <span className="wallet-amount fw-bold text-primary">₹{totalAmount.toFixed(2)}</span>
               </div>
               <Button 
@@ -326,9 +381,9 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
         </Modal.Header>
         <Modal.Body>
           <p className="mb-3">
-            <strong>Wallet Balance:</strong> ₹{walletAmount.toFixed(2)} <br />
+            <strong>Deposit Amount:</strong> ₹{walletAmount.toFixed(2)} <br />
             <strong>Cashback:</strong> ₹{cashback.toFixed(2)} <br />
-            <strong>Total Balance:</strong> ₹{totalAmount.toFixed(2)}
+            <strong>Wallet Balance:</strong> ₹{totalAmount.toFixed(2)}
           </p>
           <p className="mb-3 text-muted">
             Minimum balance after withdrawal: ₹{MIN_BALANCE}
@@ -343,7 +398,6 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
               type="number"
               placeholder="Enter amount to withdraw"
               min="0.01"
-              max={walletAmount - MIN_BALANCE}
               step="0.01"
               value={withdrawAmount}
               onChange={(e) => setWithdrawAmount(e.target.value)}
@@ -365,7 +419,7 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
           <Button 
             variant="primary" 
             onClick={handleWithdraw}
-            disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0 || (walletAmount - parseFloat(withdrawAmount)) < MIN_BALANCE}
+            disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0}
           >
             Submit Request
           </Button>
