@@ -19,6 +19,11 @@ const TestWinner = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
+  // Wallet data state
+  const [walletAmount, setWalletAmount] = useState(0);
+  const [cashback, setCashback] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+  
   // Filter state
   const [statusFilter, setStatusFilter] = useState('all');
   
@@ -60,6 +65,15 @@ const TestWinner = () => {
 
         if (response.data.status) {
           setTestWinnerData(response.data.data);
+          
+          // Extract wallet data from the main response
+          const cashbackAmount = response.data.data.winner_details?.cashback || 0;
+          const walletBalance = response.data.data.winner_details?.wallet_balance || 0;
+          const total = cashbackAmount + walletBalance;
+          
+          setCashback(cashbackAmount);
+          setWalletAmount(walletBalance);
+          setTotalAmount(total);
         } else {
           throw new Error(response.data.message || "Failed to fetch test winner data");
         }
@@ -87,20 +101,24 @@ const TestWinner = () => {
   const getStatusVariant = (status) => {
     switch(status) {
       case 'passed':
-      case 'completed':
         return 'success';
       case 'failed':
         return 'danger';
+      case 'started':
+        return 'info';
+      case 'not_attempted':
+        return 'secondary';
       case 'pending':
       default:
         return 'warning';
     }
   };
 
-  // Get score badge variant
-  const getScoreVariant = (score) => {
-    if (score >= 70) return 'success';
-    if (score >= 50) return 'warning';
+  // Get score badge variant - scores are 0-5, so convert to percentage for logic
+  const getScoreVariant = (score, totalQuestions = 5) => {
+    const percentage = (score / totalQuestions) * 100;
+    if (percentage >= 80) return 'success';
+    if (percentage >= 50) return 'warning';
     return 'danger';
   };
 
@@ -214,12 +232,14 @@ const TestWinner = () => {
                           <option value="all">All Status</option>
                           <option value="passed">Passed</option>
                           <option value="failed">Failed</option>
+                          <option value="started">Started</option>
+                          <option value="not_attempted">Not Attempted</option>
                           <option value="pending">Pending</option>
                         </Form.Select>
                       </div>
                     </div>
                     {currentItems.length > 0 ? (
-                      <table className="temp-rwd-table">
+                       <table className="temp-rwd-table">
                         <tbody>
                           <tr>
                             <th>Attempt ID</th>
@@ -233,8 +253,8 @@ const TestWinner = () => {
                               <td data-th="Attempt ID">{attempt.id}</td>
                               <td data-th="Total Questions">{attempt.total_questions}</td>
                               <td data-th="Score">
-                                <Badge bg={getScoreVariant(attempt.score)}>
-                                  {attempt.score}%
+                                <Badge bg={getScoreVariant(attempt.score, attempt.total_questions)}>
+                                  {attempt.score}/{attempt.total_questions}
                                 </Badge>
                               </td>
                               <td data-th="Status">
@@ -292,6 +312,8 @@ const TestWinner = () => {
                         <tr>
                           <th>Score</th>
                           <th>Cashback</th>
+                          <th>Wallet Balance</th>
+                          <th>Total Balance</th>
                           <th>Account Holder Name</th>
                           <th>Phone</th>
                           <th>Account Number</th>
@@ -299,12 +321,14 @@ const TestWinner = () => {
                           <th>Date</th>
                         </tr>
                         <tr>
-                          <td data-th="Score">
-                            <Badge bg={getScoreVariant(testWinnerData.winner_details?.score || 0)}>
-                              {testWinnerData.winner_details?.score || 0}%
+                           <td data-th="Score">
+                            <Badge bg={getScoreVariant(testWinnerData.winner_details?.score || 0, 5)}>
+                              {testWinnerData.winner_details?.score || 0}/5
                             </Badge>
                           </td>
                           <td data-th="Cashback">₹{testWinnerData.winner_details?.cashback || 0}</td>
+                          <td data-th="Wallet Balance">₹{walletAmount.toFixed(2)}</td>
+                          <td data-th="Total Balance">₹{totalAmount.toFixed(2)}</td>
                           <td data-th="Account Holder Name">{testWinnerData.winner_details?.account_holder_name || "N/A"}</td>
                           <td data-th="Phone">{testWinnerData.winner_details?.phone || "N/A"}</td>
                           <td data-th="Account Number">{testWinnerData.winner_details?.account_number || "N/A"}</td>
