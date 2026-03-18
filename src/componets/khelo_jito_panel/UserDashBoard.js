@@ -67,10 +67,26 @@ const UserDashBoard = () => {
       }
     };
 
+    // Check if payment was completed and refresh data
+    const checkPaymentCompletion = () => {
+      const paymentCompleted = localStorage.getItem("payment_completed");
+      if (paymentCompleted) {
+        // Refresh wallet amount
+        fetchWalletAmount();
+        // Remove the flag
+        localStorage.removeItem("payment_completed");
+      }
+    };
+
     // First fetch wallet amount, then check for winning amount
     fetchWalletAmount().then(() => {
       checkWinningAmount();
     });
+
+    // Set up interval to check for payment completion
+    const paymentCheckInterval = setInterval(checkPaymentCompletion, 3000);
+
+    return () => clearInterval(paymentCheckInterval);
   }, [user]);
 
   useEffect(() => {

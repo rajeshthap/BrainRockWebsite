@@ -46,6 +46,8 @@ const WalletPaymentStatus = () => {
   const handleCloseTab = () => {
     // Remove order_id from localStorage
     localStorage.removeItem("wallet_payment_order_id");
+    // Set flag to indicate payment was completed
+    localStorage.setItem("payment_completed", "true");
     // Close the current tab
     window.close();
   };
@@ -137,12 +139,12 @@ const WalletPaymentStatus = () => {
                 </Alert>
               )}
 
-              {paymentStatus.phonepe_response && (
-                <div className="mb-4">
-                  <p className="text-muted">Amount</p>
-                  <p className="font-weight-bold">₹{paymentStatus.phonepe_response.amount}</p>
-                </div>
-              )}
+               {paymentStatus.phonepe_response && (
+                 <div className="mb-4">
+                   <p className="text-muted">Amount</p>
+                   <p className="font-weight-bold">₹{(paymentStatus.phonepe_response.amount / 100).toFixed(2)}</p>
+                 </div>
+               )}
 
               <Button variant="primary" onClick={handleCloseTab}>
                 Close Tab

@@ -113,7 +113,23 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
       }
     };
 
+    // Check if payment was completed and refresh data
+    const checkPaymentCompletion = () => {
+      const paymentCompleted = localStorage.getItem("payment_completed");
+      if (paymentCompleted) {
+        // Refresh wallet amount
+        fetchData();
+        // Remove the flag
+        localStorage.removeItem("payment_completed");
+      }
+    };
+
     fetchData();
+
+    // Set up interval to check for payment completion
+    const paymentCheckInterval = setInterval(checkPaymentCompletion, 3000);
+
+    return () => clearInterval(paymentCheckInterval);
   }, [user]);
 
   // Get user display name
