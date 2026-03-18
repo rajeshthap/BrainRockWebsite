@@ -18,10 +18,14 @@ function Test() {
   const navigate = useNavigate();
   console.log("Test component - User ID from URL:", urlUserId);
   console.log("Test component - User ID from localStorage:", storageUserId);
-  console.log("Test component - Final User ID:", userId);
-  // Check if localStorage has the test_user_id
-  if (!userId) {
-    console.error("User ID not found in URL or localStorage");
+  
+  // Check for payment success parameters in URL
+  const paymentSuccess = searchParams.get("payment_success");
+  const paymentMethod = searchParams.get("payment_method");
+  
+  // If payment was successful and we have user_id, proceed
+  if (paymentSuccess === "true" && userId) {
+    console.log("Test component - Payment successful via:", paymentMethod);
   }
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -40,7 +44,7 @@ function Test() {
   const [animateScore, setAnimateScore] = useState(false); // For score animation
   const [showWinnerForm, setShowWinnerForm] = useState(false); // State for winner form visibility
   const [winnerFormData, setWinnerFormData] = useState({
-    phone: "",
+    phone: localStorage.getItem("test_user_phone") || "",
     password: "",
     account_holder_name: "",
     account_number: "",
@@ -220,37 +224,44 @@ function Test() {
 
   // Handle claim prize
   const handleClaimPrize = async () => {
-    // Use user from AuthContext if available, otherwise use test user ID
-    const claimUserId = (user && user.unique_id) || userId;
-    console.log("handleClaimPrize - Auth user:", user);
-    console.log("handleClaimPrize - userId from Test:", userId);
-    console.log("handleClaimPrize - claimUserId:", claimUserId);
+    // Get payment method and source from localStorage
+    const paymentMethod = localStorage.getItem("test_payment_method");
+    const testSource = localStorage.getItem("test_source");
     
-    if (claimUserId) {
+    // Check if came from user dashboard (using test_source flag)
+    if (testSource === "userdashboard" && userId) {
       try {
-        // Call add-cashback API to add won amount to wallet
-        const response = await axios.put(
+        // Call add-cashback API to add won amount to wallet (for users from user dashboard)
+        const response = await axios.post(
           "https://brainrock.in/brainrock/backend/api/add-cashback/",
-          { user_id: claimUserId },
+          { user_id: userId },
           { withCredentials: true }
         );
-
-        console.log("handleClaimPrize - API response:", response.data);
 
         if (response.data.status) {
           // Store winning amount (amount_added) in localStorage for display in dashboard
           localStorage.setItem("winningAmount", response.data.amount_added || 0);
           
-          // Redirect to user dashboard
-          navigate("/UserDashBoard");
+          // Redirect based on payment method
+          if (paymentMethod === "online") {
+            // For online payment, redirect to login page
+            navigate("/login");
+          } else {
+            // For wallet payment, redirect to user dashboard (keep existing behavior)
+            navigate("/UserDashBoard");
+          }
         }
       } catch (error) {
         console.error("Error adding cashback:", error);
         alert("Failed to claim prize. Please try again.");
       }
-    } else {
-      // For unauthorized users without test user ID, show winner form
+    } else if (userId) {
+      // For unauthenticated users or users from KheloJito page, show winner form to fill details
       setShowWinnerForm(true);
+    } else {
+      // For users without any identification
+      alert("Please register first to claim your prize.");
+      navigate("/KheloJito");
     }
   };
 
@@ -352,22 +363,7 @@ function Test() {
       ? testResult.status === "passed"
       : percentage >= 60;
 
-    // If user passed and user_id is available, automatically claim prize
-    if (isPassed && (userId || (user && user.unique_id))) {
-      handleClaimPrize();
-      return (
-        <div className="test-container">
-          <div className="test-card results-card">
-            <div className="results-header">
-              <h1 className="results-title">Processing Your Prize...</h1>
-              <p className="results-subtitle">Please wait while we add your winning amount to your wallet</p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // If user passed and user_id is NOT available, show winner form
+    // If user passed and showWinnerForm is true, display the winner form
     if (isPassed && showWinnerForm) {
       return (
         <div className="test-container">
@@ -404,8 +400,7 @@ function Test() {
                   type="tel"
                   name="phone"
                   value={winnerFormData.phone}
-                  onChange={handleWinnerFormChange}
-                  placeholder="Enter your phone number"
+                  disabled
                   className="form-control"
                   required
                 />

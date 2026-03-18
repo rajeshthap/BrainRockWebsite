@@ -55,13 +55,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await axiosInstance.post("logout/");
       console.log("Logout response:", res.data);
-  
+ 
       clearAllCookies();
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("BR_LOGGED_OUT", "1");
-          localStorage.removeItem("test_user_id");
-          localStorage.removeItem("winningAmount");
         }
       } catch (e) {
         // ignore
@@ -69,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setLoading(false);
       setHasRefreshFailed(false);
-  
+ 
       if (options && options.redirect !== false) {
         try {
           if (typeof window !== "undefined") {
@@ -79,17 +77,15 @@ export const AuthProvider = ({ children }) => {
           // ignore
         }
       }
-  
+ 
       return { success: true, data: res.data };
     } catch (err) {
       console.error("Logout failed:", err.response?.data || err.message);
-  
+ 
       clearAllCookies();
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("BR_LOGGED_OUT", "1");
-          localStorage.removeItem("test_user_id");
-          localStorage.removeItem("winningAmount");
         }
       } catch (e) {
         // ignore
@@ -106,7 +102,7 @@ export const AuthProvider = ({ children }) => {
           // ignore
         }
       }
-  
+ 
       return {
         success: false,
         error: err.response?.data || { message: err.message },
@@ -224,6 +220,64 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const doInit = async () => {
       try {
+        const perf = typeof performance !== "undefined" ? performance : null;
+        let navType = null;
+        if (perf && perf.getEntriesByType) {
+          const entries = perf.getEntriesByType("navigation");
+          navType = entries && entries.length ? entries[0].type : null;
+        }
+ 
+        // Fallback for older browsers
+        if (!navType && perf && perf.navigation) {
+          navType = perf.navigation.type === 1 ? "reload" : "navigate";
+        }
+ 
+        const isReload = navType === "reload";
+        const path =
+          typeof window !== "undefined" && window.location.pathname
+            ? window.location.pathname
+            : "/";
+ 
+        // List of pages that should remain on the same URL after a hard reload and are public (no auth required).
+        const publicPaths = [
+          "/",
+          "/home",
+          "/companyprofile",
+          "/ourteam",
+          "/runningprojects",
+          "/servicespage",
+          "/courses",
+          "/gallery",
+          "/feedback",
+          "/trainingregistration",
+          "/training",
+          "/contact",
+          "/servicesdetails",
+          "/certificate",
+          "/career",
+          "/login",
+          "/ProjectDetail",
+          "/Terms"
+        ].map((p) => p.toLowerCase());
+ 
+        const normalizedPath = path.toLowerCase().replace(/\/+$/, "") || "/";
+ 
+        // If it's a reload and the current path is NOT in allowed public list, redirect to root
+        if (
+          isReload &&
+          !publicPaths.includes(normalizedPath) &&
+          normalizedPath !== "/login"
+        ) {
+          try {
+            if (typeof window !== "undefined") {
+              window.location.replace("/");
+            }
+          } catch (e) {
+            // ignore
+          }
+          return;
+        }
+ 
         // Only attempt to validate/refresh token for non-public (protected) routes.
         if (!hasRefreshFailed) {
           try {
@@ -231,29 +285,6 @@ export const AuthProvider = ({ children }) => {
               const current =
                 window.location.pathname.toLowerCase().replace(/\/+$/, "") ||
                 "/";
-              
-              // List of pages that are public (no auth required).
-              const publicPaths = [
-                "/",
-                "/home",
-                "/companyprofile",
-                "/ourteam",
-                "/runningprojects",
-                "/servicespage",
-                "/courses",
-                "/gallery",
-                "/feedback",
-                "/trainingregistration",
-                "/training",
-                "/contact",
-                "/servicesdetails",
-                "/certificate",
-                "/career",
-                "/login",
-                "/ProjectDetail",
-                "/Terms"
-              ].map((p) => p.toLowerCase());
-
               if (!publicPaths.includes(current)) {
                 validateOrRefreshToken();
               } else {
@@ -269,7 +300,7 @@ export const AuthProvider = ({ children }) => {
         // ignore
       }
     };
-
+ 
     doInit();
   }, []);
  

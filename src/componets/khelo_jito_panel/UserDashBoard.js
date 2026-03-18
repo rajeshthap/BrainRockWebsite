@@ -49,19 +49,21 @@ const UserDashBoard = () => {
       }
     };
 
-    // Check for winning amount in localStorage
-    const winningAmount = localStorage.getItem("winningAmount");
-    if (winningAmount) {
-      // Show success popup
-      alert(`Congratulations! You won ₹${parseFloat(winningAmount).toFixed(2)}! The amount has been added to your wallet.`);
-      // Remove from localStorage
-      localStorage.removeItem("winningAmount");
-      // Fetch updated wallet amount
-      fetchWalletAmount();
-    } else {
-      // Fetch initial wallet amount if no winning amount
-      fetchWalletAmount();
-    }
+    const checkWinningAmount = () => {
+      // Check for winning amount in localStorage
+      const winningAmount = localStorage.getItem("winningAmount");
+      if (winningAmount) {
+        // Show success popup
+        alert(`Congratulations! You won ₹${parseFloat(winningAmount).toFixed(2)}! The amount has been added to your wallet.`);
+        // Remove from localStorage
+        localStorage.removeItem("winningAmount");
+      }
+    };
+
+    // First fetch wallet amount, then check for winning amount
+    fetchWalletAmount().then(() => {
+      checkWinningAmount();
+    });
   }, [user]);
 
   useEffect(() => {
@@ -114,6 +116,9 @@ const UserDashBoard = () => {
       if (response.data.status) {
         setWalletAmount(response.data.cashback);
         setPaymentSuccess(true);
+        // Save payment method and source to localStorage for Test component
+        localStorage.setItem("test_payment_method", "wallet");
+        localStorage.setItem("test_source", "userdashboard");
       }
     } catch (error) {
       console.error("Error processing wallet payment:", error);
@@ -129,14 +134,24 @@ const UserDashBoard = () => {
         `${API_BASE_URL}/register-test/`,
         {
           user_id: user.unique_id
-        }
+        },
+        { withCredentials: true }
       );
 
       if (response.data.status && response.data.payment_order) {
-        // Save user ID to localStorage for Test component
-        localStorage.setItem("test_user_id", response.data.user_id || user.unique_id);
-        // Redirect to payment gateway URL
-        window.location.href = response.data.payment_order.redirectUrl;
+        // Save user ID, payment method, and source to localStorage for Test component
+        localStorage.setItem("test_user_id", user.unique_id);
+        localStorage.setItem("test_payment_method", "online");
+        localStorage.setItem("test_source", "userdashboard");
+        
+        // Check if payment gateway provides a success callback URL
+        // If not, we'll handle it by checking for payment success in the Test component
+        if (response.data.payment_order.redirectUrl) {
+          window.location.href = response.data.payment_order.redirectUrl;
+        } else {
+          // If no redirect URL, consider payment successful and show start test button
+          setPaymentSuccess(true);
+        }
       }
     } catch (error) {
       console.error("Error processing online payment:", error);
@@ -154,7 +169,7 @@ const UserDashBoard = () => {
       );
 
       if (response.data.status) {
-        // Save user ID to localStorage for Test component
+        // Save user ID to localStorage for Test component (payment method and source already saved)
         localStorage.setItem("test_user_id", user.unique_id);
         // Navigate to test page
         navigate("/test");

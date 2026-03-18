@@ -254,14 +254,7 @@ function AppContent() {
         <Route path="/Terms" element={<Terms />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/KheloJito" element={<KheloJito />} />
-        <Route
-          path="/test"
-          element={
-            <ProtectedRoute>
-              <Test />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/test" element={<Test />} />
 
         {/* Hr  Payroll (protected) */}
 

@@ -124,8 +124,10 @@ function KheloJito() {
       console.log("Registration successful:", response.data);
       console.log("User ID:", response.data.user_id);
 
-      // Store user_id in localStorage for Test component to retrieve
+      // Store user_id, phone number, and source in localStorage for Test component to retrieve
       localStorage.setItem("test_user_id", response.data.user_id);
+      localStorage.setItem("test_user_phone", formData.phone);
+      localStorage.setItem("test_source", "khelojito");
 
       // Clear form
       setFormData({ full_name: "", email: "", phone: "", fee: 1 });
