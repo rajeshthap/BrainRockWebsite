@@ -50,6 +50,8 @@ function Test() {
     account_number: "",
     ifsc_code: "",
   }); // State for winner form data
+  const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(false); // State for wrong answers modal
+  const [wrongAnswers, setWrongAnswers] = useState([]); // State to store wrong answers
 
   // Start test and fetch questions from API
   useEffect(() => {
@@ -277,6 +279,23 @@ function Test() {
       // Unauthorized user - redirect to KheloJito for re-registration
       navigate("/KheloJito");
     }
+  };
+
+  // Function to find and display wrong answers
+  const handleShowWrongAnswers = () => {
+    const wrong = [];
+    userAnswers.forEach((answer, index) => {
+      if (answer.selected_option !== questions[index].correct_answer) {
+        wrong.push({
+          question: questions[index].question_text,
+          userAnswer: questions[index].options[answer.selected_option],
+          correctAnswer: questions[index].options[questions[index].correct_answer],
+          questionNumber: index + 1
+        });
+      }
+    });
+    setWrongAnswers(wrong);
+    setShowWrongAnswersModal(true);
   };
 
   // Handle winner form input changes
@@ -526,10 +545,56 @@ function Test() {
                 Claim Your Prize
               </button>
             )}
+            <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
+              Wrong Answers
+            </button>
             <button className="restart-button" onClick={handleRestart}>
               Retake Test
             </button>
           </div>
+
+          {/* Wrong Answers Modal */}
+          {showWrongAnswersModal && (
+            <div className="wrong-answers-modal">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h2>Wrong Answers ({wrongAnswers.length})</h2>
+                  <button className="close-button" onClick={() => setShowWrongAnswersModal(false)}>
+                    ×
+                  </button>
+                </div>
+                <div className="modal-body">
+                  {wrongAnswers.length === 0 ? (
+                    <div className="no-wrong-answers">
+                      Congratulations! You answered all questions correctly.
+                    </div>
+                  ) : (
+                    wrongAnswers.map((item, index) => (
+                      <div key={index} className="wrong-answer-item">
+                        <div className="question-number">Question {item.questionNumber}:</div>
+                        <div className="question-text">{item.question}</div>
+                        <div className="answer-container">
+                          <div className="user-answer">
+                            <span className="label">Your Answer:</span>
+                            <span className="answer-text">{item.userAnswer}</span>
+                          </div>
+                          <div className="correct-answer">
+                            <span className="label">Correct Answer:</span>
+                            <span className="answer-text">{item.correctAnswer}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button className="close-button" onClick={() => setShowWrongAnswersModal(false)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
