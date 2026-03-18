@@ -36,8 +36,10 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     profile_photo: null,
   });
 
-  // State for wallet amount
+  // State for wallet amount, cashback, and total
   const [walletAmount, setWalletAmount] = useState(0);
+  const [cashback, setCashback] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
 
   // State for withdrawal modal
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -56,14 +58,20 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     const fetchData = async () => {
       if (user && user.unique_id) {
         try {
-          // Fetch wallet amount
+          // Fetch wallet amount and cashback
           const walletResponse = await axios.get(
             `${API_BASE_URL}/test-winner-cashback/?user_id=${user.unique_id}`,
             { withCredentials: true }
           );
           
           if (walletResponse.data.status) {
-            setWalletAmount(walletResponse.data.cashback || 0);
+            const cashbackAmount = walletResponse.data.cashback || 0;
+            const walletBalance = walletResponse.data.wallet_balance || 0;
+            const total = cashbackAmount + walletBalance;
+            
+            setCashback(cashbackAmount);
+            setWalletAmount(walletBalance);
+            setTotalAmount(total);
           }
 
           // Fetch user profile details
@@ -159,15 +167,21 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
       if (response.data.status) {
         setWithdrawSuccess("Withdrawal request submitted successfully!");
         setWithdrawAmount("");
-        // Fetch updated wallet amount
-        const walletResponse = await axios.get(
-          `${API_BASE_URL}/test-winner-cashback/?user_id=${user.unique_id}`,
-          { withCredentials: true }
-        );
-        
-        if (walletResponse.data.status) {
-          setWalletAmount(walletResponse.data.cashback || 0);
-        }
+          // Fetch updated wallet amount and cashback
+          const walletResponse = await axios.get(
+            `${API_BASE_URL}/test-winner-cashback/?user_id=${user.unique_id}`,
+            { withCredentials: true }
+          );
+          
+          if (walletResponse.data.status) {
+            const cashbackAmount = walletResponse.data.cashback || 0;
+            const walletBalance = walletResponse.data.wallet_balance || 0;
+            const total = cashbackAmount + walletBalance;
+            
+            setCashback(cashbackAmount);
+            setWalletAmount(walletBalance);
+            setTotalAmount(total);
+          }
         // Close modal after 2 seconds
         setTimeout(() => {
           setShowWithdrawModal(false);
@@ -212,8 +226,8 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
                 style={{ cursor: 'pointer' }}
                 onClick={() => setShowWithdrawModal(true)}
               >
-                <span className="wallet-label me-2 text-muted">Wallet:</span>
-                <span className="wallet-amount fw-bold text-primary">₹{walletAmount.toFixed(2)}</span>
+                <span className="wallet-label me-2 text-muted">Total Balance:</span>
+                <span className="wallet-amount fw-bold text-primary">₹{totalAmount.toFixed(2)}</span>
               </div>
               <Button 
                 variant="primary" 
@@ -264,7 +278,7 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
         </Modal.Header>
         <Modal.Body>
           <p className="mb-3">
-            <strong>Current Balance:</strong> ₹{walletAmount.toFixed(2)}
+            <strong>Current Balance:</strong> ₹{totalAmount.toFixed(2)}
           </p>
           
           <Form.Group controlId="addAmount">
@@ -312,7 +326,9 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
         </Modal.Header>
         <Modal.Body>
           <p className="mb-3">
-            <strong>Current Balance:</strong> ₹{walletAmount.toFixed(2)}
+            <strong>Wallet Balance:</strong> ₹{walletAmount.toFixed(2)} <br />
+            <strong>Cashback:</strong> ₹{cashback.toFixed(2)} <br />
+            <strong>Total Balance:</strong> ₹{totalAmount.toFixed(2)}
           </p>
           <p className="mb-3 text-muted">
             Minimum balance after withdrawal: ₹{MIN_BALANCE}
