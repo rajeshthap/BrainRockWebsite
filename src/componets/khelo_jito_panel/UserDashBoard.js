@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Container, Row, Col, Modal, Pagination, Alert, Button } from "react-bootstrap";
+import { Container, Row, Col, Modal, Pagination, Alert, Button, Form } from "react-bootstrap";
 import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,7 +10,7 @@ import UserHeader from "./UserHeader";
 import UserLeftNav from "./UserLeftNav";
 import Test from "../Play_and_Win/Test";
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
-const TEST_AMOUNT = 1; // Fixed test amount
+const TEST_AMOUNT = 8; // Fixed test amount
 
 const UserDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -24,6 +24,10 @@ const UserDashBoard = () => {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [walletAmount, setWalletAmount] = useState(0);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [showAddWalletModal, setShowAddWalletModal] = useState(false);
+  const [addAmount, setAddAmount] = useState("");
+  const [addError, setAddError] = useState("");
+  const [addSuccess, setAddSuccess] = useState("");
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
@@ -40,7 +44,10 @@ const UserDashBoard = () => {
           );
           
           if (response.data.status) {
-            setWalletAmount(response.data.cashback || 0);
+            const cashbackAmount = response.data.cashback || 0;
+            const walletBalance = response.data.wallet_balance || 0;
+            const total = cashbackAmount + walletBalance;
+            setWalletAmount(total);
           }
         } catch (error) {
           console.error("Error fetching wallet amount:", error);
@@ -159,6 +166,41 @@ const UserDashBoard = () => {
     }
   };
 
+  // Handle add wallet
+  const handleAddWallet = async () => {
+    setAddError("");
+    setAddSuccess("");
+
+    const amount = parseFloat(addAmount);
+
+    // Validation
+    if (!amount || amount <= 0) {
+      setAddError("Please enter a valid amount");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/add-wallet/`,
+        {
+          user_id: user.unique_id,
+          amount: amount,
+        },
+        { withCredentials: true }
+      );
+
+      if (response.data.status && response.data.payment_data && response.data.payment_data.redirectUrl) {
+        // Redirect to payment gateway URL
+        window.location.href = response.data.payment_data.redirectUrl;
+      } else {
+        setAddError(response.data.message || "Failed to initiate payment");
+      }
+    } catch (error) {
+      console.error("Error adding wallet amount:", error);
+      setAddError("Failed to add amount to wallet. Please try again.");
+    }
+  };
+
   // Start test
   const handleStartTest = async () => {
     try {
@@ -271,6 +313,31 @@ const UserDashBoard = () => {
                   <h6>Wallet Balance: ₹{walletAmount.toFixed(2)}</h6>
                   <p>Test Amount: ₹{TEST_AMOUNT.toFixed(2)}</p>
                   <p>Remaining Balance: ₹{(walletAmount - TEST_AMOUNT).toFixed(2)}</p>
+                  
+                  {walletAmount < TEST_AMOUNT && (
+                    <div className="mb-3">
+                      <p className="text-danger">Your wallet balance is insufficient to pay for the test.</p>
+                      <Button
+                        variant="success"
+                        onClick={() => {
+                          const remainingAmount = TEST_AMOUNT - walletAmount;
+                          setAddAmount(remainingAmount.toFixed(2));
+                          setShowAddWalletModal(true);
+                        }}
+                        className="mb-2"
+                      >
+                        Add ₹{(TEST_AMOUNT - walletAmount).toFixed(2)} to Wallet
+                      </Button>
+                      <Button
+                        variant="outline-success"
+                        onClick={() => setShowAddWalletModal(true)}
+                        className="ms-2"
+                      >
+                        Add Custom Amount
+                      </Button>
+                    </div>
+                  )}
+                  
                   <Button
                     variant="primary"
                     onClick={handleWalletPayment}
@@ -307,6 +374,54 @@ const UserDashBoard = () => {
               Cancel
             </Button>
           )}
+        </Modal.Footer>
+      </Modal>
+
+      {/* Add Wallet Modal */}
+      <Modal
+        show={showAddWalletModal}
+        onHide={() => setShowAddWalletModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Add to Wallet</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-3">
+            <strong>Current Balance:</strong> ₹{walletAmount.toFixed(2)}
+          </p>
+          
+          <Form.Group controlId="addAmount">
+            <Form.Label>Amount to Add (₹)</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="Enter amount to add"
+              min="0.01"
+              step="0.01"
+              value={addAmount}
+              onChange={(e) => setAddAmount(e.target.value)}
+            />
+          </Form.Group>
+
+          {addError && (
+            <div className="mt-3 text-danger">{addError}</div>
+          )}
+
+          {addSuccess && (
+            <div className="mt-3 text-success">{addSuccess}</div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAddWalletModal(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={handleAddWallet}
+            disabled={!addAmount || parseFloat(addAmount) <= 0}
+          >
+            Add to Wallet
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>
