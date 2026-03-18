@@ -17,9 +17,9 @@ import FooterPage from "../footer/FooterPage";
 function KheloJito() {
   // State to hold the form data
   const [formData, setFormData] = useState({
+    phone: "",
     full_name: "",
     email: "",
-    phone: "",
     fee: 1,
   });
 
@@ -28,6 +28,11 @@ function KheloJito() {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState({});
+  const [phoneValidation, setPhoneValidation] = useState({
+    isChecking: false,
+    isRegistered: false,
+    isValid: false,
+  });
 
   const navigate = useNavigate();
 
@@ -39,6 +44,55 @@ function KheloJito() {
       [name]: value,
     }));
     validateField(name, value);
+    
+    // Real-time phone number validation
+    if (name === "phone") {
+      const isValidPhone = /^[0-9]{10}$/.test(value);
+      setPhoneValidation(prev => ({
+        ...prev,
+        isValid: isValidPhone,
+      }));
+      
+      if (isValidPhone) {
+        checkPhoneNumber(value);
+      } else {
+        setPhoneValidation(prev => ({
+          ...prev,
+          isChecking: false,
+          isRegistered: false,
+        }));
+      }
+    }
+  };
+
+  // Check if phone number exists in registered users API
+  const checkPhoneNumber = async (phone) => {
+    setPhoneValidation(prev => ({ ...prev, isChecking: true }));
+    try {
+      const response = await axios.get(
+        "https://brainrock.in/brainrock/backend/api/test/winner-phones/",
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      const isRegistered = response.data.phones.includes(phone);
+      setPhoneValidation(prev => ({
+        ...prev,
+        isChecking: false,
+        isRegistered: isRegistered,
+      }));
+    } catch (error) {
+      console.error("Error checking phone number:", error);
+      setPhoneValidation(prev => ({
+        ...prev,
+        isChecking: false,
+        isRegistered: false,
+      }));
+    }
   };
 
   // Validation for form fields
@@ -230,46 +284,6 @@ function KheloJito() {
             {/* Registration Form */}
             <Form onSubmit={handleSubmit}>
               <Row>
-                {/* Full Name */}
-                <Col md={6} className="mt-3">
-                  <Form.Group>
-                    <Form.Label className="br-label">
-                      Full Name <span className="br-span-star">*</span>
-                    </Form.Label>
-                    <Form.Control
-                      type="text"
-                      className={`br-form-control ${errors.full_name ? "is-invalid" : ""}`}
-                      name="full_name"
-                      value={formData.full_name}
-                      onChange={handleInputChange}
-                      placeholder="Enter your full name"
-                    />
-                    {errors.full_name && (
-                      <div className="invalid-feedback">{errors.full_name}</div>
-                    )}
-                  </Form.Group>
-                </Col>
-
-                {/* Email */}
-                <Col md={6} className="mt-3">
-                  <Form.Group>
-                    <Form.Label className="br-label">
-                      Email <span className="br-span-star">*</span>
-                    </Form.Label>
-                    <Form.Control
-                      type="email"
-                      className={`br-form-control ${errors.email ? "is-invalid" : ""}`}
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Enter your email"
-                    />
-                    {errors.email && (
-                      <div className="invalid-feedback">{errors.email}</div>
-                    )}
-                  </Form.Group>
-                </Col>
-
                 {/* Phone Number */}
                 <Col md={6} className="mt-3">
                   <Form.Group>
@@ -290,8 +304,50 @@ function KheloJito() {
                   </Form.Group>
                 </Col>
 
+                {/* Full Name */}
+                <Col md={6} className="mt-3">
+                  <Form.Group>
+                    <Form.Label className="br-label">
+                      Full Name <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      className={`br-form-control ${errors.full_name ? "is-invalid" : ""}`}
+                      name="full_name"
+                      value={formData.full_name}
+                      onChange={handleInputChange}
+                      placeholder="Enter your full name"
+                      disabled={phoneValidation.isRegistered}
+                    />
+                    {errors.full_name && (
+                      <div className="invalid-feedback">{errors.full_name}</div>
+                    )}
+                  </Form.Group>
+                </Col>
+
+                {/* Email */}
+                <Col md={6} className="mt-3">
+                  <Form.Group>
+                    <Form.Label className="br-label">
+                      Email <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="email"
+                      className={`br-form-control ${errors.email ? "is-invalid" : ""}`}
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="Enter your email"
+                      disabled={phoneValidation.isRegistered}
+                    />
+                    {errors.email && (
+                      <div className="invalid-feedback">{errors.email}</div>
+                    )}
+                  </Form.Group>
+                </Col>
+
                 {/* Fee */}
-                {/* <Col md={6} className="mt-3">
+                <Col md={6} className="mt-3">
                   <Form.Group>
                     <Form.Label className="br-label">Fee</Form.Label>
                     <Form.Control
@@ -303,19 +359,64 @@ function KheloJito() {
                       onChange={handleInputChange}
                     />
                   </Form.Group>
-                </Col> */}
+                </Col>
+
+                {/* Phone Validation Message */}
+                {phoneValidation.isChecking && (
+                  <Col md={12} className="mt-3">
+                    <Alert variant="info">Checking phone number...</Alert>
+                  </Col>
+                )}
+
+                {phoneValidation.isRegistered && (
+                  <Col md={12} className="mt-3">
+                    <Alert variant="danger">
+                      This number is already registered, please use a different number or login with this mobile number.
+                    </Alert>
+                    <Button
+                      variant="warning"
+                      className="br-button"
+                      onClick={() => {
+                        setFormData({ phone: "", full_name: "", email: "", fee: 1 });
+                        setPhoneValidation({
+                          isChecking: false,
+                          isRegistered: false,
+                          isValid: false,
+                        });
+                        setErrors({});
+                      }}
+                    >
+                      Back to Khelo & Jeeto Registration
+                    </Button>
+                  </Col>
+                )}
+
+                {/* Login Button for New Users */}
+                {!phoneValidation.isRegistered && phoneValidation.isValid && (
+                  <Col md={12} className="mt-3">
+                    <Button
+                      variant="secondary"
+                      className="br-button mr-2"
+                      onClick={() => navigate("/login")}
+                    >
+                      Already registered? Login
+                    </Button>
+                  </Col>
+                )}
 
                 {/* Submit Button */}
-                <Col md={12} className="mt-4">
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    className="br-button"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Registering..." : "Register"}
-                  </Button>
-                </Col>
+                {!phoneValidation.isRegistered && (
+                  <Col md={12} className="mt-4">
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      className="br-button"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Registering..." : "Register"}
+                    </Button>
+                  </Col>
+                )}
               </Row>
             </Form>
           </div>
