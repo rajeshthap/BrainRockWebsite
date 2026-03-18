@@ -567,7 +567,7 @@ function KheloJito() {
             </Modal.Body>
             <Modal.Footer>
               <Button 
-                variant="secondary" 
+                variant="secondary" className="agree-btn"
                 onClick={() => {
                   setShowTermsModal(false);
                   setTermsAccepted(false);
@@ -576,7 +576,7 @@ function KheloJito() {
                 Decline
               </Button>
               <Button 
-                variant="primary" 
+                variant="primary" className="agree-btn"
                 onClick={() => {
                   setShowTermsModal(false);
                   setTermsAccepted(true);
