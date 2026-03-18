@@ -154,8 +154,8 @@ const UserDashBoard = () => {
         // Check if payment gateway provides a success callback URL
         // If not, we'll handle it by checking for payment success in the Test component
         if (response.data.payment_order.redirectUrl) {
-          window.location.href = response.data.payment_order.redirectUrl;
-        } else {
+           window.open(response.data.payment_order.redirectUrl, '_blank');
+         } else {
           // If no redirect URL, consider payment successful and show start test button
           setPaymentSuccess(true);
         }
@@ -194,8 +194,8 @@ const UserDashBoard = () => {
         if (response.data.order_id) {
           localStorage.setItem("wallet_payment_order_id", response.data.order_id);
         }
-        // Redirect to payment gateway URL
-        window.location.href = response.data.payment_data.redirectUrl;
+        // Open payment gateway URL in new tab
+        window.open(response.data.payment_data.redirectUrl, '_blank');
       } else {
         setAddError(response.data.message || "Failed to initiate payment");
       }

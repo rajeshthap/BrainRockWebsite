@@ -149,8 +149,8 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
         if (response.data.order_id) {
           localStorage.setItem("wallet_payment_order_id", response.data.order_id);
         }
-        // Redirect to payment gateway URL
-        window.location.href = response.data.payment_data.redirectUrl;
+        // Open payment gateway URL in new tab
+        window.open(response.data.payment_data.redirectUrl, '_blank');
       } else {
         setAddError(response.data.message || "Failed to initiate payment");
       }

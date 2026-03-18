@@ -43,10 +43,11 @@ const WalletPaymentStatus = () => {
     checkPaymentStatus();
   }, []);
 
-  const handleGoBack = () => {
+  const handleCloseTab = () => {
     // Remove order_id from localStorage
     localStorage.removeItem("wallet_payment_order_id");
-    navigate("/UserDashBoard");
+    // Close the current tab
+    window.close();
   };
 
   if (loading) {
@@ -77,8 +78,8 @@ const WalletPaymentStatus = () => {
                   <h5>Error</h5>
                   <p>{error}</p>
                 </Alert>
-                <Button variant="primary" onClick={handleGoBack}>
-                  Go Back to Dashboard
+                <Button variant="primary" onClick={handleCloseTab}>
+                  Close Tab
                 </Button>
               </Card.Body>
             </Card>
@@ -143,8 +144,8 @@ const WalletPaymentStatus = () => {
                 </div>
               )}
 
-              <Button variant="primary" onClick={handleGoBack}>
-                Go Back to Dashboard
+              <Button variant="primary" onClick={handleCloseTab}>
+                Close Tab
               </Button>
             </Card.Body>
           </Card>
