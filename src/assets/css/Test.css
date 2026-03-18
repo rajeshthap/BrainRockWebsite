@@ -534,10 +534,10 @@
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease;
-  padding-top: 50px;
+  overflow: hidden;
 }
 
 .wrong-answers-modal .modal-content {
@@ -546,6 +546,8 @@
   padding: 30px;
   max-width: 800px;
   width: 90%;
+  margin-top: 74px !important;
+  max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   position: relative;
