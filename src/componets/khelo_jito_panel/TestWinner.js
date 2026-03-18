@@ -21,6 +21,10 @@ const TestWinner = () => {
   
   // Filter state
   const [statusFilter, setStatusFilter] = useState('all');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Responsive check
   useEffect(() => {
@@ -109,7 +113,16 @@ const TestWinner = () => {
   // Handle status filter change
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page when filter changes
   };
+  
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredAttempts.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredAttempts.length / itemsPerPage);
+  
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="dashboard-container">
@@ -205,7 +218,7 @@ const TestWinner = () => {
                         </Form.Select>
                       </div>
                     </div>
-                    {filteredAttempts.length > 0 ? (
+                    {currentItems.length > 0 ? (
                       <table className="temp-rwd-table">
                         <tbody>
                           <tr>
@@ -215,7 +228,7 @@ const TestWinner = () => {
                             <th>Status</th>
                             <th>Started At</th>
                           </tr>
-                          {filteredAttempts.map((attempt) => (
+                          {currentItems.map((attempt, index) => (
                             <tr key={attempt.id}>
                               <td data-th="Attempt ID">{attempt.id}</td>
                               <td data-th="Total Questions">{attempt.total_questions}</td>
@@ -237,6 +250,31 @@ const TestWinner = () => {
                     ) : (
                       <div className="text-center py-3">
                         <p className="text-muted">No test attempts found.</p>
+                      </div>
+                    )}
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.Prev 
+                            onClick={() => handlePageChange(currentPage - 1)} 
+                            disabled={currentPage === 1}
+                          />
+                          {[...Array(totalPages).keys()].map(page => (
+                            <Pagination.Item 
+                              key={page + 1} 
+                              active={page + 1 === currentPage}
+                              onClick={() => handlePageChange(page + 1)}
+                            >
+                              {page + 1}
+                            </Pagination.Item>
+                          ))}
+                          <Pagination.Next 
+                            onClick={() => handlePageChange(currentPage + 1)} 
+                            disabled={currentPage === totalPages}
+                          />
+                        </Pagination>
                       </div>
                     )}
                   </div>
