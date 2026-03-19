@@ -15,7 +15,6 @@ const AddQuiz = () => {
   
   // Form state
   const [formData, setFormData] = useState({
-    quiz_id: "",
     title: "",
     description: "",
     quiz_category: "",
@@ -114,7 +113,6 @@ const AddQuiz = () => {
   // Clear form function
   const clearForm = () => {
     setFormData({
-      quiz_id: "",
       title: "",
       description: "",
       quiz_category: "",
@@ -143,9 +141,10 @@ const AddQuiz = () => {
     setShowAlert(false);
     
     try {
-      // Create payload
+      // Create payload (exclude quiz_id since it's auto-generated)
+      const { quiz_id, ...payload } = formData;
       const dataToSend = {
-        ...formData,
+        ...payload,
         number_of_questions: formData.questions.length
       };
       
@@ -223,18 +222,6 @@ const AddQuiz = () => {
             )}
             
             <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>Quiz ID</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter quiz ID (e.g., QUIZ-00001)"
-                  name="quiz_id"
-                  value={formData.quiz_id}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              
               <Form.Group className="mb-3">
                 <Form.Label>Quiz Title</Form.Label>
                 <Form.Control
