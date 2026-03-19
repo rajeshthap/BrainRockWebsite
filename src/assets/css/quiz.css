@@ -1,0 +1,230 @@
+
+        .quiz-card {
+          background-color: #f8f9fa;
+          border-radius: 10px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          height: 100%;
+        }
+        
+        .quiz-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .quiz-card-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: #212529;
+          margin-bottom: 15px;
+        }
+        .start-btn{
+        font-size:12px;
+        }
+        .quiz-card-description {
+          color: #6c757d;
+          margin-bottom: 20px;
+          line-height: 1.5;
+          font-size:12px;
+        }
+        
+        .quiz-card-details {
+          margin-bottom: 20px;
+        }
+        
+        .quiz-detail-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid #e9ecef;
+        }
+        
+        .quiz-detail-item:last-child {
+          border-bottom: none;
+        }
+        
+        .detail-label {
+          font-weight: 500;
+          color: #495057;
+          font-size:12px;
+        }
+        
+        .detail-value {
+          color: #007bff;
+          font-weight: 600;
+          font-size:12px
+        }
+        
+        .quiz-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 0;
+          border-bottom: 1px solid #dee2e6;
+          
+        }
+        
+        .question-number {
+          font-size: 18px;
+          font-weight: 600;
+          color: #495057;
+        }
+        
+        .score {
+          font-size: 18px;
+          font-weight: 600;
+          color: #007bff;
+        }
+        
+        .question-text {
+          font-size: 24px;
+          font-weight: 600;
+          color: #212529;
+          line-height: 1.5;
+        }
+        
+        .quiz-options {
+          display: grid;
+          gap: 10px;
+        }
+        
+        .quiz-option {
+          padding: 15px;
+          background-color: white;
+          border: 2px solid #dee2e6;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 16px;
+          font-weight: 500;
+        }
+        
+        .quiz-option:hover {
+          background-color: #e9ecef;
+          border-color: #adb5bd;
+        }
+        
+        .quiz-option.selected {
+          background-color: #007bff;
+          border-color: #007bff;
+          color: white;
+        }
+        
+        .quiz-option.correct {
+          background-color: #28a745;
+          border-color: #28a745;
+          color: white;
+        }
+        
+        .quiz-option.incorrect {
+          background-color: #dc3545;
+          border-color: #dc3545;
+          color: white;
+        }
+        
+        .quiz-controls {
+          display: flex;
+          justify-content: flex-end;
+        }
+        
+        .quiz-results-card {
+          background-color: #f8f9fa;
+          border-radius: 10px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          text-align: center;
+        }
+        
+        .results-title {
+          font-size: 32px;
+          font-weight: 700;
+          color: #212529;
+          margin-bottom: 20px;
+        }
+        
+        .results-score {
+          font-size: 24px;
+          font-weight: 600;
+          color: #495057;
+          margin-bottom: 10px;
+        }
+        
+        .results-percentage {
+          font-size: 48px;
+          font-weight: 700;
+          color: #007bff;
+          margin-bottom: 30px;
+        }
+        
+        .results-message h4 {
+          font-size: 24px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+        
+        .results-message p {
+          font-size: 18px;
+          color: #6c757d;
+        }
+        
+        .message-excellent h4 {
+          color: #28a745;
+        }
+        
+        .message-good h4 {
+          color: #ffc107;
+        }
+        
+        .message-poor h4 {
+          color: #dc3545;
+        }
+        
+        /* Payment Modal Styles */
+        .payment-info {
+          padding: 20px 0;
+        }
+        
+        .payment-details, .wallet-info, .payment-methods {
+          margin-bottom: 25px;
+        }
+        
+        .payment-details h5, .wallet-info h5, .payment-methods h5 {
+          font-weight: 600;
+          color: #212529;
+          margin-bottom: 15px;
+          font-size:14px;
+        }
+        
+        .payment-details p, .wallet-info p {
+          margin: 5px 0;
+          color: #495057;
+          font-size:12px;
+        }
+        
+        .payment-success {
+          text-align: center;
+          padding: 30px 0;
+        }
+        
+        .success-icon {
+          width: 80px;
+          height: 80px;
+          background-color: #28a745;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 20px;
+          font-size: 48px;
+          color: white;
+          font-weight: bold;
+        }
+        
+        .payment-success h4 {
+          color: #28a745;
+          margin-bottom: 10px;
+        }
+        
+        .payment-success p {
+          color: #6c757d;
+        }
+     
