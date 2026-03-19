@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Container, Row, Col, Table, Image, Badge, Button, Pagination, Alert, Modal, Form } from "react-bootstrap";
-import { FaTrophy, FaUser, FaEnvelope, FaPhone, FaIdCard, FaBook, FaCalendar, FaMoneyBillWave } from "react-icons/fa";
+import { FaTrophy, FaUser, FaEnvelope, FaPhone, FaIdCard, FaBook, FaCalendar, FaMoneyBillWave, FaDownload, FaCertificate } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext";
 import UserLeftNav from "./UserLeftNav";
 import UserHeader from "./UserHeader";
@@ -120,6 +120,22 @@ const TestWinner = () => {
     if (percentage >= 80) return 'success';
     if (percentage >= 50) return 'warning';
     return 'danger';
+  };
+
+  // Get certificate URL from attempt
+  const getCertificateUrl = (certificatePath) => {
+    if (!certificatePath) return null;
+    return certificatePath.startsWith('http') 
+      ? certificatePath 
+      : `https://brainrock.in/brainrock/backend${certificatePath}`;
+  };
+
+  // Handle certificate download
+  const handleDownloadCertificate = (certificatePath) => {
+    const certificateUrl = getCertificateUrl(certificatePath);
+    if (certificateUrl) {
+      window.open(certificateUrl, '_blank');
+    }
   };
 
   // Filter test attempts based on status
@@ -247,6 +263,7 @@ const TestWinner = () => {
                             <th>Score</th>
                             <th>Status</th>
                             <th>Started At</th>
+                            <th>Certificate</th>
                           </tr>
                           {currentItems.map((attempt, index) => (
                             <tr key={attempt.id}>
@@ -263,6 +280,23 @@ const TestWinner = () => {
                                 </Badge>
                               </td>
                               <td data-th="Started At">{formatDate(attempt.started_at)}</td>
+                              <td data-th="Certificate">
+                                {attempt.certificate ? (
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => handleDownloadCertificate(attempt.certificate)}
+                                    className="certificate-button"
+                                  >
+                                    <FaDownload className="me-1" />
+                                    Download
+                                  </Button>
+                                ) : (
+                                  <span className="text-muted">
+                                    {attempt.test_status === 'passed' ? 'Certificate not available' : 'N/A'}
+                                  </span>
+                                )}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
