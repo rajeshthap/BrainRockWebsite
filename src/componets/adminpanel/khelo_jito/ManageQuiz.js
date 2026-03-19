@@ -35,6 +35,7 @@ const ManageQuiz = () => {
     start_date_time: "",
     end_date_time: "",
     price: 0,
+    entry_fee: "0.00",
     is_active: true,
     questions: [
       {
@@ -321,7 +322,7 @@ const ManageQuiz = () => {
                     </Col>
                   ) : (
                     currentItems.map((quiz) => (
-                      <Col lg={4} md={6} sm={12} className="mb-4" key={quiz.id}>
+                      <Col lg={4} md={6} sm={12} className="mb-4" key={quiz.quiz_id}>
                         <Card className="h-100">
                           <Card.Body>
                             <div className="d-flex justify-content-between align-items-start mb-3">
@@ -348,6 +349,10 @@ const ManageQuiz = () => {
                               <div className="d-flex justify-content-between mb-1">
                                 <small className="text-muted">Price:</small>
                                 <small className="fw-bold">₹{quiz.price}</small>
+                              </div>
+                              <div className="d-flex justify-content-between mb-1">
+                                <small className="text-muted">Entry Fee:</small>
+                                <small className="fw-bold">₹{quiz.entry_fee}</small>
                               </div>
                               <div className="d-flex justify-content-between mb-1">
                                 <small className="text-muted">Start:</small>
@@ -490,6 +495,21 @@ const ManageQuiz = () => {
                         placeholder="Enter quiz price"
                         name="price"
                         value={editFormData.price}
+                        onChange={handleEditChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col lg={6} md={6} sm={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Entry Fee (₹)</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Enter entry fee"
+                        name="entry_fee"
+                        value={editFormData.entry_fee}
                         onChange={handleEditChange}
                         required
                       />
@@ -647,6 +667,10 @@ const ManageQuiz = () => {
                 <div className="col-md-6">
                   <h5>Price</h5>
                   <p>₹{currentViewItem.price}</p>
+                </div>
+                <div className="col-md-6">
+                  <h5>Entry Fee</h5>
+                  <p>₹{currentViewItem.entry_fee}</p>
                 </div>
                 <div className="col-md-6">
                   <h5>Start Date</h5>

@@ -22,6 +22,7 @@ const AddQuiz = () => {
     start_date_time: "",
     end_date_time: "",
     price: 0,
+    entry_fee: "0.00",
     is_active: true,
     questions: [
       {
@@ -120,6 +121,7 @@ const AddQuiz = () => {
       start_date_time: "",
       end_date_time: "",
       price: 0,
+      entry_fee: "0.00",
       is_active: true,
       questions: [
         {
@@ -281,6 +283,21 @@ const AddQuiz = () => {
                       placeholder="Enter quiz price"
                       name="price"
                       value={formData.price}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col lg={6} md={6} sm={12}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Entry Fee (₹)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Enter entry fee"
+                      name="entry_fee"
+                      value={formData.entry_fee}
                       onChange={handleChange}
                       required
                     />
