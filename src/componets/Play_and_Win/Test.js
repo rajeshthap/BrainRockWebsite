@@ -52,6 +52,7 @@ function Test() {
   }); // State for winner form data
   const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(false); // State for wrong answers modal
   const [wrongAnswers, setWrongAnswers] = useState([]); // State to store wrong answers
+  const [certificateUrl, setCertificateUrl] = useState(null); // State for certificate URL
 
   // Start test and fetch questions from API
   useEffect(() => {
@@ -215,6 +216,15 @@ function Test() {
       console.log("Test submission successful:", response.data);
       // Save API response data for display
       setTestResult(response.data);
+      
+      // Check if certificate is available
+      if (response.data.certificate) {
+        const certificatePath = response.data.certificate.startsWith('http') 
+          ? response.data.certificate 
+          : `https://brainrock.in/brainrock/backend${response.data.certificate}`;
+        setCertificateUrl(certificatePath);
+      }
+      
       setShowResults(true);
     } catch (err) {
       console.error("Error submitting test:", err);
@@ -538,6 +548,33 @@ function Test() {
                 ? "Test Passed: Congratulations!"
                 : "Test Failed: Better luck next time"}
           </div>
+
+          {/* Certificate Section */}
+          {isPassed && certificateUrl && (
+            <div className="certificate-section">
+              <h3 className="certificate-title">Your Certificate</h3>
+              <div className="certificate-container">
+                <img 
+                  src={certificateUrl} 
+                  alt="Certificate" 
+                  className="certificate-image"
+                  onError={(e) => {
+                    console.error("Certificate image failed to load");
+                    e.target.style.display = "none";
+                  }}
+                />
+              </div>
+              <div className="certificate-actions">
+                <a 
+                  href={certificateUrl} 
+                  download="certificate.png" 
+                  className="download-button"
+                >
+                  Download Certificate
+                </a>
+              </div>
+            </div>
+          )}
 
           <div className="results-actions">
             {isPassed && (
