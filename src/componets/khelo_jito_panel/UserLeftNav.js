@@ -7,7 +7,8 @@ import {
   FaSignOutAlt,
   FaChevronDown,
   FaChevronRight,
-
+  FaQuestionCircle,
+  FaBook,
 } from "react-icons/fa";
 
 import "../../assets/css/emp_dashboard.css";
@@ -32,13 +33,13 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
             active: true,
         },
         {
-            icon: <FaTachometerAlt />,
+            icon: <FaBook />,
             label: "Test Details",
             path: "/TestWinner",
             active: true,
         },
         {
-            icon: <FaTachometerAlt />,
+            icon: <FaQuestionCircle />,
             label: "Quiz",
             path: "/Quiz",
             active: true,
