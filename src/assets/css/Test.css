@@ -774,6 +774,13 @@
   margin-bottom: 20px;
 }
 
+.certificate-link {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
 .certificate-image {
   max-width: 100%;
   height: auto;
@@ -782,8 +789,9 @@
   transition: transform 0.3s ease;
 }
 
-.certificate-image:hover {
+.certificate-link:hover .certificate-image {
   transform: scale(1.02);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 }
 
 .certificate-actions {
