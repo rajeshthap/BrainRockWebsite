@@ -403,7 +403,7 @@ const AddQuiz = () => {
                 variant="secondary"
                 type="button"
                 onClick={addQuestion}
-                className="mb-4"
+                className="me-2"
               >
                 <FaPlus className="me-1" /> Add Question
               </Button>
