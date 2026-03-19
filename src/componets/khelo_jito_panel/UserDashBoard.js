@@ -187,13 +187,14 @@ const UserDashBoard = () => {
         `${API_BASE_URL}/test-winner-cashback/`,
         {
           user_id: user.unique_id,
-          cashback: walletAmount - TEST_AMOUNT
+          cashback: TEST_AMOUNT // Send only the entry fee amount
         },
         { withCredentials: true }
       );
 
       if (response.data.status) {
-        setWalletAmount(response.data.cashback);
+        // Calculate the remaining balance locally
+        setWalletAmount(walletAmount - TEST_AMOUNT);
         setPaymentSuccess(true);
         // Save payment method and source to localStorage for Test component
         localStorage.setItem("test_payment_method", "wallet");

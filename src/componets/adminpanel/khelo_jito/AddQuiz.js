@@ -213,7 +213,7 @@ const AddQuiz = () => {
         {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            <h2 className="mb-4">Add New Quiz</h2>
+            <h2 className="mb-4" style={{ fontSize: '1.25rem', fontWeight: '600' }}>Add New Quiz</h2>
             
             {showAlert && (
               <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
@@ -221,36 +221,47 @@ const AddQuiz = () => {
               </Alert>
             )}
             
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>Quiz Title</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter quiz title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              
-              <Form.Group className="mb-3">
-                <Form.Label>Description</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Enter quiz description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              
+            <Form onSubmit={handleSubmit} style={{ fontSize: '0.8rem' }}>
+              {/* First line: Title and Description */}
               <Row>
                 <Col lg={6} md={6} sm={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Category</Form.Label>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Quiz Title</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter quiz title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '300px' }}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col lg={6} md={6} sm={12}>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Description</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={1}
+                      placeholder="Enter quiz description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '300px' }}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              
+              {/* Second line: Category, Price, Entry Fee, Dates */}
+              <Row>
+                <Col lg={3} md={4} sm={12}>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Category</Form.Label>
                     <Form.Control
                       type="text"
                       placeholder="Enter quiz category"
@@ -258,115 +269,125 @@ const AddQuiz = () => {
                       value={formData.quiz_category}
                       onChange={handleChange}
                       required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '150px' }}
                     />
                   </Form.Group>
                 </Col>
-                <Col lg={6} md={6} sm={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Price (₹)</Form.Label>
+                <Col lg={2} md={4} sm={12}>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Price (₹)</Form.Label>
                     <Form.Control
                       type="number"
                       min="0"
-                      placeholder="Enter quiz price"
+                      placeholder="Price"
                       name="price"
                       value={formData.price}
                       onChange={handleChange}
                       required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '100px' }}
                     />
                   </Form.Group>
                 </Col>
-                <Col lg={6} md={6} sm={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Entry Fee (₹)</Form.Label>
+                <Col lg={2} md={4} sm={12}>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Entry Fee (₹)</Form.Label>
                     <Form.Control
                       type="number"
                       min="0"
                       step="0.01"
-                      placeholder="Enter entry fee"
+                      placeholder="Fee"
                       name="entry_fee"
                       value={formData.entry_fee}
                       onChange={handleChange}
                       required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '100px' }}
                     />
                   </Form.Group>
                 </Col>
-              </Row>
-              
-              <Row>
-                <Col lg={6} md={6} sm={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Start Date & Time</Form.Label>
+                <Col lg={3} md={6} sm={12}>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Start Date</Form.Label>
                     <Form.Control
                       type="datetime-local"
                       name="start_date_time"
                       value={formData.start_date_time}
                       onChange={handleChange}
                       required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '180px' }}
                     />
                   </Form.Group>
                 </Col>
-                <Col lg={6} md={6} sm={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>End Date & Time</Form.Label>
+                <Col lg={2} md={6} sm={12}>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>End Date</Form.Label>
                     <Form.Control
                       type="datetime-local"
                       name="end_date_time"
                       value={formData.end_date_time}
                       onChange={handleChange}
                       required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '180px' }}
                     />
                   </Form.Group>
                 </Col>
               </Row>
               
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-2">
                 <Form.Check
                   type="checkbox"
-                  label="Active"
+                  label={<span style={{ fontSize: '0.8rem' }}>Active</span>}
                   name="is_active"
                   checked={formData.is_active}
                   onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
                 />
               </Form.Group>
               
-              <hr className="my-4" />
+              <hr className="my-2" />
               
-              <h3>Questions ({formData.questions.length})</h3>
+              <h3 style={{ fontSize: '1rem', fontWeight: '600' }}>Questions ({formData.questions.length})</h3>
               
               {formData.questions.map((question, questionIndex) => (
-                <div key={questionIndex} className="mb-4 p-3 border rounded">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h4>Question {questionIndex + 1}</h4>
+                <div key={questionIndex} className="mb-2 p-2 border rounded">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: '500' }}>Question {questionIndex + 1}</h4>
                     <Button
                       variant="danger"
                       size="sm"
                       onClick={() => removeQuestion(questionIndex)}
                       disabled={formData.questions.length <= 1}
+                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}
                     >
                       <FaTrash className="me-1" /> Remove
                     </Button>
                   </div>
                   
-                  <Form.Group className="mb-3">
-                    <Form.Label>Question Text</Form.Label>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Question Text</Form.Label>
                     <Form.Control
                       as="textarea"
-                      rows={2}
+                      rows={1}
                       placeholder="Enter question text"
                       name="question_text"
                       value={question.question_text}
                       onChange={(e) => handleQuestionChange(questionIndex, e)}
                       required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '400px' }}
                     />
                   </Form.Group>
                   
-                  <Form.Group className="mb-3">
-                    <Form.Label>Options</Form.Label>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Options</Form.Label>
                     <div className="options-container">
                       {question.options.map((option, optionIndex) => (
-                        <div key={optionIndex} className="option-item mb-2">
-                          <InputGroup>
-                            <InputGroup.Text>Option {optionIndex + 1}</InputGroup.Text>
+                        <div key={optionIndex} className="option-item mb-1">
+                          <InputGroup size="sm">
+                            <InputGroup.Text style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>Option {optionIndex + 1}</InputGroup.Text>
                             <Form.Control
                               type="text"
                               placeholder={`Enter option ${optionIndex + 1}`}
@@ -374,6 +395,7 @@ const AddQuiz = () => {
                               value={option}
                               onChange={(e) => handleQuestionChange(questionIndex, e)}
                               required
+                              style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '350px' }}
                             />
                           </InputGroup>
                         </div>
@@ -381,16 +403,18 @@ const AddQuiz = () => {
                     </div>
                   </Form.Group>
                   
-                  <Form.Group className="mb-3">
-                    <Form.Label>Correct Answer</Form.Label>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Correct Answer</Form.Label>
                     <Form.Select
                       name="correct_answer"
                       value={question.correct_answer}
                       onChange={(e) => handleQuestionChange(questionIndex, e)}
                       required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '150px' }}
                     >
                       {question.options.map((_, index) => (
-                        <option key={index} value={index}>
+                        <option key={index} value={index} style={{ fontSize: '0.8rem' }}>
                           Option {index + 1}
                         </option>
                       ))}
@@ -404,6 +428,8 @@ const AddQuiz = () => {
                 type="button"
                 onClick={addQuestion}
                 className="me-2"
+                size="sm"
+                style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
               >
                 <FaPlus className="me-1" /> Add Question
               </Button>
@@ -413,6 +439,8 @@ const AddQuiz = () => {
                 type="submit" 
                 disabled={isSubmitting}
                 className="me-2"
+                size="sm"
+                style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
               >
                 {isSubmitting ? 'Submitting...' : 'Add Quiz'}
               </Button>
@@ -421,6 +449,8 @@ const AddQuiz = () => {
                 variant="secondary" 
                 onClick={clearForm}
                 type="button"
+                size="sm"
+                style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
               >
                 Clear
               </Button>

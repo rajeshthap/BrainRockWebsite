@@ -134,6 +134,7 @@ import UserProfile from "./componets/khelo_jito_panel/user_profile/UserProfile";
 import TestWinner from "./componets/khelo_jito_panel/TestWinner";
 import WalletPaymentStatus from "./componets/khelo_jito_panel/WalletPaymentStatus";
 import Quiz from "./componets/khelo_jito_panel/Quiz";
+import QuizTest from "./componets/Play_and_Win/QuizTest";
 
 
 // import Terms from "./componets/pdf_page/Terms";
@@ -218,7 +219,8 @@ function AppContent() {
         "/UserProfile",
         "/TestWinner",
         "/WalletPaymentStatus",
-        "/Quiz"
+        "/Quiz",
+        "/QuizTest"
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -412,6 +414,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Quiz />
+              </ProtectedRoute>
+            }
+          />
+        <Route
+            path="/QuizTest"
+            element={
+              <ProtectedRoute>
+                <QuizTest />
               </ProtectedRoute>
             }
           />
