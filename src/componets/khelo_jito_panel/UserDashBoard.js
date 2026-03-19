@@ -62,7 +62,7 @@ const UserDashBoard = () => {
         try {
           console.log("Fetching certificates count for user:", user.unique_id);
           const response = await axios.get(
-            `${API_BASE_URL}/api/test-winners/?user_id=${user.unique_id}`,
+            `${API_BASE_URL}/test-winners/?user_id=${user.unique_id}`,
             { withCredentials: true }
           );
           
