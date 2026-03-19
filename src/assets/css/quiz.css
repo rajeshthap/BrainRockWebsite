@@ -183,9 +183,9 @@
           padding: 20px 0;
         }
         
-        .payment-details, .wallet-info, .payment-methods {
+        /* .payment-details, .wallet-info, .payment-methods {
           margin-bottom: 25px;
-        }
+        } */
         
         .payment-details h5, .wallet-info h5, .payment-methods h5 {
           font-weight: 600;

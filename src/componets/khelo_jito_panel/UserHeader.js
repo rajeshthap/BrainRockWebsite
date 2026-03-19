@@ -276,8 +276,10 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     if (userDetails.profile_photo) {
       return `https://brainrock.in/brainrock/backend${userDetails.profile_photo}`;
     }
-    // Fallback to a default avatar
-    return `https://ui-avatars.com/api/?name=ADMIN&background=0d6efd&color=fff&size=40`;
+    // Fallback to a default avatar with dynamic user name
+    const displayName = getDisplayName();
+    const avatarName = displayName || "User";
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(avatarName)}&background=0d6efd&color=fff&size=40`;
   };
 
   return (
@@ -294,10 +296,10 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             </Button>
           </Col>
 
-          <Col className="d-flex align-items-center justify-content-end">
+          <Col className="d-flex align-items-center justify-content-end p-2">
             <div className="d-flex align-items-center me-3">
               <div 
-                className="wallet-info d-flex align-items-center bg-light px-3 py-2 rounded-pill"
+                className="wallet-info d-flex align-items-center bg-light px-3 rounded-pill"
                 style={{ cursor: 'pointer' }}
                 onClick={() => setShowWithdrawModal(true)}
               >
@@ -322,7 +324,9 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
                     roundedCircle
                     className="user-avatar"
                     onError={(e) => {
-                      e.target.src = `https://ui-avatars.com/api/?name=ADMIN&background=0d6efd&color=fff&size=40`;
+                      const displayName = getDisplayName();
+                      const avatarName = displayName || "User";
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(avatarName)}&background=0d6efd&color=fff&size=40`;
                     }}
                   />
                   <span className="user-name d-none d-md-inline">{getDisplayName()}</span>
