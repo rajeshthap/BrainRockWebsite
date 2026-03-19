@@ -37,10 +37,17 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
             path: "/TestWinner",
             active: true,
         },
-       
-       
-    
-       
+        {
+            icon: <FaTachometerAlt />,
+            label: "Quiz",
+            path: "/Quiz",
+            active: true,
+        },
+        
+        
+        
+     
+        
     ];
 
     return (
