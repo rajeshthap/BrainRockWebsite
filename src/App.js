@@ -126,6 +126,8 @@ import KheloJito from "./componets/Play_and_Win/KheloJito";
 import Test from "./componets/Play_and_Win/Test";
 import AddPlay from "./componets/adminpanel/khelo_jito/AddPlay";
 import ManagePlay from "./componets/adminpanel/khelo_jito/ManagePlay";
+import AddQuiz from "./componets/adminpanel/khelo_jito/AddQuiz";
+import ManageQuiz from "./componets/adminpanel/khelo_jito/ManageQuiz";
 import Registerduser from "./componets/adminpanel/khelo_jito_registerd_user/Registerduser";
 import UserDashBoard from "./componets/khelo_jito_panel/UserDashBoard";
 import UserProfile from "./componets/khelo_jito_panel/user_profile/UserProfile";
@@ -207,8 +209,10 @@ function AppContent() {
     "/GenerateBill",
     "/ManageBills",
     "/BillUpload",
-    "/AddPlay",
-    "/ManagePlay",
+        "/AddPlay",
+        "/ManagePlay",
+        "/AddQuiz",
+        "/ManageQuiz",
     "/Registerduser",
          "/UserDashBoard",
         "/UserProfile",
@@ -833,6 +837,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManagePlay />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/AddQuiz"
+          element={
+            <ProtectedRoute>
+              <AddQuiz />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ManageQuiz"
+          element={
+            <ProtectedRoute>
+              <ManageQuiz />
             </ProtectedRoute>
           }
         />

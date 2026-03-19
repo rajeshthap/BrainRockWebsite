@@ -350,6 +350,16 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
                     path: "/ManagePlay",
                     icon: <FaEdit />,
                 },
+                {
+                    label: "Add Quiz",
+                    path: "/AddQuiz",
+                    icon: <FaPlusCircle />,
+                },
+                {
+                    label: "Manage Quiz",
+                    path: "/ManageQuiz",
+                    icon: <FaEdit />,
+                },
             ],
         },
     ];
