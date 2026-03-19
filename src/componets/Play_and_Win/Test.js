@@ -123,10 +123,10 @@ function Test() {
     return () => clearInterval(timer);
   }, [currentQuestion, loading, showResults, questions.length]);
 
-  // Reset timer when current question or selected option changes
+  // Reset timer only when current question changes
   useEffect(() => {
     setTimeLeft(10);
-  }, [currentQuestion, selectedOption]);
+  }, [currentQuestion]);
 
   // Tab switch detection
   useEffect(() => {
@@ -554,15 +554,22 @@ function Test() {
             <div className="certificate-section">
               <h3 className="certificate-title">Your Certificate</h3>
               <div className="certificate-container">
-                <img 
-                  src={certificateUrl} 
-                  alt="Certificate" 
-                  className="certificate-image"
-                  onError={(e) => {
-                    console.error("Certificate image failed to load");
-                    e.target.style.display = "none";
-                  }}
-                />
+                <a 
+                  href={certificateUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="certificate-link"
+                >
+                  <img 
+                    src={certificateUrl} 
+                    alt="Certificate" 
+                    className="certificate-image"
+                    onError={(e) => {
+                      console.error("Certificate image failed to load");
+                      e.target.style.display = "none";
+                    }}
+                  />
+                </a>
               </div>
               <div className="certificate-actions">
                 <a 

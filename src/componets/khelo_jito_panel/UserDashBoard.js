@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Container, Row, Col, Modal, Pagination, Alert, Button, Form } from "react-bootstrap";
-import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice } from "react-icons/fa";
+import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice, FaCertificate } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -28,12 +28,13 @@ const UserDashBoard = () => {
   const [addAmount, setAddAmount] = useState("");
   const [addError, setAddError] = useState("");
   const [addSuccess, setAddSuccess] = useState("");
+  const [certificatesCount, setCertificatesCount] = useState(0);
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Fetch wallet amount and check for won amount
+  // Fetch wallet amount and certificates count
   useEffect(() => {
     const fetchWalletAmount = async () => {
       if (user && user.unique_id) {
@@ -53,6 +54,58 @@ const UserDashBoard = () => {
           console.error("Error fetching wallet amount:", error);
           setWalletAmount(0);
         }
+      }
+    };
+
+    const fetchCertificatesCount = async () => {
+      if (user && user.unique_id) {
+        try {
+          console.log("Fetching certificates count for user:", user.unique_id);
+          const response = await axios.get(
+            `${API_BASE_URL}/api/test-winners/?user_id=${user.unique_id}`,
+            { withCredentials: true }
+          );
+          
+          console.log("Test winners API response:", response.data);
+          
+          // Check if response has expected structure
+          if (response.data.status && response.data.data) {
+            console.log("Response data structure:", Object.keys(response.data.data));
+            
+            if (response.data.data.attempts) {
+              console.log("All attempts:", response.data.data.attempts);
+              
+              // Check all test_status values present
+              const allStatuses = [...new Set(response.data.data.attempts.map(attempt => attempt.test_status))];
+              console.log("All unique test statuses:", allStatuses);
+              
+              // Check which attempts have certificates
+              const attemptsWithCertificates = response.data.data.attempts.filter(
+                attempt => attempt.certificate
+              );
+              console.log("Attempts with certificates:", attemptsWithCertificates);
+              
+               // Count only passed attempts with certificates
+              const attemptsWithCertificate = response.data.data.attempts.filter(
+                attempt => attempt.test_status === "passed" && attempt.certificate
+              );
+              console.log("Attempts with certificate count:", attemptsWithCertificate.length);
+              setCertificatesCount(attemptsWithCertificate.length);
+            } else {
+              console.log("No attempts data found in response");
+              setCertificatesCount(0);
+            }
+          } else {
+            console.log("Response does not have expected structure");
+            setCertificatesCount(0);
+          }
+        } catch (error) {
+          console.error("Error fetching certificates count:", error);
+          setCertificatesCount(0);
+        }
+      } else {
+        console.log("User or user.unique_id not available");
+        setCertificatesCount(0);
       }
     };
 
@@ -78,8 +131,11 @@ const UserDashBoard = () => {
       }
     };
 
-    // First fetch wallet amount, then check for winning amount
-    fetchWalletAmount().then(() => {
+    // First fetch wallet amount and certificates count, then check for winning amount
+    Promise.all([
+      fetchWalletAmount(),
+      fetchCertificatesCount()
+    ]).then(() => {
       checkWinningAmount();
     });
 
@@ -283,7 +339,21 @@ const UserDashBoard = () => {
                                 </div>
                               </div>
                             </Col>
-      
+                            <Col lg={4} md={6} sm={12} className="mb-3">
+                              <div
+                                className="br-stat-card card-green"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => navigate("/TestWinner")}
+                              >
+                                <div className="br-stat-icon">
+                                  <FaCertificate />
+                                </div>
+                                <div className="br-stat-details">
+                                  <h5>Passed Certificates</h5>
+                                  <h2>{certificatesCount}</h2>
+                                </div>
+                              </div>
+                            </Col>
             </Row>
           </div>
 
