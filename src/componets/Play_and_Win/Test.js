@@ -605,9 +605,6 @@ function Test() {
                 <button className="continue-button" onClick={handleClaimPrize}>
                   Claim reward
                 </button>
-                <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
-                  Wrong Answers
-                </button>
               </>
             ) : (
               <>
