@@ -5,6 +5,8 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import FooterPage from "../footer/FooterPage";
 import { Container } from "react-bootstrap";
 import { AuthContext } from "../context/AuthContext";
+import Winner from "../../assets/images/result_img.jpg"
+import Faild from "../../assets/images/result_img.jpg"
 
 // Define the base URL for your API
 const API_BASE_URL = "https://brainrock.in/brainrock/backend";
@@ -508,93 +510,119 @@ function Test() {
     return (
       <div className="test-container">
         <div className="test-card results-card">
-          <div className="results-header">
-            <h1 className="results-title">Test Results</h1>
-          </div>
-
-          <div className="circular-progress-container">
-            <div
-              className={`circular-progress ${animateScore ? "animate" : ""}`}
-            >
-              <svg className="progress-ring" width="200" height="200">
-                <circle
-                  className="progress-ring-circle-bg"
-                  cx="100"
-                  cy="100"
-                  r="90"
-                />
-                <circle
-                  className={`progress-ring-circle ${isPassed ? "pass" : "fail"}`}
-                  cx="100"
-                  cy="100"
-                  r="90"
-                  strokeDasharray={`${2 * Math.PI * 90}`}
-                  strokeDashoffset={`${2 * Math.PI * 90 * (1 - percentage / 100)}`}
-                />
-              </svg>
-              <div className="progress-text">
-                <div className="score-display">
-                  {testResult?.score || score}/{questions.length}
+          <div className="results-content">
+            {/* Left side - Certificate */}
+            {isPassed && certificateUrl ? (
+              <div className="results-image">
+                <div className="certificate-container">
+                  <a 
+                    href={certificateUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="certificate-link"
+                  >
+                    <img 
+                      src={certificateUrl} 
+                      alt="Certificate" 
+                      className="certificate-image"
+                      onError={(e) => {
+                        console.error("Certificate image failed to load");
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  </a>
                 </div>
-                <div className="percentage-display">{percentage}%</div>
+                <div className="certificate-actions">
+                  <a 
+                    href={certificateUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="download-button"
+                  >
+                    Download Certificate
+                  </a>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className={`result-message ${isPassed ? "passed" : "failed"}`}>
-            {isTabSwitchFailed
-              ? "Test Failed: You switched tabs during the test"
-              : isPassed
-                ? "Test Passed: Congratulations!"
-                : "Test Failed: Better luck next time"}
-          </div>
-
-          {/* Certificate Section */}
-          {isPassed && certificateUrl && (
-            <div className="certificate-section">
-              <h3 className="certificate-title">Your Certificate</h3>
-              <div className="certificate-container">
-                <a 
-                  href={certificateUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="certificate-link"
-                >
-                  <img 
-                    src={certificateUrl} 
-                    alt="Certificate" 
-                    className="certificate-image"
-                    onError={(e) => {
-                      console.error("Certificate image failed to load");
-                      e.target.style.display = "none";
-                    }}
-                  />
-                </a>
+            ) : (
+              /* If no certificate (failed), show appropriate message or leave empty */
+              <div className="results-image">
+                <div className="no-certificate">
+                  <h3>{isPassed ? "Certificate Coming Soon" : "Try Again to Get Certificate"}</h3>
+                  <p>{isPassed ? "Your certificate will be available shortly" : "Score 60% or more to earn a certificate"}</p>
+                </div>
               </div>
-              <div className="certificate-actions">
-                <a 
-                  href={certificateUrl} 
-                  download="certificate.png" 
-                  className="download-button"
-                >
-                  Download Certificate
-                </a>
-              </div>
-            </div>
-          )}
-
-          <div className="results-actions">
-            {isPassed && (
-              <button className="claim-button" onClick={handleClaimPrize}>
-                Claim Your Prize
-              </button>
             )}
-            <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
-              Wrong Answers
-            </button>
-            <button className="restart-button" onClick={handleRestart}>
-              Retake Test
-            </button>
+            
+            {/* Right side - Results */}
+            <div className="results-data">
+              <div className="results-header">
+                <h1 className="results-title">
+                  {isPassed ? "Congratulations!" : "Better Luck Next Time"}
+                </h1>
+                <p className="results-subtitle">
+                  {isPassed ? "You have successfully passed the test" : "Keep practicing to improve your score"}
+                </p>
+              </div>
+
+              <div className="score-section">
+                <div className="percentage-circle">
+                  <div className="percentage-text">{percentage}%</div>
+                  <div className="score-label">Overall Score</div>
+                </div>
+                
+                <div className="score-details">
+                  <div className="score-item correct">
+                    <div className="score-value">{testResult?.score || score}</div>
+                    <div className="score-label">Correct</div>
+                  </div>
+                  <div className="score-item incorrect">
+                    <div className="score-value">{questions.length - (testResult?.score || score)}</div>
+                    <div className="score-label">Incorrect</div>
+                  </div>
+                  <div className="score-item total">
+                    <div className="score-value">{questions.length}</div>
+                    <div className="score-label">Total</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="progress-section">
+                <div className="progress-header">
+                  <div className="progress-label">Progress</div>
+                  <div className="progress-percentage">{percentage}%</div>
+                </div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ width: `${percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="results-actions">
+            {isPassed ? (
+              <>
+                <button className="continue-button" onClick={handleClaimPrize}>
+                  Claim reward
+                </button>
+                <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
+                  Wrong Answers
+                </button>
+              </>
+            ) : (
+              <>
+              <div className="d-flex  ">
+                <button className="restart-button" onClick={handleRestart}>
+                  Retake Test
+                </button>
+                <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
+                  Wrong Answers
+                </button>
+                </div>
+              </>
+            )}
+              </div>
+            </div>
           </div>
 
           {/* Wrong Answers Modal */}
