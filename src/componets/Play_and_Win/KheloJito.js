@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import "../../assets/css/KheloJito.css";
 import axios from "axios";
 import FooterPage from "../footer/FooterPage";
+import kheloImage from "../../assets/images/khelo-img-banner.png";
 
 function KheloJito() {
   // State to hold the form data
@@ -241,27 +242,26 @@ function KheloJito() {
     <>
       {/* Banner Section */}
       <div className="KheloJito-banner">
-        <div className="site-breadcrumb-wpr">
-          <h2 className="breadcrumb-title">Khelo aur Jeeto</h2>
-          <ul className="breadcrumb-menu clearfix">
-            <li>
-              <Link className="breadcrumb-home" to="/">
-                Home
-              </Link>
-            </li>
-            <li className="px-2">/</li>
-            <li>
-              <Link className="breadcrumb-about" to="/">
-                Khelo aur Jeeto
-              </Link>
-            </li>
-          </ul>
-        </div>
+        
       </div>
 
-       <div className="khelojito-section">
-        <Container className="mt-4 mb-3">
-          <div className="khelojito-box text-heading">
+        <div className="khelojito-section">
+         <Container className="mt-4 mb-3">
+           <Row className="align-items-center">
+             {/* Left Side - Image */}
+             <Col md={6} className="mb-4 mb-md-0">
+               <div className="khelo-image-container">
+                 <img 
+                   src={kheloImage} 
+                   alt="Khelo aur Jeeto" 
+                   className="khelo-image"
+                 />
+               </div>
+             </Col>
+             
+             {/* Right Side - Form */}
+             <Col md={6}>
+               <div className="khelojito-box text-heading">
             {/* Success Alert */}
             {showSuccess && (
               <Card className="mb-4 border-success success-card">
@@ -426,8 +426,9 @@ function KheloJito() {
                 )}
               </Row>
             </Form>
-
-          </div>
+              </div>
+            </Col>
+          </Row>
 
           {/* Terms and Conditions Modal */}
           <Modal 

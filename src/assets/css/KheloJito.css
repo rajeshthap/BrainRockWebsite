@@ -1,6 +1,6 @@
 /* KheloJito.css */
 .KheloJito-banner {
-  background-image: url('../../assets/images/bg-counter.jpg');
+  background-image: url('../../assets/images/khelo_teeto_5.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -78,7 +78,7 @@
 }
 
 .khelojito-section {
-  padding: 60px 20px;
+
   background-color: #f8f9fa;
   min-height: calc(100vh - 350px);
 }
@@ -183,8 +183,9 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .KheloJito-banner {
-    height: 200px;
-    padding: var(--br-space-500);
+    height: 130px;
+    padding: var(--br-space-400);
+    background-size: cover;
   }
   
   .breadcrumb-title {
@@ -209,11 +210,8 @@
 }
 
 @media (max-width: 576px) {
-  .KheloJito-banner {
-    height: 180px;
-    padding: var(--br-space-400);
-  }
-  
+ 
+ 
   .breadcrumb-title {
     font-size: 1.8rem;
   }
@@ -271,6 +269,20 @@
 
 .terms-content .mb-3 {
   margin-bottom: 15px !important;
+}
+
+.khelo-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.khelo-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Modal Responsive Design */
