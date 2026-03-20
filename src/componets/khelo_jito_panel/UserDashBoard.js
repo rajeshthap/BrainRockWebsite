@@ -325,59 +325,65 @@ const UserDashBoard = () => {
         <Container fluid className="dashboard-body">
           <h1 className="page-title">Khelo Aur Jeeto </h1>
           
-          <div className="br-box-container mt-4">
-            <div className="br-stats-row">
-              {/* Khelo Aur Jeeto Card */}
-              <div
-                className="br-stat-card card-gradient-primary"
-                onClick={handleKheloJeetoClick}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="br-stat-icon">
-                  <FaBook />
-                </div>
-                <div className="br-stat-details">
-                  <h5>Khelo Aur Jeeto</h5>
-                  <p className="card-description">Start Quiz</p>
-                  <button className="play-button">Play Now</button>
-                </div>
-              </div>
+           <div className="br-box-container mt-4">
+             <div className="row">
+               {/* Khelo Aur Jeeto Card */}
+               <div className="col-md-4 mb-4">
+                 <div
+                   className="br-stat-card card-gradient-primary"
+                   onClick={handleKheloJeetoClick}
+                   style={{ cursor: "pointer" }}
+                 >
+                   <div className="br-stat-icon">
+                     <FaBook />
+                   </div>
+                   <div className="br-stat-details">
+                     <h5>Khelo Aur Jeeto</h5>
+                     <p className="card-description">Start Quiz</p>
+                     <button className="play-button">Play Now</button>
+                   </div>
+                 </div>
+               </div>
 
-              {/* Certificates Card */}
-              <div
-                className="br-stat-card card-gradient-success"
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate("/TestWinner")}
-              >
-                <div className="br-stat-icon">
-                  <FaCertificate />
-                </div>
-                <div className="br-stat-details">
-                  <h5>Passed Certificates</h5>
-                  <h2>{certificatesCount}</h2>
-                  <p className="card-description">Earned Certificates</p>
-                </div>
-              </div>
+               {/* Certificates Card */}
+               <div className="col-md-4 mb-4">
+                 <div
+                   className="br-stat-card card-gradient-success"
+                   style={{ cursor: "pointer" }}
+                   onClick={() => navigate("/TestWinner")}
+                 >
+                   <div className="br-stat-icon">
+                     <FaCertificate />
+                   </div>
+                   <div className="br-stat-details">
+                     <h5>Passed Certificates</h5>
+                     <h2>{certificatesCount}</h2>
+                     <p className="card-description">Earned Certificates</p>
+                   </div>
+                 </div>
+               </div>
 
-              {/* Wallet Balance Card */}
-              <div className="br-stat-card card-gradient-warning">
-                <div className="br-stat-icon">
-                  <FaFileInvoice />
-                </div>
-                <div className="br-stat-details">
-                  <h5>Wallet Balance</h5>
-                  <h2>₹{walletAmount.toFixed(2)}</h2>
-                  <p className="card-description">Available to Play</p>
-                  <button 
-                    className="add-money-button"
-                    onClick={() => setShowAddWalletModal(true)}
-                  >
-                    Add Money
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+               {/* Wallet Balance Card */}
+               <div className="col-md-4 mb-4">
+                 <div className="br-stat-card card-gradient-warning">
+                   <div className="br-stat-icon">
+                     <FaFileInvoice />
+                   </div>
+                   <div className="br-stat-details">
+                     <h5>Wallet Balance</h5>
+                     <h2>₹{walletAmount.toFixed(2)}</h2>
+                     <p className="card-description">Available to Play</p>
+                     <button 
+                       className="add-money-button"
+                       onClick={() => setShowAddWalletModal(true)}
+                     >
+                       Add Money
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
 
           {/* Feature Highlights */}
           <div className="feature-highlights mt-5">
