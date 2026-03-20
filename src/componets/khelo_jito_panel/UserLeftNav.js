@@ -13,6 +13,7 @@ import {
 
 import "../../assets/css/emp_dashboard.css";
 import { Link } from "react-router-dom";
+import "../../assets/css/user_dashborad_style.css"
 import { AuthContext } from "../context/AuthContext";
 const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
     const { logout } = useContext(AuthContext);
@@ -55,7 +56,7 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
         <>
             {/* Desktop Sidebar */}
             <div
-                className={`sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}
+                className={`sidebar-user  ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}
             >
                 <div className="sidebar-header">
                     <div className="logo-container text-center">
@@ -115,7 +116,7 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
                         ))}
                 </Nav>
 
-                <div className="sidebar-footer">
+                {/* <div className="sidebar-footer">
                     <Nav.Link
                         className="nav-item logout-btn"
                         onClick={logout}
@@ -125,7 +126,7 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
                         </span>
                         <span className="nav-text">Logout</span>
                     </Nav.Link>
-                </div>
+                </div> */}
             </div>
 
             {/* Mobile / Tablet Sidebar (Offcanvas) */}

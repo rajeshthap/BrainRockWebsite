@@ -40,6 +40,13 @@
   color: #fff;
 }
 
+.sidebar-user{
+background-color:#a54db5 !important;
+}
+.temp-rwd-table-style tr:first-child {
+    background-color: #a54db5;
+    color: #fff;
+}
 .br-stat-details h2 {
   font-size: 32px;
   margin: 5px 0 0 0;

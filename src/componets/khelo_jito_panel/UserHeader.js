@@ -309,7 +309,7 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
               <Button 
                 variant="primary" 
                 size="sm" 
-                className="ms-2"
+                className="ms-2 profile-bg"
                 onClick={() => setShowAddWalletModal(true)}
               >
                 + Add
@@ -385,7 +385,7 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             Cancel
           </Button>
           <Button 
-            variant="primary" 
+            variant="primary" className="profile-bg"
             onClick={handleAddWallet}
             disabled={!addAmount || parseFloat(addAmount) <= 0}
           >

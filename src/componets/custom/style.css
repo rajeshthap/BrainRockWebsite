@@ -394,7 +394,10 @@ color: #0056b3;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   height: 100%;
 }
-
+.profile-bg{
+  background-color: #a54db5 !important;
+  border: 1px solid #a54db5;
+}
 .project-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
