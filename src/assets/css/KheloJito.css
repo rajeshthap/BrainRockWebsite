@@ -232,7 +232,7 @@
 }
 
 .terms-content h4 {
-  margin-top: 20px;
+  margin-top: 2px;
   margin-bottom: 10px;
   font-weight: 600;
   color: #333;
@@ -242,20 +242,20 @@
   font-size: 12px;
 }
 .terms-content p {
-  margin-bottom: 10px;
+  margin-bottom: 2px;
   color: #555;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .terms-content ul {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   padding-left: 20px;
 }
 
 .terms-content li {
   margin-bottom: 5px;
   color: #555;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .terms-content strong {
