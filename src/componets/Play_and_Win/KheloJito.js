@@ -248,16 +248,43 @@ function KheloJito() {
         <div className="khelojito-section">
          <Container className="mt-4 mb-3">
            <Row className="align-items-center">
-             {/* Left Side - Image */}
-             <Col md={6} className="mb-4 mb-md-0">
-               <div className="khelo-image-container">
-                 <img 
-                   src={kheloImage} 
-                   alt="Khelo aur Jeeto" 
-                   className="khelo-image"
-                 />
-               </div>
-             </Col>
+              {/* Left Side - Image Slider */}
+              <Col md={6} className="mb-4 mb-md-0">
+                <div className="slider-container">
+                  <div className="slider-one">
+                    <div className="slider-one-image">
+                      <div className="slider-text">
+                        <h1>Khelo Aur Jeeto!</h1>
+                        <p>Test your knowledge and win amazing rewards. Play our exciting quiz game and earn points that can be converted to real money.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="slider-two">
+                    <div className="slider-two-image">
+                      <div className="slider-text">
+                        <h1>Knowledge is Power</h1>
+                        <p>Every question you answer correctly brings you closer to winning. Challenge yourself with our skill-based quiz platform.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="slider-three">
+                    <div className="slider-three-image">
+                      <div className="slider-text">
+                        <h1>Earn Real Rewards</h1>
+                        <p>Get 80 points for 100% correct answers. Points can be withdrawn to your wallet once you reach ₹200.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="slider-four">
+                    <div className="slider-four-image">
+                      <div className="slider-text">
+                        <h1>Play Anytime, Anywhere</h1>
+                        <p>Participate in our quiz game from the comfort of your home. All you need is a smartphone and internet connection.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Col>
              
              {/* Right Side - Form */}
              <Col md={6}>
