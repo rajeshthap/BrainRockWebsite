@@ -245,7 +245,7 @@ function QuizTest() {
     try {
       const response = await axios.post(
         "https://brainrock.in/brainrock/backend/api/quiz/add-cashback/",
-        { user_id: userId },
+        { user_id: userId, quiz_id: quizId },
         {
           withCredentials: true,
           headers: {
@@ -371,12 +371,18 @@ function QuizTest() {
     const isTabSwitchFailed =
       score === 0 && userAnswers.length < questions.length;
     // Calculate percentage
-    const percentage = Math.round(
-      ((testResult?.score || score) / questions.length) * 100,
-    );
+    const calculatedScore = testResult?.score !== undefined ? testResult.score : score;
+    const percentage = Math.round((calculatedScore / questions.length) * 100);
+    console.log("Calculated Score:", calculatedScore);
+    // Debug information
+    console.log("Test Result:", testResult);
+    console.log("Score:", testResult?.score || score);
+    console.log("Total Questions:", questions.length);
+    console.log("Percentage:", percentage);
+    
     // Determine if passed based on API response or score
     const isPassed = testResult
-      ? testResult.status === "passed"
+      ? (testResult.status === "passed" || testResult.status === "success" || percentage === 100)
       : percentage >= 60;
 
     // If user passed and showWinnerForm is true, display the winner form
@@ -537,7 +543,7 @@ function QuizTest() {
                   </a>
                 </div>
               )}
-              <button className="claim-prize-button" onClick={handleClaimReward}>
+              <button className="continue-button" onClick={handleClaimReward}>
                 Claim Reward
               </button>
             </div>
@@ -550,7 +556,7 @@ function QuizTest() {
             </div>
           )}
 
-          {userAnswers.length === questions.length && (
+          {userAnswers.length === questions.length && !isPassed && (
             <div className="wrong-answers-section">
               <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
                 View Wrong Answers
