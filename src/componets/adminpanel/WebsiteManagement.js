@@ -21,6 +21,7 @@ const WebsiteManagement = () => {
   const [brainrockBillsCount, setBrainrockBillsCount] = useState(0);
   const [zeeBillsCount, setZeeBillsCount] = useState(0);
   const [kheloJitoUsersCount, setKheloJitoUsersCount] = useState(0);
+  const [quizParticipantsCount, setQuizParticipantsCount] = useState(0);
 
   // Loading and error states
   const [loading, setLoading] = useState({
@@ -30,6 +31,7 @@ const WebsiteManagement = () => {
     brainrockBills: false,
     zeeBills: false,
     kheloJitoUsers: false,
+    quizParticipants: false,
   });
 
   const [errors, setErrors] = useState({
@@ -39,6 +41,7 @@ const WebsiteManagement = () => {
     brainrockBills: null,
     zeeBills: null,
     kheloJitoUsers: null,
+    quizParticipants: null,
   });
 
   // Table view states
@@ -154,6 +157,58 @@ const goToZeeBills = () => {
 const goToKheloJitoUsers = () => {
   navigate("/Registerduser");
 };
+
+const goToQuizParticipants = () => {
+  navigate("/Registerduser", { state: { activeTab: "quiz-participants" } });
+};
+
+  // Fetch Quiz Participants count
+  useEffect(() => {
+    const fetchQuizParticipants = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, quizParticipants: true }));
+        console.log('=== Fetching quiz participants ===');
+        const response = await fetch(
+          "https://brainrock.in/brainrock/backend/api/quiz-participants/",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('HTTP error response:', errorText);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('=== API response data ===', JSON.stringify(data, null, 2));
+
+        if (data.status && Array.isArray(data.data)) {
+          setQuizParticipantsCount(data.data.length);
+          setErrors((prev) => ({ ...prev, quizParticipants: null }));
+          console.log('Success - Quiz participants count:', data.data.length);
+        } else {
+          console.error('Unexpected data format:', typeof data, data);
+          throw new Error(data.message || "Failed to fetch quiz participants - unexpected data format");
+        }
+      } catch (err) {
+        console.error('=== Error fetching quiz participants ===');
+        console.error('Error message:', err.message);
+        console.error('Error stack:', err.stack);
+        setErrors((prev) => ({ ...prev, quizParticipants: err.message }));
+        setQuizParticipantsCount(0);
+      } finally {
+        setLoading((prev) => ({ ...prev, quizParticipants: false }));
+      }
+    };
+
+    fetchQuizParticipants();
+  }, []);
   // Fetch Employees data
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -969,6 +1024,23 @@ const goToKheloJitoUsers = () => {
                   <div className="br-stat-details">
                     <h5>Total Khelo Jito Users</h5>
                     <h2>{kheloJitoUsersCount}</h2>
+                  </div>
+                </div>
+              </Col>
+
+              {/* Quiz Participants Card */}
+              <Col lg={4} md={6} sm={12} className="mb-3">
+                <div
+                  className="br-stat-card card-purple"
+                  onClick={goToQuizParticipants}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="br-stat-icon">
+                    <FaUsers />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Total Quiz Participants</h5>
+                    <h2>{quizParticipantsCount}</h2>
                   </div>
                 </div>
               </Col>

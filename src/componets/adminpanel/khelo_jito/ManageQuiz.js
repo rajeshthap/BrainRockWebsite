@@ -25,8 +25,12 @@ const ManageQuiz = () => {
   // View and Edit modal state
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showParticipantsModal, setShowParticipantsModal] = useState(false);
   const [currentViewItem, setCurrentViewItem] = useState(null);
   const [currentEditItem, setCurrentEditItem] = useState(null);
+  const [currentQuizId, setCurrentQuizId] = useState(null);
+  const [participants, setParticipants] = useState([]);
+  const [participantsLoading, setParticipantsLoading] = useState(false);
   const [editFormData, setEditFormData] = useState({
     quiz_id: "",
     title: "",
@@ -150,6 +154,28 @@ const ManageQuiz = () => {
   const handleView = (quiz) => {
     setCurrentViewItem(quiz);
     setShowViewModal(true);
+  };
+
+  // Handle view participants
+  const handleViewParticipants = async (quizId) => {
+    setCurrentQuizId(quizId);
+    setParticipantsLoading(true);
+    try {
+      const response = await axios.get(`https://brainrock.in/brainrock/backend/api/quiz-participants/?quiz_id=${quizId}`, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const participantsData = response.data.data || response.data;
+      setParticipants(participantsData);
+      setShowParticipantsModal(true);
+    } catch (err) {
+      console.error('Error fetching participants:', err);
+      setParticipants([]);
+    } finally {
+      setParticipantsLoading(false);
+    }
   };
 
   // Handle edit
@@ -367,7 +393,7 @@ const ManageQuiz = () => {
                                 </small>
                               </div>
                             </div>
-                            <div className="d-flex justify-content-end">
+                             <div className="d-flex justify-content-end">
                               <Button
                                 variant="primary"
                                 size="sm"
@@ -383,6 +409,14 @@ const ManageQuiz = () => {
                                 onClick={() => handleView(quiz)}
                               >
                                 View
+                              </Button>
+                              <Button
+                                variant="info"
+                                size="sm"
+                                className="me-2"
+                                onClick={() => handleViewParticipants(quiz.quiz_id)}
+                              >
+                                Participants
                               </Button>
                               <Button
                                 variant="danger"
@@ -725,8 +759,96 @@ const ManageQuiz = () => {
             </>
           )}
         </Modal.Body>
-        <Modal.Footer>
+         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Participants Modal */}
+      <Modal show={showParticipantsModal} onHide={() => setShowParticipantsModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Quiz Participants - {currentQuizId}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {participantsLoading ? (
+            <div className="text-center my-5">
+              <Spinner animation="border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <p className="mt-2">Loading participants...</p>
+            </div>
+          ) : participants.length > 0 ? (
+            <div className="table-responsive">
+              <table className="temp-rwd-table">
+                <tbody>
+                  <tr>
+                    <th>S.No</th>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Payment Status</th>
+                    <th>Attempt Status</th>
+                    <th>Score</th>
+                    <th>Joined At</th>
+                  </tr>
+                  {participants.map((participant, index) => (
+                    <tr key={participant.id}>
+                      <td data-th="S.No">{index + 1}</td>
+                      <td data-th="User ID">{participant.student?.user_id}</td>
+                      <td data-th="Name">{participant.student?.full_name}</td>
+                      <td data-th="Email">{participant.student?.email}</td>
+                      <td data-th="Phone">{participant.student?.phone}</td>
+                      <td data-th="Payment Status">
+                        <span className={`badge bg-${participant.payment_status === 'wallet-completed' || participant.payment_status === 'completed' ? 'success' : 'warning'}`}>
+                          {participant.payment_status}
+                        </span>
+                      </td>
+                      <td data-th="Attempt Status">
+                        <span className={`badge bg-${participant.attempt?.attempt_status === 'submitted' ? 'success' : participant.attempt?.attempt_status === 'started' ? 'info' : 'warning'}`}>
+                          {participant.attempt?.attempt_status || 'Not Attempted'}
+                        </span>
+                      </td>
+                      <td data-th="Score">{participant.attempt?.score || 'N/A'}</td>
+                      <td data-th="Joined At">{new Date(participant.joined_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr style={{ backgroundColor: '#f0f8ff', fontWeight: 'bold', borderTop: '2px solid #0066cc' }}>
+                    <td colSpan="5" className="text-end pe-3" style={{ color: '#333' }}>
+                      <strong>Participation Summary:</strong>
+                    </td>
+                    <td colSpan="4" style={{ paddingLeft: '20px' }}>
+                      <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
+                        <div style={{ color: '#27ae60', fontWeight: '600' }}>
+                          ✓ Completed: {participants.filter(p => p.attempt?.attempt_status === 'submitted').length}
+                        </div>
+                        <div style={{ color: '#3498db', fontWeight: '600' }}>
+                          ⏳ Started: {participants.filter(p => p.attempt?.attempt_status === 'started').length}
+                        </div>
+                        <div style={{ color: '#f39c12', fontWeight: '600' }}>
+                          ⏰ Not Attempted: {participants.filter(p => !p.attempt || !p.attempt.attempt_status).length}
+                        </div>
+                        <div style={{ marginTop: '8px', borderTop: '1px solid #bdc3c7', paddingTop: '8px', color: '#0066cc', fontWeight: '700' }}>
+                          Total: {participants.length}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center my-5">
+              <p>No participants found for this quiz.</p>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowParticipantsModal(false)}>
             Close
           </Button>
         </Modal.Footer>
