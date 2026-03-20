@@ -139,12 +139,24 @@ const WalletPaymentStatus = () => {
                 </Alert>
               )}
 
-               {paymentStatus.phonepe_response && (
-                 <div className="mb-4">
-                   <p className="text-muted">Amount</p>
-                   <p className="font-weight-bold">₹{(paymentStatus.phonepe_response.amount / 100).toFixed(2)}</p>
-                 </div>
-               )}
+                {paymentStatus.phonepe_response && paymentStatus.phonepe_response.amount != null && !isNaN(paymentStatus.phonepe_response.amount) && (
+                  <div className="mb-4">
+                    <p className="text-muted">Amount</p>
+                    <p className="font-weight-bold">₹{parseFloat(paymentStatus.phonepe_response.amount).toFixed(2)}</p>
+                  </div>
+                )}
+                {(!paymentStatus.phonepe_response || paymentStatus.phonepe_response.amount == null || isNaN(paymentStatus.phonepe_response.amount)) && paymentStatus.amount && !isNaN(paymentStatus.amount) && (
+                  <div className="mb-4">
+                    <p className="text-muted">Amount</p>
+                    <p className="font-weight-bold">₹{parseFloat(paymentStatus.amount).toFixed(2)}</p>
+                  </div>
+                )}
+                {((!paymentStatus.phonepe_response || paymentStatus.phonepe_response.amount == null || isNaN(paymentStatus.phonepe_response.amount)) && (!paymentStatus.amount || isNaN(paymentStatus.amount))) && (
+                  <div className="mb-4">
+                    <p className="text-muted">Amount</p>
+                    <p className="font-weight-bold">₹0.00</p>
+                  </div>
+                )}
 
               <Button variant="primary" onClick={handleCloseTab}>
                 Close Tab

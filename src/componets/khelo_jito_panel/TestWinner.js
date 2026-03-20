@@ -309,26 +309,24 @@ const TestWinner = () => {
                     
                     {/* Pagination */}
                     {totalPages > 1 && (
-                      <div className="d-flex justify-content-center mt-4">
-                        <Pagination>
-                          <Pagination.Prev 
-                            onClick={() => handlePageChange(currentPage - 1)} 
-                            disabled={currentPage === 1}
-                          />
-                          {[...Array(totalPages).keys()].map(page => (
-                            <Pagination.Item 
-                              key={page + 1} 
-                              active={page + 1 === currentPage}
-                              onClick={() => handlePageChange(page + 1)}
-                            >
-                              {page + 1}
-                            </Pagination.Item>
-                          ))}
-                          <Pagination.Next 
-                            onClick={() => handlePageChange(currentPage + 1)} 
-                            disabled={currentPage === totalPages}
-                          />
-                        </Pagination>
+                      <div className="pagination-container">
+                        <ul className="pagination">
+                          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                            <a className="page-link" href="#!" onClick={() => handlePageChange(currentPage - 1)}>
+                              &laquo;
+                            </a>
+                          </li>
+                          <li className="page-item active">
+                            <a className="page-link" href="#!">
+                              {currentPage} of {totalPages}
+                            </a>
+                          </li>
+                          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                            <a className="page-link" href="#!" onClick={() => handlePageChange(currentPage + 1)}>
+                              &raquo;
+                            </a>
+                          </li>
+                        </ul>
                       </div>
                     )}
                   </div>
