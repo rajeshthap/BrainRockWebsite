@@ -7,7 +7,7 @@ import { Container } from "react-bootstrap";
 import { AuthContext } from "../context/AuthContext";
 
 // Define the base URL for your API
-const API_BASE_URL = "https://brainrock.in/brainrock/backend";
+const API_BASE_URL = "https://brainrock.in/brainrock/backend/api";
 
 function QuizTest() {
   // Get user_id and quiz_id from URL search parameters or localStorage
@@ -27,6 +27,10 @@ function QuizTest() {
   // If payment was successful and we have user_id and quiz_id, proceed
   if (paymentSuccess === "true" && userId && quizId) {
     console.log("QuizTest component - Payment successful via:", paymentMethod);
+  } else if (paymentSuccess === "false" || paymentSuccess === "cancel") {
+    // If payment was canceled or failed, close the tab
+    console.log("QuizTest component - Payment canceled or failed");
+    window.close();
   }
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -64,7 +68,7 @@ function QuizTest() {
         }
 
         const response = await axios.post(
-          "https://brainrock.in/brainrock/backend/api/start-quiz/",
+          "https://brainrock.in/brainrock/backend/api/quiz-start/",
           { user_id: userId, quiz_id: quizId },
           {
             withCredentials: true,
@@ -201,7 +205,7 @@ function QuizTest() {
   const submitQuiz = async (answers) => {
     try {
       const response = await axios.post(
-        "https://brainrock.in/brainrock/backend/api/submit-quiz/",
+        `${API_BASE_URL}/submit-quiz/`,
         {
           user_id: userId,
           quiz_id: quizId,
@@ -236,62 +240,40 @@ function QuizTest() {
 
   const { user } = useContext(AuthContext);
 
-  // Handle claim prize
-  const handleClaimPrize = async () => {
-    // Get payment method and source from localStorage
-    const paymentMethod = localStorage.getItem("quiz_payment_method");
-    const quizSource = localStorage.getItem("quiz_source");
-    
-    // Check if came from user dashboard (using quiz_source flag)
-    if (quizSource === "userdashboard" && userId) {
-      try {
-        // Call add-cashback API to add won amount to wallet (for users from user dashboard)
-        const response = await axios.post(
-          "https://brainrock.in/brainrock/backend/api/add-cashback/",
-          { user_id: userId },
-          { withCredentials: true }
-        );
-
-        if (response.data.status) {
-          // Store winning amount (amount_added) in localStorage for display in dashboard
-          localStorage.setItem("winningAmount", response.data.amount_added || 0);
-          
-          // Redirect based on payment method
-          if (paymentMethod === "online") {
-            // For online payment, redirect to login page
-            navigate("/login");
-          } else {
-            // For wallet payment, redirect to user dashboard (keep existing behavior)
-            navigate("/UserDashBoard");
-          }
+  // Handle claim reward
+  const handleClaimReward = async () => {
+    try {
+      const response = await axios.post(
+        "https://brainrock.in/brainrock/backend/api/quiz/add-cashback/",
+        { user_id: userId },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      } catch (error) {
-        console.error("Error adding cashback:", error);
-        alert("Failed to claim prize. Please try again.");
+      );
+
+      if (response.data.status) {
+        alert("Congratulations! Your reward has been claimed successfully.");
+        // Redirect to user dashboard
+        navigate("/UserDashBoard");
+      } else {
+        throw new Error(response.data.message || "Failed to claim reward");
       }
-    } else if (userId) {
-      // For unauthenticated users or users from Quiz page, show winner form to fill details
-      setShowWinnerForm(true);
-    } else {
-      // For users without any identification
-      alert("Please register first to claim your prize.");
-      navigate("/KheloJito");
+    } catch (error) {
+      console.error("Error claiming reward:", error);
+      alert("Failed to claim reward. Please try again.");
     }
   };
 
-  const handleRestart = () => {
+  const handleCloseTest = () => {
     // Clear localStorage
     localStorage.removeItem("quiz_user_id");
     localStorage.removeItem("quiz_quiz_id");
     
-    // Redirect based on user authorization
-    if (user && user.unique_id) {
-      // Authorized user - redirect to user dashboard
-      navigate("/UserDashBoard");
-    } else {
-      // Unauthorized user - redirect to KheloJito for re-registration
-      navigate("/KheloJito");
-    }
+    // Redirect to KheloJito page (main quiz section) instead of closing tab
+    navigate("/KheloJito");
   };
 
   // Function to find and display wrong answers
@@ -555,15 +537,15 @@ function QuizTest() {
                   </a>
                 </div>
               )}
-              <button className="claim-prize-button" onClick={handleClaimPrize}>
-                Claim Prize
+              <button className="claim-prize-button" onClick={handleClaimReward}>
+                Claim Reward
               </button>
             </div>
           ) : (
             <div className="failure-message">
               <p>Sorry, you did not pass the quiz this time.</p>
-              <button className="restart-button" onClick={handleRestart}>
-                Try Again
+              <button className="restart-button" onClick={handleCloseTest}>
+                Close Test
               </button>
             </div>
           )}
@@ -580,6 +562,49 @@ function QuizTest() {
             <div className="tab-switch-failure">
               <h3>Test Failed Due to Tab Switching</h3>
               <p>Your quiz was terminated because you switched tabs multiple times.</p>
+            </div>
+          )}
+
+          {/* Wrong Answers Modal */}
+          {showWrongAnswersModal && (
+            <div className="wrong-answers-modal">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h2>Wrong Answers ({wrongAnswers.length})</h2>
+                  <button className="close-button" onClick={() => setShowWrongAnswersModal(false)}>
+                    ×
+                  </button>
+                </div>
+                <div className="modal-body">
+                  {wrongAnswers.length === 0 ? (
+                    <div className="no-wrong-answers">
+                      Congratulations! You answered all questions correctly.
+                    </div>
+                  ) : (
+                    wrongAnswers.map((item, index) => (
+                      <div key={index} className="wrong-answer-item">
+                        <div className="question-number">Question {item.questionNumber}:</div>
+                        <div className="question-text">{item.question}</div>
+                        <div className="answer-container">
+                          <div className="user-answer">
+                            <span className="label">Your Answer:</span>
+                            <span className="answer-text">{item.userAnswer}</span>
+                          </div>
+                          <div className="correct-answer">
+                            <span className="label">Correct Answer:</span>
+                            <span className="answer-text">{item.correctAnswer}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button className="close-button" onClick={() => setShowWrongAnswersModal(false)}>
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
