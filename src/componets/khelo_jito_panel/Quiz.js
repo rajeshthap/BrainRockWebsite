@@ -24,6 +24,7 @@ const Quiz = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [participationData, setParticipationData] = useState({});
   
   const [showAddWalletModal, setShowAddWalletModal] = useState(false);
   const [addAmount, setAddAmount] = useState("");
@@ -65,8 +66,35 @@ const Quiz = () => {
       }
     };
 
+    const fetchParticipatedQuizzes = async () => {
+      if (user && user.unique_id) {
+        try {
+          const response = await axios.get(
+            `${API_BASE_URL}/quiz-participants/?user_id=${user.unique_id}`,
+            { withCredentials: true }
+          );
+          
+          if (response.data.status && response.data.data) {
+            const participationMap = {};
+            response.data.data.forEach(item => {
+              participationMap[item.quiz] = {
+                score: item.attempt?.score,
+                totalQuestions: item.attempt?.total_questions,
+                status: item.attempt?.attempt_status
+              };
+            });
+            setParticipationData(participationMap);
+          }
+        } catch (error) {
+          console.error("Error fetching participated quizzes:", error);
+          setParticipationData({});
+        }
+      }
+    };
+
     fetchQuizzes();
-  }, []);
+    fetchParticipatedQuizzes();
+  }, [user]);
 
   useEffect(() => {
     const fetchWalletAmount = async () => {
@@ -111,11 +139,11 @@ const Quiz = () => {
     }
 
     try {
-      const response = await axios.put(
-        `${API_BASE_URL}/test-winner-cashback/`,
+      const response = await axios.post(
+        `${API_BASE_URL}/quiz/wallet-register/`,
         {
           user_id: user.unique_id,
-          cashback: parseFloat(selectedQuiz.entry_fee)
+          quiz_id: selectedQuiz.quiz_id
         },
         { withCredentials: true }
       );
@@ -195,23 +223,12 @@ const Quiz = () => {
     }
   };
 
-  const handleStartQuiz = async () => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/start-quiz/`,
-        { user_id: user.unique_id, quiz_id: selectedQuiz.quiz_id },
-        { withCredentials: true }
-      );
-
-      if (response.data.status) {
-        localStorage.setItem("quiz_user_id", user.unique_id);
-        localStorage.setItem("quiz_quiz_id", selectedQuiz.quiz_id);
-        setShowPaymentModal(false);
-      }
-    } catch (error) {
-      console.error("Error starting quiz:", error);
-      alert("Failed to start quiz. Please try again.");
-    }
+  const handleStartQuiz = () => {
+    localStorage.setItem("quiz_user_id", user.unique_id);
+    localStorage.setItem("quiz_quiz_id", selectedQuiz.quiz_id);
+    setShowPaymentModal(false);
+    // Navigate to QuizTest page to start the quiz
+    navigate("/QuizTest");
   };
 
   const handleClosePaymentModal = () => {
@@ -279,15 +296,24 @@ const Quiz = () => {
                             <span className="detail-label">Duration:</span>
                             <span className="detail-value">{Math.ceil(quiz.questions?.length * 1.2)} minutes</span>
                           </div>
+                          {participationData[quiz.quiz_id] && (
+                            <div className="quiz-detail-item">
+                              <span className="detail-label">Your Score:</span>
+                              <span className="detail-value">
+                                {participationData[quiz.quiz_id].score}/{participationData[quiz.quiz_id].totalQuestions}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="quiz-controls mt-4">
                           <Button
                             variant="primary"
                             onClick={() => handleQuizSelect(quiz)}
                             className="start-btn"
-                            disabled={!quiz.is_active}
+                            disabled={!quiz.is_active || participationData[quiz.quiz_id]}
                           >
-                            {quiz.is_active ? "Start Quiz" : "Quiz Inactive"}
+                            {!quiz.is_active ? "Quiz Inactive" : 
+                             participationData[quiz.quiz_id] ? "Already Participated" : "Start Quiz"}
                           </Button>
                         </div>
                       </Card.Body>
