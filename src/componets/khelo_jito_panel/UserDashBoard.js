@@ -29,6 +29,7 @@ const UserDashBoard = () => {
   const [addError, setAddError] = useState("");
   const [addSuccess, setAddSuccess] = useState("");
   const [certificatesCount, setCertificatesCount] = useState(0);
+  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
@@ -77,7 +78,7 @@ const UserDashBoard = () => {
               
               // Check all test_status values present
               const allStatuses = [...new Set(response.data.data.attempts.map(attempt => attempt.test_status))];
-              console.log("All unique test statuses:", allStatuses);
+              console.log("All unique quiz statuses:", allStatuses);
               
               // Check which attempts have certificates
               const attemptsWithCertificates = response.data.data.attempts.filter(
@@ -163,7 +164,7 @@ const UserDashBoard = () => {
     setSearchTerm("");
   };
 
-  // Open payment modal
+   // Open payment modal directly
   const handleKheloJeetoClick = () => {
     setShowPaymentModal(true);
     setPaymentMethod(null);
@@ -278,8 +279,13 @@ const UserDashBoard = () => {
     }
   };
 
-  // Start test
-  const handleStartTest = async () => {
+  // Show instructions modal before starting test
+  const handleStartTest = () => {
+    setShowInstructionsModal(true);
+  };
+
+  // Start test after accepting instructions
+  const handleAcceptInstructions = async () => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/start-test/`,
@@ -415,6 +421,97 @@ const UserDashBoard = () => {
         </Container>
       </div>
 
+      {/* Quiz Instructions Modal */}
+      <Modal
+        show={showInstructionsModal}
+        onHide={() => setShowInstructionsModal(false)}
+        size="lg"
+        centered
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Quiz Instructions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="max-h-90 overflow-y-auto">
+          <div className="instructions-container">
+             <div className="instruction-section">
+              <h5>📋 General Rules</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• This quiz contains <strong>10 questions</strong></li>
+                <li className="mb-2">• Total duration: <strong>2.5 minutes</strong></li>
+                <li className="mb-2">• Each question carries equal weightage</li>
+                <li className="mb-2">• You must score <strong>100% to pass</strong> and be eligible for the prize</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>⏱️ Timing & Navigation</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Each question has a <strong>15 second timer</strong></li>
+                <li className="mb-2">• Timer starts immediately when the question is displayed</li>
+                <li className="mb-2">• If time runs out, the question will be marked as unanswered</li>
+                <li className="mb-2">• You can navigate between questions using the Next button</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>👁️ Proctoring</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Switching tabs or minimizing the browser window is monitored</li>
+                <li className="mb-2">• <strong>First tab switch: Warning</strong> - You will see a caution message</li>
+                <li className="mb-2">• <strong>Second tab switch: Test failure</strong> - Your quiz will be immediately submitted with 0 score</li>
+                <li className="mb-2">• Do not attempt to cheat as it will result in disqualification</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>💡 Tips for Success</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Read each question carefully before answering</li>
+                <li className="mb-2">• Manage your time wisely - don't spend too long on a single question</li>
+                <li className="mb-2">• Answer all questions - there's no negative marking</li>
+                <li className="mb-2">• Stay focused and avoid distractions</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>🏆 Prize Information</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• <strong>Prize Amount:</strong> ₹10</li>
+                <li className="mb-2">• To claim your prize, you must score 100%</li>
+                <li className="mb-2">• Winners will receive their prize within 7-10 working days</li>
+                <li className="mb-2">• The prize will be transferred to your registered bank account</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>🔒 Terms & Conditions</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Entry fee is non-refundable once paid</li>
+                <li className="mb-2">• BrainRock reserves the right to disqualify any participant for cheating</li>
+                <li className="mb-2">• All decisions made by BrainRock are final and binding</li>
+                <li className="mb-2">• The quiz must be completed in a single session</li>
+              </ul>
+            </div>
+          </div>
+        </Modal.Body>
+         <Modal.Footer>
+          <Button 
+            variant="secondary" 
+            onClick={() => setShowInstructionsModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={handleAcceptInstructions}
+            className="px-4"
+          >
+            I Understand - Start Test
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* Payment Modal */}
       <Modal
         show={showPaymentModal}
@@ -423,7 +520,7 @@ const UserDashBoard = () => {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Register for Test</Modal.Title>
+          <Modal.Title>Register for Quiz</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {!paymentSuccess ? (
@@ -455,7 +552,7 @@ const UserDashBoard = () => {
               {paymentMethod === "wallet" && (
                 <div className="border p-4 rounded bg-light">
                   <h6>Wallet Balance: ₹{walletAmount.toFixed(2)}</h6>
-                  <p>Test Amount: ₹{TEST_AMOUNT.toFixed(2)}</p>
+                  <p>Quiz Amount: ₹{TEST_AMOUNT.toFixed(2)}</p>
                   <p>Remaining Balance: ₹{(walletAmount - TEST_AMOUNT).toFixed(2)}</p>
                   
                   {walletAmount < TEST_AMOUNT && (

@@ -35,13 +35,13 @@ const UserLeftNav = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) => {
         },
         {
             icon: <FaBook />,
-            label: "Test Details",
+            label: "Quiz Details",
             path: "/TestWinner",
             active: true,
         },
         {
             icon: <FaQuestionCircle />,
-            label: "Quiz",
+            label: "Quiz Categories",
             path: "/Quiz",
             active: true,
         },

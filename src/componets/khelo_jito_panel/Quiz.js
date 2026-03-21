@@ -30,6 +30,7 @@ const Quiz = () => {
   const [addAmount, setAddAmount] = useState("");
   const [addError, setAddError] = useState("");
   const [addSuccess, setAddSuccess] = useState("");
+  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
 
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -80,7 +81,8 @@ const Quiz = () => {
               participationMap[item.quiz] = {
                 score: item.attempt?.score,
                 totalQuestions: item.attempt?.total_questions,
-                status: item.attempt?.attempt_status
+                status: item.attempt?.status,
+                paymentStatus: item.payment_status
               };
             });
             setParticipationData(participationMap);
@@ -121,7 +123,7 @@ const Quiz = () => {
     fetchWalletAmount();
   }, [user]);
 
-  const handleQuizSelect = (quiz) => {
+   const handleQuizSelect = (quiz) => {
     setSelectedQuiz(quiz);
     setShowPaymentModal(true);
     setPaymentMethod(null);
@@ -224,9 +226,14 @@ const Quiz = () => {
   };
 
   const handleStartQuiz = () => {
+    setShowPaymentModal(false);
+    setShowInstructionsModal(true);
+  };
+
+  const handleAcceptInstructions = () => {
     localStorage.setItem("quiz_user_id", user.unique_id);
     localStorage.setItem("quiz_quiz_id", selectedQuiz.quiz_id);
-    setShowPaymentModal(false);
+    setShowInstructionsModal(false);
     // Navigate to QuizTest page to start the quiz
     navigate("/QuizTest");
   };
@@ -251,7 +258,7 @@ const Quiz = () => {
         <UserHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="dashboard-body">
-          <h1 className="page-title">Quiz</h1>
+          <h1 className="page-title">Quiz Categories</h1>
           
           <div className="br-box-container mt-4">
             {loading ? (
@@ -310,10 +317,10 @@ const Quiz = () => {
                             variant="primary"
                             onClick={() => handleQuizSelect(quiz)}
                             className="start-btn"
-                            disabled={!quiz.is_active || participationData[quiz.quiz_id]}
+                            disabled={!quiz.is_active || (participationData[quiz.quiz_id] && participationData[quiz.quiz_id].paymentStatus?.includes('completed'))}
                           >
                             {!quiz.is_active ? "Quiz Inactive" : 
-                             participationData[quiz.quiz_id] ? "Already Participated" : "Start Quiz"}
+                             (participationData[quiz.quiz_id] && participationData[quiz.quiz_id].paymentStatus?.includes('completed')) ? "Already Participated" : "Start Quiz"}
                           </Button>
                         </div>
                       </Card.Body>
@@ -474,7 +481,103 @@ const Quiz = () => {
         </Modal.Footer>
       </Modal>
 
-     
+      {/* Quiz Instructions Modal */}
+      <Modal
+        show={showInstructionsModal}
+        onHide={() => {
+          setShowInstructionsModal(false);
+          setSelectedQuiz(null);
+        }}
+        size="lg"
+        centered
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Quiz Instructions: {selectedQuiz?.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="max-h-90 overflow-y-auto">
+          <div className="instructions-container">
+             <div className="instruction-section">
+              <h5>📋 General Rules</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• This quiz contains <strong>{selectedQuiz?.questions?.length || 0} questions</strong></li>
+                <li className="mb-2">• Total duration: <strong>{Math.ceil(selectedQuiz?.questions?.length * 1.5)} minutes</strong></li>
+                <li className="mb-2">• Each question carries equal weightage</li>
+                <li className="mb-2">• You must score <strong>100% to pass</strong> and be eligible for the prize</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>⏱️ Timing & Navigation</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Each question has a <strong>15 second timer</strong></li>
+                <li className="mb-2">• Timer starts immediately when the question is displayed</li>
+                <li className="mb-2">• If time runs out, the question will be marked as unanswered</li>
+                <li className="mb-2">• You can navigate between questions using the Next button</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>👁️ Proctoring</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Switching tabs or minimizing the browser window is monitored</li>
+                <li className="mb-2">• <strong>First tab switch: Warning</strong> - You will see a caution message</li>
+                <li className="mb-2">• <strong>Second tab switch: Quiz failure</strong> - Your quiz will be immediately submitted with 0 score</li>
+                <li className="mb-2">• Do not attempt to cheat as it will result in disqualification</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>💡 Tips for Success</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Read each question carefully before answering</li>
+                <li className="mb-2">• Manage your time wisely - don't spend too long on a single question</li>
+                <li className="mb-2">• Answer all questions - there's no negative marking</li>
+                <li className="mb-2">• Stay focused and avoid distractions</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>🏆 Prize Information</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• <strong>Prize Amount:</strong> ₹{selectedQuiz?.price || 0}</li>
+                <li className="mb-2">• To claim your prize, you must score 100%</li>
+                <li className="mb-2">• Winners will receive their prize within 7-10 working days</li>
+                <li className="mb-2">• The prize will be transferred to your registered bank account</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>🔒 Terms & Conditions</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Entry fee is non-refundable once paid</li>
+                <li className="mb-2">• BrainRock reserves the right to disqualify any participant for cheating</li>
+                <li className="mb-2">• All decisions made by BrainRock are final and binding</li>
+                <li className="mb-2">• The quiz must be completed in a single session</li>
+              </ul>
+            </div>
+          </div>
+        </Modal.Body>
+            <Modal.Footer>
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  setShowInstructionsModal(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="primary" 
+                onClick={handleAcceptInstructions}
+                className="px-4"
+              >
+                I Understand - Start Quiz
+              </Button>
+            </Modal.Footer>
+      </Modal>
+
+      
     </div>
   );
 };

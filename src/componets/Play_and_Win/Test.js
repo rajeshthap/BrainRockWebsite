@@ -55,8 +55,9 @@ function Test() {
   const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(false); // State for wrong answers modal
   const [wrongAnswers, setWrongAnswers] = useState([]); // State to store wrong answers
   const [certificateUrl, setCertificateUrl] = useState(null); // State for certificate URL
+  const [showInstructionsModal, setShowInstructionsModal] = useState(true); // State for instructions modal (show on load)
 
-  // Start test and fetch questions from API
+  // Start Quiz and fetch questions from API
   useEffect(() => {
     const startTest = async () => {
       try {
@@ -79,10 +80,10 @@ function Test() {
           setQuestions(response.data.questions);
           setAttemptId(response.data.attempt_id);
         } else {
-          throw new Error(response.data.message || "Failed to start test");
+          throw new Error(response.data.message || "Failed to start quiz");
         }
       } catch (err) {
-        let errorMessage = "Failed to start test";
+        let errorMessage = "Failed to start quiz";
         if (err.response) {
           // Server responded with error status (400, 401, 403, 500, etc.)
           if (err.response.data && err.response.data.message) {
@@ -116,7 +117,7 @@ function Test() {
         if (prevTime <= 1) {
           // Time's up, move to next question
           handleNextQuestion();
-          return 10; // Reset timer for next question
+          return 15; // Reset timer for next question
         }
         return prevTime - 1;
       });
@@ -127,7 +128,7 @@ function Test() {
 
   // Reset timer only when current question changes
   useEffect(() => {
-    setTimeLeft(10);
+    setTimeLeft(15);
   }, [currentQuestion]);
 
   // Tab switch detection
@@ -143,7 +144,7 @@ function Test() {
             setTabSwitchWarning(true);
             console.log("Test warning: First tab switch");
           } else if (newCount === 2) {
-            // Second time, fail the test
+            // Second time, fail the quiz
             setShowResults(true);
             setScore(0);
             console.log("Test failed: Second tab switch");
@@ -193,12 +194,12 @@ function Test() {
       setCurrentQuestion(nextQuestion);
       setSelectedOption(null);
     } else {
-      // All questions completed, submit test
+      // All questions completed, submit quiz
       submitTest(newAnswers);
     }
   };
 
-  // Submit test to API
+  // Submit quiz to API
   const submitTest = async (answers) => {
     try {
       const response = await axios.post(
@@ -229,7 +230,7 @@ function Test() {
       
       setShowResults(true);
     } catch (err) {
-      console.error("Error submitting test:", err);
+      console.error("Error submitting quiz:", err);
       setError(err.message);
     }
   };
@@ -312,7 +313,7 @@ function Test() {
 
   // Social sharing functions
   const shareOnWhatsApp = (percent) => {
-    const text = `I passed the BrainRock test with ${percent}% score! Check out my certificate: ${certificateUrl}`;
+    const text = `I passed the BrainRock quiz with ${percent}% score! Check out my certificate: ${certificateUrl}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -326,7 +327,7 @@ function Test() {
   };
 
   const shareOnLinkedIn = (percent) => {
-    const text = `I passed the BrainRock test with ${percent}% score! Check out my certificate: ${certificateUrl}`;
+    const text = `I passed the BrainRock quiz with ${percent}% score! Check out my certificate: ${certificateUrl}`;
     const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certificateUrl)}&title=BrainRock Certificate&summary=${encodeURIComponent(text)}`;
     window.open(linkedinUrl, '_blank');
   };
@@ -390,6 +391,86 @@ function Test() {
     );
   }
 
+  // Show instructions modal before starting the Quiz
+  if (showInstructionsModal) {
+    return (
+      <div className="test-container">
+        <div className="test-card">
+          <div className="instructions-container">
+            <div className="instruction-section">
+              <h5>📋 General Rules</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• This quiz contains <strong>10 questions</strong></li>
+                <li className="mb-2">• Total duration: <strong>2.5 minutes</strong></li>
+                <li className="mb-2">• Each question carries equal weightage</li>
+                <li className="mb-2">• You must score <strong>100% to pass</strong> and be eligible for the prize</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>⏱️ Timing & Navigation</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Each question has a <strong>15 second timer</strong></li>
+                <li className="mb-2">• Timer starts immediately when the question is displayed</li>
+                <li className="mb-2">• If time runs out, the question will be marked as unanswered</li>
+                <li className="mb-2">• You can navigate between questions using the Next button</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>👁️ Proctoring</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Switching tabs or minimizing the browser window is monitored</li>
+                <li className="mb-2">• <strong>First tab switch: Warning</strong> - You will see a caution message</li>
+                <li className="mb-2">• <strong>Second tab switch: Quiz failure</strong> - Your quiz will be immediately submitted with 0 score</li>
+                <li className="mb-2">• Do not attempt to cheat as it will result in disqualification</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>💡 Tips for Success</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Read each question carefully before answering</li>
+                <li className="mb-2">• Manage your time wisely - don't spend too long on a single question</li>
+                <li className="mb-2">• Answer all questions - there's no negative marking</li>
+                <li className="mb-2">• Stay focused and avoid distractions</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>🏆 Prize Information</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• <strong>Prize Amount:</strong> ₹10</li>
+                <li className="mb-2">• To claim your prize, you must score 100%</li>
+                <li className="mb-2">• Winners will receive their prize within 7-10 working days</li>
+                <li className="mb-2">• The prize will be transferred to your registered bank account</li>
+              </ul>
+            </div>
+
+            <div className="instruction-section">
+              <h5>🔒 Terms & Conditions</h5>
+              <ul className="list-unstyled">
+                <li className="mb-2">• Entry fee is non-refundable once paid</li>
+                <li className="mb-2">• BrainRock reserves the right to disqualify any participant for cheating</li>
+                <li className="mb-2">• All decisions made by BrainRock are final and binding</li>
+                <li className="mb-2">• The quiz must be completed in a single session</li>
+              </ul>
+            </div>
+
+            <div className="text-center mt-4">
+              <button 
+                className="btn btn-primary px-4 py-2"
+                onClick={() => setShowInstructionsModal(false)}
+              >
+                I Understand - Start Quiz
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (questions.length === 0) {
     return (
       <div className="test-container">
@@ -411,9 +492,9 @@ function Test() {
       ((testResult?.score || score) / questions.length) * 100,
     );
     // Determine if passed based on API response or score
-    const isPassed = testResult
+     const isPassed = testResult
       ? testResult.status === "passed"
-      : percentage >= 60;
+      : percentage === 100;
 
     // If user passed and showWinnerForm is true, display the winner form
     if (isPassed && showWinnerForm) {
@@ -597,7 +678,7 @@ function Test() {
               <div className="results-image">
                 <div className="no-certificate">
                   <h3>{isPassed ? "Certificate Coming Soon" : "Try Again to Get Certificate"}</h3>
-                  <p>{isPassed ? "Your certificate will be available shortly" : "Score 60% or more to earn a certificate"}</p>
+                  <p>{isPassed ? "Your certificate will be available shortly" : "Score 100% to earn a certificate"}</p>
                 </div>
               </div>
             )}
@@ -609,7 +690,7 @@ function Test() {
                   {isPassed ? "Congratulations!" : "Better Luck Next Time"}
                 </h1>
                 <p className="results-subtitle">
-                  {isPassed ? "You have successfully passed the test" : "Keep practicing to improve your score"}
+                  {isPassed ? "You have successfully passed the Quiz" : "Keep practicing to improve your score"}
                 </p>
               </div>
 
@@ -659,7 +740,7 @@ function Test() {
               <>
               <div className="d-flex  ">
                 <button className="restart-button" onClick={handleRestart}>
-                  Retake Test
+                  Retake Quiz
                 </button>
                 <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
                   Wrong Answers
@@ -726,7 +807,7 @@ function Test() {
           {tabSwitchWarning && (
             <div className="warning-message">
               Warning: You have switched tabs once. Switching again will end
-              your test.
+              your Quiz.
             </div>
           )}
 

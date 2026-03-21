@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row, Modal, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import "../../assets/css/UserPage.css";
 // import PoorImg from "../../assets/images/poorimg.jpg";
 import Carousel from "react-bootstrap/Carousel";
@@ -8,6 +9,7 @@ import { FaArrowRight } from "react-icons/fa6";
 
 import Banner1 from "../../assets/images/banner-1.png";
 import Banner2 from "../../assets/images/banner-2.png";
+import KheloBanner from "../../assets/images/khelo-img-banner.png";
 
 import "../../assets/css/slider.css";
 
@@ -28,6 +30,30 @@ import ServicesPage from "./ServicesPage";
 import KheloJito from "../Play_and_Win/KheloJito";
 
 function UserPage() {
+  const navigate = useNavigate();
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Show popup every time user visits the page
+  useEffect(() => {
+    // Show popup after a short delay
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 1000); // 1 second delay
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle popup close
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
+
+  // Handle Khelo Jito button click
+  const handleKheloJitoClick = () => {
+    setShowPopup(false);
+    navigate("/KheloJito");
+  };
+
   // Helper function to truncate text to 20 words
   const truncateText = (text, wordLimit = 20) => {
     if (!text) return "";
@@ -296,6 +322,45 @@ function UserPage() {
 
   return (
     <div className="container-fluid p-0">
+      {/* Khelo Jito Popup */}
+      <Modal
+        show={showPopup}
+        onHide={handleClosePopup}
+        centered
+        size="lg"
+        backdrop="static"
+        className="khelo-jito-popup"
+      >
+        <Modal.Header closeButton className="bg-gradient-to-r from-purple-600 to-blue-600  term-nd-condi">
+          <Modal.Title className=" w-100">
+            <h3 className="mb-0 text-white"> ₹8 Entry | ₹80 Reward </h3>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-0 position-relative">
+          <img 
+            src={KheloBanner} 
+            alt="Khelo Aur Jeeto Banner" 
+            className="w-100 rounded-bottom"
+            style={{ height: '300px', objectFit: 'cover' }}
+          />
+          <div className="position-absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black-800 to-transparent p-4">
+            <div className="text-center">
+              <div className="d-flex justify-content-center">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={handleKheloJitoClick}
+                  className="px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 border-0 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+                  style={{ borderRadius: '50px', fontSize: '1.1rem' }}
+                >
+                 Khelo Aur Jeeto
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Modal.Body>
+       
+      </Modal>
       <TopNotificationBanner />
       <div className="craousal-main" style={{ overflow: "hidden" }}>
         <Carousel className="resorce-craousal" interval={3000} pause={false}>

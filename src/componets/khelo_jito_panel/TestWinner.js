@@ -237,7 +237,7 @@ const TestWinner = () => {
                     <div className="d-flex justify-content-between align-items-center mb-3">
                       <h3 className="mb-0">
                         <FaBook className="me-2 text-info" />
-                        Test Attempts ({filteredAttempts.length})
+                        Quiz Attempts ({filteredAttempts.length})
                       </h3>
                       <div style={{ width: '200px' }}>
                         <Form.Select
