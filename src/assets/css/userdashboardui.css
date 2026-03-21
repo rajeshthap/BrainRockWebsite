@@ -15,7 +15,7 @@
   font-weight: 700;
   color: #2c3e50;
   margin-bottom: 25px;
-  text-align: center;
+  
   position: relative;
 }
 
@@ -53,7 +53,7 @@
   box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
   position: relative;
   overflow: hidden;
-  min-height: 220px;
+ 
   height: 100%;
 }
 

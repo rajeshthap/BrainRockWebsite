@@ -310,6 +310,27 @@ function Test() {
     setShowWrongAnswersModal(true);
   };
 
+  // Social sharing functions
+  const shareOnWhatsApp = (percent) => {
+    const text = `I passed the BrainRock test with ${percent}% score! Check out my certificate: ${certificateUrl}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const shareOnInstagram = () => {
+    // Instagram doesn't support direct link sharing of text, but we can open Instagram
+    // Alternatively, we can download the certificate and let user share it manually
+    alert("To share on Instagram, please download your certificate first and then share it from the Instagram app.");
+    // Open Instagram app or website
+    window.open('https://www.instagram.com/', '_blank');
+  };
+
+  const shareOnLinkedIn = (percent) => {
+    const text = `I passed the BrainRock test with ${percent}% score! Check out my certificate: ${certificateUrl}`;
+    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certificateUrl)}&title=BrainRock Certificate&summary=${encodeURIComponent(text)}`;
+    window.open(linkedinUrl, '_blank');
+  };
+
   // Handle winner form input changes
   const handleWinnerFormChange = (e) => {
     const { name, value } = e.target;
@@ -532,7 +553,7 @@ function Test() {
                     />
                   </a>
                 </div>
-                <div className="certificate-actions">
+                 <div className="certificate-actions">
                   <a 
                     href={certificateUrl} 
                     target="_blank" 
@@ -541,6 +562,34 @@ function Test() {
                   >
                     Download Certificate
                   </a>
+                  
+                  {/* Social Sharing Buttons */}
+                  <div className="social-sharing">
+                    <div className="sharing-title">Share your certificate:</div>
+                    <div className="sharing-buttons">
+                      <button 
+                        className="share-button whatsapp" 
+                        onClick={() => shareOnWhatsApp(percentage)}
+                        title="Share on WhatsApp"
+                      >
+                        WhatsApp
+                      </button>
+                      <button 
+                        className="share-button instagram" 
+                        onClick={shareOnInstagram}
+                        title="Share on Instagram"
+                      >
+                        Instagram
+                      </button>
+                      <button 
+                        className="share-button linkedin" 
+                        onClick={() => shareOnLinkedIn(percentage)}
+                        title="Share on LinkedIn"
+                      >
+                        LinkedIn
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (

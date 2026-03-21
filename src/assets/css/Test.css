@@ -80,8 +80,8 @@
   color: white;
 }
 
-.timer{
-    color: rgb(137, 48, 48);
+.timer {
+  color: rgb(137, 48, 48);
 }
 
 .warning-message {
@@ -102,11 +102,13 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .next-button {
   width: 100%;
   padding: 15px;
@@ -163,7 +165,7 @@
 .restart-button {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(90deg,#13539d 0%,#1d71ce);
+  background: linear-gradient(90deg, #13539d 0%, #1d71ce);
   color: white;
   border: none;
   border-radius: 10px;
@@ -200,7 +202,7 @@
 }
 
 .results-image {
- 
+
   justify-content: center;
   align-items: center;
   min-height: 300px;
@@ -275,9 +277,11 @@
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
+
   100% {
     transform: scale(1);
   }
@@ -412,6 +416,97 @@
   transform: translateY(-1px);
 }
 
+/* Social Sharing Styles */
+.social-sharing {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.sharing-title {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.sharing-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.share-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.share-button:active {
+  transform: translateY(0);
+}
+
+/* WhatsApp button */
+.share-button.whatsapp {
+  background: #25D366;
+  color: white;
+}
+
+.share-button.whatsapp:hover {
+  background: #128C7E;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+/* Instagram button */
+.share-button.instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: white;
+}
+
+.share-button.instagram:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(220, 39, 67, 0.3);
+}
+
+/* LinkedIn button */
+.share-button.linkedin {
+  background: #0077b5;
+  color: white;
+}
+
+.share-button.linkedin:hover {
+  background: #006699;
+  box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .sharing-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .share-button {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
 /* No Certificate Message */
 .no-certificate {
   text-align: center;
@@ -436,7 +531,7 @@
 }
 
 .restart-button {
-  background: linear-gradient(90deg,#13539d 0%,#1d71ce);
+  background: linear-gradient(90deg, #13539d 0%, #1d71ce);
   color: white;
   border: none;
   padding: 15px 40px;
@@ -463,6 +558,7 @@
     transform: translateY(0) rotate(0deg);
     opacity: 1;
   }
+
   100% {
     transform: translateY(300px) rotate(720deg);
     opacity: 0;
