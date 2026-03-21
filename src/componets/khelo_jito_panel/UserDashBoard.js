@@ -601,9 +601,9 @@ const UserDashBoard = () => {
             </>
           ) : (
             <div className="text-center">
-              <h5>Payment Successful!</h5>
+              <h5 className="text-success">Payment Successful!</h5>
               <p>Your test registration is complete.</p>
-              <Button variant="primary" onClick={handleStartTest} className="mt-3">
+              <Button variant="success" onClick={handleStartTest} className="mt-3">
                 Start Test
               </Button>
             </div>

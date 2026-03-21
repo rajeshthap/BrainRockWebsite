@@ -421,9 +421,9 @@ const Quiz = () => {
             </>
           ) : (
             <div className="text-center">
-              <h5>Payment Successful!</h5>
+              <h5 className="text-success">Payment Successful!</h5>
               <p>Your quiz registration is complete.</p>
-              <Button variant="primary" onClick={handleStartQuiz} className="mt-3">
+              <Button variant="success" onClick={handleStartQuiz} className="mt-3">
                 Start Quiz
               </Button>
             </div>
