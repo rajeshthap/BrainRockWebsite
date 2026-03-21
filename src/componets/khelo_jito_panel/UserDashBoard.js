@@ -507,7 +507,7 @@ const UserDashBoard = () => {
             onClick={handleAcceptInstructions}
             className="px-4"
           >
-            I Understand - Start Test
+            I Understand - Start Quiz
           </Button>
         </Modal.Footer>
       </Modal>
@@ -604,7 +604,7 @@ const UserDashBoard = () => {
               <h5 className="text-success">Payment Successful!</h5>
               <p>Your test registration is complete.</p>
               <Button variant="success" onClick={handleStartTest} className="mt-3">
-                Start Test
+                Start Quiz
               </Button>
             </div>
           )}
