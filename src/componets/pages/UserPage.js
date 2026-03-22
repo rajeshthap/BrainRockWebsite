@@ -9,7 +9,7 @@ import { FaArrowRight } from "react-icons/fa6";
 
 import Banner1 from "../../assets/images/banner-1.png";
 import Banner2 from "../../assets/images/banner-2.png";
-import KheloBanner from "../../assets/images/khelo-img-banner.png";
+import KheloBanner from "../../assets/images/khelo-img-banner1.jpeg";
 
 import "../../assets/css/slider.css";
 
@@ -331,35 +331,41 @@ function UserPage() {
         backdrop="static"
         className="khelo-jito-popup"
       >
-        <Modal.Header closeButton className="bg-gradient-to-r from-purple-600 to-blue-600  term-nd-condi">
-          <Modal.Title className=" w-100">
-            <h3 className="mb-0 text-white"> ₹8 Entry | ₹80 Reward </h3>
+        <Modal.Header closeButton className="bg-gradient-to-r from-purple-600 to-blue-600 term-nd-condi">
+          <Modal.Title className="w-100">
+            <h3 className="mb-0 text-white">Get Knowledge, Certificate, and Money</h3>
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="p-0 position-relative">
-          <img 
-            src={KheloBanner} 
-            alt="Khelo Aur Jeeto Banner" 
-            className="w-100 rounded-bottom"
-            style={{ height: '300px', objectFit: 'cover' }}
-          />
-          <div className="position-absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black-800 to-transparent p-4">
-            <div className="text-center">
-              <div className="d-flex justify-content-center">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={handleKheloJitoClick}
-                  className="px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 border-0 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
-                  style={{ borderRadius: '50px', fontSize: '1.1rem' }}
-                >
-                 Khelo Aur Jeeto
-                </Button>
-              </div>
+        <Modal.Body className="p-4">
+          <div className="row align-items-center">
+            {/* Left side - content */}
+            <div className="col-lg-6 col-md-6 col-sm-12">
+             
+              <p className="mb-4 text-gray-700">
+                Join our quiz challenge and win exciting prizes. Test your knowledge and earn rewards.
+              </p>
+              
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleKheloJitoClick}
+                className="px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 border-0 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+                style={{ borderRadius: '50px', fontSize: '1.1rem' }}
+              >
+                Start Quiz
+              </Button>
+            </div>
+            {/* Right side - banner */}
+            <div className="col-lg-6 col-md-6 col-sm-12">
+              <img 
+                src={KheloBanner} 
+                alt="Khelo Aur Jeeto Banner" 
+                className="w-100 rounded"
+                style={{ height: '250px', objectFit: 'cover' }}
+              />
             </div>
           </div>
         </Modal.Body>
-       
       </Modal>
       <TopNotificationBanner />
       <div className="craousal-main" style={{ overflow: "hidden" }}>
