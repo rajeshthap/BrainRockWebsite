@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import "../../assets/css/KheloJito.css";
 import axios from "axios";
 import FooterPage from "../footer/FooterPage";
-import kheloImage from "../../assets/images/khelo-img-banner.png";
+import kheloImage from "../../assets/images/khelo-img-banner.jpeg";
 
 function KheloJito() {
   // State to hold the form data
