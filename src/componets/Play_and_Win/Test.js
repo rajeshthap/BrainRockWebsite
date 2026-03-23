@@ -25,8 +25,16 @@ function Test() {
   const paymentSuccess = searchParams.get("payment_success");
   const paymentMethod = searchParams.get("payment_method");
   
-  // If payment was successful and we have user_id, proceed
-  if (paymentSuccess === "true" && userId) {
+  // Check if this is a first-time payment user
+  const isFirstTimePayment = paymentSuccess === "true";
+  const hasPaidBefore = localStorage.getItem("test_has_paid") === "true";
+  const testAttempts = parseInt(localStorage.getItem("test_attempts") || "0");
+  const hasPassed = localStorage.getItem("test_passed") === "true";
+  
+  // If first-time payment, update localStorage
+  if (isFirstTimePayment && userId) {
+    localStorage.setItem("test_has_paid", "true");
+    localStorage.setItem("test_payment_date", new Date().toISOString());
     console.log("Test component - Payment successful via:", paymentMethod);
   }
 
@@ -56,6 +64,8 @@ function Test() {
   const [wrongAnswers, setWrongAnswers] = useState([]); // State to store wrong answers
   const [certificateUrl, setCertificateUrl] = useState(null); // State for certificate URL
   const [showInstructionsModal, setShowInstructionsModal] = useState(true); // State for instructions modal (show on load)
+  const [showStartTestButton, setShowStartTestButton] = useState(false); // State for first-time payment users to start test
+  const [remainingAttempts, setRemainingAttempts] = useState(3); // Track remaining attempts
 
   // Start Quiz and fetch questions from API
   useEffect(() => {
@@ -84,21 +94,60 @@ function Test() {
         }
       } catch (err) {
         let errorMessage = "Failed to start quiz";
+        let shouldRedirectToKheloJito = false;
+        
+        console.log("API Error Response:", err);
+        
         if (err.response) {
           // Server responded with error status (400, 401, 403, 500, etc.)
+          console.log("Error Response Data:", err.response.data);
+          console.log("Error Status:", err.response.status);
+          
           if (err.response.data && err.response.data.message) {
             errorMessage = err.response.data.message;
+            console.log("Error Message from API:", errorMessage);
+            
+            // Check if error indicates already attempted test - redirect to KheloJito
+            const errorLower = errorMessage.toLowerCase();
+            console.log("Error Lower:", errorLower);
+            
+            if (errorLower.includes('attempt') || 
+                errorLower.includes('already') || 
+                errorLower.includes('completed') || 
+                errorLower.includes('used') ||
+                errorLower.includes('expired')) {
+              console.log("DETECTED: All attempts used - Will redirect to KheloJito");
+              shouldRedirectToKheloJito = true;
+            }
           } else {
             errorMessage = `Server error: ${err.response.status}`;
           }
         } else if (err.request) {
           // Request made but no response
-          errorMessage =
-            "No response from server. Please check your connection.";
+          errorMessage = "No response from server. Please check your connection.";
+          console.log("No response from server");
         } else {
           // Error in request setup
           errorMessage = err.message;
+          console.log("Request setup error:", errorMessage);
+          
+          const errorLower = errorMessage.toLowerCase();
+          if (errorLower.includes('attempt') || 
+              errorLower.includes('already') || 
+              errorLower.includes('completed')) {
+            console.log("DETECTED: Attempt related error - Will redirect to KheloJito");
+            shouldRedirectToKheloJito = true;
+          }
         }
+        
+        // If error indicates user already attempted, redirect to KheloJito
+        if (shouldRedirectToKheloJito) {
+          console.log("Redirecting to KheloJito...");
+          navigate("/KheloJito");
+          return;
+        }
+        
+        console.log("Setting error message:", errorMessage);
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -107,6 +156,49 @@ function Test() {
 
     startTest();
   }, [userId]);
+
+  // Initialize remaining attempts from localStorage
+  useEffect(() => {
+    // Check if user has already passed the test
+    if (hasPassed) {
+      console.log("User has already passed the test - redirecting to KheloJito");
+      navigate("/KheloJito");
+      return;
+    }
+    
+    // Check if user has used all 3 attempts
+    if (testAttempts >= 3) {
+      console.log("User has used all 3 attempts - redirecting to KheloJito");
+      navigate("/KheloJito");
+      return;
+    }
+    
+    // For first-time payment users, show the start test button
+    if (isFirstTimePayment && userId) {
+      setShowStartTestButton(true);
+      setRemainingAttempts(3 - testAttempts);
+      console.log("First-time payment user - showing start test button");
+      console.log("Remaining attempts:", 3 - testAttempts);
+    } else if (hasPaidBefore && userId) {
+      // For returning payment users, also show the button with remaining attempts
+      setShowStartTestButton(true);
+      setRemainingAttempts(3 - testAttempts);
+      console.log("Returning payment user - showing start test button");
+      console.log("Remaining attempts:", 3 - testAttempts);
+    }
+  }, [userId, isFirstTimePayment, hasPaidBefore, testAttempts, hasPassed, navigate]);
+
+  // Function to start the test (for first-time payment users)
+  const handleStartTest = async () => {
+    // Increment attempts in localStorage
+    const currentAttempts = parseInt(localStorage.getItem("test_attempts") || "0");
+    localStorage.setItem("test_attempts", currentAttempts + 1);
+    setRemainingAttempts(3 - (currentAttempts + 1));
+    console.log("Test started. Attempt number:", currentAttempts + 1);
+    
+    // Hide the start button and proceed to start the test
+    setShowStartTestButton(false);
+  };
 
   // Timer effect
   useEffect(() => {
@@ -228,6 +320,30 @@ function Test() {
         setCertificateUrl(certificatePath);
       }
       
+      // Check if user passed the test (100% score)
+      const percentage = Math.round(
+        ((response.data.score || score) / questions.length) * 100,
+      );
+      const isPassed = response.data.status === "passed" || percentage === 100;
+      
+      if (isPassed) {
+        // User passed - mark as passed so they can't take test again
+        localStorage.setItem("test_passed", "true");
+        console.log("User passed the test - marking as passed in localStorage");
+      } else {
+        // User failed - check if they have used all attempts
+        const currentAttempts = parseInt(localStorage.getItem("test_attempts") || "0");
+        console.log("User failed. Current attempts:", currentAttempts);
+        
+        if (currentAttempts >= 3) {
+          // All 3 attempts used - redirect to KheloJito
+          console.log("All 3 attempts used - will redirect to KheloJito");
+          setTimeout(() => {
+            navigate("/KheloJito");
+          }, 2000);
+        }
+      }
+      
       setShowResults(true);
     } catch (err) {
       console.error("Error submitting quiz:", err);
@@ -281,16 +397,71 @@ function Test() {
   };
 
   const handleRestart = () => {
-    // Clear localStorage
-    localStorage.removeItem("test_user_id");
+    // Get current attempt count
+    const currentAttempts = parseInt(localStorage.getItem("test_attempts") || "0");
+    const hasPassed = localStorage.getItem("test_passed") === "true";
     
-    // Redirect based on user authorization
-    if (user && user.unique_id) {
-      // Authorized user - redirect to user dashboard
-      navigate("/UserDashBoard");
+    // If user has passed or used all 3 attempts, redirect to KheloJito
+    if (hasPassed || currentAttempts >= 3) {
+      // Clear localStorage for fresh start
+      localStorage.removeItem("test_user_id");
+      localStorage.removeItem("test_user_phone");
+      
+      // Redirect based on user authorization
+      if (user && user.unique_id) {
+        navigate("/UserDashBoard");
+      } else {
+        navigate("/KheloJito");
+      }
     } else {
-      // Unauthorized user - redirect to KheloJito for re-registration
-      navigate("/KheloJito");
+      // User has remaining attempts - show the start test button again
+      setShowStartTestButton(true);
+      setShowResults(false);
+      setCurrentQuestion(0);
+      setScore(0);
+      setUserAnswers([]);
+      setSelectedOption(null);
+      setTestResult(null);
+      setRemainingAttempts(3 - currentAttempts);
+      setQuestions([]); // Clear questions to trigger re-fetch
+      setLoading(true); // Set loading to trigger start-test API call
+      console.log("Restarting test. Remaining attempts:", 3 - currentAttempts);
+      
+      // Re-fetch questions for the next attempt
+      const startTest = async () => {
+        try {
+          if (!userId) {
+            throw new Error("User ID not found. Please register first.");
+          }
+
+          const response = await axios.post(
+            "https://brainrock.in/brainrock/backend/api/start-test/",
+            { user_id: userId },
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          if (response.data.status) {
+            setQuestions(response.data.questions);
+            setAttemptId(response.data.attempt_id);
+            // After getting questions, hide the start button and show instructions
+            setShowStartTestButton(false);
+          } else {
+            throw new Error(response.data.message || "Failed to start quiz");
+          }
+        } catch (err) {
+          console.error("Error restarting test:", err);
+          setError(err.message || "Failed to restart test");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      startTest();
     }
   };
 
@@ -376,6 +547,48 @@ function Test() {
       <div className="test-container">
         <div className="test-card">
           <div className="loading">Loading questions...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show start test button for first-time payment users
+  if (showStartTestButton) {
+    return (
+      <div className="test-container">
+        <div className="test-card">
+        <div className="payment-success-container">
+
+  {remainingAttempts > 0 ? (
+    <>
+    
+      <div className="attempts-info">
+        <p><strong>Remaining Attempts:</strong> {remainingAttempts} out of 3</p>
+        <p className="attempts-note">
+          You have used all your quiz attempts.
+        </p>
+      </div>
+    </>
+  ) : (
+    <>
+      <p className="payment-message text-danger">
+      Better luck next time! Thank You.
+      </p>
+
+      <p className="attempts-note">
+       Click below when you're ready to start your next attempt.
+      </p>
+    </>
+  )}
+
+  <button
+    className="btn btn-secondary btn-lg ms-3"
+    onClick={() => navigate("/KheloJito")}
+  >
+    Go Back
+  </button>
+
+</div>
         </div>
       </div>
     );
