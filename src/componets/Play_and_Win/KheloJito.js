@@ -248,15 +248,16 @@ function KheloJito() {
         <div className="khelojito-section">
          <Container className="mt-4 mb-3">
            <Row className="align-items-center">
-               {/* Left Side - Image Slider */}
-               <Col md={6} className="mb-4 mb-md-0">
-                 <div className="slider-container">
-                   <div className="slider-one">
-                     <div className="slider-one-image">
-                     </div>
-                   </div>
-                 </div>
-               </Col>
+             {/* Left Side - Image */}
+             <Col md={6} className="mb-4 mb-md-0">
+               <div className="khelo-image-container">
+                 <img 
+                   src={kheloImage} 
+                   alt="Khelo aur Jeeto" 
+                   className="khelo-image"
+                 />
+               </div>
+             </Col>
              
              {/* Right Side - Form */}
              <Col md={6}>
@@ -287,6 +288,7 @@ function KheloJito() {
               </Alert>
             )}
 
+            {/* Terms and Conditions Checkbox */}
            
 
             {/* Registration Form */}
