@@ -60,7 +60,42 @@ function Test() {
   // State for tracking remaining attempts for KheloJito users
   const [remainingAttempts, setRemainingAttempts] = useState(0);
   const [isRetakeMode, setIsRetakeMode] = useState(false);
+ useEffect(() => {
+    // Disable back button by preventing default behavior
+    const preventBack = (e) => {
+      // Always prevent default and push state to stay on current page
+      e.preventDefault();
+      // Push a new state to prevent going back
+      window.history.pushState(null, window.location.href);
+    };
+    // Push current state first to ensure we have a state to go back to
 
+    window.history.pushState(null, window.location.href);
+
+    // Handle popstate event (when back button is clicked)
+
+    window.addEventListener('popstate', preventBack);
+    // Also prevent hash changes
+
+    const preventHashChange = (e) => {
+
+      e.preventDefault();
+
+      window.history.pushState(null, window.location.href);
+
+    };
+
+    window.addEventListener('hashchange', preventHashChange);
+
+    return () => {
+
+      window.removeEventListener('popstate', preventBack);
+
+      window.removeEventListener('hashchange', preventHashChange);
+
+    };
+
+  }, []);
   // Initialize remaining attempts from localStorage on component mount
   useEffect(() => {
     const testSource = localStorage.getItem("test_source");

@@ -288,9 +288,6 @@ function KheloJito() {
               </Alert>
             )}
 
-            {/* Terms and Conditions Checkbox */}
-           
-
             {/* Registration Form */}
             <Form onSubmit={handleSubmit}>
               <Row>
