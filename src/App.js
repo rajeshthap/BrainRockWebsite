@@ -249,7 +249,6 @@ function AppContent() {
           element={<TrainingRegistration />}
         />
 
-        <Route path="/WebsiteManagement" element={<WebsiteManagement />} />
         <Route path="/LeftNavManagement" element={<LeftNavManagement />} />
         <Route path="/AddServices" element={<AddServices />} />
         <Route path="/ViewServices" element={<ViewServices />} />
@@ -269,7 +268,14 @@ function AppContent() {
         <Route path="/test" element={<Test />} />
 
         {/* Hr  Payroll (protected) */}
-
+    <Route
+          path="/WebsiteManagement"
+          element={
+            <ProtectedRoute>
+              <WebsiteManagement />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/LeaveStatus"
           element={

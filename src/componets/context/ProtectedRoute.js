@@ -8,6 +8,7 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [checking, setChecking] = useState(false);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   // When location changes, if there's no user try to refresh token once
   // before redirecting to /Login. This prevents typing a protected URL
@@ -16,7 +17,20 @@ const ProtectedRoute = ({ children }) => {
     let mounted = true;
 
     const tryRefresh = async () => {
-      if (user || loading) return; // already authenticated or still validating
+      // If we already have a user, no need to refresh
+      if (user) {
+        setHasCheckedAuth(true);
+        return;
+      }
+      
+      // If still loading, wait for it to complete
+      if (loading) return;
+
+      // If we've already checked and there's no user, redirect
+      if (hasCheckedAuth && !user) {
+        navigate('/Login', { state: { from: location }, replace: true });
+        return;
+      }
 
       if (typeof validateOrRefreshToken === 'function') {
         setChecking(true);
@@ -24,16 +38,19 @@ const ProtectedRoute = ({ children }) => {
           const res = await validateOrRefreshToken();
           if (!mounted) return;
           setChecking(false);
+          setHasCheckedAuth(true);
           if (!res || !res.success) {
             navigate('/Login', { state: { from: location }, replace: true });
           }
         } catch (e) {
           if (!mounted) return;
           setChecking(false);
+          setHasCheckedAuth(true);
           navigate('/Login', { state: { from: location }, replace: true });
         }
       } else {
         // No refresh function available, redirect immediately
+        setHasCheckedAuth(true);
         navigate('/Login', { state: { from: location }, replace: true });
       }
     };
@@ -44,11 +61,12 @@ const ProtectedRoute = ({ children }) => {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  }, [location.pathname, user, loading]);
 
   // While auth is loading (validating/refreshing token) or this route is
   // actively checking, don't render the protected children (show nothing).
-  if (loading || checking) {
+  // Also show nothing if we haven't checked auth yet and there's no user
+  if (loading || checking || (!hasCheckedAuth && !user)) {
     return null;
   }
 
