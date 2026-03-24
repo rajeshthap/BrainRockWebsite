@@ -41,21 +41,44 @@ function Test() {
   const [userAnswers, setUserAnswers] = useState([]);
   const [timeLeft, setTimeLeft] = useState(30);
   const [testResult, setTestResult] = useState(null);
-  const [tabSwitchWarning, setTabSwitchWarning] = useState(false); // New state for tab switch warning
-  const [tabSwitchCount, setTabSwitchCount] = useState(0); // New state for tab switch count
-  const [animateScore, setAnimateScore] = useState(false); // For score animation
-  const [showWinnerForm, setShowWinnerForm] = useState(false); // State for winner form visibility
+  const [tabSwitchWarning, setTabSwitchWarning] = useState(false);
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [animateScore, setAnimateScore] = useState(false);
+  const [showWinnerForm, setShowWinnerForm] = useState(false);
   const [winnerFormData, setWinnerFormData] = useState({
     phone: localStorage.getItem("test_user_phone") || "",
     password: "",
     account_holder_name: "",
     account_number: "",
     ifsc_code: "",
-  }); // State for winner form data
-  const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(false); // State for wrong answers modal
-  const [wrongAnswers, setWrongAnswers] = useState([]); // State to store wrong answers
-  const [certificateUrl, setCertificateUrl] = useState(null); // State for certificate URL
-  const [showInstructionsModal, setShowInstructionsModal] = useState(true); // State for instructions modal (show on load)
+  });
+  const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(false);
+  const [wrongAnswers, setWrongAnswers] = useState([]);
+  const [certificateUrl, setCertificateUrl] = useState(null);
+  const [showInstructionsModal, setShowInstructionsModal] = useState(true);
+
+  // State for tracking remaining attempts for KheloJito users
+  const [remainingAttempts, setRemainingAttempts] = useState(0);
+  const [isRetakeMode, setIsRetakeMode] = useState(false);
+
+  // Initialize remaining attempts from localStorage on component mount
+  useEffect(() => {
+    const testSource = localStorage.getItem("test_source");
+    let storedAttempts = localStorage.getItem("khelojito_remaining_attempts");
+    
+    if (testSource === "khelojito") {
+      // If this is the first time coming from KheloJito after payment,
+      // set remaining attempts to 2 (allowing 3 total attempts)
+      if (!storedAttempts) {
+        localStorage.setItem("khelojito_remaining_attempts", "2");
+        storedAttempts = "2";
+        console.log("First time from KheloJito - set remaining attempts to 2");
+      }
+      const attempts = parseInt(storedAttempts, 10);
+      setRemainingAttempts(attempts);
+      console.log("KheloJito user detected. Remaining attempts:", attempts);
+    }
+  }, []);
 
   // Start Quiz and fetch questions from API
   useEffect(() => {
@@ -280,17 +303,89 @@ function Test() {
     }
   };
 
-  const handleRestart = () => {
-    // Clear localStorage
-    localStorage.removeItem("test_user_id");
+  // Function to fetch new questions for retake attempts
+  const fetchNewQuestions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (!userId) {
+        throw new Error("User ID not found. Please register first.");
+      }
+
+      const response = await axios.post(
+        "https://brainrock.in/brainrock/backend/api/start-test/",
+        { user_id: userId },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.data.status) {
+        // Reset all test state for new attempt
+        setQuestions(response.data.questions);
+        setAttemptId(response.data.attempt_id);
+        setCurrentQuestion(0);
+        setUserAnswers([]);
+        setTimeLeft(300); // 5 minutes timer reset
+        setShowResults(false);
+        setScore(0);
+        setRemainingAttempts((prev) => prev - 1);
+        
+        console.log("New questions fetched successfully. Attempt ID:", response.data.attempt_id);
+      } else {
+        throw new Error(response.data.message || "Failed to fetch new questions");
+      }
+    } catch (err) {
+      let errorMessage = "Failed to start new attempt";
+      if (err.response) {
+        if (err.response.data && err.response.data.message) {
+          errorMessage = err.response.data.message;
+        } else {
+          errorMessage = `Server error: ${err.response.status}`;
+        }
+      } else if (err.request) {
+        errorMessage = "No response from server. Please check your connection.";
+      } else {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestart = async () => {
+    // Get test source from localStorage
+    const testSource = localStorage.getItem("test_source");
+    const currentAttempts = parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10);
     
-    // Redirect based on user authorization
-    if (user && user.unique_id) {
-      // Authorized user - redirect to user dashboard
-      navigate("/UserDashBoard");
+    // For KheloJito users, check if they have remaining attempts
+    if (testSource === "khelojito" && currentAttempts > 0) {
+      // Decrease remaining attempts in localStorage
+      const newAttempts = currentAttempts - 1;
+      localStorage.setItem("khelojito_remaining_attempts", newAttempts.toString());
+      
+      console.log("Retaking test. Remaining attempts:", newAttempts);
+      
+      // Fetch new questions without reloading the page
+      await fetchNewQuestions();
     } else {
-      // Unauthorized user - redirect to KheloJito for re-registration
-      navigate("/KheloJito");
+      // Clear localStorage
+      localStorage.removeItem("test_user_id");
+      localStorage.removeItem("khelojito_remaining_attempts");
+      
+      // Redirect based on user authorization
+      if (user && user.unique_id) {
+        // Authorized user - redirect to user dashboard
+        navigate("/UserDashBoard");
+      } else {
+        // Unauthorized user - redirect to KheloJito for re-registration
+        navigate("/KheloJito");
+      }
     }
   };
 
@@ -738,14 +833,34 @@ function Test() {
               </>
             ) : (
               <>
-              <div className="d-flex  ">
-                <button className="restart-button" onClick={handleRestart}>
-                  Retake Quiz
-                </button>
-                <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
-                  Wrong Answers
-                </button>
+              <div className="d-flex flex-column align-items-center">
+                {/* Show remaining attempts info for KheloJito users */}
+                {remainingAttempts > 0 ? (
+                  <div className="remaining-attempts-info mb-2">
+                    <span className="badge bg-info">
+                      You have {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining
+                    </span>
+                  </div>
+                ) : (
+                  localStorage.getItem("test_source") === "khelojito" && (
+                    <div className="remaining-attempts-info mb-2">
+                      <span className="badge bg-warning">
+                        No attempts remaining. Register again to try more.
+                      </span>
+                    </div>
+                  )
+                )}
+                <div className="d-flex">
+                  <button className="restart-button" onClick={handleRestart}>
+                    {remainingAttempts > 0 
+                      ? `Retake Quiz (${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} left)` 
+                      : "Retake Quiz"}
+                  </button>
+                  <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
+                    Wrong Answers
+                  </button>
                 </div>
+              </div>
               </>
             )}
               </div>
