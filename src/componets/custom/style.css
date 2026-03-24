@@ -440,7 +440,9 @@ color: #0056b3;
   .main-header{
     padding: 2px !important;
   }
-
+.bg-gradient-to-r{
+  margin-bottom: 12px !important;
+}
 }
 
 /* Hover Effect */
