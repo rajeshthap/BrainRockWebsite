@@ -486,85 +486,7 @@ function Test() {
     );
   }
 
-  // Show instructions modal before starting the Quiz
-  if (showInstructionsModal) {
-    return (
-      <div className="test-container">
-        <div className="test-card">
-          <div className="instructions-container">
-            <div className="instruction-section">
-              <h5>📋 General Rules</h5>
-              <ul className="list-unstyled">
-                <li className="mb-2">• This quiz contains <strong>10 questions</strong></li>
-                <li className="mb-2">• Total duration: <strong>2.5 minutes</strong></li>
-                <li className="mb-2">• Each question carries equal weightage</li>
-                <li className="mb-2">• You must score <strong>100% to pass</strong> and be eligible for the prize</li>
-              </ul>
-            </div>
 
-            <div className="instruction-section">
-              <h5>⏱️ Timing & Navigation</h5>
-              <ul className="list-unstyled">
-                <li className="mb-2">• Each question has a <strong>15 second timer</strong></li>
-                <li className="mb-2">• Timer starts immediately when the question is displayed</li>
-                <li className="mb-2">• If time runs out, the question will be marked as unanswered</li>
-                <li className="mb-2">• You can navigate between questions using the Next button</li>
-              </ul>
-            </div>
-
-            <div className="instruction-section">
-              <h5>👁️ Proctoring</h5>
-              <ul className="list-unstyled">
-                <li className="mb-2">• Switching tabs or minimizing the browser window is monitored</li>
-                <li className="mb-2">• <strong>First tab switch: Warning</strong> - You will see a caution message</li>
-                <li className="mb-2">• <strong>Second tab switch: Quiz failure</strong> - Your quiz will be immediately submitted with 0 score</li>
-                <li className="mb-2">• Do not attempt to cheat as it will result in disqualification</li>
-              </ul>
-            </div>
-
-            <div className="instruction-section">
-              <h5>💡 Tips for Success</h5>
-              <ul className="list-unstyled">
-                <li className="mb-2">• Read each question carefully before answering</li>
-                <li className="mb-2">• Manage your time wisely - don't spend too long on a single question</li>
-                <li className="mb-2">• Answer all questions - there's no negative marking</li>
-                <li className="mb-2">• Stay focused and avoid distractions</li>
-              </ul>
-            </div>
-
-            <div className="instruction-section">
-              <h5>🏆 Prize Information</h5>
-              <ul className="list-unstyled">
-                <li className="mb-2">• <strong>Prize Amount:</strong> ₹10</li>
-                <li className="mb-2">• To claim your prize, you must score 100%</li>
-                <li className="mb-2">• Winners will receive their prize within 7-10 working days</li>
-                <li className="mb-2">• The prize will be transferred to your registered bank account</li>
-              </ul>
-            </div>
-
-            <div className="instruction-section">
-              <h5>🔒 Terms & Conditions</h5>
-              <ul className="list-unstyled">
-                <li className="mb-2">• Entry fee is non-refundable once paid</li>
-                <li className="mb-2">• BrainRock reserves the right to disqualify any participant for cheating</li>
-                <li className="mb-2">• All decisions made by BrainRock are final and binding</li>
-                <li className="mb-2">• The quiz must be completed in a single session</li>
-              </ul>
-            </div>
-
-            <div className="text-center mt-4">
-              <button 
-                className="btn btn-primary px-4 py-2"
-                onClick={() => setShowInstructionsModal(false)}
-              >
-                I Understand - Start Quiz
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (questions.length === 0) {
     return (
@@ -850,7 +772,7 @@ function Test() {
                     </div>
                   )
                 )}
-                <div className="d-flex">
+                <div className="d-flex-file ">
                   <button className="restart-button" onClick={handleRestart}>
                     {remainingAttempts > 0 
                       ? `Retake Quiz (${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} left)` 

@@ -6,7 +6,9 @@
   padding: 20px;
 
 }
-
+.d-flex-file{
+  display: flex;
+}
 .test-card {
   background: white;
   border-radius: 15px;
@@ -594,7 +596,7 @@
   color: white;
   border: none;
   padding: 15px 40px;
-  font-size: 1.1rem;
+  font-size: 12px;
   font-weight: 600;
   border-radius: 50px;
   cursor: pointer;
@@ -1010,6 +1012,222 @@
   .cancel-button {
     width: 100%;
   }
+
+  /* Results Content Mobile Styles */
+  .results-content {
+    flex-direction: column;
+    gap: 20px;
+    padding: 15px;
+  }
+
+  .results-image {
+    order: -1;
+    width: 100%;
+    min-height: auto;
+  }
+
+  .results-illustration {
+    max-height: 200px;
+    width: 100%;
+  }
+
+  .results-data {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .results-title {
+    font-size: 1.8rem;
+  }
+
+  .results-subtitle {
+    font-size: 0.95rem;
+  }
+
+  /* Certificate Container Mobile */
+  .certificate-container {
+    max-width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .certificate-image {
+    height: 180px;
+    width: 100%;
+    object-fit: contain;
+  }
+
+  .certificate-actions {
+    margin-top: 15px;
+  }
+
+  .download-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    width: 100%;
+    display: block;
+    text-align: center;
+  }
+
+  /* Social Sharing Mobile */
+  .social-sharing {
+    margin-top: 15px;
+    padding-top: 15px;
+  }
+
+  .sharing-buttons {
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .share-button {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    flex: 1;
+    min-width: 80px;
+    max-width: 120px;
+  }
+
+  /* Score Section Mobile */
+  .percentage-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .percentage-text {
+    font-size: 1.8rem;
+  }
+
+  .score-label {
+    font-size: 0.75rem;
+  }
+
+  .score-details {
+    flex-direction: row;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .score-item {
+    flex: 1;
+    min-width: 70px;
+  }
+
+  .score-value {
+    font-size: 1.2rem;
+  }
+
+  /* Progress Section Mobile */
+  .progress-section {
+    margin-bottom: 20px;
+  }
+
+  /* Results Actions Mobile */
+  .results-actions {
+    margin-top: 25px;
+  }
+
+  .continue-button,
+  .restart-button,
+  .claim-button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 1rem;
+    margin: 5px 0;
+    display: block;
+  }
+
+  .wrong-answers-button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 12px !important;
+    margin: 5px 0;
+    display: block;
+  }
+
+  .d-flex-file {
+    flex-direction: row !important;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .d-flex-file button {
+    margin: 5px;
+    flex: 1;
+  }
+
+  /* Circular Progress Mobile */
+  .circular-progress {
+    width: 150px;
+    height: 150px;
+  }
+
+  /* Winner Form Mobile */
+  .winner-form {
+    margin-top: 20px;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+  }
+
+  .form-control {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+
+  /* Modal Mobile */
+  .wrong-answers-modal .modal-content {
+    padding: 20px 15px;
+    margin: 10px;
+    width: 95%;
+  }
+
+  .wrong-answers-modal .modal-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .wrong-answers-modal .question-text {
+    font-size: 1rem;
+  }
+
+  .wrong-answers-modal .answer-container {
+    flex-direction: column;
+  }
+
+  .wrong-answers-modal .label {
+    min-width: 100px;
+    font-size: 0.9rem;
+  }
+
+  /* Loading and Error States Mobile */
+  .loading,
+  .error {
+    font-size: 1rem;
+    padding: 20px;
+  }
+
+  /* Instructions Modal Mobile */
+  .instructions-container {
+    max-height: 70vh;
+    padding-right: 5px;
+  }
+
+  .instruction-section {
+    padding: 12px;
+  }
+
+  .instruction-section h5 {
+    font-size: 1rem;
+  }
+
+  .instruction-section li {
+    font-size: 0.85rem;
+  }
 }
 
 /* Certificate Section Styles */
@@ -1077,23 +1295,7 @@
   color: white;
 }
 
-/* Responsive Design for Results Layout */
-@media (max-width: 768px) {
-  .results-content {
-    flex-direction: column;
-    gap: 20px;
-  }
 
-  .results-image {
-    order: -1;
-  }
-
-  .results-illustration {
-    max-height: 200px;
-  }
-}
-
-/* Test Results Layout Styles */
 .trophy-icon {
   width: 60px;
   height: 60px;
