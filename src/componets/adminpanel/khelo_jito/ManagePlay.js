@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Card, Modal, Spinner, Pagination } from "react-bootstrap";
+import { Container, Form, Button, Alert, Modal, Spinner, Row, Col } from "react-bootstrap";
 import "../../../assets/css/emp_dashboard.css";
 import { useNavigate } from "react-router-dom";
 import LeftNavManagement from "../LeftNavManagement";
@@ -39,7 +39,7 @@ const ManagePlay = () => {
 
   // Pagination and search state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(6);
+  const [itemsPerPage] = useState(20);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Responsive check
@@ -241,9 +241,70 @@ const ManagePlay = () => {
         <AdminHeader toggleSidebar={toggleSidebar} />
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
+            <style>{`
+              .questions-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.875rem;
+              }
+              .questions-table th {
+                background-color: #2c3e50;
+                color: white;
+                font-weight: 600;
+                padding: 6px 8px;
+                text-align: left;
+                white-space: nowrap;
+                border: none;
+              }
+              .questions-table td {
+                padding: 6px 8px;
+                vertical-align: top;
+                border-bottom: 1px solid #e9ecef;
+              }
+              .questions-table tr:hover {
+                background-color: #f8f9fa;
+              }
+              .questions-table .question-text {
+                font-weight: 500;
+                font-size: 0.9rem;
+                line-height: 1.4;
+              }
+              .questions-table .hindi-text {
+                color: #6c757d;
+                font-size: 0.8rem;
+                margin-top: 2px;
+              }
+              .questions-table .options-list {
+                font-size: 0.8rem;
+                line-height: 1.5;
+                margin-bottom: 0;
+                padding-left: 0;
+              }
+              .questions-table .options-list li {
+                padding: 1px 0;
+              }
+              .questions-table .badge {
+                font-size: 0.75rem;
+                padding: 0.25em 0.5em;
+              }
+              .questions-table .btn-sm {
+                padding: 0.15rem 0.4rem;
+                font-size: 0.75rem;
+              }
+              .pagination-info {
+                min-width: 140px;
+                text-align: center;
+                font-size: 0.875rem;
+              }
+              @media (max-width: 992px) {
+                .table-responsive {
+                  font-size: 0.85rem;
+                }
+              }
+            `}</style>
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="mb-0">Manage Khelo Jito Questions</h2>
-              <div style={{ width: '300px' }}>
+              <div style={{ width: '350px' }}>
                 <input
                   type="text"
                   placeholder="Search by question or options..."
@@ -269,93 +330,102 @@ const ManagePlay = () => {
                   <span className="visually-hidden">Loading...</span>
                 </Spinner>
               </div>
-            ) : (
-              <>
-                <Row>
-                  {currentItems.length === 0 ? (
-                    <Col xs={12} className="text-center my-5">
-                      <p>{searchTerm ? 'No questions match your search.' : 'No questions found.'}</p>
-                    </Col>
-                  ) : (
-                    currentItems.map((question) => (
-                      <Col lg={4} md={6} sm={12} className="mb-4" key={question.id}>
-                        <Card className="h-100">
-                          <Card.Body>
-                            <div className="d-flex justify-content-between align-items-start mb-3">
-                              <div>
-                                <Card.Title className="managetitle">Question {question.id}</Card.Title>
-                                <Card.Subtitle className="mb-2 text-muted">
-                                  Marks: {question.marks}
-                                </Card.Subtitle>
-                              </div>
-                            </div>
-                            <Card.Text style={{ minHeight: '80px' }}>
-                              {question.question_text}
-                              {question.question_hindi_text && (
-                                <div className="mt-2">
-                                  <small className="text-muted">
-                                    <strong>Hindi:</strong> {question.question_hindi_text}
-                                  </small>
-                                </div>
-                              )}
-                            </Card.Text>
-                            <div className="mb-3">
-                              <strong>Options:</strong>
-                              <ul className="list-unstyled">
-                                {question.options.map((option, index) => (
-                                  <li key={index} className={`${index === question.correct_answer ? 'text-success' : ''}`}>
-                                    {index === question.correct_answer && '✓ '}
-                                    {option}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div className="d-flex justify-content-end">
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                className="me-2"
-                                onClick={() => handleEdit(question)}
-                              >
-                                <FaEdit className="me-1" /> Edit
-                              </Button>
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => handleDelete(question.id)}
-                              >
-                                <FaTrash className="me-1" /> Delete
-                              </Button>
-                            </div>
-                          </Card.Body>
-                        </Card>
-                      </Col>
-                    ))
-                  )}
-                </Row>
+             ) : (
+               <>
+                 {currentItems.length === 0 ? (
+                   <div className="text-center my-5">
+                     <p>{searchTerm ? 'No questions match your search.' : 'No questions found.'}</p>
+                   </div>
+                 ) : (
+                   <div className="table-responsive">
+                     <table className="table table-hover table-striped align-middle questions-table">
+                       <thead className="table-dark">
+                         <tr>
+                           <th style={{ width: '60px' }}>#</th>
+                           <th style={{ width: '40%' }}>Question</th>
+                           <th style={{ width: '35%' }}>Options</th>
+                           <th style={{ width: '100px' }}>Marks</th>
+                           <th style={{ width: '150px' }}>Correct Answer</th>
+                           <th style={{ width: '120px' }}>Actions</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         {currentItems.map((question, index) => {
+                           const sequenceNumber = (currentPage - 1) * itemsPerPage + index + 1;
+                           return (
+                             <tr key={question.id}>
+                               <td>{sequenceNumber}</td>
+                               <td>
+                                 <div className="question-text">{question.question_text}</div>
+                                 {question.question_hindi_text && (
+                                   <div className="hindi-text mt-1">
+                                     <small className="text-muted">{question.question_hindi_text}</small>
+                                   </div>
+                                 )}
+                               </td>
+                               <td>
+                                 <ul className="list-unstyled mb-0 options-list">
+                                   {question.options.map((option, optIndex) => (
+                                     <li key={optIndex} className={`${optIndex === question.correct_answer ? 'text-success fw-bold' : ''}`}>
+                                       {optIndex === question.correct_answer && '✓ '}
+                                       {option}
+                                     </li>
+                                   ))}
+                                 </ul>
+                               </td>
+                               <td>{question.marks}</td>
+                               <td>
+                                 <span className="badge bg-success">
+                                   Option {question.correct_answer + 1}
+                                 </span>
+                               </td>
+                               <td>
+                                 <Button
+                                   variant="primary"
+                                   size="sm"
+                                   className="me-1"
+                                   onClick={() => handleEdit(question)}
+                                 >
+                                   <FaEdit />
+                                 </Button>
+                                 <Button
+                                   variant="danger"
+                                   size="sm"
+                                   onClick={() => handleDelete(question.id)}
+                                 >
+                                   <FaTrash />
+                                 </Button>
+                               </td>
+                             </tr>
+                           );
+                         })}
+                       </tbody>
+                     </table>
+                   </div>
+                 )}
 
-                {/* Pagination */}
+                {/* Pagination with arrows */}
                 {totalPages > 1 && (
-                  <div className="d-flex justify-content-center mt-4">
-                    <Pagination>
-                      <Pagination.Prev
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                      />
-                      {[...Array(totalPages).keys()].map(page => (
-                        <Pagination.Item
-                          key={page + 1}
-                          active={page + 1 === currentPage}
-                          onClick={() => handlePageChange(page + 1)}
-                        >
-                          {page + 1}
-                        </Pagination.Item>
-                      ))}
-                      <Pagination.Next
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                      />
-                    </Pagination>
+                  <div className="d-flex justify-content-center align-items-center mt-4">
+                    <button
+                      className="btn btn-outline-primary me-3"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      ← Prev
+                    </button>
+                    
+                    <span className="pagination-info fw-bold">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    
+                    <button
+                      className="btn btn-outline-primary ms-3"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next →
+                    </button>
                   </div>
                 )}
               </>

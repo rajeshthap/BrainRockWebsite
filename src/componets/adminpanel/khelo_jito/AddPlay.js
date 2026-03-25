@@ -144,136 +144,165 @@ const AddPlay = () => {
     }
   };
 
-  return (
-    <div className="dashboard-container">
-      {/* Sidebar */}
-      <LeftNavManagement
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        isMobile={isMobile}
-        isTablet={isTablet}
-      />
+   return (
+     <div className="dashboard-container">
+       {/* Sidebar */}
+       <LeftNavManagement
+         sidebarOpen={sidebarOpen}
+         setSidebarOpen={setSidebarOpen}
+         isMobile={isMobile}
+         isTablet={isTablet}
+       />
 
-      {/* Main Content */}
-      <div className="main-content">
-        {/* Header */}
-        <AdminHeader toggleSidebar={toggleSidebar} />
+       {/* Main Content */}
+       <div className="main-content">
+         {/* Header */}
+         <AdminHeader toggleSidebar={toggleSidebar} />
 
-        {/* Dashboard Body */}
-        <Container fluid className="dashboard-body">
-          <div className="br-box-container">
-            <h2 className="mb-4">Add New Question</h2>
-            
-            {showAlert && (
-              <Alert variant={variant} className="mb-4" onClose={() => setShowAlert(false)} dismissible>
-                {message}
-              </Alert>
-            )}
-            
-            <Form onSubmit={handleSubmit}>
-               <Form.Group className="mb-3">
-                 <Form.Label>Question Text (English)</Form.Label>
-                 <Form.Control
-                   as="textarea"
-                   rows={3}
-                   placeholder="Enter question text in English"
-                   name="question_text"
-                   value={formData.question_text}
-                   onChange={handleChange}
-                   required
-                 />
+         {/* Dashboard Body */}
+         <Container fluid className="dashboard-body">
+           <div className="br-box-container">
+             <style>{`
+               .add-question-form .form-control,
+               .add-question-form .form-select {
+                 padding: 0.375rem 0.5rem;
+                 font-size: 0.875rem;
+               }
+               .add-question-form .form-label {
+                 font-size: 0.875rem;
+                 margin-bottom: 0.25rem;
+                 font-weight: 500;
+               }
+               .add-question-form .btn {
+                 padding: 0.375rem 0.75rem;
+                 font-size: 0.875rem;
+               }
+               .add-question-form .input-group-text {
+                 padding: 0.375rem 0.5rem;
+                 font-size: 0.875rem;
+                 background-color: #f8f9fa;
+               }
+               .add-question-form textarea {
+                 min-height: 60px;
+               }
+             `}</style>
+             
+             <h2 className="mb-3 h5">Add New Question</h2>
+             
+             {showAlert && (
+               <Alert variant={variant} className="mb-3 py-2" onClose={() => setShowAlert(false)} dismissible>
+                 {message}
+               </Alert>
+             )}
+             
+             <Form onSubmit={handleSubmit} className="add-question-form">
+                <Form.Group className="mb-2">
+                  <Form.Label>Question (English)</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    placeholder="Enter question in English"
+                    name="question_text"
+                    value={formData.question_text}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+                
+                <Form.Group className="mb-2">
+                  <Form.Label>Question (Hindi) <span className="text-muted">(Optional)</span></Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    placeholder="Enter question in Hindi"
+                    name="question_hindi_text"
+                    value={formData.question_hindi_text || ""}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+               
+               <Form.Group className="mb-2">
+                 <Form.Label>Options</Form.Label>
+                 <div className="options-container">
+                   {formData.options.map((option, index) => (
+                     <div key={index} className="option-item mb-1">
+                       <InputGroup size="sm">
+                         <InputGroup.Text>{index + 1}</InputGroup.Text>
+                         <Form.Control
+                           type="text"
+                           placeholder={`Option ${index + 1}`}
+                           name={`option-${index}`}
+                           value={option}
+                           onChange={handleChange}
+                           required
+                         />
+                       </InputGroup>
+                     </div>
+                   ))}
+                 </div>
                </Form.Group>
                
-               <Form.Group className="mb-3">
-                 <Form.Label>Question Text (Hindi)</Form.Label>
-                 <Form.Control
-                   as="textarea"
-                   rows={3}
-                   placeholder="Enter question text in Hindi (optional)"
-                   name="question_hindi_text"
-                   value={formData.question_hindi_text || ""}
-                   onChange={handleChange}
-                 />
-               </Form.Group>
-              
-              <Form.Group className="mb-3">
-                <Form.Label>Options</Form.Label>
-                <div className="options-container">
-                  {formData.options.map((option, index) => (
-                    <div key={index} className="option-item mb-2">
-                      <InputGroup>
-                        <InputGroup.Text>Option {index + 1}</InputGroup.Text>
-                        <Form.Control
-                          type="text"
-                          placeholder={`Enter option ${index + 1}`}
-                          name={`option-${index}`}
-                          value={option}
-                          onChange={handleChange}
-                          required
-                        />
-                      </InputGroup>
-                    </div>
-                  ))}
-                </div>
-              </Form.Group>
-              
-              <Row>
-                <Col lg={6} md={6} sm={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Correct Answer</Form.Label>
-                    <Form.Select
-                      name="correct_answer"
-                      value={formData.correct_answer}
-                      onChange={handleChange}
-                      required
-                    >
-                      {formData.options.map((_, index) => (
-                        <option key={index} value={index}>
-                          Option {index + 1}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-                <Col lg={6} md={6} sm={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Marks</Form.Label>
-                    <Form.Control
-                      type="number"
-                      min="1"
-                      max="10"
-                      placeholder="Enter marks"
-                      name="marks"
-                      value={formData.marks}
-                      onChange={handleChange}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              
-              <Button 
-                variant="primary" 
-                type="submit" 
-                disabled={isSubmitting}
-                className="me-2"
-              >
-                {isSubmitting ? 'Submitting...' : 'Add Question'}
-              </Button>
-              
-              <Button 
-                variant="secondary" 
-                onClick={clearForm}
-                type="button"
-              >
-                Clear
-              </Button>
-            </Form>
-          </div>
-        </Container>
-      </div>
-    </div>
-  );
+               <Row className="g-2 mb-2">
+                 <Col xs={12} sm={6}>
+                   <Form.Group>
+                     <Form.Label>Correct Answer</Form.Label>
+                     <Form.Select
+                       size="sm"
+                       name="correct_answer"
+                       value={formData.correct_answer}
+                       onChange={handleChange}
+                       required
+                     >
+                       {formData.options.map((_, index) => (
+                         <option key={index} value={index}>
+                           Option {index + 1}
+                         </option>
+                       ))}
+                     </Form.Select>
+                   </Form.Group>
+                 </Col>
+                 <Col xs={12} sm={6}>
+                   <Form.Group>
+                     <Form.Label>Marks</Form.Label>
+                     <Form.Control
+                       type="number"
+                       min="1"
+                       max="10"
+                       placeholder="Marks"
+                       size="sm"
+                       name="marks"
+                       value={formData.marks}
+                       onChange={handleChange}
+                       required
+                     />
+                   </Form.Group>
+                 </Col>
+               </Row>
+               
+               <div className="d-flex gap-2">
+                 <Button 
+                   variant="primary" 
+                   type="submit" 
+                   disabled={isSubmitting}
+                   size="sm"
+                 >
+                   {isSubmitting ? 'Saving...' : 'Save'}
+                 </Button>
+                 <Button 
+                   variant="outline-secondary" 
+                   onClick={clearForm}
+                   type="button"
+                   size="sm"
+                 >
+                   Clear
+                 </Button>
+               </div>
+             </Form>
+           </div>
+         </Container>
+       </div>
+     </div>
+   );
 };
 
 export default AddPlay;
