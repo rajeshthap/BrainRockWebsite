@@ -424,22 +424,23 @@ function Test() {
     }
   };
 
-  // Function to find and display wrong answers
-  const handleShowWrongAnswers = () => {
-    const wrong = [];
-    userAnswers.forEach((answer, index) => {
-      if (answer.selected_option !== questions[index].correct_answer) {
-        wrong.push({
-          question: questions[index].question_text,
-          userAnswer: questions[index].options[answer.selected_option],
-          correctAnswer: questions[index].options[questions[index].correct_answer],
-          questionNumber: index + 1
-        });
-      }
-    });
-    setWrongAnswers(wrong);
-    setShowWrongAnswersModal(true);
-  };
+   // Function to find and display wrong answers
+   const handleShowWrongAnswers = () => {
+     const wrong = [];
+     userAnswers.forEach((answer, index) => {
+       if (answer.selected_option !== questions[index].correct_answer) {
+         wrong.push({
+           question: questions[index].question_text,
+           question_hindi_text: questions[index].question_hindi_text || "",
+           userAnswer: questions[index].options[answer.selected_option],
+           correctAnswer: questions[index].options[questions[index].correct_answer],
+           questionNumber: index + 1
+         });
+       }
+     });
+     setWrongAnswers(wrong);
+     setShowWrongAnswersModal(true);
+   };
 
   // Social sharing functions
   const shareOnWhatsApp = (percent) => {
@@ -841,20 +842,25 @@ function Test() {
                     </div>
                   ) : (
                     wrongAnswers.map((item, index) => (
-                      <div key={index} className="wrong-answer-item">
-                        <div className="question-number">Question {item.questionNumber}:</div>
-                        <div className="question-text">{item.question}</div>
-                        <div className="answer-container">
-                          <div className="user-answer">
-                            <span className="label">Your Answer:</span>
-                            <span className="answer-text">{item.userAnswer}</span>
-                          </div>
-                          <div className="correct-answer">
-                            <span className="label">Correct Answer:</span>
-                            <span className="answer-text">{item.correctAnswer}</span>
-                          </div>
-                        </div>
-                      </div>
+                       <div key={index} className="wrong-answer-item">
+                         <div className="question-number">Question {item.questionNumber}:</div>
+                         <div className="question-text">{item.question}</div>
+                         {item.question_hindi_text && (
+                           <div className="hindi-question mt-1">
+                             <small className="text-muted">{item.question_hindi_text}</small>
+                           </div>
+                         )}
+                         <div className="answer-container">
+                           <div className="user-answer">
+                             <span className="label">Your Answer:</span>
+                             <span className="answer-text">{item.userAnswer}</span>
+                           </div>
+                           <div className="correct-answer">
+                             <span className="label">Correct Answer:</span>
+                             <span className="answer-text">{item.correctAnswer}</span>
+                           </div>
+                         </div>
+                       </div>
                     ))
                   )}
                 </div>
@@ -895,9 +901,16 @@ function Test() {
             Question {currentQuestion + 1} of {questions.length}
           </div>
           <div className="timer">Time Left: {timeLeft} seconds</div>
-          <h2 className="question">
-            {questions[currentQuestion].question_text}
-          </h2>
+           <h2 className="question">
+             {questions[currentQuestion].question_text}
+             {questions[currentQuestion].question_hindi_text && (
+               <div className="hindi-question mt-2">
+                 <small className="text-muted">
+                   {questions[currentQuestion].question_hindi_text}
+                 </small>
+               </div>
+             )}
+           </h2>
           <div className="options">
             {questions[currentQuestion].options.map((option, index) => (
               <div

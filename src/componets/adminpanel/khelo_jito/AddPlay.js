@@ -13,13 +13,14 @@ const AddPlay = () => {
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
   
-  // Form state
-  const [formData, setFormData] = useState({
-    question_text: "",
-    options: ["", "", "", ""],
-    correct_answer: 0,
-    marks: 1
-  });
+   // Form state
+   const [formData, setFormData] = useState({
+     question_text: "",
+     question_hindi_text: "",
+     options: ["", "", "", ""],
+     correct_answer: 0,
+     marks: 1
+   });
   
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,6 +71,7 @@ const AddPlay = () => {
   const clearForm = () => {
     setFormData({
       question_text: "",
+      question_hindi_text: "",
       options: ["", "", "", ""],
       correct_answer: 0,
       marks: 1
@@ -89,6 +91,7 @@ const AddPlay = () => {
       // Create payload
       const dataToSend = {
         question_text: formData.question_text,
+        question_hindi_text: formData.question_hindi_text || "",
         options: formData.options,
         correct_answer: formData.correct_answer,
         marks: formData.marks
@@ -168,18 +171,30 @@ const AddPlay = () => {
             )}
             
             <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>Question Text</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Enter question text"
-                  name="question_text"
-                  value={formData.question_text}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
+               <Form.Group className="mb-3">
+                 <Form.Label>Question Text (English)</Form.Label>
+                 <Form.Control
+                   as="textarea"
+                   rows={3}
+                   placeholder="Enter question text in English"
+                   name="question_text"
+                   value={formData.question_text}
+                   onChange={handleChange}
+                   required
+                 />
+               </Form.Group>
+               
+               <Form.Group className="mb-3">
+                 <Form.Label>Question Text (Hindi)</Form.Label>
+                 <Form.Control
+                   as="textarea"
+                   rows={3}
+                   placeholder="Enter question text in Hindi (optional)"
+                   name="question_hindi_text"
+                   value={formData.question_hindi_text || ""}
+                   onChange={handleChange}
+                 />
+               </Form.Group>
               
               <Form.Group className="mb-3">
                 <Form.Label>Options</Form.Label>

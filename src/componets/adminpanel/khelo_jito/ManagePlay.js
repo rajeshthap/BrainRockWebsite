@@ -26,6 +26,7 @@ const ManagePlay = () => {
   const [currentEditItem, setCurrentEditItem] = useState(null);
   const [editFormData, setEditFormData] = useState({
     question_text: "",
+    question_hindi_text: "",
     options: ["", "", "", ""],
     correct_answer: 0,
     marks: 1
@@ -135,6 +136,7 @@ const ManagePlay = () => {
     setCurrentEditItem(question);
     setEditFormData({
       question_text: question.question_text,
+      question_hindi_text: question.question_hindi_text || "",
       options: question.options || ["", "", "", ""],
       correct_answer: question.correct_answer,
       marks: question.marks || 1
@@ -173,6 +175,7 @@ const ManagePlay = () => {
     const dataToSend = {
       id: currentEditItem.id,
       question_text: editFormData.question_text,
+      question_hindi_text: editFormData.question_hindi_text || "",
       options: editFormData.options,
       correct_answer: editFormData.correct_answer,
       marks: editFormData.marks
@@ -201,6 +204,7 @@ const ManagePlay = () => {
             ? {
                 ...item,
                 question_text: editFormData.question_text,
+                question_hindi_text: editFormData.question_hindi_text || "",
                 options: editFormData.options,
                 correct_answer: editFormData.correct_answer,
                 marks: editFormData.marks
@@ -285,7 +289,16 @@ const ManagePlay = () => {
                                 </Card.Subtitle>
                               </div>
                             </div>
-                            <Card.Text style={{ minHeight: '80px' }}>{question.question_text}</Card.Text>
+                            <Card.Text style={{ minHeight: '80px' }}>
+                              {question.question_text}
+                              {question.question_hindi_text && (
+                                <div className="mt-2">
+                                  <small className="text-muted">
+                                    <strong>Hindi:</strong> {question.question_hindi_text}
+                                  </small>
+                                </div>
+                              )}
+                            </Card.Text>
                             <div className="mb-3">
                               <strong>Options:</strong>
                               <ul className="list-unstyled">
@@ -359,15 +372,27 @@ const ManagePlay = () => {
         <Form onSubmit={handleEditSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Question Text</Form.Label>
+              <Form.Label>Question Text (English)</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                placeholder="Enter question text"
+                placeholder="Enter question text in English"
                 name="question_text"
                 value={editFormData.question_text}
                 onChange={handleEditChange}
                 required
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Question Text (Hindi)</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Enter question text in Hindi (optional)"
+                name="question_hindi_text"
+                value={editFormData.question_hindi_text || ""}
+                onChange={handleEditChange}
               />
             </Form.Group>
 
