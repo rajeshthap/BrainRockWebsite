@@ -25,6 +25,34 @@ import { FaUser } from "react-icons/fa6";
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
 const MIN_WITHDRAWAL = 9;
 const MIN_BALANCE = 8;
+const STORAGE_KEY = 'BR_USER_HEADER_DATA';
+
+// Helper to safely get/set localStorage for user header data
+const getStoredHeaderData = () => {
+  try {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    }
+  } catch (e) {
+    console.error("Error reading header data from localStorage:", e);
+  }
+  return null;
+};
+
+const setStoredHeaderData = (headerData) => {
+  try {
+    if (typeof window !== "undefined") {
+      if (headerData) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(headerData));
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  } catch (e) {
+    console.error("Error saving header data to localStorage:", e);
+  }
+};
 
 function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const { user, logout } = useContext(AuthContext);
@@ -73,6 +101,17 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     });
   }, [withdrawAmount, totalAmount, walletAmount, cashback]);
 
+  // Load stored header data immediately on mount
+  useEffect(() => {
+    const storedData = getStoredHeaderData();
+    if (storedData) {
+      setUserDetails(storedData.userDetails || { full_name: "", profile_photo: null });
+      setWalletAmount(storedData.walletAmount || 0);
+      setCashback(storedData.cashback || 0);
+      setTotalAmount(storedData.totalAmount || 0);
+    }
+  }, []);
+
   // Fetch wallet amount and user details
   useEffect(() => {
     const fetchData = async () => {
@@ -101,9 +140,18 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
           );
 
           if (profileResponse.data.status && profileResponse.data.data.student_profile) {
-            setUserDetails({
+            const newUserDetails = {
               full_name: profileResponse.data.data.student_profile.full_name || "",
               profile_photo: profileResponse.data.data.student_profile.profile_photo || null,
+            };
+            setUserDetails(newUserDetails);
+            
+            // Store all header data in localStorage for persistence
+            setStoredHeaderData({
+              userDetails: newUserDetails,
+              walletAmount: walletResponse.data.status ? (walletResponse.data.wallet_balance || 0) : 0,
+              cashback: walletResponse.data.status ? (walletResponse.data.cashback || 0) : 0,
+              totalAmount: walletResponse.data.status ? ((walletResponse.data.cashback || 0) + (walletResponse.data.wallet_balance || 0)) : 0,
             });
           }
         } catch (error) {

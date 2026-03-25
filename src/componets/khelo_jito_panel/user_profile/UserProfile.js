@@ -10,12 +10,41 @@ import UserLeftNav from "../UserLeftNav";
 import UserHeader from "../UserHeader";
 
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
+const STORAGE_KEY = 'BR_USER_PROFILE_DATA';
+
+// Helper to safely get/set localStorage for user profile
+const getStoredUserProfile = () => {
+  try {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    }
+  } catch (e) {
+    console.error("Error reading user profile from localStorage:", e);
+  }
+  return null;
+};
+
+const setStoredUserProfile = (profileData) => {
+  try {
+    if (typeof window !== "undefined") {
+      if (profileData) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profileData));
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  } catch (e) {
+    console.error("Error saving user profile to localStorage:", e);
+  }
+};
+
 const UserProfile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,16 +64,36 @@ const UserProfile = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
+  // Load stored user profile data immediately on mount
   useEffect(() => {
+    const storedProfile = getStoredUserProfile();
+    if (storedProfile) {
+      setUserData(storedProfile);
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch fresh data from API when user is available
+  useEffect(() => {
+    // Wait for auth to finish loading
+    if (authLoading) {
+      return;
+    }
+
+    // If no user after auth loaded, clear data and stop loading
     if (!user || !user.unique_id) {
-      console.log("User ID not available yet");
+      console.log("User ID not available");
       setLoading(false);
       return;
     }
 
     const fetchUserProfile = async () => {
       try {
-        setLoading(true);
+        // Only show loading if we don't have stored data
+        const storedProfile = getStoredUserProfile();
+        if (!storedProfile) {
+          setLoading(true);
+        }
         setError(null);
         
         const response = await axios.get(
@@ -52,10 +101,11 @@ const UserProfile = () => {
           { withCredentials: true }
         );
 
-
-
         if (response.data.status) {
-          setUserData(response.data.data);
+          const profileData = response.data.data;
+          setUserData(profileData);
+          // Store in localStorage for persistence
+          setStoredUserProfile(profileData);
         } else {
           throw new Error(response.data.message || "Failed to fetch user profile");
         }
@@ -68,7 +118,7 @@ const UserProfile = () => {
     };
 
     fetchUserProfile();
-  }, [user]);
+  }, [user, authLoading]);
 
   const toCamelLabel = (str) => {
     const label = str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());

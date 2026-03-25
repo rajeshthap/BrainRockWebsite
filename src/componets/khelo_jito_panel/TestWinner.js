@@ -7,12 +7,40 @@ import UserHeader from "./UserHeader";
 import axios from "axios";
 
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend';
+const STORAGE_KEY = 'BR_TEST_WINNER_DATA';
+
+// Helper to safely get/set localStorage for test winner data
+const getStoredTestWinnerData = () => {
+  try {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    }
+  } catch (e) {
+    console.error("Error reading test winner data from localStorage:", e);
+  }
+  return null;
+};
+
+const setStoredTestWinnerData = (testWinnerData) => {
+  try {
+    if (typeof window !== "undefined") {
+      if (testWinnerData) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(testWinnerData));
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  } catch (e) {
+    console.error("Error saving test winner data to localStorage:", e);
+  }
+};
 
 const TestWinner = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   
   // Test winner data state
   const [testWinnerData, setTestWinnerData] = useState(null);
@@ -45,8 +73,25 @@ const TestWinner = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
+  // Load stored test winner data immediately on mount
+  useEffect(() => {
+    const storedData = getStoredTestWinnerData();
+    if (storedData) {
+      setTestWinnerData(storedData.testWinnerData || null);
+      setWalletAmount(storedData.walletAmount || 0);
+      setCashback(storedData.cashback || 0);
+      setTotalAmount(storedData.totalAmount || 0);
+      setLoading(false);
+    }
+  }, []);
+
   // Fetch test winner data
   useEffect(() => {
+    // Wait for auth to finish loading
+    if (authLoading) {
+      return;
+    }
+
     const fetchTestWinnerData = async () => {
       if (!user || !user.unique_id) {
         console.log("User ID not available yet");
@@ -55,7 +100,13 @@ const TestWinner = () => {
       }
 
       try {
-        setLoading(true);
+        // Only show loading if we don't have stored data
+        const storedData = getStoredTestWinnerData();
+        if (!storedData) {
+          setLoading(true);
+        }
+        setError(null);
+        
         const response = await axios.get(
           `${API_BASE_URL}/api/test-winners/?user_id=${user.unique_id}`,
           { withCredentials: true }
@@ -64,16 +115,25 @@ const TestWinner = () => {
         console.log("Test winner data response:", response.data);
 
         if (response.data.status) {
-          setTestWinnerData(response.data.data);
+          const testData = response.data.data;
+          setTestWinnerData(testData);
           
           // Extract wallet data from the main response
-          const cashbackAmount = response.data.data.winner_details?.cashback || 0;
-          const walletBalance = response.data.data.winner_details?.wallet_balance || 0;
+          const cashbackAmount = testData.winner_details?.cashback || 0;
+          const walletBalance = testData.winner_details?.wallet_balance || 0;
           const total = cashbackAmount + walletBalance;
           
           setCashback(cashbackAmount);
           setWalletAmount(walletBalance);
           setTotalAmount(total);
+          
+          // Store all test winner data in localStorage for persistence
+          setStoredTestWinnerData({
+            testWinnerData: testData,
+            walletAmount: walletBalance,
+            cashback: cashbackAmount,
+            totalAmount: total,
+          });
         } else {
           throw new Error(response.data.message || "Failed to fetch test winner data");
         }
@@ -86,7 +146,7 @@ const TestWinner = () => {
     };
 
     fetchTestWinnerData();
-  }, [user]);
+  }, [user, authLoading]);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
