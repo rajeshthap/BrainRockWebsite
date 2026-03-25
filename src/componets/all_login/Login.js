@@ -88,7 +88,7 @@ export default function Login() {
       }
 
       // Default redirect to HR Dashboard for all other roles
-      navigate("/HrDashBoard", {
+      navigate("/", {
         state: { unique_id: user.id },
         replace: true,
       });
