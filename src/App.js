@@ -141,7 +141,7 @@ function AppContent() {
   const { updateAvailable, handleRefresh } = useVersionChecker();
 
   const hiddenPaths = new Set([
-    "/HrDashBoard",
+   
   
    
  
@@ -232,7 +232,7 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/Login" element={<Login />} />
       
-        {/* <Route path="/HrDashBoard" element={<HrDashBoard />} /> */}
+       
      
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         
