@@ -9,6 +9,34 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
+const STORAGE_KEY = 'BR_QUIZ_DATA';
+
+// Helper to safely get/set localStorage for quiz data
+const getStoredQuizData = () => {
+  try {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    }
+  } catch (e) {
+    console.error("Error reading quiz data from localStorage:", e);
+  }
+  return null;
+};
+
+const setStoredQuizData = (quizData) => {
+  try {
+    if (typeof window !== "undefined") {
+      if (quizData) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(quizData));
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  } catch (e) {
+    console.error("Error saving quiz data to localStorage:", e);
+  }
+};
 
 const Quiz = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -32,7 +60,7 @@ const Quiz = () => {
   const [addSuccess, setAddSuccess] = useState("");
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
 
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -49,9 +77,32 @@ const Quiz = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
+  // Load stored quiz data immediately on mount
   useEffect(() => {
+    const storedData = getStoredQuizData();
+    if (storedData) {
+      setQuizzes(storedData.quizzes || []);
+      setParticipationData(storedData.participationData || {});
+      setWalletAmount(storedData.walletAmount || 0);
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Wait for auth to finish loading
+    if (authLoading) {
+      return;
+    }
+
     const fetchQuizzes = async () => {
       try {
+        // Only show loading if we don't have stored data
+        const storedData = getStoredQuizData();
+        if (!storedData) {
+          setLoading(true);
+        }
+        setError(null);
+        
         const response = await axios.get(`${API_BASE_URL}/quiz-items/`, {
           withCredentials: true,
           headers: {
@@ -60,6 +111,13 @@ const Quiz = () => {
         });
         const quizzesData = response.data.data || response.data;
         setQuizzes(quizzesData);
+        
+        // Store quizzes data in localStorage for persistence
+        const currentStoredData = getStoredQuizData() || {};
+        setStoredQuizData({
+          ...currentStoredData,
+          quizzes: quizzesData,
+        });
       } catch (err) {
         setError(err.message);
       } finally {
@@ -86,6 +144,13 @@ const Quiz = () => {
               };
             });
             setParticipationData(participationMap);
+            
+            // Store participation data in localStorage for persistence
+            const currentStoredData = getStoredQuizData() || {};
+            setStoredQuizData({
+              ...currentStoredData,
+              participationData: participationMap,
+            });
           }
         } catch (error) {
           console.error("Error fetching participated quizzes:", error);
@@ -96,9 +161,14 @@ const Quiz = () => {
 
     fetchQuizzes();
     fetchParticipatedQuizzes();
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
+    // Wait for auth to finish loading
+    if (authLoading) {
+      return;
+    }
+
     const fetchWalletAmount = async () => {
       if (user && user.unique_id) {
         try {
@@ -112,6 +182,13 @@ const Quiz = () => {
             const walletBalance = response.data.wallet_balance || 0;
             const total = cashbackAmount + walletBalance;
             setWalletAmount(total);
+            
+            // Store wallet amount in localStorage for persistence
+            const currentStoredData = getStoredQuizData() || {};
+            setStoredQuizData({
+              ...currentStoredData,
+              walletAmount: total,
+            });
           }
         } catch (error) {
           console.error("Error fetching wallet amount:", error);
@@ -121,7 +198,7 @@ const Quiz = () => {
     };
 
     fetchWalletAmount();
-  }, [user]);
+  }, [user, authLoading]);
 
    const handleQuizSelect = (quiz) => {
     setSelectedQuiz(quiz);

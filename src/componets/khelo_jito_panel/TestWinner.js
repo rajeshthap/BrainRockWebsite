@@ -4,6 +4,7 @@ import { FaTrophy, FaUser, FaEnvelope, FaPhone, FaIdCard, FaBook, FaCalendar, Fa
 import { AuthContext } from "../context/AuthContext";
 import UserLeftNav from "./UserLeftNav";
 import UserHeader from "./UserHeader";
+import "../../assets/css/attendance.css"
 import axios from "axios";
 
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend';

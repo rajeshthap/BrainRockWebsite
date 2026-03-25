@@ -4,6 +4,7 @@ import { AiFillEdit } from "react-icons/ai";
 import { AiOutlineUser } from 'react-icons/ai';
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
+import "../../../assets/css/attendance.css";
 
 // Define base URLs for your APIs
 const REFUND_API_URL = 'https://brjobsedu.com/girls_course/girls_course_backend/api/refund-request/';

@@ -11,6 +11,58 @@ import UserLeftNav from "./UserLeftNav";
 import Test from "../Play_and_Win/Test";
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
 const TEST_AMOUNT = 8; // Fixed test amount
+const STORAGE_KEY = 'BR_USER_DASHBOARD_DATA';
+const PAYMENT_SUCCESS_KEY = 'BR_PAYMENT_SUCCESS';
+
+// Helper to get user_id from localStorage as fallback
+const getUserId = (user) => {
+  // First try to get from user context
+  if (user && user.unique_id) {
+    return user.unique_id;
+  }
+  
+  // Fallback: try to get from localStorage (BR_USER_DATA)
+  try {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("BR_USER_DATA");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        return parsedUser.unique_id || null;
+      }
+    }
+  } catch (e) {
+    console.error("Error reading user from localStorage:", e);
+  }
+  
+  return null;
+};
+
+// Helper to safely get/set localStorage for user dashboard data
+const getStoredDashboardData = () => {
+  try {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    }
+  } catch (e) {
+    console.error("Error reading dashboard data from localStorage:", e);
+  }
+  return null;
+};
+
+const setStoredDashboardData = (dashboardData) => {
+  try {
+    if (typeof window !== "undefined") {
+      if (dashboardData) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dashboardData));
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  } catch (e) {
+    console.error("Error saving dashboard data to localStorage:", e);
+  }
+};
 
 const UserDashBoard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -30,8 +82,10 @@ const UserDashBoard = () => {
   const [addSuccess, setAddSuccess] = useState("");
   const [certificatesCount, setCertificatesCount] = useState(0);
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -64,79 +118,107 @@ const UserDashBoard = () => {
     };
   }, []);
 
+  // Load stored dashboard data immediately on mount
+  useEffect(() => {
+    const storedData = getStoredDashboardData();
+    if (storedData) {
+      setWalletAmount(storedData.walletAmount || 0);
+      setCertificatesCount(storedData.certificatesCount || 0);
+      setLoading(false);
+    }
+    
+    // Load payment success state from localStorage
+    const paymentSuccess = localStorage.getItem(PAYMENT_SUCCESS_KEY);
+    if (paymentSuccess === 'true') {
+      setPaymentSuccess(true);
+    }
+  }, []);
+
   // Fetch wallet amount and certificates count
   useEffect(() => {
+    // Wait for auth to finish loading
+    if (authLoading) {
+      return;
+    }
+
+    // Get user_id from context or localStorage fallback
+    const userId = getUserId(user);
+    
+    // If no user after auth loaded, clear data and stop loading
+    if (!userId) {
+      console.log("User ID not available");
+      setLoading(false);
+      return;
+    }
+
     const fetchWalletAmount = async () => {
-      if (user && user.unique_id) {
-        try {
-          const response = await axios.get(
-            `${API_BASE_URL}/test-winner-cashback/?user_id=${user.unique_id}`,
-            { withCredentials: true }
-          );
-          
-          if (response.data.status) {
-            const cashbackAmount = response.data.cashback || 0;
-            const walletBalance = response.data.wallet_balance || 0;
-            const total = cashbackAmount + walletBalance;
-            setWalletAmount(total);
-          }
-        } catch (error) {
-          console.error("Error fetching wallet amount:", error);
-          setWalletAmount(0);
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/test-winner-cashback/?user_id=${userId}`,
+          { withCredentials: true }
+        );
+        
+        if (response.data.status) {
+          const cashbackAmount = response.data.cashback || 0;
+          const walletBalance = response.data.wallet_balance || 0;
+          const total = cashbackAmount + walletBalance;
+          setWalletAmount(total);
+          return total;
         }
+      } catch (error) {
+        console.error("Error fetching wallet amount:", error);
+        setWalletAmount(0);
       }
+      return 0;
     };
 
     const fetchCertificatesCount = async () => {
-      if (user && user.unique_id) {
-        try {
-          console.log("Fetching certificates count for user:", user.unique_id);
-          const response = await axios.get(
-            `${API_BASE_URL}/test-winners/?user_id=${user.unique_id}`,
-            { withCredentials: true }
-          );
+      try {
+        console.log("Fetching certificates count for user:", userId);
+        const response = await axios.get(
+          `${API_BASE_URL}/test-winners/?user_id=${userId}`,
+          { withCredentials: true }
+        );
+        
+        console.log("Test winners API response:", response.data);
+        
+        // Check if response has expected structure
+        if (response.data.status && response.data.data) {
+          console.log("Response data structure:", Object.keys(response.data.data));
           
-          console.log("Test winners API response:", response.data);
-          
-          // Check if response has expected structure
-          if (response.data.status && response.data.data) {
-            console.log("Response data structure:", Object.keys(response.data.data));
+          if (response.data.data.attempts) {
+            console.log("All attempts:", response.data.data.attempts);
             
-            if (response.data.data.attempts) {
-              console.log("All attempts:", response.data.data.attempts);
-              
-              // Check all test_status values present
-              const allStatuses = [...new Set(response.data.data.attempts.map(attempt => attempt.test_status))];
-              console.log("All unique quiz statuses:", allStatuses);
-              
-              // Check which attempts have certificates
-              const attemptsWithCertificates = response.data.data.attempts.filter(
-                attempt => attempt.certificate
-              );
-              console.log("Attempts with certificates:", attemptsWithCertificates);
-              
-               // Count only passed attempts with certificates
-              const attemptsWithCertificate = response.data.data.attempts.filter(
-                attempt => attempt.test_status === "passed" && attempt.certificate
-              );
-              console.log("Attempts with certificate count:", attemptsWithCertificate.length);
-              setCertificatesCount(attemptsWithCertificate.length);
-            } else {
-              console.log("No attempts data found in response");
-              setCertificatesCount(0);
-            }
+            // Check all test_status values present
+            const allStatuses = [...new Set(response.data.data.attempts.map(attempt => attempt.test_status))];
+            console.log("All unique quiz statuses:", allStatuses);
+            
+            // Check which attempts have certificates
+            const attemptsWithCertificates = response.data.data.attempts.filter(
+              attempt => attempt.certificate
+            );
+            console.log("Attempts with certificates:", attemptsWithCertificates);
+            
+             // Count only passed attempts with certificates
+            const attemptsWithCertificate = response.data.data.attempts.filter(
+              attempt => attempt.test_status === "passed" && attempt.certificate
+            );
+            console.log("Attempts with certificate count:", attemptsWithCertificate.length);
+            setCertificatesCount(attemptsWithCertificate.length);
+            return attemptsWithCertificate.length;
           } else {
-            console.log("Response does not have expected structure");
+            console.log("No attempts data found in response");
             setCertificatesCount(0);
           }
-        } catch (error) {
-          console.error("Error fetching certificates count:", error);
+        } else {
+          console.log("Response does not have expected structure");
           setCertificatesCount(0);
         }
-      } else {
-        console.log("User or user.unique_id not available");
+      } catch (error) {
+        console.error("Error fetching certificates count:", error);
         setCertificatesCount(0);
       }
+      return 0;
     };
 
     const checkWinningAmount = () => {
@@ -161,19 +243,44 @@ const UserDashBoard = () => {
       }
     };
 
-    // First fetch wallet amount and certificates count, then check for winning amount
-    Promise.all([
-      fetchWalletAmount(),
-      fetchCertificatesCount()
-    ]).then(() => {
-      checkWinningAmount();
-    });
+    const fetchDashboardData = async () => {
+      // Only show loading if we don't have stored data
+      const storedData = getStoredDashboardData();
+      if (!storedData) {
+        setLoading(true);
+      }
+      setError(null);
+
+      try {
+        // Fetch wallet amount and certificates count
+        const [walletTotal, certsCount] = await Promise.all([
+          fetchWalletAmount(),
+          fetchCertificatesCount()
+        ]);
+
+        // Store in localStorage for persistence
+        setStoredDashboardData({
+          walletAmount: walletTotal,
+          certificatesCount: certsCount
+        });
+
+        // Check for winning amount after data is fetched
+        checkWinningAmount();
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError(err.response?.data?.message || err.message || "Failed to fetch dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
 
     // Set up interval to check for payment completion
     const paymentCheckInterval = setInterval(checkPaymentCompletion, 3000);
 
     return () => clearInterval(paymentCheckInterval);
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     const checkDevice = () => {
@@ -198,6 +305,8 @@ const UserDashBoard = () => {
     setShowPaymentModal(true);
     setPaymentMethod(null);
     setPaymentSuccess(false);
+    // Clear payment success state from localStorage
+    localStorage.removeItem(PAYMENT_SUCCESS_KEY);
   };
 
   // Select payment method
@@ -207,6 +316,15 @@ const UserDashBoard = () => {
 
   // Process wallet payment
   const handleWalletPayment = async () => {
+    // Get user_id from context or localStorage fallback
+    const userId = getUserId(user);
+    
+    // Check if user is available
+    if (!userId) {
+      alert("User not authenticated. Please login again.");
+      return;
+    }
+
     if (walletAmount < TEST_AMOUNT) {
       alert("Insufficient wallet balance");
       return;
@@ -216,7 +334,7 @@ const UserDashBoard = () => {
       const response = await axios.put(
         `${API_BASE_URL}/test-winner-cashback/`,
         {
-          user_id: user.unique_id,
+          user_id: userId,
           cashback: TEST_AMOUNT // Send only the entry fee amount
         },
         { withCredentials: true }
@@ -229,6 +347,8 @@ const UserDashBoard = () => {
         // Save payment method and source to localStorage for Test component
         localStorage.setItem("test_payment_method", "wallet");
         localStorage.setItem("test_source", "userdashboard");
+        // Save payment success state to localStorage
+        localStorage.setItem(PAYMENT_SUCCESS_KEY, 'true');
       }
     } catch (error) {
       console.error("Error processing wallet payment:", error);
@@ -238,19 +358,29 @@ const UserDashBoard = () => {
 
   // Process online payment
   const handleOnlinePayment = async () => {
+    // Get user_id from context or localStorage fallback
+    const userId = getUserId(user);
+    
+    // Check if user is available
+    if (!userId) {
+      alert("User not authenticated. Please login again.");
+      return;
+    }
+
     try {
-      // Send only user_id to register-test API for authenticated users
+      // Send user_id and fee to register-test API for authenticated users
       const response = await axios.post(
         `${API_BASE_URL}/register-test/`,
         {
-          user_id: user.unique_id
+          user_id: userId,
+          fee: TEST_AMOUNT
         },
         { withCredentials: true }
       );
 
       if (response.data.status && response.data.payment_order) {
         // Save user ID, payment method, and source to localStorage for Test component
-        localStorage.setItem("test_user_id", user.unique_id);
+        localStorage.setItem("test_user_id", userId);
         localStorage.setItem("test_payment_method", "online");
         localStorage.setItem("test_source", "userdashboard");
         
@@ -261,6 +391,8 @@ const UserDashBoard = () => {
          } else {
           // If no redirect URL, consider payment successful and show start test button
           setPaymentSuccess(true);
+          // Save payment success state to localStorage
+          localStorage.setItem(PAYMENT_SUCCESS_KEY, 'true');
         }
       }
     } catch (error) {
@@ -274,6 +406,15 @@ const UserDashBoard = () => {
     setAddError("");
     setAddSuccess("");
 
+    // Get user_id from context or localStorage fallback
+    const userId = getUserId(user);
+    
+    // Check if user is available
+    if (!userId) {
+      setAddError("User not authenticated. Please login again.");
+      return;
+    }
+
     const amount = parseFloat(addAmount);
 
     // Validation
@@ -286,7 +427,7 @@ const UserDashBoard = () => {
       const response = await axios.post(
         `${API_BASE_URL}/add-wallet/`,
         {
-          user_id: user.unique_id,
+          user_id: userId,
           amount: amount,
         },
         { withCredentials: true }
@@ -315,16 +456,30 @@ const UserDashBoard = () => {
 
   // Start test after accepting instructions
   const handleAcceptInstructions = async () => {
+    // Get user_id from context or localStorage fallback
+    const userId = getUserId(user);
+    
+    // Check if user is available
+    if (!userId) {
+      alert("User not authenticated. Please login again.");
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${API_BASE_URL}/start-test/`,
-        { user_id: user.unique_id },
+        {
+          user_id: userId,
+          fee: TEST_AMOUNT
+        },
         { withCredentials: true }
       );
 
       if (response.data.status) {
         // Save user ID to localStorage for Test component (payment method and source already saved)
-        localStorage.setItem("test_user_id", user.unique_id);
+        localStorage.setItem("test_user_id", userId);
+        // Clear payment success state from localStorage
+        localStorage.removeItem(PAYMENT_SUCCESS_KEY);
         // Navigate to test page
         navigate("/test");
       }
@@ -360,93 +515,109 @@ const UserDashBoard = () => {
         <Container fluid className="dashboard-body">
           <h1 className="page-title">Khelo Aur Jeeto </h1>
           
-           <div className="br-box-container mt-4">
-             <div className="row">
-               {/* Khelo Aur Jeeto Card */}
-               <div className="col-md-4 mb-4">
-                 <div
-                   className="br-stat-card card-gradient-primary"
-                   onClick={handleKheloJeetoClick}
-                   style={{ cursor: "pointer" }}
-                 >
-                   <div className="br-stat-icon">
-                     <FaBook />
-                   </div>
-                   <div className="br-stat-details">
-                     <h5>Khelo Aur Jeeto</h5>
-                     <p className="card-description">Start Quiz</p>
-                     <button className="play-button">Play Now</button>
-                   </div>
-                 </div>
-               </div>
+          {loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3">Loading dashboard data...</p>
+            </div>
+          ) : error ? (
+            <Alert variant="danger" className="mt-4">
+              <h4>Error</h4>
+              <p>{error}</p>
+            </Alert>
+          ) : (
+            <>
+              <div className="br-box-container mt-4">
+                <div className="row">
+                  {/* Khelo Aur Jeeto Card */}
+                  <div className="col-md-4 mb-4">
+                    <div
+                      className="br-stat-card card-gradient-primary"
+                      onClick={handleKheloJeetoClick}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <div className="br-stat-icon">
+                        <FaBook />
+                      </div>
+                      <div className="br-stat-details">
+                        <h5>Khelo Aur Jeeto</h5>
+                        <p className="card-description">Start Quiz</p>
+                        <button className="play-button">Play Now</button>
+                      </div>
+                    </div>
+                  </div>
 
-               {/* Certificates Card */}
-               <div className="col-md-4 mb-4">
-                 <div
-                   className="br-stat-card card-gradient-success"
-                   style={{ cursor: "pointer" }}
-                   onClick={() => navigate("/TestWinner")}
-                 >
-                   <div className="br-stat-icon">
-                     <FaCertificate />
-                   </div>
-                   <div className="br-stat-details">
-                     <h5>Passed Certificates</h5>
-                     <h2>{certificatesCount}</h2>
-                     <p className="card-description">Earned Certificates</p>
-                   </div>
-                 </div>
-               </div>
+                  {/* Certificates Card */}
+                  <div className="col-md-4 mb-4">
+                    <div
+                      className="br-stat-card card-gradient-success"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => navigate("/TestWinner")}
+                    >
+                      <div className="br-stat-icon">
+                        <FaCertificate />
+                      </div>
+                      <div className="br-stat-details">
+                        <h5>Passed Certificates</h5>
+                        <h2>{certificatesCount}</h2>
+                        <p className="card-description">Earned Certificates</p>
+                      </div>
+                    </div>
+                  </div>
 
-               {/* Wallet Balance Card */}
-               <div className="col-md-4 mb-4">
-                 <div className="br-stat-card card-gradient-warning">
-                   <div className="br-stat-icon">
-                     <FaFileInvoice />
-                   </div>
-                   <div className="br-stat-details">
-                     <h5>Wallet Balance</h5>
-                     <h2>₹{walletAmount.toFixed(2)}</h2>
-                     <p className="card-description">Available to Play</p>
-                     <button 
-                       className="add-money-button"
-                       onClick={() => setShowAddWalletModal(true)}
-                     >
-                       Add Money
-                     </button>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
+                  {/* Wallet Balance Card */}
+                  <div className="col-md-4 mb-4">
+                    <div className="br-stat-card card-gradient-warning">
+                      <div className="br-stat-icon">
+                        <FaFileInvoice />
+                      </div>
+                      <div className="br-stat-details">
+                        <h5>Wallet Balance</h5>
+                        <h2>₹{walletAmount.toFixed(2)}</h2>
+                        <p className="card-description">Available to Play</p>
+                        <button
+                          className="add-money-button"
+                          onClick={() => setShowAddWalletModal(true)}
+                        >
+                          Add Money
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-          {/* Feature Highlights */}
-          <div className="feature-highlights mt-5">
-            <h2 className="section-title">Why Play With Us?</h2>
-            <Row>
-              <Col xs={12} sm={6} lg={4} className="mb-4">
-                <div className="feature-card">
-                  <div className="feature-icon">🏆</div>
-                  <h3>Win Cash Prizes</h3>
-                  <p>Compete and win real cash prizes by taking quizzes</p>
-                </div>
-              </Col>
-              <Col xs={12} sm={6} lg={4} className="mb-4">
-                <div className="feature-card">
-                  <div className="feature-icon">📚</div>
-                  <h3>Learn & Grow</h3>
-                  <p>Enhance your knowledge with interactive quizzes</p>
-                </div>
-              </Col>
-              <Col xs={12} sm={6} lg={4} className="mb-4">
-                <div className="feature-card">
-                  <div className="feature-icon">🎯</div>
-                  <h3>Certificates</h3>
-                  <p>Get certified for each quiz you pass</p>
-                </div>
-              </Col>
-            </Row>
-          </div>
+              {/* Feature Highlights */}
+              <div className="feature-highlights mt-5">
+                <h2 className="section-title">Why Play With Us?</h2>
+                <Row>
+                  <Col xs={12} sm={6} lg={4} className="mb-4">
+                    <div className="feature-card">
+                      <div className="feature-icon">🏆</div>
+                      <h3>Win Cash Prizes</h3>
+                      <p>Compete and win real cash prizes by taking quizzes</p>
+                    </div>
+                  </Col>
+                  <Col xs={12} sm={6} lg={4} className="mb-4">
+                    <div className="feature-card">
+                      <div className="feature-icon">📚</div>
+                      <h3>Learn & Grow</h3>
+                      <p>Enhance your knowledge with interactive quizzes</p>
+                    </div>
+                  </Col>
+                  <Col xs={12} sm={6} lg={4} className="mb-4">
+                    <div className="feature-card">
+                      <div className="feature-icon">🎯</div>
+                      <h3>Certificates</h3>
+                      <p>Get certified for each quiz you pass</p>
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            </>
+          )}
         </Container>
       </div>
 
@@ -544,7 +715,11 @@ const UserDashBoard = () => {
       {/* Payment Modal */}
       <Modal
         show={showPaymentModal}
-        onHide={() => setShowPaymentModal(false)}
+        onHide={() => {
+          setShowPaymentModal(false);
+          // Clear payment success state from localStorage when modal is closed
+          localStorage.removeItem(PAYMENT_SUCCESS_KEY);
+        }}
         size="lg"
         centered
       >
@@ -640,7 +815,11 @@ const UserDashBoard = () => {
         </Modal.Body>
         <Modal.Footer>
           {!paymentSuccess && (
-            <Button variant="secondary" onClick={() => setShowPaymentModal(false)}>
+            <Button variant="secondary" onClick={() => {
+              setShowPaymentModal(false);
+              // Clear payment success state from localStorage when cancel is clicked
+              localStorage.removeItem(PAYMENT_SUCCESS_KEY);
+            }}>
               Cancel
             </Button>
           )}

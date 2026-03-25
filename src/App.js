@@ -5,7 +5,6 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fontsource/poppins";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import UpdateNotification from "./components/UpdateNotification";
 import { useVersionChecker } from "./utils/versionChecker";
 import {
   BrowserRouter as Router,
@@ -18,50 +17,49 @@ import "../src/componets/custom/style.css";
 import Home from "./componets/pages/Home";
 import Footer from "./componets/footer/Footer";
 import NavBar from "./componets/topnav/NavBar";
-import HrDashBoard from "./componets/hr_dashboard/HrDashBoard";
-import EmployeeManagement from "./componets/hr_dashboard/hr_iinerpage/EmployeeManagement";
+
+
 import Login from "./componets/all_login/Login";
 import { AuthProvider } from "./componets/context/AuthContext";
 import { UserProfileProvider } from "./componets/context/UserProfileContext";
-import EmployeeRegistration from "./componets/all_registration/EmployeeRegistration";
+
 import ProtectedRoute from "./componets/context/ProtectedRoute";
-import DailyAttendance from "./componets/hr_dashboard/attendance/DailyAttendance";
-import HrProfile from "./componets/all_profile/HrProfile";
+
+
 import ForgotPassword from "./componets/all_login/ForgotPassword";
 
-//Hr Payroll
-import AddEmployeeForm from "./componets/Payroll_dashboard/AddEmployeeForm";
-import EmployeeList from "./componets/Payroll_dashboard/EmployeeList";
+
+
+
 import {
   PayrollCalculations,
   calculateTotals,
 } from "./utils/PayrollCalculations";
 
-import MyTeam from "./componets/hr_dashboard/teammanagement/MyTeam";
-import PayrollCharts from "./componets/Payroll_dashboard/PayrollCharts";
-import PayDashBoard from "./componets/Payroll_dashboard/PayDashBoard";
-import LeaveCalendar from "./componets/hr_dashboard/hr_iinerpage/LeaveCalendar";
-import EmpList from "./componets/hr_dashboard/pay_roll/EmpList";
-import SalaryCalculation from "./componets/hr_dashboard/pay_roll/SalaryCalculation";
-import LeaveManagement from "./componets/hr_dashboard/Leave/LeaveManagement";
+
+
+
+
+
+
+
 import CompanyProfile from "./componets/pages/aboutus/CompanyProfile";
 import OurTeam from "./componets/pages/aboutus/OurTeam";
 import Careers from "./componets/pages/aboutus/RunningProjects";
-import ApplyLeaveCalendar from "./componets/hr_dashboard/Leave/ApplyLeaveCalendar";
-import LeaveStatus from "./componets/hr_dashboard/Leave/LeaveStatus";
-import SalaryStructure from "./componets/hr_dashboard/pay_roll/SalaryStructure";
-import LeaveHistory from "./componets/hr_dashboard/Leave/LeaveHistory";
-import AttendanceRegularization from "./componets/hr_dashboard/attendance/AttendanceRegularization";
-import DepartmentHierarchy from "./componets/hr_dashboard/Departments/DepartmentHierarchy";
 
-import CreateTeam from "./componets/hr_dashboard/teammanagement/CreateTeam";
-import ManageTeam from "./componets/hr_dashboard/teammanagement/ManageTeam";
+
+
+
+
+
+
+
 import Courses from "./componets/topnav/navigationpages/Courses";
 import Gallery from "./componets/topnav/navigationpages/Gallery";
 
 import TrainingRegistration from "./componets/topnav/navigationpages/TrainingRegistration";
 
-import PayslipGenerator from "./componets/hr_dashboard/pay_roll/PayslipGenerator";
+
 import WebsiteManagement from "./componets/adminpanel/WebsiteManagement";
 import LeftNavManagement from "./componets/adminpanel/LeftNavManagement";
 import AddServices from "./componets/adminpanel/Services/AddServices";
@@ -101,13 +99,13 @@ import ServicesDetails from "./componets/pages/ServicesDetails";
 import Certificate from "./componets/topnav/navigationpages/Certificate";
 import ManageFirm from "./componets/adminpanel/addfirm/ManageFirm";
 import AddFirm from "./componets/adminpanel/addfirm/AddFirm";
-import InterviewSch from "./componets/hr_dashboard/recruitments/InterviewSch";
-import JobApplications from "./componets/hr_dashboard/recruitments/JobApplications";
-import JobOpenings from "./componets/hr_dashboard/recruitments/JobOpenings";
-import OfferLetters from "./componets/hr_dashboard/recruitments/OfferLetters";
-import Shortlisting from "./componets/hr_dashboard/recruitments/Shortlisting";
+
+
+
+
+
 import Career from "./componets/topnav/navigationpages/Career";
-import EmployeeTransfer from "./componets/hr_dashboard/hr_iinerpage/EmployeeTransfer";
+
 
 import AllStudentsData from "./componets/adminpanel/Candidate/AllStudentsData";
 
@@ -144,29 +142,27 @@ function AppContent() {
 
   const hiddenPaths = new Set([
     "/HrDashBoard",
-    "/EmployeeManagement",
-    "/EmployeeRegistration",
-    "/DailyAttendance",
-    "/HrProfile",
-    "/AttendanceRegularization",
-    "/AddEmployeeForm",
-    "/EmployeeList",
+  
+   
+ 
+
+   
+   
     "/PayrollCalculations",
     "/MockData",
-    "/PayrollCharts",
-    "/PayDashBoard",
+
+  
     "/SalaryCalculation",
-    "/EmpList",
-    "/LeaveManagement",
-    "/ApplyLeaveCalendar",
-    "/LeaveStatus",
+   
+   
+   
     "/SalaryStructure",
-    "/LeaveHistory",
+   
     "/DepartmentHierarchy",
-    "/CreateTeam",
+   
     "/ManageTeam",
-    "/MyTeam",
-    "/PayslipGenerator",
+   
+   
     "/WebsiteManagement",
     "LeftNavManagement",
     "/AddServices",
@@ -200,12 +196,12 @@ function AppContent() {
     "/EditNotification",
     "/AddFirm",
     "/ManageFirm",
-    "/JobApplications",
-    "/JobOpenings",
-    "/OfferLetters",
-    "/Shortlisting",
-    "/InterviewSch",
-    "/EmployeeTransfer",
+ 
+ 
+ 
+   
+   
+  
     "/AllStudentsData",
     "/GenerateBill",
     "/ManageBills",
@@ -230,17 +226,16 @@ function AppContent() {
 
   return (
     <>
-      {updateAvailable && <UpdateNotification onRefresh={handleRefresh} />}
       {!shouldHideNavbar && <NavBar />}
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/Login" element={<Login />} />
-        {/* <Route path="/EmployeeRegistration" element={<EmployeeRegistration />} /> */}
+      
         {/* <Route path="/HrDashBoard" element={<HrDashBoard />} /> */}
-        <Route path="/DailyAttendance" element={<DailyAttendance />} />
+     
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
-        <Route path="/ApplyLeaveCalendar" element={<ApplyLeaveCalendar />} />
+        
         <Route path="/Courses" element={<Courses />} />
         <Route path="/Gallery" element={<Gallery />} />
         <Route path="/Training" element={<Training />} />
@@ -276,32 +271,11 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/LeaveStatus"
-          element={
-            <ProtectedRoute>
-              <LeaveStatus />
-            </ProtectedRoute>
-          }
-        />
+       
 
-        <Route
-          path="/LeaveHistory"
-          element={
-            <ProtectedRoute>
-              <LeaveHistory />
-            </ProtectedRoute>
-          }
-        />
+       
 
-        <Route
-          path="/AddEmployeeForm"
-          element={
-            <ProtectedRoute>
-              <AddEmployeeForm />
-            </ProtectedRoute>
-          }
-        />
+     
         <Route
           path="/PayrollCalculations"
           element={
@@ -310,14 +284,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/EmployeeList"
-          element={
-            <ProtectedRoute>
-              <EmployeeList />
-            </ProtectedRoute>
-          }
-        />
+        
         <Route
           path="/Registerduser"
           element={
@@ -327,30 +294,9 @@ function AppContent() {
           }
         />
      
-        <Route
-          path="/PayrollCharts"
-          element={
-            <ProtectedRoute>
-              <PayrollCharts />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/SalaryStructure"
-          element={
-            <ProtectedRoute>
-              <SalaryStructure />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/PayslipGenerator"
-          element={
-            <ProtectedRoute>
-              <PayslipGenerator />
-            </ProtectedRoute>
-          }
-        />
+        
+       
+        
          <Route
           path="/UserProfile"
           element={
@@ -360,53 +306,15 @@ function AppContent() {
           }
         />
 
-        <Route
-          path="/PayDashBoard"
-          element={
-            <ProtectedRoute>
-              <PayDashBoard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/CreateTeam"
-          element={
-            <ProtectedRoute>
-              <CreateTeam />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/ManageTeam"
-          element={
-            <ProtectedRoute>
-              <ManageTeam />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/MyTeam"
-          element={
-            <ProtectedRoute>
-              <MyTeam />
-            </ProtectedRoute>
-          }
-        />
+        
+        
+       
         <Route path="/CompanyProfile" element={<CompanyProfile />} />
         <Route path="/OurTeam" element={<OurTeam />} />
         <Route path="/Career" element={<Career />} />
         <Route path="/ServicesDetails" element={<ServicesDetails />} />
         {/* Protected Routes */}
-        {
-          <Route
-            path="/HrDashBoard"
-            element={
-              <ProtectedRoute>
-                <HrDashBoard />
-              </ProtectedRoute>
-            }
-          />
-        }
+       
         <Route
             path="/TestWinner"
             element={
@@ -432,127 +340,17 @@ function AppContent() {
             }
           />
         
-        <Route
-          path="/EmployeeRegistration"
-          element={
-            <ProtectedRoute>
-              <EmployeeRegistration />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/AttendanceRegularization"
-          element={
-            <ProtectedRoute>
-              <AttendanceRegularization />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/EmployeeManagement"
-          element={
-            <ProtectedRoute>
-              <EmployeeManagement />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/EmployeeTransfer"
-          element={
-            <ProtectedRoute>
-              <EmployeeTransfer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/HrProfile"
-          element={
-            <ProtectedRoute>
-              <HrProfile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/LeaveCalendar"
-          element={
-            <ProtectedRoute>
-              <LeaveCalendar />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/SalaryCalculation"
-          element={
-            <ProtectedRoute>
-              <SalaryCalculation />
-            </ProtectedRoute>
-          }
-        />
+        
+       
+       
+       
+       
+     
+      
 
-        <Route
-          path="/DepartmentHierarchy"
-          element={
-            <ProtectedRoute>
-              <DepartmentHierarchy />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/EmpList"
-          element={
-            <ProtectedRoute>
-              <EmpList />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/LeaveManagement"
-          element={
-            <ProtectedRoute>
-              <LeaveManagement />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/OfferLetters"
-          element={
-            <ProtectedRoute>
-              <OfferLetters />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/Shortlisting"
-          element={
-            <ProtectedRoute>
-              <Shortlisting />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/JobOpenings"
-          element={
-            <ProtectedRoute>
-              <JobOpenings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/JobApplications"
-          element={
-            <ProtectedRoute>
-              <JobApplications />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/InterviewSch"
-          element={
-            <ProtectedRoute>
-              <InterviewSch />
-            </ProtectedRoute>
-          }
-        />
+        
+       
+   
         {/* Admin Panel Routes */}
         <Route
           path="/AddCarousel"

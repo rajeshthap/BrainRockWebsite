@@ -22,7 +22,7 @@ function KheloJito() {
     phone: "",
     full_name: "",
     email: "",
-    fee: 8,
+    fee: 1,
   });
 
   const [isLoading, setIsLoading] = useState(false);
