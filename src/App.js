@@ -295,8 +295,6 @@ function AppContent() {
         />
      
         
-       
-        
          <Route
           path="/UserProfile"
           element={
