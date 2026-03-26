@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import "../../assets/css/Test.css";
 import axios from "axios";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate,useLocation  } from "react-router-dom";
 import FooterPage from "../footer/FooterPage";
 import { Container } from "react-bootstrap";
 import { AuthContext } from "../context/AuthContext";
@@ -12,14 +12,43 @@ import Faild from "../../assets/images/result_img.jpg"
 const API_BASE_URL = "https://brainrock.in/brainrock/backend";
 
 function Test() {
-  // Get user_id from URL search parameters or localStorage
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const urlUserId = searchParams.get("user_id");
   const storageUserId = localStorage.getItem("test_user_id");
   const userId = urlUserId || storageUserId;
   const navigate = useNavigate();
+  
+  // Check if this is a fresh login (user just logged in)
+  const isFreshLogin = localStorage.getItem("fresh_login") === "true";
+  
+  // Clear test state if it's a fresh login
+  useEffect(() => {
+    if (isFreshLogin) {
+      console.log("Fresh login detected - clearing test state");
+      // Clear all test-related state from localStorage
+      localStorage.removeItem("test_currentQuestion");
+      localStorage.removeItem("test_score");
+      localStorage.removeItem("test_showResults");
+      localStorage.removeItem("test_userAnswers");
+      localStorage.removeItem("test_timeLeft");
+      localStorage.removeItem("test_testResult");
+      localStorage.removeItem("test_tabSwitchWarning");
+      localStorage.removeItem("test_tabSwitchCount");
+      localStorage.removeItem("test_showWinnerForm");
+      localStorage.removeItem("test_showWrongAnswersModal");
+      localStorage.removeItem("test_wrongAnswers");
+      localStorage.removeItem("test_certificateUrl");
+      localStorage.removeItem("test_showInstructionsModal");
+      
+      // Clear the fresh login flag
+      localStorage.removeItem("fresh_login");
+    }
+  }, [isFreshLogin]);
+  
   console.log("Test component - User ID from URL:", urlUserId);
   console.log("Test component - User ID from localStorage:", storageUserId);
+  console.log("Test component - Fresh login:", isFreshLogin);
   
   // Check for payment success parameters in URL
   const paymentSuccess = searchParams.get("payment_success");
@@ -30,21 +59,66 @@ function Test() {
     console.log("Test component - Payment successful via:", paymentMethod);
   }
 
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [score, setScore] = useState(0);
-  const [showResults, setShowResults] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return 0;
+    const saved = localStorage.getItem("test_currentQuestion");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [score, setScore] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return 0;
+    const saved = localStorage.getItem("test_score");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [showResults, setShowResults] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return false;
+    const saved = localStorage.getItem("test_showResults");
+    return saved === "true";
+  });
   const [selectedOption, setSelectedOption] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
-  const [userAnswers, setUserAnswers] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [testResult, setTestResult] = useState(null);
-  const [tabSwitchWarning, setTabSwitchWarning] = useState(false);
-  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [userAnswers, setUserAnswers] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return [];
+    const saved = localStorage.getItem("test_userAnswers");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [timeLeft, setTimeLeft] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return 15;
+    const saved = localStorage.getItem("test_timeLeft");
+    return saved ? parseInt(saved, 10) : 15;
+  });
+  const [testResult, setTestResult] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return null;
+    const saved = localStorage.getItem("test_testResult");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [tabSwitchWarning, setTabSwitchWarning] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return false;
+    const saved = localStorage.getItem("test_tabSwitchWarning");
+    return saved === "true";
+  });
+  const [tabSwitchCount, setTabSwitchCount] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return 0;
+    const saved = localStorage.getItem("test_tabSwitchCount");
+    return saved ? parseInt(saved, 10) : 0;
+  });
   const [animateScore, setAnimateScore] = useState(false);
-  const [showWinnerForm, setShowWinnerForm] = useState(false);
+  const [showWinnerForm, setShowWinnerForm] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return false;
+    const saved = localStorage.getItem("test_showWinnerForm");
+    return saved === "true";
+  });
   const [winnerFormData, setWinnerFormData] = useState({
     phone: localStorage.getItem("test_user_phone") || "",
     password: "",
@@ -52,15 +126,36 @@ function Test() {
     account_number: "",
     ifsc_code: "",
   });
-  const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(false);
-  const [wrongAnswers, setWrongAnswers] = useState([]);
-  const [certificateUrl, setCertificateUrl] = useState(null);
-  const [showInstructionsModal, setShowInstructionsModal] = useState(true);
+  const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return false;
+    const saved = localStorage.getItem("test_showWrongAnswersModal");
+    return saved === "true";
+  });
+  const [wrongAnswers, setWrongAnswers] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return [];
+    const saved = localStorage.getItem("test_wrongAnswers");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [certificateUrl, setCertificateUrl] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return null;
+    const saved = localStorage.getItem("test_certificateUrl");
+    return saved || null;
+  });
+  const [showInstructionsModal, setShowInstructionsModal] = useState(() => {
+    // Don't restore state if it's a fresh login
+    if (isFreshLogin) return true;
+    const saved = localStorage.getItem("test_showInstructionsModal");
+    return saved === "true" || saved === null;
+  });
 
   // State for tracking remaining attempts for KheloJito users
   const [remainingAttempts, setRemainingAttempts] = useState(0);
   const [isRetakeMode, setIsRetakeMode] = useState(false);
- useEffect(() => {
+
+  useEffect(() => {
     // Disable back button by preventing default behavior
     const preventBack = (e) => {
       // Always prevent default and push state to stay on current page
@@ -69,33 +164,23 @@ function Test() {
       window.history.pushState(null, window.location.href);
     };
     // Push current state first to ensure we have a state to go back to
-
     window.history.pushState(null, window.location.href);
 
     // Handle popstate event (when back button is clicked)
-
     window.addEventListener('popstate', preventBack);
     // Also prevent hash changes
-
     const preventHashChange = (e) => {
-
       e.preventDefault();
-
       window.history.pushState(null, window.location.href);
-
     };
-
     window.addEventListener('hashchange', preventHashChange);
 
     return () => {
-
       window.removeEventListener('popstate', preventBack);
-
       window.removeEventListener('hashchange', preventHashChange);
-
     };
-
   }, []);
+
   // Initialize remaining attempts from localStorage on component mount
   useEffect(() => {
     const testSource = localStorage.getItem("test_source");
@@ -114,6 +199,85 @@ function Test() {
       console.log("KheloJito user detected. Remaining attempts:", attempts);
     }
   }, []);
+
+  // Save state to localStorage whenever it changes (only if not fresh login)
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_currentQuestion", currentQuestion.toString());
+    }
+  }, [currentQuestion, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_score", score.toString());
+    }
+  }, [score, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_showResults", showResults.toString());
+    }
+  }, [showResults, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_userAnswers", JSON.stringify(userAnswers));
+    }
+  }, [userAnswers, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_timeLeft", timeLeft.toString());
+    }
+  }, [timeLeft, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_testResult", JSON.stringify(testResult));
+    }
+  }, [testResult, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_tabSwitchWarning", tabSwitchWarning.toString());
+    }
+  }, [tabSwitchWarning, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_tabSwitchCount", tabSwitchCount.toString());
+    }
+  }, [tabSwitchCount, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_showWinnerForm", showWinnerForm.toString());
+    }
+  }, [showWinnerForm, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_showWrongAnswersModal", showWrongAnswersModal.toString());
+    }
+  }, [showWrongAnswersModal, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_wrongAnswers", JSON.stringify(wrongAnswers));
+    }
+  }, [wrongAnswers, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin && certificateUrl) {
+      localStorage.setItem("test_certificateUrl", certificateUrl);
+    }
+  }, [certificateUrl, isFreshLogin]);
+
+  useEffect(() => {
+    if (!isFreshLogin) {
+      localStorage.setItem("test_showInstructionsModal", showInstructionsModal.toString());
+    }
+  }, [showInstructionsModal, isFreshLogin]);
 
   // Start Quiz and fetch questions from API
   useEffect(() => {
@@ -184,9 +348,14 @@ function Test() {
     return () => clearInterval(timer);
   }, [currentQuestion, loading, showResults, questions.length]);
 
-  // Reset timer only when current question changes
+  // Reset timer only when current question changes (not on initial load)
+  const prevQuestionRef = useRef(currentQuestion);
   useEffect(() => {
-    setTimeLeft(15);
+    // Only reset timer if question actually changed (not on initial load)
+    if (prevQuestionRef.current !== currentQuestion) {
+      setTimeLeft(15);
+      prevQuestionRef.current = currentQuestion;
+    }
   }, [currentQuestion]);
 
   // Tab switch detection
@@ -315,6 +484,9 @@ function Test() {
           // Store winning amount (amount_added) in localStorage for display in dashboard
           localStorage.setItem("winningAmount", response.data.amount_added || 0);
           
+          // Clear test state from localStorage
+          clearTestState();
+          
           // Redirect based on payment method
           if (paymentMethod === "online") {
             // For online payment, redirect to login page
@@ -336,6 +508,23 @@ function Test() {
       alert("Please register first to claim your prize.");
       navigate("/KheloJito");
     }
+  };
+
+  // Function to clear test state from localStorage
+  const clearTestState = () => {
+    localStorage.removeItem("test_currentQuestion");
+    localStorage.removeItem("test_score");
+    localStorage.removeItem("test_showResults");
+    localStorage.removeItem("test_userAnswers");
+    localStorage.removeItem("test_timeLeft");
+    localStorage.removeItem("test_testResult");
+    localStorage.removeItem("test_tabSwitchWarning");
+    localStorage.removeItem("test_tabSwitchCount");
+    localStorage.removeItem("test_showWinnerForm");
+    localStorage.removeItem("test_showWrongAnswersModal");
+    localStorage.removeItem("test_wrongAnswers");
+    localStorage.removeItem("test_certificateUrl");
+    localStorage.removeItem("test_showInstructionsModal");
   };
 
   // Function to fetch new questions for retake attempts
@@ -365,7 +554,7 @@ function Test() {
         setAttemptId(response.data.attempt_id);
         setCurrentQuestion(0);
         setUserAnswers([]);
-        setTimeLeft(300); // 5 minutes timer reset
+        setTimeLeft(15); 
         setShowResults(false);
         setScore(0);
         setRemainingAttempts((prev) => prev - 1);
@@ -406,12 +595,18 @@ function Test() {
       
       console.log("Retaking test. Remaining attempts:", newAttempts);
       
+      // Clear test state from localStorage for new attempt
+      clearTestState();
+      
       // Fetch new questions without reloading the page
       await fetchNewQuestions();
     } else {
       // Clear localStorage
       localStorage.removeItem("test_user_id");
       localStorage.removeItem("khelojito_remaining_attempts");
+      
+      // Clear test state from localStorage
+      clearTestState();
       
       // Redirect based on user authorization
       if (user && user.unique_id) {
@@ -424,23 +619,23 @@ function Test() {
     }
   };
 
-   // Function to find and display wrong answers
-   const handleShowWrongAnswers = () => {
-     const wrong = [];
-     userAnswers.forEach((answer, index) => {
-       if (answer.selected_option !== questions[index].correct_answer) {
-         wrong.push({
-           question: questions[index].question_text,
-           question_hindi_text: questions[index].question_hindi_text || "",
-           userAnswer: questions[index].options[answer.selected_option],
-           correctAnswer: questions[index].options[questions[index].correct_answer],
-           questionNumber: index + 1
-         });
-       }
-     });
-     setWrongAnswers(wrong);
-     setShowWrongAnswersModal(true);
-   };
+  // Function to find and display wrong answers
+  const handleShowWrongAnswers = () => {
+    const wrong = [];
+    userAnswers.forEach((answer, index) => {
+      if (answer.selected_option !== questions[index].correct_answer) {
+        wrong.push({
+          question: questions[index].question_text,
+          question_hindi_text: questions[index].question_hindi_text || "",
+          userAnswer: questions[index].options[answer.selected_option],
+          correctAnswer: questions[index].options[questions[index].correct_answer],
+          questionNumber: index + 1
+        });
+      }
+    });
+    setWrongAnswers(wrong);
+    setShowWrongAnswersModal(true);
+  };
 
   // Social sharing functions
   const shareOnWhatsApp = (percent) => {
@@ -495,6 +690,10 @@ function Test() {
       // Show success message and redirect to login page
       alert("Congratulations! Your details have been submitted successfully. You will receive your winning amount soon.");
       localStorage.removeItem("test_user_id");
+      
+      // Clear test state from localStorage
+      clearTestState();
+      
       navigate("/login");
     } catch (err) {
       console.error("Error submitting winner form:", err);
@@ -522,8 +721,6 @@ function Test() {
     );
   }
 
-
-
   if (questions.length === 0) {
     return (
       <div className="test-container">
@@ -545,7 +742,7 @@ function Test() {
       ((testResult?.score || score) / questions.length) * 100,
     );
     // Determine if passed based on API response or score
-     const isPassed = testResult
+    const isPassed = testResult
       ? testResult.status === "passed"
       : percentage === 100;
 
@@ -646,6 +843,10 @@ function Test() {
                 </button>
                 <button type="button" className="cancel-button" onClick={() => {
                   setShowWinnerForm(false);
+                  
+                  // Clear test state from localStorage
+                  clearTestState();
+                  
                   // Redirect based on user authorization
                   if (user && user.unique_id) {
                     navigate("/UserDashBoard");
@@ -687,7 +888,7 @@ function Test() {
                     />
                   </a>
                 </div>
-                 <div className="certificate-actions">
+                <div className="certificate-actions">
                   <a 
                     href={certificateUrl} 
                     target="_blank" 
@@ -783,44 +984,44 @@ function Test() {
               </div>
 
               <div className="results-actions">
-            {isPassed ? (
-              <>
-                <button className="continue-button" onClick={handleClaimPrize}>
-                  Claim reward
-                </button>
-              </>
-            ) : (
-              <>
-              <div className="d-flex flex-column align-items-center">
-                {/* Show remaining attempts info for KheloJito users */}
-                {remainingAttempts > 0 ? (
-                  <div className="remaining-attempts-info mb-2">
-                    <span className="badge bg-info">
-                      You have {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining
-                    </span>
-                  </div>
+                {isPassed ? (
+                  <>
+                    <button className="continue-button" onClick={handleClaimPrize}>
+                      Claim reward
+                    </button>
+                  </>
                 ) : (
-                  localStorage.getItem("test_source") === "khelojito" && (
-                    <div className="remaining-attempts-info mb-2">
-                      <span className="badge bg-warning">
-                        No attempts remaining. Register again to try more.
-                      </span>
+                  <>
+                    <div className="d-flex flex-column align-items-center">
+                      {/* Show remaining attempts info for KheloJito users */}
+                      {remainingAttempts > 0 ? (
+                        <div className="remaining-attempts-info mb-2">
+                          <span className="badge bg-info">
+                            You have {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining
+                          </span>
+                        </div>
+                      ) : (
+                        localStorage.getItem("test_source") === "khelojito" && (
+                          <div className="remaining-attempts-info mb-2">
+                            <span className="badge bg-warning">
+                              No attempts remaining. Register again to try more.
+                            </span>
+                          </div>
+                        )
+                      )}
+                      <div className="d-flex-file">
+                        <button className="restart-button" onClick={handleRestart}>
+                          {remainingAttempts > 0 
+                            ? `Retake Quiz (${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} left)` 
+                            : "Retake Quiz"}
+                        </button>
+                        <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
+                          Wrong Answers
+                        </button>
+                      </div>
                     </div>
-                  )
+                  </>
                 )}
-                <div className="d-flex-file ">
-                  <button className="restart-button" onClick={handleRestart}>
-                    {remainingAttempts > 0 
-                      ? `Retake Quiz (${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} left)` 
-                      : "Retake Quiz"}
-                  </button>
-                  <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
-                    Wrong Answers
-                  </button>
-                </div>
-              </div>
-              </>
-            )}
               </div>
             </div>
           </div>
@@ -842,25 +1043,25 @@ function Test() {
                     </div>
                   ) : (
                     wrongAnswers.map((item, index) => (
-                       <div key={index} className="wrong-answer-item">
-                         <div className="question-number">Question {item.questionNumber}:</div>
-                         <div className="question-text">{item.question}</div>
-                         {item.question_hindi_text && (
-                           <div className="hindi-question mt-1">
-                             <small className="text-muted">{item.question_hindi_text}</small>
-                           </div>
-                         )}
-                         <div className="answer-container">
-                           <div className="user-answer">
-                             <span className="label">Your Answer:</span>
-                             <span className="answer-text">{item.userAnswer}</span>
-                           </div>
-                           <div className="correct-answer">
-                             <span className="label">Correct Answer:</span>
-                             <span className="answer-text">{item.correctAnswer}</span>
-                           </div>
-                         </div>
-                       </div>
+                      <div key={index} className="wrong-answer-item">
+                        <div className="question-number">Question {item.questionNumber}:</div>
+                        <div className="question-text">{item.question}</div>
+                        {item.question_hindi_text && (
+                          <div className="hindi-question mt-1">
+                            <small className="text-muted">{item.question_hindi_text}</small>
+                          </div>
+                        )}
+                        <div className="answer-container">
+                          <div className="user-answer">
+                            <span className="label">Your Answer:</span>
+                            <span className="answer-text">{item.userAnswer}</span>
+                          </div>
+                          <div className="correct-answer">
+                            <span className="label">Correct Answer:</span>
+                            <span className="answer-text">{item.correctAnswer}</span>
+                          </div>
+                        </div>
+                      </div>
                     ))
                   )}
                 </div>
@@ -901,16 +1102,16 @@ function Test() {
             Question {currentQuestion + 1} of {questions.length}
           </div>
           <div className="timer">Time Left: {timeLeft} seconds</div>
-           <h2 className="question">
-             {questions[currentQuestion].question_text}
-             {questions[currentQuestion].question_hindi_text && (
-               <div className="hindi-question mt-2">
-                 <small className="text-muted">
-                   {questions[currentQuestion].question_hindi_text}
-                 </small>
-               </div>
-             )}
-           </h2>
+          <h2 className="question">
+            {questions[currentQuestion].question_text}
+            {questions[currentQuestion].question_hindi_text && (
+              <div className="hindi-question mt-2">
+                <small className="text-muted">
+                  {questions[currentQuestion].question_hindi_text}
+                </small>
+              </div>
+            )}
+          </h2>
           <div className="options">
             {questions[currentQuestion].options.map((option, index) => (
               <div

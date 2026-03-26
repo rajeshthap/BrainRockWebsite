@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
- 
+
 export const AuthContext = createContext();
  
 // Helper to safely get/set localStorage
@@ -51,17 +51,68 @@ export const AuthProvider = ({ children }) => {
         ...(role && { role }),
       };
       const res = await axiosInstance.post("login/", loginData);
- 
-      const userData = {
-        id: res.data.user?.id || res.data.user_id || res.data.id,
-        unique_id: res.data.user?.unique_id || res.data.unique_id || null,
-        email: res.data.user?.email || res.data.email || null,
-        full_name: res.data.user?.full_name || res.data.full_name || null,
-        role: res.data.user?.role || res.data.role || null,
+
+      console.log("Login API response:", res.data);
+      console.log("Login API response keys:", Object.keys(res.data));
+      console.log("Login API response stringified:", JSON.stringify(res.data, null, 2));
+
+      // Helper function to recursively search for user data in any structure
+      const findUserData = (obj, depth = 0) => {
+        if (depth > 3) return null; // Prevent infinite recursion
+        if (!obj || typeof obj !== 'object') return null;
+        
+        // Check if this object has user-like properties
+        const hasUserId = obj.id || obj.user_id || obj.userId || obj.unique_id || obj.uniqueId || obj.uid;
+        const hasUserInfo = obj.email || obj.full_name || obj.name || obj.role;
+        
+        if (hasUserId || hasUserInfo) {
+          return obj;
+        }
+        
+        // Recursively search nested objects
+        for (const key of Object.keys(obj)) {
+          if (typeof obj[key] === 'object' && obj[key] !== null) {
+            const found = findUserData(obj[key], depth + 1);
+            if (found) return found;
+          }
+        }
+        
+        return null;
       };
- 
-      setUser(userData);
-      setStoredUser(userData);
+
+      // Try to find user data in the response
+      const userSource = findUserData(res.data) || res.data;
+      console.log("Found user source:", userSource);
+
+      // Extract user data with multiple fallback options
+      const userData = {
+        id: userSource.id || userSource.user_id || userSource.userId || userSource.ID || null,
+        unique_id: userSource.unique_id || userSource.uniqueId || userSource.uid || userSource.user_unique_id || null,
+        email: userSource.email || userSource.email_address || userSource.user_email || userSource.Email || null,
+        full_name: userSource.full_name || userSource.name || userSource.username || userSource.user_name || userSource.fullName || userSource.FullName || null,
+        role: userSource.role || userSource.user_role || userSource.Role || userSource.userRole || null,
+      };
+
+      console.log("Extracted userData:", userData);
+
+      // Only save if we got at least one meaningful field
+      if (userData.id || userData.unique_id || userData.email) {
+        setUser(userData);
+        setStoredUser(userData);
+      } else {
+        console.error("Could not extract user data from login response. Response structure:", res.data);
+        // Try to save whatever we can find
+        const fallbackData = {
+          id: res.data.id || res.data.user_id || res.data.userId || null,
+          unique_id: res.data.unique_id || res.data.uniqueId || res.data.uid || null,
+          email: res.data.email || res.data.email_address || null,
+          full_name: res.data.full_name || res.data.name || res.data.username || null,
+          role: res.data.role || res.data.user_role || null,
+        };
+        console.log("Using fallback data:", fallbackData);
+        setUser(fallbackData);
+        setStoredUser(fallbackData);
+      }
  
       try {
         if (typeof window !== "undefined") {
@@ -169,22 +220,64 @@ export const AuthProvider = ({ children }) => {
  
     try {
       isRefreshing.current = true;
- 
+
       const res = await axiosInstance.post("token/refresh/");
- 
-      // Prefer res.data.user if present, otherwise use res.data itself.
-      const newUserSource = res.data.user || res.data || {};
-      const userData = {
-        id:
-          newUserSource.id || newUserSource.user_id || newUserSource.id || null,
-        unique_id: newUserSource.unique_id || res.data.unique_id || null,
-        email: newUserSource.email || res.data.email || null,
-        full_name: newUserSource.full_name || res.data.full_name || null,
-        role: newUserSource.role || res.data.role || null,
+
+      console.log("Token refresh API response:", res.data);
+      console.log("Token refresh API response keys:", Object.keys(res.data));
+
+      // Helper function to recursively search for user data in any structure
+      const findUserData = (obj, depth = 0) => {
+        if (depth > 3) return null; // Prevent infinite recursion
+        if (!obj || typeof obj !== 'object') return null;
+        
+        // Check if this object has user-like properties
+        const hasUserId = obj.id || obj.user_id || obj.userId || obj.unique_id || obj.uniqueId || obj.uid;
+        const hasUserInfo = obj.email || obj.full_name || obj.name || obj.role;
+        
+        if (hasUserId || hasUserInfo) {
+          return obj;
+        }
+        
+        // Recursively search nested objects
+        for (const key of Object.keys(obj)) {
+          if (typeof obj[key] === 'object' && obj[key] !== null) {
+            const found = findUserData(obj[key], depth + 1);
+            if (found) return found;
+          }
+        }
+        
+        return null;
       };
- 
-      setUser(userData);
-      setStoredUser(userData);
+
+      // Try to find user data in the response
+      const userSource = findUserData(res.data) || res.data;
+      console.log("Found user source from token refresh:", userSource);
+
+      // Extract user data with multiple fallback options
+      const userData = {
+        id: userSource.id || userSource.user_id || userSource.userId || userSource.ID || null,
+        unique_id: userSource.unique_id || userSource.uniqueId || userSource.uid || userSource.user_unique_id || null,
+        email: userSource.email || userSource.email_address || userSource.user_email || userSource.Email || null,
+        full_name: userSource.full_name || userSource.name || userSource.username || userSource.user_name || userSource.fullName || userSource.FullName || null,
+        role: userSource.role || userSource.user_role || userSource.Role || userSource.userRole || null,
+      };
+
+      console.log("Extracted userData from token refresh:", userData);
+
+      // Only update user data if we actually extracted something meaningful
+      if (userData && (userData.id || userData.unique_id || userData.email)) {
+        setUser(userData);
+        setStoredUser(userData);
+      } else {
+        console.log("Token refresh did not return user data, keeping existing stored user");
+        // Don't overwrite stored user data if token refresh doesn't return user data
+        // Just keep the existing user in state
+        const existingUser = getStoredUser();
+        if (existingUser) {
+          setUser(existingUser);
+        }
+      }
  
       setHasRefreshFailed(false);
       setLoading(false);

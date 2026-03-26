@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MdOutlineMail } from "react-icons/md";
 import { MdOutlinePhoneAndroid } from "react-icons/md";
@@ -7,15 +7,26 @@ import { PiSignInBold } from "react-icons/pi";
 import { ImFacebook } from "react-icons/im";
 import "../../assets/css/Header.css";
 import { RiUser3Fill } from "react-icons/ri";
+import { AuthContext } from "../context/AuthContext";
+
 
 function Header() {
   const navigate = useNavigate();
+  const { user, loading } = useContext(AuthContext);
 
   const handleLoginClick = (e) => {
-    // Just navigate to the Login route. Avoid preventing default or stopping propagation
-    // which can interfere with navigation in some layouts.
     navigate("/Login");
   };
+
+  // If auth is still loading, don't render anything yet
+  if (loading) {
+    return null;
+  }
+
+  // If user is logged in (has user_id), don't show the header
+  if (user && user.unique_id) {
+    return null;
+  }
 
   return (
     <div>
