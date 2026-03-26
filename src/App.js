@@ -6,6 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@fontsource/poppins";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useVersionChecker } from "./utils/versionChecker";
+import UpdateNotification from "./components/UpdateNotification";
 import {
   BrowserRouter as Router,
   Routes,
@@ -226,6 +227,7 @@ function AppContent() {
 
   return (
     <>
+      {updateAvailable && <UpdateNotification onRefresh={handleRefresh} />}
       {!shouldHideNavbar && <NavBar />}
       <Routes>
         {/* Public Routes */}
