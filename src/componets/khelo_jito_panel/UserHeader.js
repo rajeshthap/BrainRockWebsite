@@ -75,6 +75,16 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const [withdrawError, setWithdrawError] = useState("");
   const [withdrawSuccess, setWithdrawSuccess] = useState("");
 
+  // State for bank details
+  const [bankDetails, setBankDetails] = useState({
+    account_holder_name: "",
+    account_number: "",
+    ifsc_code: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasBankDetails, setHasBankDetails] = useState(false);
+  const [isBankDetailsEditable, setIsBankDetailsEditable] = useState(false);
+
   // State for add wallet modal
   const [showAddWalletModal, setShowAddWalletModal] = useState(false);
   const [addAmount, setAddAmount] = useState("");
@@ -145,6 +155,18 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
               profile_photo: profileResponse.data.data.student_profile.profile_photo || null,
             };
             setUserDetails(newUserDetails);
+            
+            // Check if bank details exist
+            if (profileResponse.data.data.winner_details) {
+              const winnerDetails = profileResponse.data.data.winner_details;
+              setBankDetails({
+                account_holder_name: winnerDetails.account_holder_name || "",
+                account_number: winnerDetails.account_number || "",
+                ifsc_code: winnerDetails.ifsc_code || ""
+              });
+              setHasBankDetails(true);
+              setIsBankDetailsEditable(false);
+            }
             
             // Store all header data in localStorage for persistence
             setStoredHeaderData({
@@ -224,6 +246,42 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     }
   };
 
+  // Handle bank details input change
+  const handleBankDetailsChange = (e) => {
+    const { name, value } = e.target;
+    setBankDetails(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Submit bank details to API
+  const submitBankDetails = async () => {
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/test-winners/`,
+        {
+          user_id: user.unique_id,
+          account_holder_name: bankDetails.account_holder_name,
+          account_number: bankDetails.account_number,
+          ifsc_code: bankDetails.ifsc_code
+        },
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      console.log("Bank details submission response:", response);
+      return response.data && response.data.status;
+    } catch (error) {
+      console.error("Error submitting bank details:", error);
+      return false;
+    }
+  };
+
   // Handle withdrawal
   const handleWithdraw = async () => {
     setWithdrawError("");
@@ -242,7 +300,34 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
       return;
     }
 
+    // Validate bank details
+    if (!bankDetails.account_holder_name || !bankDetails.account_number || !bankDetails.ifsc_code) {
+      setWithdrawError("Please fill in all bank details");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
+      // Only submit bank details if:
+      // 1. No bank details exist yet, OR
+      // 2. User is editing existing bank details
+      if (!hasBankDetails || isBankDetailsEditable) {
+        console.log("Submitting bank details first for user:", user.unique_id);
+        
+        const bankDetailsSuccess = await submitBankDetails();
+        
+        if (!bankDetailsSuccess) {
+          setWithdrawError("Failed to save bank details. Please try again.");
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // Update local state
+        setHasBankDetails(true);
+        setIsBankDetailsEditable(false);
+      }
+
       console.log("Submitting withdrawal request for user:", user.unique_id, "Amount:", amount);
       
       const response = await axios.post(
@@ -289,6 +374,12 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
         setTimeout(() => {
           setShowWithdrawModal(false);
           setWithdrawSuccess("");
+          setWithdrawAmount("");
+          setBankDetails({
+            account_holder_name: "",
+            account_number: "",
+            ifsc_code: ""
+          });
         }, 2000);
       } else {
         const errorMessage = response.data?.message || "Failed to submit withdrawal request";
@@ -316,6 +407,8 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
       }
       
       setWithdrawError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -476,6 +569,58 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             />
           </Form.Group>
 
+          <div className="mt-3 mb-3">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <h6 className="mb-0">Bank Details</h6>
+              {hasBankDetails && !isBankDetailsEditable && (
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => setIsBankDetailsEditable(true)}
+                  className="p-0"
+                >
+                  Edit Details
+                </Button>
+              )}
+            </div>
+            <Form.Group controlId="accountHolderName" className="mb-2">
+              <Form.Label>Account Holder Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="account_holder_name"
+                placeholder="Enter account holder name"
+                value={bankDetails.account_holder_name}
+                onChange={handleBankDetailsChange}
+                disabled={hasBankDetails && !isBankDetailsEditable}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="accountNumber" className="mb-2">
+              <Form.Label>Account Number</Form.Label>
+              <Form.Control
+                type="text"
+                name="account_number"
+                placeholder="Enter account number"
+                value={bankDetails.account_number}
+                onChange={handleBankDetailsChange}
+                disabled={hasBankDetails && !isBankDetailsEditable}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="ifscCode">
+              <Form.Label>IFSC Code</Form.Label>
+              <Form.Control
+                type="text"
+                name="ifsc_code"
+                placeholder="Enter IFSC code"
+                value={bankDetails.ifsc_code}
+                onChange={handleBankDetailsChange}
+                disabled={hasBankDetails && !isBankDetailsEditable}
+                required
+              />
+            </Form.Group>
+          </div>
+
           {withdrawError && (
             <div className="mt-3 text-danger">{withdrawError}</div>
           )}
@@ -491,9 +636,9 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
           <Button 
             variant="primary" 
             onClick={handleWithdraw}
-            disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0}
+            disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0 || isSubmitting}
           >
-            Submit Request
+            {isSubmitting ? "Processing..." : "Submit Request"}
           </Button>
         </Modal.Footer>
       </Modal>

@@ -151,9 +151,6 @@ function Test() {
   const [winnerFormData, setWinnerFormData] = useState({
     phone: localStorage.getItem("test_user_phone") || "",
     password: "",
-    account_holder_name: "",
-    account_number: "",
-    ifsc_code: "",
   });
   const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(() => {
     // Don't restore state if it's a fresh login
@@ -825,42 +822,6 @@ function Test() {
                   value={winnerFormData.password}
                   onChange={handleWinnerFormChange}
                   placeholder="Enter password"
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Account Holder Name</label>
-                <input
-                  type="text"
-                  name="account_holder_name"
-                  value={winnerFormData.account_holder_name}
-                  onChange={handleWinnerFormChange}
-                  placeholder="Enter account holder name"
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Account Number</label>
-                <input
-                  type="text"
-                  name="account_number"
-                  value={winnerFormData.account_number}
-                  onChange={handleWinnerFormChange}
-                  placeholder="Enter account number"
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>IFSC Code</label>
-                <input
-                  type="text"
-                  name="ifsc_code"
-                  value={winnerFormData.ifsc_code}
-                  onChange={handleWinnerFormChange}
-                  placeholder="Enter IFSC code"
                   className="form-control"
                   required
                 />
