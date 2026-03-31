@@ -19,6 +19,15 @@ function Test() {
   const userId = urlUserId || storageUserId;
   const navigate = useNavigate();
   
+  // Always prioritize URL user_id as the "latest" and sync to storage
+  useEffect(() => {
+    if (urlUserId && urlUserId !== storageUserId) {
+      console.log("New User ID detected from URL, resetting test state");
+      clearTestState();
+      localStorage.setItem("test_user_id", urlUserId);
+    }
+  }, [urlUserId, storageUserId]);
+
   // Check if this is a fresh login (user just logged in)
   const isFreshLogin = localStorage.getItem("fresh_login") === "true";
   
@@ -53,6 +62,26 @@ function Test() {
   // Check for payment success parameters in URL
   const paymentSuccess = searchParams.get("payment_success");
   const paymentMethod = searchParams.get("payment_method");
+  
+  // Check if user came from payment - restore session if needed
+  useEffect(() => {
+    if (paymentSuccess === "true") {
+      // User returned from payment - ensure test session is restored
+      const testUserId = localStorage.getItem("test_user_id") || urlUserId;
+      const testSource = localStorage.getItem("test_source");
+      const testUserPhone = localStorage.getItem("test_user_phone");
+      
+      // If we have test data but no BR_USER_DATA, set a session marker
+      if (testUserId && !localStorage.getItem("BR_USER_DATA")) {
+        // Mark that user is in a payment-completed test session
+        localStorage.setItem("BR_IN_TEST_SESSION", "1");
+        console.log("Test session restored from payment redirect");
+      }
+      
+      console.log("Payment success detected, test user ID:", testUserId);
+      console.log("Test source:", testSource);
+    }
+  }, [paymentSuccess, urlUserId]);
   
   // If payment was successful and we have user_id, proceed
   if (paymentSuccess === "true" && userId) {
@@ -623,24 +652,12 @@ function Test() {
   const handleShowWrongAnswers = () => {
     const wrong = [];
     userAnswers.forEach((answer, index) => {
-      // Add safety checks to prevent undefined errors
-      const question = questions[index];
-      if (!question) return;
-      
-      const userSelectedOption = answer.selected_option;
-      const correctAnswer = question.correct_answer;
-      
-      // Skip if user didn't answer or question doesn't have correct_answer
-      if (userSelectedOption === null || userSelectedOption === undefined || correctAnswer === undefined) return;
-      
-      if (userSelectedOption !== correctAnswer) {
+      if (answer.selected_option !== questions[index].correct_answer) {
         wrong.push({
-          question: question.question_text || "Question not available",
-          question_hindi_text: question.question_hindi_text || "",
-          userAnswer: question.options && question.options[userSelectedOption] ? question.options[userSelectedOption] : "Not answered",
-          correctAnswer: question.options && question.options[correctAnswer] ? question.options[correctAnswer] : "N/A",
-          userAnswerHindi: question.options_hindi && question.options_hindi[userSelectedOption] ? question.options_hindi[userSelectedOption] : "",
-          correctAnswerHindi: question.options_hindi && question.options_hindi[correctAnswer] ? question.options_hindi[correctAnswer] : "",
+          question: questions[index].question_text,
+          question_hindi_text: questions[index].question_hindi_text || "",
+          userAnswer: questions[index].options[answer.selected_option],
+          correctAnswer: questions[index].options[questions[index].correct_answer],
           questionNumber: index + 1
         });
       }
@@ -1067,20 +1084,10 @@ function Test() {
                           <div className="user-answer">
                             <span className="label">Your Answer:</span>
                             <span className="answer-text">{item.userAnswer}</span>
-                            {item.userAnswerHindi && (
-                              <div className="text-muted mt-1">
-                                <small>{item.userAnswerHindi}</small>
-                              </div>
-                            )}
                           </div>
                           <div className="correct-answer">
                             <span className="label">Correct Answer:</span>
                             <span className="answer-text">{item.correctAnswer}</span>
-                            {item.correctAnswerHindi && (
-                              <div className="text-muted mt-1">
-                                <small>{item.correctAnswerHindi}</small>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -1141,12 +1148,7 @@ function Test() {
                 className={`option ${selectedOption === index ? "selected" : ""}`}
                 onClick={() => handleOptionSelect(index)}
               >
-                <div>{option}</div>
-                {questions[currentQuestion].options_hindi && (
-                  <div className="hindi-option text-muted" style={{fontSize: '0.85em', marginTop: '2px'}}>
-                    {questions[currentQuestion].options_hindi[index]}
-                  </div>
-                )}
+                {option}
               </div>
             ))}
           </div>

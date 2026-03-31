@@ -19,47 +19,27 @@ import Home from "./componets/pages/Home";
 import Footer from "./componets/footer/Footer";
 import NavBar from "./componets/topnav/NavBar";
 
-
 import Login from "./componets/all_login/Login";
 import { AuthProvider } from "./componets/context/AuthContext";
 import { UserProfileProvider } from "./componets/context/UserProfileContext";
 
 import ProtectedRoute from "./componets/context/ProtectedRoute";
 
-
 import ForgotPassword from "./componets/all_login/ForgotPassword";
-
-
-
 
 import {
   PayrollCalculations,
   calculateTotals,
 } from "./utils/PayrollCalculations";
 
-
-
-
-
-
-
-
 import CompanyProfile from "./componets/pages/aboutus/CompanyProfile";
 import OurTeam from "./componets/pages/aboutus/OurTeam";
 import Careers from "./componets/pages/aboutus/RunningProjects";
-
-
-
-
-
-
-
 
 import Courses from "./componets/topnav/navigationpages/Courses";
 import Gallery from "./componets/topnav/navigationpages/Gallery";
 
 import TrainingRegistration from "./componets/topnav/navigationpages/TrainingRegistration";
-
 
 import WebsiteManagement from "./componets/adminpanel/WebsiteManagement";
 import LeftNavManagement from "./componets/adminpanel/LeftNavManagement";
@@ -101,12 +81,7 @@ import Certificate from "./componets/topnav/navigationpages/Certificate";
 import ManageFirm from "./componets/adminpanel/addfirm/ManageFirm";
 import AddFirm from "./componets/adminpanel/addfirm/AddFirm";
 
-
-
-
-
 import Career from "./componets/topnav/navigationpages/Career";
-
 
 import AllStudentsData from "./componets/adminpanel/Candidate/AllStudentsData";
 
@@ -135,35 +110,24 @@ import WalletPaymentStatus from "./componets/khelo_jito_panel/WalletPaymentStatu
 import Quiz from "./componets/khelo_jito_panel/Quiz";
 import QuizTest from "./componets/Play_and_Win/QuizTest";
 
-
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
   const location = useLocation();
   const { updateAvailable, handleRefresh } = useVersionChecker();
 
   const hiddenPaths = new Set([
-   
-  
-   
- 
-
-   
-   
     "/PayrollCalculations",
     "/MockData",
 
-  
     "/SalaryCalculation",
-   
-   
-   
+
     "/SalaryStructure",
-   
+
     "/DepartmentHierarchy",
-   
+
     "/ManageTeam",
-   
-   
+
+    "/test",
     "/WebsiteManagement",
     "LeftNavManagement",
     "/AddServices",
@@ -197,27 +161,22 @@ function AppContent() {
     "/EditNotification",
     "/AddFirm",
     "/ManageFirm",
- 
- 
- 
-   
-   
-  
+
     "/AllStudentsData",
     "/GenerateBill",
     "/ManageBills",
     "/BillUpload",
-        "/AddPlay",
-        "/ManagePlay",
-        "/AddQuiz",
-        "/ManageQuiz",
+    "/AddPlay",
+    "/ManagePlay",
+    "/AddQuiz",
+    "/ManageQuiz",
     "/Registerduser",
-         "/UserDashBoard",
-        "/UserProfile",
-        "/TestWinner",
-        "/WalletPaymentStatus",
-        "/Quiz",
-        "/QuizTest"
+    "/UserDashBoard",
+    "/UserProfile",
+    "/TestWinner",
+    "/WalletPaymentStatus",
+    "/Quiz",
+    "/QuizTest",
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -233,11 +192,9 @@ function AppContent() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/Login" element={<Login />} />
-      
-       
-     
+
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
-        
+
         <Route path="/Courses" element={<Courses />} />
         <Route path="/Gallery" element={<Gallery />} />
         <Route path="/Training" element={<Training />} />
@@ -258,14 +215,14 @@ function AppContent() {
         <Route path="/ServicesPage" element={<ServicesPage />} />
         <Route path="/Certificate" element={<Certificate />} />
         <Route path="/ProjectDetail" element={<ProjectDetail />} />
-         <Route path="/Terms" element={<Terms />} />
-         <Route path="/WalletPaymentStatus" element={<WalletPaymentStatus />} />
+        <Route path="/Terms" element={<Terms />} />
+        <Route path="/WalletPaymentStatus" element={<WalletPaymentStatus />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/KheloJito" element={<KheloJito />} />
         <Route path="/test" element={<Test />} />
 
         {/* Hr  Payroll (protected) */}
-    <Route
+        <Route
           path="/WebsiteManagement"
           element={
             <ProtectedRoute>
@@ -273,11 +230,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-       
 
-       
-
-     
         <Route
           path="/PayrollCalculations"
           element={
@@ -286,7 +239,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/Registerduser"
           element={
@@ -295,9 +248,8 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-     
-        
-         <Route
+
+        <Route
           path="/UserProfile"
           element={
             <ProtectedRoute>
@@ -306,51 +258,37 @@ function AppContent() {
           }
         />
 
-        
-        
-       
         <Route path="/CompanyProfile" element={<CompanyProfile />} />
         <Route path="/OurTeam" element={<OurTeam />} />
         <Route path="/Career" element={<Career />} />
         <Route path="/ServicesDetails" element={<ServicesDetails />} />
         {/* Protected Routes */}
-       
-        <Route
-            path="/TestWinner"
-            element={
-              <ProtectedRoute>
-                <TestWinner />
-              </ProtectedRoute>
-            }
-          />
-        <Route
-            path="/Quiz"
-            element={
-              <ProtectedRoute>
-                <Quiz />
-              </ProtectedRoute>
-            }
-          />
-        <Route
-            path="/QuizTest"
-            element={
-              <ProtectedRoute>
-                <QuizTest />
-              </ProtectedRoute>
-            }
-          />
-        
-        
-       
-       
-       
-       
-     
-      
 
-        
-       
-   
+        <Route
+          path="/TestWinner"
+          element={
+            <ProtectedRoute>
+              <TestWinner />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Quiz"
+          element={
+            <ProtectedRoute>
+              <Quiz />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/QuizTest"
+          element={
+            <ProtectedRoute>
+              <QuizTest />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Admin Panel Routes */}
         <Route
           path="/AddCarousel"
@@ -552,7 +490,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/UserDashBoard"
           element={
             <ProtectedRoute>

@@ -26,6 +26,18 @@ const ProtectedRoute = ({ children }) => {
       // If still loading, wait for it to complete
       if (loading) return;
 
+      // Check if user is in a test session (returned from payment)
+      const searchParams = new URLSearchParams(location.search);
+      const isPaymentRedirect = searchParams.get("payment_success") !== null;
+      const hasTestId = typeof window !== "undefined" && localStorage.getItem("test_user_id") !== null;
+      const inTestSession = typeof window !== "undefined" && localStorage.getItem("BR_IN_TEST_SESSION") === "1";
+      
+      // Allow access for test sessions or payment redirects without full authentication
+      if (inTestSession || isPaymentRedirect || hasTestId) {
+        setHasCheckedAuth(true);
+        return;
+      }
+
       // If we've already checked and there's no user, redirect
       if (hasCheckedAuth && !user) {
         navigate('/Login', { state: { from: location }, replace: true });
@@ -40,13 +52,21 @@ const ProtectedRoute = ({ children }) => {
           setChecking(false);
           setHasCheckedAuth(true);
           if (!res || !res.success) {
-            navigate('/Login', { state: { from: location }, replace: true });
+            // Check again if in test session before redirecting
+            const stillInTestSession = typeof window !== "undefined" && localStorage.getItem("BR_IN_TEST_SESSION") === "1";
+            if (!stillInTestSession) {
+              navigate('/Login', { state: { from: location }, replace: true });
+            }
           }
         } catch (e) {
           if (!mounted) return;
           setChecking(false);
           setHasCheckedAuth(true);
-          navigate('/Login', { state: { from: location }, replace: true });
+          // Check if in test session before redirecting
+          const stillInTestSession = typeof window !== "undefined" && localStorage.getItem("BR_IN_TEST_SESSION") === "1";
+          if (!stillInTestSession) {
+            navigate('/Login', { state: { from: location }, replace: true });
+          }
         }
       } else {
         // No refresh function available, redirect immediately
@@ -67,11 +87,26 @@ const ProtectedRoute = ({ children }) => {
   // actively checking, don't render the protected children (show nothing).
   // Also show nothing if we haven't checked auth yet and there's no user
   if (loading || checking || (!hasCheckedAuth && !user)) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const isPaymentRedirect = searchParams.get("payment_success") !== null;
+    const inTestSession = typeof window !== "undefined" && localStorage.getItem("BR_IN_TEST_SESSION") === "1";
+    
+    if (inTestSession || isPaymentRedirect) {
+      return children;
+    }
     return null;
   }
 
   // If there is no user object in the context, redirect to the login page.
+  // But allow for test sessions
   if (!user) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const isPaymentRedirect = searchParams.get("payment_success") !== null;
+    const inTestSession = typeof window !== "undefined" && localStorage.getItem("BR_IN_TEST_SESSION") === "1";
+
+    if (inTestSession || isPaymentRedirect) {
+      return children;
+    }
     return <Navigate to="/Login" state={{ from: location }} replace />;
   }
 

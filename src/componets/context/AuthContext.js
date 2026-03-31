@@ -286,12 +286,17 @@ export const AuthProvider = ({ children }) => {
       setHasRefreshFailed(true);
       setLoading(false);
       
+      // Check if returning from payment - be more lenient to avoid logout loops on mobile
+      const searchParams = new URLSearchParams(window.location.search);
+      const isPaymentRedirect = searchParams.get("payment_success") !== null;
+
       // Check if we have stored user data - if so, don't logout completely
       const storedUser = getStoredUser();
-      if (storedUser) {
+      if (storedUser || isPaymentRedirect) {
         // Keep user logged in with stored data, just log a warning
-        console.log("Token refresh failed, but user session restored from localStorage");
-        return { success: true, data: null, fromStorage: true };
+        console.log("Token refresh failed, but user session allowed to persist during payment redirect or from storage");
+        if (storedUser && !user) setUser(storedUser);
+        return { success: true, data: null, fromStorage: !!storedUser };
       }
       
       await logout({ redirect: false });

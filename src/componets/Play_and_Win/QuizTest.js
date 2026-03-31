@@ -19,6 +19,16 @@ function QuizTest() {
   const userId = urlUserId || storageUserId;
   const quizId = urlQuizId || storageQuizId;
   const navigate = useNavigate();
+
+  // Handle User ID or Quiz ID change to ensure latest data is used
+  useEffect(() => {
+    if (urlUserId && urlUserId !== storageUserId) {
+      localStorage.setItem("quiz_user_id", urlUserId);
+    }
+    if (urlQuizId && urlQuizId !== storageQuizId) {
+      localStorage.setItem("quiz_quiz_id", urlQuizId);
+    }
+  }, [urlUserId, urlQuizId, storageUserId, storageQuizId]);
   
   // Check for payment success parameters in URL
   const paymentSuccess = searchParams.get("payment_success");

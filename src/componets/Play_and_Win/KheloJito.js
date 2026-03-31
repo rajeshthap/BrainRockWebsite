@@ -185,6 +185,16 @@ function KheloJito() {
       localStorage.setItem("test_user_phone", formData.phone);
       localStorage.setItem("test_source", "khelojito");
 
+      // Clear previous test progress to ensure the new registration starts fresh
+      const testKeys = [
+        "test_currentQuestion", "test_score", "test_showResults", 
+        "test_userAnswers", "test_timeLeft", "test_testResult",
+        "test_tabSwitchWarning", "test_tabSwitchCount", "test_showWinnerForm",
+        "test_showWrongAnswersModal", "test_wrongAnswers", "test_certificateUrl",
+        "test_showInstructionsModal"
+      ];
+      testKeys.forEach(key => localStorage.removeItem(key));
+
       // Clear form
       setFormData({ full_name: "", email: "", phone: "", fee: 1 });
 
