@@ -677,7 +677,7 @@ const UserDashBoard = () => {
             <div className="instruction-section">
               <h5>🏆 Prize Information</h5>
               <ul className="list-unstyled">
-                <li className="mb-2">• <strong>Prize Amount:</strong> ₹10</li>
+                <li className="mb-2">• <strong>Prize Amount:</strong> ₹80</li>
                 <li className="mb-2">• To claim your prize, you must score 100%</li>
                 <li className="mb-2">• Winners will receive their prize within 7-10 working days</li>
                 <li className="mb-2">• The prize will be transferred to your registered bank account</li>
