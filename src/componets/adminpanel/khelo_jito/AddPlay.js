@@ -18,6 +18,7 @@ const AddPlay = () => {
      question_text: "",
      question_hindi_text: "",
      options: ["", "", "", ""],
+     options_hindi: ["", "", "", ""],
      correct_answer: 0,
      marks: 1
    });
@@ -47,8 +48,19 @@ const AddPlay = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    if (name.startsWith('option')) {
-      // Handle option inputs
+    if (name.startsWith('option_hindi_')) {
+      // Handle Hindi option inputs
+      const optionIndex = parseInt(name.split('_')[2]);
+      setFormData(prev => {
+        const newOptionsHindi = [...prev.options_hindi];
+        newOptionsHindi[optionIndex] = value;
+        return {
+          ...prev,
+          options_hindi: newOptionsHindi
+        };
+      });
+    } else if (name.startsWith('option')) {
+      // Handle English option inputs
       const optionIndex = parseInt(name.split('-')[1]);
       setFormData(prev => {
         const newOptions = [...prev.options];
@@ -73,6 +85,7 @@ const AddPlay = () => {
       question_text: "",
       question_hindi_text: "",
       options: ["", "", "", ""],
+      options_hindi: ["", "", "", ""],
       correct_answer: 0,
       marks: 1
     });
@@ -93,6 +106,7 @@ const AddPlay = () => {
         question_text: formData.question_text,
         question_hindi_text: formData.question_hindi_text || "",
         options: formData.options,
+        options_hindi: formData.options_hindi,
         correct_answer: formData.correct_answer,
         marks: formData.marks
       };
@@ -222,7 +236,7 @@ const AddPlay = () => {
                 </Form.Group>
                
                <Form.Group className="mb-2">
-                 <Form.Label>Options</Form.Label>
+                 <Form.Label>Options (English)</Form.Label>
                  <div className="options-container">
                    {formData.options.map((option, index) => (
                      <div key={index} className="option-item mb-1">
@@ -235,6 +249,26 @@ const AddPlay = () => {
                            value={option}
                            onChange={handleChange}
                            required
+                         />
+                       </InputGroup>
+                     </div>
+                   ))}
+                 </div>
+               </Form.Group>
+               
+               <Form.Group className="mb-2">
+                 <Form.Label>Options (Hindi) <span className="text-muted">(Optional)</span></Form.Label>
+                 <div className="options-container">
+                   {formData.options_hindi.map((option, index) => (
+                     <div key={index} className="option-item mb-1">
+                       <InputGroup size="sm">
+                         <InputGroup.Text>{index + 1}</InputGroup.Text>
+                         <Form.Control
+                           type="text"
+                           placeholder={`विकल्प ${index + 1}`}
+                           name={`option_hindi_${index}`}
+                           value={option}
+                           onChange={handleChange}
                          />
                        </InputGroup>
                      </div>

@@ -28,6 +28,7 @@ const ManagePlay = () => {
     question_text: "",
     question_hindi_text: "",
     options: ["", "", "", ""],
+    options_hindi: ["", "", "", ""],
     correct_answer: 0,
     marks: 1
   });
@@ -79,14 +80,16 @@ const ManagePlay = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Filter questions based on search term
+  // Filter questions based on search term (includes Hindi text search)
   const filteredQuestions = searchTerm.trim() === ''
     ? questions
     : questions.filter((question) => {
         const lowerSearch = searchTerm.toLowerCase();
         return (
           question.question_text?.toLowerCase().includes(lowerSearch) ||
-          question.options.some(option => option.toLowerCase().includes(lowerSearch))
+          question.question_hindi_text?.toLowerCase().includes(lowerSearch) ||
+          question.options?.some(option => option.toLowerCase().includes(lowerSearch)) ||
+          question.options_hindi?.some(option => option.toLowerCase().includes(lowerSearch))
         );
       });
 
@@ -138,6 +141,7 @@ const ManagePlay = () => {
       question_text: question.question_text,
       question_hindi_text: question.question_hindi_text || "",
       options: question.options || ["", "", "", ""],
+      options_hindi: question.options_hindi || ["", "", "", ""],
       correct_answer: question.correct_answer,
       marks: question.marks || 1
     });
@@ -149,7 +153,7 @@ const ManagePlay = () => {
     const { name, value } = e.target;
 
     if (name.startsWith('option')) {
-      // Handle option inputs
+      // Handle English option inputs
       const optionIndex = parseInt(name.split('-')[1]);
       setEditFormData(prev => {
         const newOptions = [...prev.options];
@@ -157,6 +161,17 @@ const ManagePlay = () => {
         return {
           ...prev,
           options: newOptions
+        };
+      });
+    } else if (name.startsWith('option_hindi')) {
+      // Handle Hindi option inputs
+      const optionIndex = parseInt(name.split('_')[2]);
+      setEditFormData(prev => {
+        const newOptionsHindi = [...prev.options_hindi];
+        newOptionsHindi[optionIndex] = value;
+        return {
+          ...prev,
+          options_hindi: newOptionsHindi
         };
       });
     } else {
@@ -177,6 +192,7 @@ const ManagePlay = () => {
       question_text: editFormData.question_text,
       question_hindi_text: editFormData.question_hindi_text || "",
       options: editFormData.options,
+      options_hindi: editFormData.options_hindi,
       correct_answer: editFormData.correct_answer,
       marks: editFormData.marks
     };
@@ -206,6 +222,7 @@ const ManagePlay = () => {
                 question_text: editFormData.question_text,
                 question_hindi_text: editFormData.question_hindi_text || "",
                 options: editFormData.options,
+                options_hindi: editFormData.options_hindi,
                 correct_answer: editFormData.correct_answer,
                 marks: editFormData.marks
               }
@@ -331,105 +348,116 @@ const ManagePlay = () => {
                 </Spinner>
               </div>
              ) : (
-               <>
-                 {currentItems.length === 0 ? (
-                   <div className="text-center my-5">
-                     <p>{searchTerm ? 'No questions match your search.' : 'No questions found.'}</p>
-                   </div>
-                 ) : (
-                   <div className="table-responsive">
-                     <table className="table table-hover table-striped align-middle questions-table">
-                       <thead className="table-dark">
-                         <tr>
-                           <th style={{ width: '60px' }}>#</th>
-                           <th style={{ width: '40%' }}>Question</th>
-                           <th style={{ width: '35%' }}>Options</th>
-                           <th style={{ width: '100px' }}>Marks</th>
-                           <th style={{ width: '150px' }}>Correct Answer</th>
-                           <th style={{ width: '120px' }}>Actions</th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                         {currentItems.map((question, index) => {
-                           const sequenceNumber = (currentPage - 1) * itemsPerPage + index + 1;
-                           return (
-                             <tr key={question.id}>
-                               <td>{sequenceNumber}</td>
-                               <td>
-                                 <div className="question-text">{question.question_text}</div>
-                                 {question.question_hindi_text && (
-                                   <div className="hindi-text mt-1">
-                                     <small className="text-muted">{question.question_hindi_text}</small>
-                                   </div>
-                                 )}
-                               </td>
-                               <td>
-                                 <ul className="list-unstyled mb-0 options-list">
-                                   {question.options.map((option, optIndex) => (
-                                     <li key={optIndex} className={`${optIndex === question.correct_answer ? 'text-success fw-bold' : ''}`}>
-                                       {optIndex === question.correct_answer && '✓ '}
-                                       {option}
-                                     </li>
-                                   ))}
-                                 </ul>
-                               </td>
-                               <td>{question.marks}</td>
-                               <td>
-                                 <span className="badge bg-success">
-                                   Option {question.correct_answer + 1}
-                                 </span>
-                               </td>
-                               <td>
-                                 <Button
-                                   variant="primary"
-                                   size="sm"
-                                   className="me-1"
-                                   onClick={() => handleEdit(question)}
-                                 >
-                                   <FaEdit />
-                                 </Button>
-                                 <Button
-                                   variant="danger"
-                                   size="sm"
-                                   onClick={() => handleDelete(question.id)}
-                                 >
-                                   <FaTrash />
-                                 </Button>
-                               </td>
-                             </tr>
-                           );
-                         })}
-                       </tbody>
-                     </table>
-                   </div>
-                 )}
+                <>
+                  {currentItems.length === 0 ? (
+                    <div className="text-center my-5">
+                      <p>{searchTerm ? 'No questions match your search.' : 'No questions found.'}</p>
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-hover table-striped align-middle questions-table">
+                        <thead className="table-dark">
+                          <tr>
+                            <th style={{ width: '60px' }}>#</th>
+                            <th style={{ width: '40%' }}>Question</th>
+                            <th style={{ width: '35%' }}>Options</th>
+                            <th style={{ width: '100px' }}>Marks</th>
+                            <th style={{ width: '150px' }}>Correct Answer</th>
+                            <th style={{ width: '120px' }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentItems.map((question, index) => {
+                            const sequenceNumber = (currentPage - 1) * itemsPerPage + index + 1;
+                            return (
+                              <tr key={question.id}>
+                                <td>{sequenceNumber}</td>
+                                <td>
+                                  <div className="question-text">{question.question_text}</div>
+                                  {question.question_hindi_text && (
+                                    <div className="hindi-text mt-1">
+                                      <small className="text-muted">{question.question_hindi_text}</small>
+                                    </div>
+                                  )}
+                                </td>
+                                <td>
+                                  <ul className="list-unstyled mb-0 options-list">
+                                    {question.options && question.options.map((option, optIndex) => (
+                                      <li key={optIndex} className={`${optIndex === question.correct_answer ? 'text-success fw-bold' : ''}`}>
+                                        {optIndex === question.correct_answer && '✓ '}
+                                        {option}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  {question.options_hindi && question.options_hindi.length > 0 && (
+                                    <ul className="list-unstyled mb-0 options-list mt-2">
+                                      <li className="text-muted small fw-bold mb-1">Hindi:</li>
+                                      {question.options_hindi.map((option, optIndex) => (
+                                        <li key={optIndex} className={`${optIndex === question.correct_answer ? 'text-success fw-bold' : 'text-muted'}`}>
+                                          {optIndex === question.correct_answer && '✓ '}
+                                          {option}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </td>
+                                <td>{question.marks}</td>
+                                <td>
+                                  <span className="badge bg-success">
+                                    Option {question.correct_answer + 1}
+                                  </span>
+                                </td>
+                                <td>
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    className="me-1"
+                                    onClick={() => handleEdit(question)}
+                                  >
+                                    <FaEdit />
+                                  </Button>
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => handleDelete(question.id)}
+                                  >
+                                    <FaTrash />
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
 
-                {/* Pagination with arrows */}
-                {totalPages > 1 && (
-                  <div className="d-flex justify-content-center align-items-center mt-4">
-                    <button
-                      className="btn btn-outline-primary me-3"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      ← Prev
-                    </button>
-                    
-                    <span className="pagination-info fw-bold">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    
-                    <button
-                      className="btn btn-outline-primary ms-3"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
+                  {/* Pagination with arrows */}
+                  {totalPages > 1 && (
+                    <div className="d-flex justify-content-center align-items-center mt-4">
+                      <button
+                        className="btn btn-outline-primary me-3"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        ← Prev
+                      </button>
+                      
+                      <span className="pagination-info fw-bold">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      
+                      <button
+                        className="btn btn-outline-primary ms-3"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
           </div>
         </Container>
       </div>
@@ -467,17 +495,34 @@ const ManagePlay = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Options</Form.Label>
+              <Form.Label>Options (English)</Form.Label>
               <div className="options-container">
                 {editFormData.options.map((option, index) => (
                   <div key={index} className="option-item mb-2">
                     <Form.Control
                       type="text"
-                      placeholder={`Enter option ${index + 1}`}
+                      placeholder={`Option ${index + 1} (English)`}
                       name={`option-${index}`}
                       value={option}
                       onChange={handleEditChange}
                       required
+                    />
+                  </div>
+                ))}
+              </div>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Options (Hindi) <span className="text-muted">(Optional)</span></Form.Label>
+              <div className="options-container">
+                {editFormData.options_hindi.map((option, index) => (
+                  <div key={index} className="option-item mb-2">
+                    <Form.Control
+                      type="text"
+                      placeholder={`Option ${index + 1} (Hindi)`}
+                      name={`option_hindi_${index}`}
+                      value={option}
+                      onChange={handleEditChange}
                     />
                   </div>
                 ))}

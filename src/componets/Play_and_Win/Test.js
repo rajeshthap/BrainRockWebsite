@@ -623,12 +623,24 @@ function Test() {
   const handleShowWrongAnswers = () => {
     const wrong = [];
     userAnswers.forEach((answer, index) => {
-      if (answer.selected_option !== questions[index].correct_answer) {
+      // Add safety checks to prevent undefined errors
+      const question = questions[index];
+      if (!question) return;
+      
+      const userSelectedOption = answer.selected_option;
+      const correctAnswer = question.correct_answer;
+      
+      // Skip if user didn't answer or question doesn't have correct_answer
+      if (userSelectedOption === null || userSelectedOption === undefined || correctAnswer === undefined) return;
+      
+      if (userSelectedOption !== correctAnswer) {
         wrong.push({
-          question: questions[index].question_text,
-          question_hindi_text: questions[index].question_hindi_text || "",
-          userAnswer: questions[index].options[answer.selected_option],
-          correctAnswer: questions[index].options[questions[index].correct_answer],
+          question: question.question_text || "Question not available",
+          question_hindi_text: question.question_hindi_text || "",
+          userAnswer: question.options && question.options[userSelectedOption] ? question.options[userSelectedOption] : "Not answered",
+          correctAnswer: question.options && question.options[correctAnswer] ? question.options[correctAnswer] : "N/A",
+          userAnswerHindi: question.options_hindi && question.options_hindi[userSelectedOption] ? question.options_hindi[userSelectedOption] : "",
+          correctAnswerHindi: question.options_hindi && question.options_hindi[correctAnswer] ? question.options_hindi[correctAnswer] : "",
           questionNumber: index + 1
         });
       }
@@ -1055,10 +1067,20 @@ function Test() {
                           <div className="user-answer">
                             <span className="label">Your Answer:</span>
                             <span className="answer-text">{item.userAnswer}</span>
+                            {item.userAnswerHindi && (
+                              <div className="text-muted mt-1">
+                                <small>{item.userAnswerHindi}</small>
+                              </div>
+                            )}
                           </div>
                           <div className="correct-answer">
                             <span className="label">Correct Answer:</span>
                             <span className="answer-text">{item.correctAnswer}</span>
+                            {item.correctAnswerHindi && (
+                              <div className="text-muted mt-1">
+                                <small>{item.correctAnswerHindi}</small>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1119,7 +1141,12 @@ function Test() {
                 className={`option ${selectedOption === index ? "selected" : ""}`}
                 onClick={() => handleOptionSelect(index)}
               >
-                {option}
+                <div>{option}</div>
+                {questions[currentQuestion].options_hindi && (
+                  <div className="hindi-option text-muted" style={{fontSize: '0.85em', marginTop: '2px'}}>
+                    {questions[currentQuestion].options_hindi[index]}
+                  </div>
+                )}
               </div>
             ))}
           </div>
