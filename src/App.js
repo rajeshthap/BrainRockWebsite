@@ -127,7 +127,7 @@ function AppContent() {
 
     "/ManageTeam",
 
-    "/test",
+    "/Test",
     "/WebsiteManagement",
     "LeftNavManagement",
     "/AddServices",

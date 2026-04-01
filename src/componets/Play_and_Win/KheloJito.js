@@ -206,7 +206,7 @@ function KheloJito() {
         window.location.href = response.data.payment_order.redirectUrl;
       } else {
         // If no payment required, redirect directly to test page
-        navigate("/test");
+        navigate("/Test");
       }
     } catch (error) {
       console.error("Error during registration:", error);
