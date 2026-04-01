@@ -209,22 +209,17 @@ function Test() {
 
   // Initialize remaining attempts from localStorage on component mount
   useEffect(() => {
-    const testSource = localStorage.getItem("test_source");
     let storedAttempts = localStorage.getItem("khelojito_remaining_attempts");
     
-    // Only KheloJito users get retake attempts (not UserDashBoard users)
-    if (testSource === "khelojito") {
-      // If this is the first time coming from KheloJito after payment,
-      // set remaining attempts to 2 (allowing 3 total attempts)
-      if (!storedAttempts) {
-        localStorage.setItem("khelojito_remaining_attempts", "2");
-        storedAttempts = "2";
-        console.log("First time from KheloJito - set remaining attempts to 2");
-      }
-      const attempts = parseInt(storedAttempts, 10);
-      setRemainingAttempts(attempts);
-      console.log("KheloJito user detected. Remaining attempts:", attempts);
+    // Initialize if not set - allow 2 retakes (3 total attempts)
+    if (!storedAttempts) {
+      localStorage.setItem("khelojito_remaining_attempts", "2");
+      storedAttempts = "2";
+      console.log("First time - set remaining attempts to 2");
     }
+    const attempts = parseInt(storedAttempts, 10);
+    setRemainingAttempts(attempts);
+    console.log("Remaining attempts initialized:", attempts);
   }, []);
 
   // Save state to localStorage whenever it changes (only if not fresh login)
@@ -612,16 +607,22 @@ function Test() {
   const handleRestart = async () => {
     // Get test source from localStorage
     const testSource = localStorage.getItem("test_source");
-    const currentAttempts = parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10);
+    let currentAttempts = parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10);
     
-    // For KheloJito users only, check if they have remaining attempts
+    // Ensure test_source is set for retake
+    if (!testSource) {
+      localStorage.setItem("test_source", "khelojito");
+    }
+    
+    // For KheloJito users, check if they have remaining attempts
     // (UserDashBoard users get only 1 attempt)
-    if (testSource === "khelojito" && currentAttempts > 0) {
+    if (currentAttempts > 0) {
       // Decrease remaining attempts in localStorage
-      const newAttempts = currentAttempts - 1;
-      localStorage.setItem("khelojito_remaining_attempts", newAttempts.toString());
+      currentAttempts = currentAttempts - 1;
+      localStorage.setItem("khelojito_remaining_attempts", currentAttempts.toString());
+      setRemainingAttempts(currentAttempts);
       
-      console.log("Retaking test. Remaining attempts:", newAttempts);
+      console.log("Retaking test. Remaining attempts:", currentAttempts);
       
       // Clear test state from localStorage for new attempt
       clearTestState();
@@ -629,21 +630,9 @@ function Test() {
       // Fetch new questions without reloading the page
       await fetchNewQuestions();
     } else {
-      // Clear localStorage
-      localStorage.removeItem("test_user_id");
-      localStorage.removeItem("khelojito_remaining_attempts");
-      
-      // Clear test state from localStorage
-      clearTestState();
-      
-      // Redirect based on user authorization
-      if (user && user.unique_id) {
-        // Authorized user - redirect to user dashboard
-        navigate("/UserDashBoard");
-      } else {
-        // Unauthorized user - redirect to KheloJito for re-registration
-        navigate("/KheloJito");
-      }
+      // No more attempts - redirect to KheloJito after alert
+      alert("No attempts remaining. You will be redirected to register again.");
+      navigate("/KheloJito");
     }
   };
 
@@ -989,22 +978,20 @@ function Test() {
                       {remainingAttempts > 0 ? (
                         <div className="remaining-attempts-info mb-2">
                           <span className="badge bg-info">
-                            You have {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining
+                            You have {remainingAttempts} attempt{remainingAttempts === 1 ? '' : 's'} remaining
                           </span>
                         </div>
                       ) : (
-                        localStorage.getItem("test_source") === "khelojito" && (
                           <div className="remaining-attempts-info mb-2">
                             <span className="badge bg-warning">
                               No attempts remaining. Register again to try more.
                             </span>
                           </div>
-                        )
                       )}
                       <div className="d-flex-file">
                         <button className="restart-button" onClick={handleRestart}>
                           {remainingAttempts > 0 
-                            ? `Retake Quiz (${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} left)` 
+                            ? `Retake Quiz (${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} left)` 
                             : "Retake Quiz"}
                         </button>
                         <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
