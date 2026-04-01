@@ -90,21 +90,25 @@ const ProtectedRoute = ({ children }) => {
     const searchParams = new URLSearchParams(window.location.search);
     const isPaymentRedirect = searchParams.get("payment_success") !== null;
     const inTestSession = typeof window !== "undefined" && localStorage.getItem("BR_IN_TEST_SESSION") === "1";
+    const hasTestId = typeof window !== "undefined" && localStorage.getItem("test_user_id") !== null;
     
-    if (inTestSession || isPaymentRedirect) {
+    // Allow access for payment redirects, test sessions, OR if user has test_user_id (new registration)
+    if (inTestSession || isPaymentRedirect || hasTestId) {
       return children;
     }
     return null;
   }
 
   // If there is no user object in the context, redirect to the login page.
-  // But allow for test sessions
+  // But allow for test sessions or payment redirects
   if (!user) {
     const searchParams = new URLSearchParams(window.location.search);
     const isPaymentRedirect = searchParams.get("payment_success") !== null;
     const inTestSession = typeof window !== "undefined" && localStorage.getItem("BR_IN_TEST_SESSION") === "1";
+    const hasTestId = typeof window !== "undefined" && localStorage.getItem("test_user_id") !== null;
 
-    if (inTestSession || isPaymentRedirect) {
+    // Allow access for payment redirects, test sessions, OR if user has test_user_id (new registration)
+    if (inTestSession || isPaymentRedirect || hasTestId) {
       return children;
     }
     return <Navigate to="/Login" state={{ from: location }} replace />;

@@ -10,7 +10,7 @@ import UserHeader from "./UserHeader";
 import UserLeftNav from "./UserLeftNav";
 import Test from "../Play_and_Win/Test";
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
-const TEST_AMOUNT = 8; // Fixed test amount
+const TEST_AMOUNT = 1; // Fixed test amount
 const STORAGE_KEY = 'BR_USER_DASHBOARD_DATA';
 const PAYMENT_SUCCESS_KEY = 'BR_PAYMENT_SUCCESS';
 

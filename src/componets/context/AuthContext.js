@@ -290,9 +290,13 @@ export const AuthProvider = ({ children }) => {
       const searchParams = new URLSearchParams(window.location.search);
       const isPaymentRedirect = searchParams.get("payment_success") !== null;
 
-      // Check if we have stored user data - if so, don't logout completely
+      // Check if we have stored user data OR test_user_id (new user from registration)
       const storedUser = getStoredUser();
-      if (storedUser || isPaymentRedirect) {
+      const hasTestId = typeof window !== "undefined" && localStorage.getItem("test_user_id") !== null;
+      const inTestSession = typeof window !== "undefined" && localStorage.getItem("BR_IN_TEST_SESSION") === "1";
+
+      // Allow session to persist if: stored user OR payment redirect OR test session OR new user with test_user_id
+      if (storedUser || isPaymentRedirect || inTestSession || hasTestId) {
         // Keep user logged in with stored data, just log a warning
         console.log("Token refresh failed, but user session allowed to persist during payment redirect or from storage");
         if (storedUser && !user) setUser(storedUser);

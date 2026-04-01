@@ -71,8 +71,8 @@ function Test() {
       const testSource = localStorage.getItem("test_source");
       const testUserPhone = localStorage.getItem("test_user_phone");
       
-      // If we have test data but no BR_USER_DATA, set a session marker
-      if (testUserId && !localStorage.getItem("BR_USER_DATA")) {
+      // If we have test data, always set the session marker for new users
+      if (testUserId) {
         // Mark that user is in a payment-completed test session
         localStorage.setItem("BR_IN_TEST_SESSION", "1");
         console.log("Test session restored from payment redirect");
@@ -212,6 +212,7 @@ function Test() {
     const testSource = localStorage.getItem("test_source");
     let storedAttempts = localStorage.getItem("khelojito_remaining_attempts");
     
+    // Only KheloJito users get retake attempts (not UserDashBoard users)
     if (testSource === "khelojito") {
       // If this is the first time coming from KheloJito after payment,
       // set remaining attempts to 2 (allowing 3 total attempts)
@@ -613,7 +614,8 @@ function Test() {
     const testSource = localStorage.getItem("test_source");
     const currentAttempts = parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10);
     
-    // For KheloJito users, check if they have remaining attempts
+    // For KheloJito users only, check if they have remaining attempts
+    // (UserDashBoard users get only 1 attempt)
     if (testSource === "khelojito" && currentAttempts > 0) {
       // Decrease remaining attempts in localStorage
       const newAttempts = currentAttempts - 1;
