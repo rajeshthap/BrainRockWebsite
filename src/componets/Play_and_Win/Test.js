@@ -210,15 +210,25 @@ function Test() {
   // Initialize remaining attempts from localStorage on component mount - only once
   const initializeAttempts = () => {
     let testSource = localStorage.getItem("test_source");
+    let paymentMethod = localStorage.getItem("test_payment_method");
     let storedAttempts = localStorage.getItem("khelojito_remaining_attempts");
     
-    // For KheloJito users, ensure they have 2 attempts unless already set
+    // For KheloJito users (from registration form), ensure they have 2 attempts unless already set
     if (testSource === "khelojito") {
       // Initialize if not set or if somehow 0
       if (!storedAttempts || storedAttempts === "0") {
         localStorage.setItem("khelojito_remaining_attempts", "2");
         storedAttempts = "2";
         console.log("First time from KheloJito - set remaining attempts to 2");
+      }
+    }
+    // For UserDashboard users, set 1 attempt if not already set
+    else if (testSource === "userdashboard") {
+      // Initialize if not set or if somehow 0
+      if (!storedAttempts || storedAttempts === "0") {
+        localStorage.setItem("khelojito_remaining_attempts", "1");
+        storedAttempts = "1";
+        console.log("First time from UserDashboard -", paymentMethod, "- set remaining attempts to 1");
       }
     }
     const attempts = parseInt(storedAttempts || "0", 10);
@@ -613,17 +623,39 @@ function Test() {
   };
 
   const handleRestart = async () => {
-    // Get test source from localStorage
+    // Get test source and payment method from localStorage
     const testSource = localStorage.getItem("test_source");
+    const paymentMethod = localStorage.getItem("test_payment_method");
     let currentAttempts = parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10);
+    
+    // UserDashboard users (both wallet and online) get only 1 attempt - no retakes allowed
+    if (testSource === "userdashboard") {
+      // For UserDashboard users, no retakes - redirect immediately based on payment method
+      if (paymentMethod === "online") {
+        // Online payment - redirect to Login
+        alert("All attempts done. You will be redirected to login.");
+        // Clear all test-related localStorage
+        clearTestState();
+        localStorage.removeItem("test_user_id");
+        localStorage.removeItem("test_user_phone");
+        localStorage.removeItem("test_source");
+        localStorage.removeItem("test_payment_method");
+        localStorage.removeItem("khelojito_remaining_attempts");
+        navigate("/login");
+      } else {
+        // Wallet payment or default - redirect to UserDashBoard without alert
+        clearTestState();
+        navigate("/UserDashBoard");
+      }
+      return;
+    }
     
     // Ensure test_source is set for retake
     if (!testSource) {
       localStorage.setItem("test_source", "khelojito");
     }
     
-    // For KheloJito users, check if they have remaining attempts
-    // (UserDashBoard users get only 1 attempt)
+    // Check if there are remaining attempts (only for KheloJito users)
     if (currentAttempts > 0) {
       // Decrease remaining attempts in localStorage
       currentAttempts = currentAttempts - 1;
@@ -638,8 +670,15 @@ function Test() {
       // Fetch new questions without reloading the page
       await fetchNewQuestions();
     } else {
-      // No more attempts - redirect to KheloJito after alert
-      alert("No attempts remaining. You will be redirected to register again.");
+      // No more attempts - for KheloJito users, redirect to KheloJito
+      alert("All attempts done. You will be redirected to register again.");
+      // Clear all test-related localStorage
+      clearTestState();
+      localStorage.removeItem("test_user_id");
+      localStorage.removeItem("test_user_phone");
+      localStorage.removeItem("test_source");
+      localStorage.removeItem("test_payment_method");
+      localStorage.removeItem("khelojito_remaining_attempts");
       navigate("/KheloJito");
     }
   };
@@ -982,23 +1021,28 @@ function Test() {
                 ) : (
                   <>
                     <div className="d-flex flex-column align-items-center">
-                      {/* Show remaining attempts info - read from localStorage directly */}
-                      {parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10) > 0 ? (
-                        <div className="remaining-attempts-info mb-2">
-                          <span className="badge bg-info">
-                            You have {localStorage.getItem("khelojito_remaining_attempts")} attempt{localStorage.getItem("khelojito_remaining_attempts") === "1" ? '' : 's'} remaining
-                          </span>
-                        </div>
-                      ) : (
-                          <div className="remaining-attempts-info mb-2">
-                            <span className="badge bg-warning">
-                              No attempts remaining. Register again to try more.
-                            </span>
-                          </div>
+                      {/* Show remaining attempts info only for KheloJito users (not UserDashboard) */}
+                      {localStorage.getItem("test_source") === "khelojito" && (
+                        <>
+                          {parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10) > 0 ? (
+                            <div className="remaining-attempts-info mb-2">
+                              <span className="badge bg-info">
+                                You have {localStorage.getItem("khelojito_remaining_attempts")} attempt{localStorage.getItem("khelojito_remaining_attempts") === "1" ? '' : 's'} remaining
+                              </span>
+                            </div>
+                          ) : (
+                              <div className="remaining-attempts-info mb-2">
+                                <span className="badge bg-warning">
+                                  No attempts remaining. Register again to try more.
+                                </span>
+                              </div>
+                          )}
+                        </>
                       )}
                       <div className="d-flex-file">
                         <button className="restart-button" onClick={handleRestart}>
-                          {parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10) > 0 
+                          {/* Show simple text for UserDashboard, with attempts for KheloJito */}
+                          {localStorage.getItem("test_source") === "khelojito" && parseInt(localStorage.getItem("khelojito_remaining_attempts") || "0", 10) > 0 
                             ? `Retake Quiz (${localStorage.getItem("khelojito_remaining_attempts")} attempt${localStorage.getItem("khelojito_remaining_attempts") === "1" ? '' : 's'} left)` 
                             : "Retake Quiz"}
                         </button>
