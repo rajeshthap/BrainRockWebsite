@@ -1112,6 +1112,11 @@ function Test() {
                 onClick={() => handleOptionSelect(index)}
               >
                 {option}
+                {questions[currentQuestion].options_hindi && questions[currentQuestion].options_hindi[index] && (
+                  <div className="text-muted" style={{ fontSize: '0.85em', marginTop: '2px' }}>
+                    {questions[currentQuestion].options_hindi[index]}
+                  </div>
+                )}
               </div>
             ))}
           </div>
