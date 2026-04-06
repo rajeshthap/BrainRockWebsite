@@ -10,7 +10,6 @@ import UserHeader from "./UserHeader";
 import UserLeftNav from "./UserLeftNav";
 import Test from "../Play_and_Win/Test";
 const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
-const TEST_AMOUNT = 8; // Fixed test amount
 const STORAGE_KEY = 'BR_USER_DASHBOARD_DATA';
 const PAYMENT_SUCCESS_KEY = 'BR_PAYMENT_SUCCESS';
 
@@ -84,10 +83,40 @@ const UserDashBoard = () => {
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [testAmount, setTestAmount] = useState(0);
   const navigate = useNavigate();
   const { user, loading: authLoading } = useContext(AuthContext);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  // Fetch test amount from API
+ // Fetch test amount from API
+useEffect(() => {
+  const fetchTestAmount = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/fee-item/`,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      // The fee is nested in response.data.data[0].fee based on the API response
+      if (response.data.success && response.data.data && response.data.data.length > 0) {
+        // Convert the string fee to a number
+        setTestAmount(parseFloat(response.data.data[0].fee));
+      } else {
+        setTestAmount(8); // Fallback amount
+      }
+    } catch (error) {
+      console.error("Error fetching test amount:", error);
+      setTestAmount(8); // Fallback amount
+    }
+  };
+  fetchTestAmount();
+}, []);
 
   // Prevent browser back button
   useEffect(() => {
@@ -325,7 +354,7 @@ const UserDashBoard = () => {
       return;
     }
 
-    if (walletAmount < TEST_AMOUNT) {
+    if (walletAmount < testAmount) {
       alert("Insufficient wallet balance");
       return;
     }
@@ -335,14 +364,14 @@ const UserDashBoard = () => {
         `${API_BASE_URL}/test-winner-cashback/`,
         {
           user_id: userId,
-          cashback: TEST_AMOUNT // Send only the entry fee amount
+          cashback: testAmount // Send only the entry fee amount
         },
         { withCredentials: true }
       );
 
       if (response.data.status) {
         // Calculate the remaining balance locally
-        setWalletAmount(walletAmount - TEST_AMOUNT);
+        setWalletAmount(walletAmount - testAmount);
         setPaymentSuccess(true);
         // Save payment method and source to localStorage for Test component
         localStorage.setItem("test_payment_method", "wallet");
@@ -373,7 +402,7 @@ const UserDashBoard = () => {
         `${API_BASE_URL}/register-test/`,
         {
           user_id: userId,
-          fee: TEST_AMOUNT
+          fee: testAmount
         },
         { withCredentials: true }
       );
@@ -470,7 +499,7 @@ const UserDashBoard = () => {
         `${API_BASE_URL}/start-test/`,
         {
           user_id: userId,
-          fee: TEST_AMOUNT
+          fee: testAmount
         },
         { withCredentials: true }
       );
@@ -738,7 +767,7 @@ const UserDashBoard = () => {
                 >
                   <div className="d-flex align-items-center justify-content-between w-100">
                     <span>Pay with Wallet</span>
-                    <span className="fw-bold">₹{TEST_AMOUNT.toFixed(2)}</span>
+                    <span className="fw-bold">₹{testAmount.toFixed(2)}</span>
                   </div>
                 </Button>
                 <Button
@@ -748,7 +777,7 @@ const UserDashBoard = () => {
                 >
                   <div className="d-flex align-items-center justify-content-between w-100">
                     <span>Online Payment</span>
-                    <span className="fw-bold">₹{TEST_AMOUNT.toFixed(2)}</span>
+                    <span className="fw-bold">₹{testAmount.toFixed(2)}</span>
                   </div>
                 </Button>
               </div>
@@ -756,22 +785,22 @@ const UserDashBoard = () => {
               {paymentMethod === "wallet" && (
                 <div className="border p-4 rounded bg-light">
                   <h6>Wallet Balance: ₹{walletAmount.toFixed(2)}</h6>
-                  <p>Quiz Amount: ₹{TEST_AMOUNT.toFixed(2)}</p>
-                  <p>Remaining Balance: ₹{(walletAmount - TEST_AMOUNT).toFixed(2)}</p>
+                  <p>Quiz Amount: ₹{testAmount.toFixed(2)}</p>
+                  <p>Remaining Balance: ₹{(walletAmount - testAmount).toFixed(2)}</p>
                   
-                  {walletAmount < TEST_AMOUNT && (
+                  {walletAmount < testAmount && (
                     <div className="mb-3">
                       <p className="text-danger">Your wallet balance is insufficient to pay for the test.</p>
                       <Button
                         variant="success"
                         onClick={() => {
-                          const remainingAmount = TEST_AMOUNT - walletAmount;
+                          const remainingAmount = testAmount - walletAmount;
                           setAddAmount(remainingAmount.toFixed(2));
                           setShowAddWalletModal(true);
                         }}
                         className="mb-2"
                       >
-                        Add ₹{(TEST_AMOUNT - walletAmount).toFixed(2)} to Wallet
+                        Add ₹{(testAmount - walletAmount).toFixed(2)} to Wallet
                       </Button>
                       <Button
                         variant="outline-success"
@@ -786,7 +815,7 @@ const UserDashBoard = () => {
                   <Button
                     variant="primary"
                     onClick={handleWalletPayment}
-                    disabled={walletAmount < TEST_AMOUNT}
+                    disabled={walletAmount < testAmount}
                   >
                     Pay with Wallet
                   </Button>
@@ -796,7 +825,7 @@ const UserDashBoard = () => {
               {paymentMethod === "online" && (
                 <div className="border p-4 rounded bg-light">
                   <h6>Online Payment</h6>
-                  <p>Test Amount: ₹{TEST_AMOUNT.toFixed(2)}</p>
+                  <p>Test Amount: ₹{testAmount.toFixed(2)}</p>
                   <Button variant="primary" onClick={handleOnlinePayment}>
                     Proceed to Payment
                   </Button>

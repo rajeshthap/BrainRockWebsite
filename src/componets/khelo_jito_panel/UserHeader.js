@@ -75,15 +75,18 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const [withdrawError, setWithdrawError] = useState("");
   const [withdrawSuccess, setWithdrawSuccess] = useState("");
 
-  // State for bank details
-  const [bankDetails, setBankDetails] = useState({
+  // State for payment details
+  const [paymentDetails, setPaymentDetails] = useState({
+    upi_id: "",
     account_holder_name: "",
     account_number: "",
     ifsc_code: ""
   });
+  const [withdrawalMethod, setWithdrawalMethod] = useState('bank'); // 'upi' or 'bank'
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasBankDetails, setHasBankDetails] = useState(false);
-  const [isBankDetailsEditable, setIsBankDetailsEditable] = useState(false);
+  const [hasUpiDetails, setHasUpiDetails] = useState(false);
+  const [isPaymentDetailsEditable, setIsPaymentDetailsEditable] = useState(false);
 
   // State for add wallet modal
   const [showAddWalletModal, setShowAddWalletModal] = useState(false);
@@ -156,16 +159,22 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             };
             setUserDetails(newUserDetails);
             
-            // Check if bank details exist
+            // Check if payment details exist
             if (profileResponse.data.data.winner_details) {
               const winnerDetails = profileResponse.data.data.winner_details;
-              setBankDetails({
+              setPaymentDetails({
+                upi_id: winnerDetails.upi_id || "",
                 account_holder_name: winnerDetails.account_holder_name || "",
                 account_number: winnerDetails.account_number || "",
                 ifsc_code: winnerDetails.ifsc_code || ""
               });
-              setHasBankDetails(true);
-              setIsBankDetailsEditable(false);
+              setHasUpiDetails(!!winnerDetails.upi_id);
+              setHasBankDetails(!!(winnerDetails.account_holder_name && winnerDetails.account_number && winnerDetails.ifsc_code));
+              setIsPaymentDetailsEditable(false);
+              // Default to UPI if available, otherwise bank
+              if (winnerDetails.upi_id) {
+                setWithdrawalMethod('upi');
+              }
             }
             
             // Store all header data in localStorage for persistence
@@ -246,25 +255,26 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
     }
   };
 
-  // Handle bank details input change
-  const handleBankDetailsChange = (e) => {
+  // Handle payment details input change
+  const handlePaymentDetailsChange = (e) => {
     const { name, value } = e.target;
-    setBankDetails(prev => ({
+    setPaymentDetails(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  // Submit bank details to API
-  const submitBankDetails = async () => {
+  // Submit payment details to API
+  const submitPaymentDetails = async () => {
     try {
       const response = await axios.put(
         `${API_BASE_URL}/test-winners/`,
         {
           user_id: user.unique_id,
-          account_holder_name: bankDetails.account_holder_name,
-          account_number: bankDetails.account_number,
-          ifsc_code: bankDetails.ifsc_code
+          upi_id: paymentDetails.upi_id,
+          account_holder_name: paymentDetails.account_holder_name,
+          account_number: paymentDetails.account_number,
+          ifsc_code: paymentDetails.ifsc_code
         },
         {
           withCredentials: true,
@@ -274,10 +284,10 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
         }
       );
 
-      console.log("Bank details submission response:", response);
+      console.log("Payment details submission response:", response);
       return response.data && response.data.status;
     } catch (error) {
-      console.error("Error submitting bank details:", error);
+      console.error("Error submitting payment details:", error);
       return false;
     }
   };
@@ -300,32 +310,44 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
       return;
     }
 
-    // Validate bank details
-    if (!bankDetails.account_holder_name || !bankDetails.account_number || !bankDetails.ifsc_code) {
-      setWithdrawError("Please fill in all bank details");
-      return;
+    // Validate payment details based on selected method
+    if (withdrawalMethod === 'upi') {
+      if (!paymentDetails.upi_id) {
+        setWithdrawError("Please enter your UPI ID");
+        return;
+      }
+    } else {
+      if (!paymentDetails.account_holder_name || !paymentDetails.account_number || !paymentDetails.ifsc_code) {
+        setWithdrawError("Please fill in all bank details");
+        return;
+      }
     }
 
     setIsSubmitting(true);
 
     try {
-      // Only submit bank details if:
-      // 1. No bank details exist yet, OR
-      // 2. User is editing existing bank details
-      if (!hasBankDetails || isBankDetailsEditable) {
-        console.log("Submitting bank details first for user:", user.unique_id);
-        
-        const bankDetailsSuccess = await submitBankDetails();
-        
-        if (!bankDetailsSuccess) {
-          setWithdrawError("Failed to save bank details. Please try again.");
+      // Only submit payment details if:
+      // 1. No payment details exist yet, OR
+      // 2. User is editing existing payment details
+      const needsSubmission = withdrawalMethod === 'upi' ? (!hasUpiDetails || isPaymentDetailsEditable) : (!hasBankDetails || isPaymentDetailsEditable);
+      if (needsSubmission) {
+        console.log("Submitting payment details first for user:", user.unique_id);
+
+        const paymentDetailsSuccess = await submitPaymentDetails();
+
+        if (!paymentDetailsSuccess) {
+          setWithdrawError("Failed to save payment details. Please try again.");
           setIsSubmitting(false);
           return;
         }
-        
+
         // Update local state
-        setHasBankDetails(true);
-        setIsBankDetailsEditable(false);
+        if (withdrawalMethod === 'upi') {
+          setHasUpiDetails(true);
+        } else {
+          setHasBankDetails(true);
+        }
+        setIsPaymentDetailsEditable(false);
       }
 
       console.log("Submitting withdrawal request for user:", user.unique_id, "Amount:", amount);
@@ -375,7 +397,8 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
           setShowWithdrawModal(false);
           setWithdrawSuccess("");
           setWithdrawAmount("");
-          setBankDetails({
+          setPaymentDetails({
+            upi_id: "",
             account_holder_name: "",
             account_number: "",
             ifsc_code: ""
@@ -554,10 +577,10 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             Minimum balance after withdrawal: ₹{MIN_BALANCE}
           </p>
           <div className="alert alert-warning mb-3" role="alert">
-            <strong>Important Note:</strong> Withdrawal requests may take 2-3 working days to process and reflect in your bank account.
+            <strong>Important Note:</strong> Withdrawal requests may take 2-3 working days to process and reflect in your account.
           </div>
-          
-          <Form.Group controlId="withdrawAmount">
+
+          <Form.Group controlId="withdrawAmount" className="mb-3">
             <Form.Label>Withdrawal Amount (₹)</Form.Label>
             <Form.Control
               type="number"
@@ -569,56 +592,99 @@ function UserHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
             />
           </Form.Group>
 
+          <Form.Group className="mb-3">
+            <Form.Label>Withdrawal Method</Form.Label>
+            <div>
+              <Form.Check
+                type="radio"
+                label="UPI Transfer"
+                name="withdrawalMethod"
+                value="upi"
+                checked={withdrawalMethod === 'upi'}
+                onChange={(e) => setWithdrawalMethod(e.target.value)}
+                inline
+              />
+              <Form.Check
+                type="radio"
+                label="Bank Transfer"
+                name="withdrawalMethod"
+                value="bank"
+                checked={withdrawalMethod === 'bank'}
+                onChange={(e) => setWithdrawalMethod(e.target.value)}
+                inline
+              />
+            </div>
+          </Form.Group>
+
           <div className="mt-3 mb-3">
             <div className="d-flex justify-content-between align-items-center mb-2">
-              <h6 className="mb-0">Bank Details</h6>
-              {hasBankDetails && !isBankDetailsEditable && (
+              <h6 className="mb-0">
+                {withdrawalMethod === 'upi' ? 'UPI Details' : 'Bank Details'}
+              </h6>
+              {((withdrawalMethod === 'upi' && hasUpiDetails) || (withdrawalMethod === 'bank' && hasBankDetails)) && !isPaymentDetailsEditable && (
                 <Button
                   variant="link"
                   size="sm"
-                  onClick={() => setIsBankDetailsEditable(true)}
+                  onClick={() => setIsPaymentDetailsEditable(true)}
                   className="p-0"
                 >
                   Edit Details
                 </Button>
               )}
             </div>
-            <Form.Group controlId="accountHolderName" className="mb-2">
-              <Form.Label>Account Holder Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="account_holder_name"
-                placeholder="Enter account holder name"
-                value={bankDetails.account_holder_name}
-                onChange={handleBankDetailsChange}
-                disabled={hasBankDetails && !isBankDetailsEditable}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="accountNumber" className="mb-2">
-              <Form.Label>Account Number</Form.Label>
-              <Form.Control
-                type="text"
-                name="account_number"
-                placeholder="Enter account number"
-                value={bankDetails.account_number}
-                onChange={handleBankDetailsChange}
-                disabled={hasBankDetails && !isBankDetailsEditable}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="ifscCode">
-              <Form.Label>IFSC Code</Form.Label>
-              <Form.Control
-                type="text"
-                name="ifsc_code"
-                placeholder="Enter IFSC code"
-                value={bankDetails.ifsc_code}
-                onChange={handleBankDetailsChange}
-                disabled={hasBankDetails && !isBankDetailsEditable}
-                required
-              />
-            </Form.Group>
+            {withdrawalMethod === 'upi' ? (
+              <Form.Group controlId="upiId">
+                <Form.Label>UPI ID</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="upi_id"
+                  placeholder="Enter your UPI ID (e.g., user@upi)"
+                  value={paymentDetails.upi_id}
+                  onChange={handlePaymentDetailsChange}
+                  disabled={hasUpiDetails && !isPaymentDetailsEditable}
+                  required
+                />
+              </Form.Group>
+            ) : (
+              <>
+                <Form.Group controlId="accountHolderName" className="mb-2">
+                  <Form.Label>Account Holder Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="account_holder_name"
+                    placeholder="Enter account holder name"
+                    value={paymentDetails.account_holder_name}
+                    onChange={handlePaymentDetailsChange}
+                    disabled={hasBankDetails && !isPaymentDetailsEditable}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group controlId="accountNumber" className="mb-2">
+                  <Form.Label>Account Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="account_number"
+                    placeholder="Enter account number"
+                    value={paymentDetails.account_number}
+                    onChange={handlePaymentDetailsChange}
+                    disabled={hasBankDetails && !isPaymentDetailsEditable}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group controlId="ifscCode">
+                  <Form.Label>IFSC Code</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="ifsc_code"
+                    placeholder="Enter IFSC code"
+                    value={paymentDetails.ifsc_code}
+                    onChange={handlePaymentDetailsChange}
+                    disabled={hasBankDetails && !isPaymentDetailsEditable}
+                    required
+                  />
+                </Form.Group>
+              </>
+            )}
           </div>
 
           {withdrawError && (

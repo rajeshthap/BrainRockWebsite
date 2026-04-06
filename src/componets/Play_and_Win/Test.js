@@ -633,7 +633,7 @@ function Test() {
       // For UserDashboard users, no retakes - redirect immediately based on payment method
       if (paymentMethod === "online") {
         // Online payment - redirect to Login
-        alert("All attempts done. You will be redirected to login.");
+        // alert("All attempts done. You will be redirected to login.");
         // Clear all test-related localStorage
         clearTestState();
         localStorage.removeItem("test_user_id");
@@ -641,7 +641,7 @@ function Test() {
         localStorage.removeItem("test_source");
         localStorage.removeItem("test_payment_method");
         localStorage.removeItem("khelojito_remaining_attempts");
-        navigate("/login");
+        navigate("/UserDashBoard");
       } else {
         // Wallet payment or default - redirect to UserDashBoard without alert
         clearTestState();

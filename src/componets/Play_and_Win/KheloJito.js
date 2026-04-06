@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -22,8 +22,38 @@ function KheloJito() {
     phone: "",
     full_name: "",
     email: "",
-    fee: 8,
+    fee: 0,
   });
+
+  const [apiFee, setApiFee] = useState(null);
+
+  // Fetch fee from API on component mount
+ // Fetch fee from API on component mount
+useEffect(() => {
+  const fetchFee = async () => {
+    try {
+      const response = await axios.get(
+        "https://brainrock.in/brainrock/backend/api/fee-item/",
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      // Extract fee from the correct path in the response
+      const feeValue = response.data.data[0].fee;
+      setApiFee(feeValue);
+      setFormData((prev) => ({ ...prev, fee: feeValue }));
+    } catch (error) {
+      console.error("Error fetching fee:", error);
+      setApiFee(8);
+      setFormData((prev) => ({ ...prev, fee: 8 }));
+    }
+  };
+  fetchFee();
+}, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -196,7 +226,7 @@ function KheloJito() {
       testKeys.forEach(key => localStorage.removeItem(key));
 
       // Clear form
-      setFormData({ full_name: "", email: "", phone: "", fee: 1 });
+      setFormData({ full_name: "", email: "", phone: "", fee: apiFee || 8 });
 
       // Redirect directly to payment URL without showing success message
       if (
@@ -363,20 +393,18 @@ function KheloJito() {
                   </Form.Group>
                 </Col>
 
-                {/* Fee */}
-                {/* <Col md={6} className="mt-3">
+                {/* Fee Display */}
+                <Col md={6} className="mt-3">
                   <Form.Group>
-                    <Form.Label className="br-label">Fee</Form.Label>
+                    <Form.Label className="br-label">Registration Fee</Form.Label>
                     <Form.Control
-                      type="number"
+                      type="text"
                       className="br-form-control"
-                      name="fee"
+                      value={apiFee !== null ? `₹${apiFee}` : "Loading..."}
                       disabled
-                      value={formData.fee}
-                      onChange={handleInputChange}
                     />
                   </Form.Group>
-                </Col> */}
+                </Col>
 
                 {/* Phone Validation Message */}
                 {phoneValidation.isChecking && (
@@ -465,7 +493,7 @@ function KheloJito() {
                 
                 <h4> Registration Fee</h4>
                 <ul>
-                  <li>To participate in the quiz game, users are required to pay a registration fee of ₹8.</li>
+                  <li>To participate in the quiz game, users are required to pay a registration fee of ₹{apiFee !== null ? apiFee : '...'}</li>
                   <li>This registration fee is non-refundable once the quiz attempt has started.</li>
                   <li>Payment of the registration fee allows the user to participate in one quiz session unless stated otherwise.</li>
                 </ul>
@@ -532,7 +560,7 @@ function KheloJito() {
                 
                 <h4> Payment and Refund Policy</h4>
                 <ul>
-                  <li>The ₹8 entry fee is non-refundable once a quiz session begins.</li>
+                  <li>The ₹{apiFee !== null ? apiFee : '...'} entry fee is non-refundable once a quiz session begins.</li>
                   <li>Refunds may only be considered if a technical error prevents the user from accessing the quiz after payment.</li>
                 </ul>
                 
