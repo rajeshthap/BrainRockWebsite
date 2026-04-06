@@ -9,7 +9,7 @@ import { FaArrowRight } from "react-icons/fa6";
 
 import Banner1 from "../../assets/images/banner-1.png";
 import Banner2 from "../../assets/images/banner-2.png";
-import KheloBanner from "../../assets/images/khelo-img-banner1.jpeg";
+import KheloBanner from "../../assets/images/khelo-img-banner1.png";
 
 import "../../assets/css/slider.css";
 

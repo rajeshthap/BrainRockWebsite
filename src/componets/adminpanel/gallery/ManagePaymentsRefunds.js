@@ -155,6 +155,7 @@ const ManagePaymentsRefunds = () => {
       withdrawal.account_holder_name?.toLowerCase().includes(lowerSearch) ||
       withdrawal.account_number?.toString().includes(lowerSearch) ||
       withdrawal.ifsc_code?.toLowerCase().includes(lowerSearch) ||
+      withdrawal.upi_id?.toLowerCase().includes(lowerSearch) ||
       withdrawal.withdraw_amount?.toString().includes(lowerSearch)
     );
     
@@ -547,19 +548,20 @@ const ManagePaymentsRefunds = () => {
                       <div className="col-md-12">
                         <table className="temp-rwd-table">
                           <tbody>
-                            <tr>
-                              <th>Withdraw ID</th>
-                              <th>User ID</th>
-                              <th>Account Holder Name</th>
-                         
-                              <th>Account Number</th>
-                              <th>IFSC Code</th>
-                              <th>Withdraw Amount</th>
-                              <th>Status</th>
-                              <th>Requested At</th>
-                              {/* <th>Processed At</th> */}
-                              <th>Action</th>
-                            </tr>
+                             <tr>
+                               <th>Withdraw ID</th>
+                               <th>User ID</th>
+                               <th>Account Holder Name</th>
+
+                               <th>Account Number</th>
+                               <th>IFSC Code</th>
+                               <th>UPI ID</th>
+                               <th>Withdraw Amount</th>
+                               <th>Status</th>
+                               <th>Requested At</th>
+                               {/* <th>Processed At</th> */}
+                               <th>Action</th>
+                             </tr>
                             
                             {currentWithdrawals.length > 0 ? (
                               currentWithdrawals.map((withdrawal, index) => (
@@ -567,12 +569,13 @@ const ManagePaymentsRefunds = () => {
                                   <td data-th="Withdraw ID">
                                     <strong>{withdrawal.withdraw_id || 'N/A'}</strong>
                                   </td>
-                                  <td data-th="User ID">{withdrawal.user_id || 'N/A'}</td>
-                                  <td data-th="Account Holder Name">{withdrawal.account_holder_name || 'N/A'}</td>
-                                  {/* <td data-th="Phone">{withdrawal.phone || 'N/A'}</td> */}
-                                  <td data-th="Account Number">{withdrawal.account_number || 'N/A'}</td>
-                                  <td data-th="IFSC Code">{withdrawal.ifsc_code || 'N/A'}</td>
-                                  <td data-th="Withdraw Amount">{withdrawal.withdraw_amount ? `₹${withdrawal.withdraw_amount}` : 'N/A'}</td>
+                                   <td data-th="User ID">{withdrawal.user_id || 'N/A'}</td>
+                                   <td data-th="Account Holder Name">{withdrawal.account_holder_name || 'N/A'}</td>
+                                   {/* <td data-th="Phone">{withdrawal.phone || 'N/A'}</td> */}
+                                   <td data-th="Account Number">{withdrawal.account_number || 'N/A'}</td>
+                                   <td data-th="IFSC Code">{withdrawal.ifsc_code || 'N/A'}</td>
+                                   <td data-th="UPI ID">{withdrawal.upi_id || 'N/A'}</td>
+                                   <td data-th="Withdraw Amount">{withdrawal.withdraw_amount ? `₹${withdrawal.withdraw_amount}` : 'N/A'}</td>
                                   <td data-th="Status">
                                     <span className={`badge bg-${getStatusVariant(withdrawal.status)}`}>
                                       {withdrawal.status || 'N/A'}
@@ -601,20 +604,20 @@ const ManagePaymentsRefunds = () => {
                                    </td>
                                 </tr>
                               ))
-                            ) : (
-                              <tr>
-                                <td colSpan="11" className="text-center">
-                                  No wallet withdrawal data available.
-                                </td>
-                              </tr>
-                            )}
+                             ) : (
+                               <tr>
+                                 <td colSpan="10" className="text-center">
+                                   No wallet withdrawal data available.
+                                 </td>
+                               </tr>
+                             )}
                           </tbody>
-                          <tfoot>
-                            <tr style={{ backgroundColor: '#f0f8ff', fontWeight: 'bold', borderTop: '2px solid #0066cc' }}>
-                              <td colSpan="8" className="text-end pe-3" style={{ color: '#333' }}>
-                                <strong>Withdrawal Summary:</strong>
-                              </td>
-                              <td colSpan="3" style={{ paddingLeft: '20px' }}>
+                           <tfoot>
+                             <tr style={{ backgroundColor: '#f0f8ff', fontWeight: 'bold', borderTop: '2px solid #0066cc' }}>
+                               <td colSpan="8" className="text-end pe-3" style={{ color: '#333' }}>
+                                 <strong>Withdrawal Summary:</strong>
+                               </td>
+                               <td colSpan="2" style={{ paddingLeft: '20px' }}>
                                 <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
                                   <div style={{ color: '#e67e22', fontWeight: '600' }}>
                                     ⏳ Pending: {filteredWithdrawals.filter(w => w.status?.toLowerCase() === 'pending').length}
@@ -781,16 +784,17 @@ const ManagePaymentsRefunds = () => {
                    <p><strong>User ID:</strong> <span className="text-success">{selectedWithdrawal.user_id}</span></p>
                    <p><strong>Account Holder Name:</strong> {selectedWithdrawal.account_holder_name}</p>
                  </Col>
-                 <Col md={6} className="mb-3">
-                   <p><strong>Account Number:</strong> {selectedWithdrawal.account_number}</p>
-                   <p><strong>IFSC Code:</strong> {selectedWithdrawal.ifsc_code}</p>
-                   <p><strong>Withdraw Amount:</strong> {selectedWithdrawal.withdraw_amount ? `₹${selectedWithdrawal.withdraw_amount}` : 'N/A'}</p>
-                   <p><strong>Status:</strong>
-                     <span className={`badge bg-${getStatusVariant(selectedWithdrawal.status)} ms-2`}>
-                       {selectedWithdrawal.status}
-                     </span>
-                   </p>
-                 </Col>
+                  <Col md={6} className="mb-3">
+                    <p><strong>Account Number:</strong> {selectedWithdrawal.account_number}</p>
+                    <p><strong>IFSC Code:</strong> {selectedWithdrawal.ifsc_code}</p>
+                    <p><strong>UPI ID:</strong> {selectedWithdrawal.upi_id || 'N/A'}</p>
+                    <p><strong>Withdraw Amount:</strong> {selectedWithdrawal.withdraw_amount ? `₹${selectedWithdrawal.withdraw_amount}` : 'N/A'}</p>
+                    <p><strong>Status:</strong>
+                      <span className={`badge bg-${getStatusVariant(selectedWithdrawal.status)} ms-2`}>
+                        {selectedWithdrawal.status}
+                      </span>
+                    </p>
+                  </Col>
                </Row>
                <Row>
                  <Col md={6} className="mb-3">

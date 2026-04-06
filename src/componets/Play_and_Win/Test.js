@@ -1129,10 +1129,11 @@ function Test() {
               }}
             ></div>
           </div>
-          <div className="question-number">
+          <div className="question-number d-flex justify-content-between align-items-center">
             Question {currentQuestion + 1} of {questions.length}
+             <div className="timer">Time Left: {timeLeft} seconds</div>
           </div>
-          <div className="timer">Time Left: {timeLeft} seconds</div>
+         
           <h2 className="question">
             {questions[currentQuestion].question_text}
             {questions[currentQuestion].question_hindi_text && (
