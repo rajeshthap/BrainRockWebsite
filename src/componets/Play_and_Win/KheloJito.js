@@ -394,7 +394,7 @@ useEffect(() => {
                 </Col>
 
                 {/* Fee Display */}
-                <Col md={6} className="mt-3">
+                {/* <Col md={6} className="mt-3">
                   <Form.Group>
                     <Form.Label className="br-label">Registration Fee</Form.Label>
                     <Form.Control
@@ -404,7 +404,7 @@ useEffect(() => {
                       disabled
                     />
                   </Form.Group>
-                </Col>
+                </Col> */}
 
                 {/* Phone Validation Message */}
                 {phoneValidation.isChecking && (
