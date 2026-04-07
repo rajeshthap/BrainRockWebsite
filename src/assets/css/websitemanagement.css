@@ -3,68 +3,135 @@
   padding: 10px 0;
 }
 
+/* Page Title */
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  padding: 10px 0;
+}
+
 /* Main Card Style */
 .br-stat-card {
   display: flex;
   align-items: center;
-  gap: 20px;
-  border-radius: 15px;
-  padding: 25px;
+  gap: 15px;
+  border-radius: 8px;
+  padding: 18px 20px;
   color: #fff;
-  transition: 0.3s ease-in-out;
-  box-shadow: 0px 4px 16px rgba(0,0,0,0.15);
+  transition: 0.2s ease-in-out;
+  box-shadow: 0px 2px 8px rgba(0, 128, 255, 0.15);
+  background: #0080ff;
 }
 
 .br-stat-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0px 6px 20px rgba(0,0,0,0.22);
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 12px rgba(0, 128, 255, 0.25);
+  background: #0070e0;
 }
 
 /* Icon Area */
 .br-stat-icon {
-  width: 60px;
-  height: 60px;
+  width: 42px;
+  height: 42px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(255,255,255,0.25);
-  border-radius: 12px;
-  font-size: 28px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+  font-size: 18px;
+  flex-shrink: 0;
 }
 
 /* Text */
 .br-stat-details h5 {
-  font-size: 16px;
+  font-size: 13px;
   margin: 0;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.br-stat-details h2 {
+  font-size: 24px;
+  margin: 4px 0 0 0;
   font-weight: 600;
   color: #fff;
 }
 
-.br-stat-details h2 {
-  font-size: 32px;
-  margin: 5px 0 0 0;
-  font-weight: 700;
-  color: #fff;
+/* ====== Different Card Colors - Complementary to Blue Sidebar ====== */
+
+/* Courses - Blue gradient */
+.card-courses {
+  background: linear-gradient(135deg, #0080ff, #0066cc);
 }
 
-/* ====== DIFFERENT CARD COLORS ====== */
-.card-blue {
-  background: linear-gradient(135deg, #1e88e5, #42a5f5);
+/* Employees - Teal */
+.card-employees {
+  background: linear-gradient(135deg, #00a884, #00856a);
 }
 
-.card-green {
-  background: linear-gradient(135deg, #43a047, #66bb6a);
+/* Projects - Purple */
+.card-projects {
+  background: linear-gradient(135deg, #6f42c1, #5a32a3);
 }
 
-.card-orange {
-  background: linear-gradient(135deg, #fb8c00, #ffa726);
-}
-.card-orange-student {
-  background: linear-gradient(135deg, #00bcfb, #00fbee);
+/* Students - Orange */
+.card-students {
+  background: linear-gradient(135deg, #ff8c00, #e67e00);
 }
 
-.card-purple {
-  background: linear-gradient(135deg, #7b1fa2, #ab47bc);
+/* Bills - Indigo */
+.card-bills {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+}
+
+/* Zee - Rose */
+.card-zee {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+}
+
+/* Khelo Jito - Emerald */
+.card-khelo {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* Quiz - Slate */
+.card-quiz {
+  background: linear-gradient(135deg, #475569, #334155);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .br-stat-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .dashboard-body{
+    padding: 10px !important;
+  }
+  .br-stat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  .br-stat-details h5 {
+    font-size: 11px;
+  }
+  .br-stat-details h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .br-stat-card {
+    padding: 12px 14px;
+  }
+  .br-stat-details h2 {
+    font-size: 18px;
+  }
 }
 .team-image {
   width: 100%;
@@ -162,22 +229,4 @@
 /* Zebra-striping for better readability (optional) */
 .table tbody tr:nth-of-type(odd) {
   background-color: rgba(0, 0, 0, 0.02);
-}
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .br-stat-card {
-    padding: 18px;
-    gap: 15px;
-  }
-  .dashboard-body{
-    padding: 10px !important;
-  }
-  .br-stat-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 22px;
-  }
-  .br-stat-details h2 {
-    font-size: 24px;
-  }
 }

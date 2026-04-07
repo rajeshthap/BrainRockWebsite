@@ -420,6 +420,12 @@ const goToQuizParticipants = () => {
     setSelectedCardType(cardType);
     setCurrentPage(1);
     setSearchTerm("");
+    setTimeout(() => {
+      const tableSection = document.getElementById("table-section");
+      if (tableSection) {
+        tableSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
   };
 
   const handleCloseTable = () => {
@@ -911,9 +917,9 @@ const goToQuizParticipants = () => {
           <div className="br-box-container mt-4">
             <Row className="br-stats-row">
               {/* Courses Card */}
-              <Col lg={4} md={6} sm={12} className="mb-3">
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
-                  className="br-stat-card card-blue"
+                  className="br-stat-card card-courses"
                   onClick={() => handleCardClick("courses")}
                   style={{ cursor: "pointer" }}
                 >
@@ -921,16 +927,16 @@ const goToQuizParticipants = () => {
                     <FaBook />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Total Courses</h5>
+                    <h5>Courses</h5>
                     <h2>{coursesData.length}</h2>
                   </div>
                 </div>
               </Col>
 
-              {/* Employees Card */}
-              <Col lg={4} md={6} sm={12} className="mb-3">
+              {/* Employees Card - COMMENTED */}
+              {/* <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
-                  className="br-stat-card card-green"
+                  className="br-stat-card card-employees"
                   onClick={() => handleCardClick("employees")}
                   style={{ cursor: "pointer" }}
                 >
@@ -938,16 +944,16 @@ const goToQuizParticipants = () => {
                     <FaUsers />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Total Employees</h5>
+                    <h5>Employees</h5>
                     <h2>{employeesData.length}</h2>
                   </div>
                 </div>
-              </Col>
+              </Col> */}
 
-              {/* Projects Card */}
-              <Col lg={4} md={6} sm={12} className="mb-3">
+              {/* Projects Card - COMMENTED */}
+              {/* <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
-                  className="br-stat-card card-orange-student"
+                  className="br-stat-card card-projects"
                   onClick={() => handleCardClick("projects")}
                   style={{ cursor: "pointer" }}
                 >
@@ -955,15 +961,16 @@ const goToQuizParticipants = () => {
                     <FaUserGraduate />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Total Projects</h5>
+                    <h5>Projects</h5>
                     <h2>{projectsData.length}</h2>
                   </div>
                 </div>
-              </Col>
+              </Col> */}
+               
                {/* Total Registr student */}
-              <Col lg={4} md={6} sm={12} className="mb-3">
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
   <div
-    className="br-stat-card card-orange"
+    className="br-stat-card card-students"
       onClick={goToNextComponent}
     style={{ cursor: "pointer" }}
   >
@@ -971,16 +978,16 @@ const goToQuizParticipants = () => {
       <FaUserGraduate />
     </div>
     <div className="br-stat-details">
-      <h5>Total Registered Students</h5>
+      <h5>Students</h5>
       <h2>{studentCount}</h2>
     </div>
   </div>
 </Col>
 
               {/* BrainRock Bills Card */}
-              <Col lg={4} md={6} sm={12} className="mb-3">
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
-                  className="br-stat-card card-blue"
+                  className="br-stat-card card-bills"
                   onClick={goToBrainrockBills}
                   style={{ cursor: "pointer" }}
                 >
@@ -988,16 +995,16 @@ const goToQuizParticipants = () => {
                     <FaFileInvoice />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Total BrainRock Bills</h5>
+                    <h5>BrainRock Bills</h5>
                     <h2>{brainrockBillsCount}</h2>
                   </div>
                 </div>
               </Col>
 
               {/* Zee Bills Card */}
-              <Col lg={4} md={6} sm={12} className="mb-3">
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
-                  className="br-stat-card card-green"
+                  className="br-stat-card card-zee"
                   onClick={goToZeeBills}
                   style={{ cursor: "pointer" }}
                 >
@@ -1005,16 +1012,16 @@ const goToQuizParticipants = () => {
                     <FaFileInvoice />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Total Zee Bills</h5>
+                    <h5>Zee Bills</h5>
                     <h2>{zeeBillsCount}</h2>
                   </div>
                 </div>
               </Col>
 
                {/* Khelo Jito Users Card */}
-              <Col lg={4} md={6} sm={12} className="mb-3">
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
-                  className="br-stat-card card-orange"
+                  className="br-stat-card card-khelo"
                   onClick={goToKheloJitoUsers}
                   style={{ cursor: "pointer" }}
                 >
@@ -1022,16 +1029,16 @@ const goToQuizParticipants = () => {
                     <FaUserGraduate />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Total Khelo Jito Users</h5>
+                    <h5>Khelo Jito Users</h5>
                     <h2>{kheloJitoUsersCount}</h2>
                   </div>
                 </div>
               </Col>
 
               {/* Quiz Participants Card */}
-              <Col lg={4} md={6} sm={12} className="mb-3">
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
-                  className="br-stat-card card-purple"
+                  className="br-stat-card card-quiz"
                   onClick={goToQuizParticipants}
                   style={{ cursor: "pointer" }}
                 >
@@ -1039,7 +1046,7 @@ const goToQuizParticipants = () => {
                     <FaUsers />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Total Quiz Participants</h5>
+                    <h5>Quiz Participants</h5>
                     <h2>{quizParticipantsCount}</h2>
                   </div>
                 </div>
@@ -1050,7 +1057,7 @@ const goToQuizParticipants = () => {
 
           {/* Table Section */}
           {selectedCardType && (
-            <div className="br-box-container mt-5">
+            <div id="table-section" className="br-box-container mt-5">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2 className="mb-0">{getModalTitle()} List</h2>
                 <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
