@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Container, Row, Col, Modal, Pagination, Alert, Button, Card, Form } from "react-bootstrap";
-import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice, FaEdit, FaUser, FaIdCard, FaEnvelope, FaPhone, FaUniversity, FaMapMarkerAlt, FaCalendar } from "react-icons/fa";
+import { Container, Row, Col, Modal, Pagination, Alert, Button, Card, Form, ProgressBar } from "react-bootstrap";
+import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice, FaEdit, FaUser, FaIdCard, FaEnvelope, FaPhone, FaUniversity, FaMapMarkerAlt, FaCalendar, FaTrophy, FaChartLine } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
@@ -49,6 +49,12 @@ const UserProfile = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Quiz performance state
+  const [participationData, setParticipationData] = useState({});
+  const [overallPerformance, setOverallPerformance] = useState(0);
+  const [quizzesAttempted, setQuizzesAttempted] = useState(0);
+  const [totalScore, setTotalScore] = useState(0);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -117,7 +123,52 @@ const UserProfile = () => {
       }
     };
 
+    const fetchParticipatedQuizzes = async () => {
+      if (user && user.unique_id) {
+        try {
+          const response = await axios.get(
+            `${API_BASE_URL}/quiz-participants/?user_id=${user.unique_id}`,
+            { withCredentials: true }
+          );
+          
+          if (response.data.status && response.data.data) {
+            const participationMap = {};
+            let completedQuizzes = 0;
+            let sumPercentage = 0;
+            
+            response.data.data.forEach(item => {
+              participationMap[item.quiz] = {
+                score: item.attempt?.score,
+                totalQuestions: item.attempt?.total_questions,
+                status: item.attempt?.status,
+                paymentStatus: item.payment_status
+              };
+              
+              // Calculate performance for completed quizzes
+              if (item.attempt?.score !== undefined && item.attempt?.total_questions) {
+                const percentage = (item.attempt.score / item.attempt.total_questions) * 100;
+                sumPercentage += percentage;
+                completedQuizzes++;
+              }
+            });
+            
+            setParticipationData(participationMap);
+            setQuizzesAttempted(completedQuizzes);
+            
+            // Calculate overall average percentage
+            const avgPercentage = completedQuizzes > 0 ? Math.round(sumPercentage / completedQuizzes) : 0;
+            setOverallPerformance(avgPercentage);
+            setTotalScore(sumPercentage);
+          }
+        } catch (error) {
+          console.error("Error fetching participated quizzes:", error);
+          setParticipationData({});
+        }
+      }
+    };
+
     fetchUserProfile();
+    fetchParticipatedQuizzes();
   }, [user, authLoading]);
 
   const toCamelLabel = (str) => {
@@ -196,6 +247,38 @@ const UserProfile = () => {
 
                         {/* Personal Information - Right Side */}
                         <Col lg={9} md={8} sm={12}>
+                          {/* Overall Performance Card */}
+                          <div className="rounded-2 p-4 mb-3" style={{
+                            background: overallPerformance >= 75 
+                              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                              : overallPerformance >= 50
+                              ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                              : 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                            color: '#fff'
+                          }}>
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                              <div>
+                                <h6 className="mb-1 fw-bold" style={{ fontSize: '12px', opacity: 0.9 }}>OVERALL PERFORMANCE</h6>
+                                <h2 className="mb-0" style={{ fontSize: '42px', fontWeight: '700' }}>{overallPerformance}%</h2>
+                              </div>
+                              <div style={{ fontSize: '48px', opacity: 0.3 }}>
+                                <FaChartLine />
+                              </div>
+                            </div>
+                            <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '8px', overflow: 'hidden', height: '8px' }}>
+                              <div style={{
+                                background: '#fff',
+                                height: '100%',
+                                width: `${overallPerformance}%`,
+                                transition: 'width 0.3s ease'
+                              }}></div>
+                            </div>
+                            <div className="d-flex justify-content-between mt-2" style={{ fontSize: '11px', opacity: 0.85 }}>
+                              <span>📊 Quizzes Attempted: <strong>{quizzesAttempted}</strong></span>
+                              <span>⭐ Average Score: <strong>{Math.round(totalScore / (quizzesAttempted || 1))}%</strong></span>
+                            </div>
+                          </div>
+
                           <div className="bg-light rounded-2 p-4">
                             <h5 className="fw-bold text-primary mb-3"><FaUser className="me-2" />Personal Information</h5>
                             <Row>
