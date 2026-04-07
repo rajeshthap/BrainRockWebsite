@@ -84,6 +84,15 @@ const UserDashBoard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [testAmount, setTestAmount] = useState(0);
+  
+  // Leaderboard states
+  const [leaderboardData, setLeaderboardData] = useState(null);
+  const [userRank, setUserRank] = useState(null);
+  const [participantsCount, setParticipantsCount] = useState(0);
+  const [winnersCount, setWinnersCount] = useState(0);
+  const [showWinnersModal, setShowWinnersModal] = useState(false);
+  const [shuffledWinners, setShuffledWinners] = useState([]);
+  
   const navigate = useNavigate();
   const { user, loading: authLoading } = useContext(AuthContext);
 
@@ -117,6 +126,55 @@ useEffect(() => {
   };
   fetchTestAmount();
 }, []);
+
+  // Fetch leaderboard data
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/leaderboard/`,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        
+        if (response.data.status) {
+          console.log('Leaderboard data:', response.data);
+          setLeaderboardData(response.data);
+          setParticipantsCount(response.data.total_users || 0);
+          setWinnersCount(response.data.winner?.length || 0);
+          
+          // Get current user's rank
+          const userId = getUserId(user);
+          if (userId && response.data.data) {
+            const userIndex = response.data.data.findIndex(item => item.user_id === userId);
+            if (userIndex !== -1) {
+              setUserRank(response.data.data[userIndex].rank);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching leaderboard data:", error);
+      }
+    };
+    
+    fetchLeaderboard();
+  }, [user]);
+
+  // Shuffle winners when modal is shown
+  const handleShowWinners = () => {
+    if (leaderboardData && leaderboardData.winner) {
+      // Shuffle winners and take top 10
+      const shuffled = [...leaderboardData.winner]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 10);
+      setShuffledWinners(shuffled);
+      setShowWinnersModal(true);
+    }
+  };
 
   // Prevent browser back button
   useEffect(() => {
@@ -565,13 +623,60 @@ useEffect(() => {
                     <div
                       className="br-stat-card card-gradient-primary"
                       onClick={handleKheloJeetoClick}
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: "pointer", position: "relative", paddingTop: "60px" }}
                     >
+                      {/* Top Left - Participants Box */}
+                      <div style={{
+                        position: "absolute",
+                        top: "10px",
+                        left: "15px",
+                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        textAlign: "center",
+                        minWidth: "70px"
+                      }}>
+                        <div style={{ fontWeight: "600", fontSize: "14px" }}>{participantsCount}</div>
+                        <div style={{ fontSize: "10px", opacity: "0.9" }}>Participants</div>
+                      </div>
+
+                      {/* Top Right - Winners Box (Clickable) */}
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShowWinners();
+                        }}
+                        style={{
+                          position: "absolute",
+                          top: "10px",
+                          right: "15px",
+                          backgroundColor: "rgba(255, 255, 255, 0.2)",
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          textAlign: "center",
+                          minWidth: "70px",
+                          cursor: "pointer",
+                          transition: "0.2s",
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.35)"}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.2)"}
+                      >
+                        <div style={{ fontWeight: "600", fontSize: "14px" }}>{winnersCount}</div>
+                        <div style={{ fontSize: "10px", opacity: "0.9" }}>Winners 🏆</div>
+                      </div>
+
                       <div className="br-stat-icon">
                         <FaBook />
                       </div>
                       <div className="br-stat-details">
                         <h5>Khelo Aur Jeeto</h5>
+                        {userRank && (
+                          <p style={{ fontSize: "13px", marginBottom: "8px", opacity: "0.95", fontWeight: "500" }}>
+                            Your Rank: <span style={{ fontWeight: "700", fontSize: "32px", display: "block", color: "#fff", marginTop: "4px" }}>#{userRank}</span>
+                          </p>
+                        )}
                         <p className="card-description">Start Quiz</p>
                         <button className="play-button">Play Now</button>
                       </div>
@@ -899,6 +1004,74 @@ useEffect(() => {
             disabled={!addAmount || parseFloat(addAmount) <= 0}
           >
             Add to Wallet
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Winners Modal */}
+      <Modal
+        show={showWinnersModal}
+        onHide={() => setShowWinnersModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>🏆 Top Winners</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+            {shuffledWinners.length > 0 ? (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#f0f0f0", borderBottom: "2px solid #ddd" }}>
+                    <th style={{ padding: "12px", textAlign: "left", fontWeight: "600" }}>Rank</th>
+                    <th style={{ padding: "12px", textAlign: "left", fontWeight: "600" }}>Name</th>
+                    <th style={{ padding: "12px", textAlign: "center", fontWeight: "600" }}>Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shuffledWinners.map((winner, index) => (
+                    <tr 
+                      key={winner.user_id}
+                      style={{ 
+                        borderBottom: "1px solid #eee",
+                        backgroundColor: index % 2 === 0 ? "#fafafa" : "#fff",
+                        transition: "0.2s"
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3f3f3"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? "#fafafa" : "#fff"}
+                    >
+                      <td style={{ padding: "12px", fontWeight: "600" }}>#{winner.rank}</td>
+                      <td style={{ padding: "12px" }}>{winner.name}</td>
+                      <td style={{ padding: "12px", textAlign: "center", fontWeight: "600", color: "#4CAF50" }}>
+                        {winner.score}/10
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-center">No winners available yet.</p>
+            )}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="primary" 
+            onClick={() => {
+              // Shuffle winners again
+              if (leaderboardData && leaderboardData.winner) {
+                const shuffled = [...leaderboardData.winner]
+                  .sort(() => Math.random() - 0.5)
+                  .slice(0, 10);
+                setShuffledWinners(shuffled);
+              }
+            }}
+          >
+            🔄 Shuffle Winners
+          </Button>
+          <Button variant="secondary" onClick={() => setShowWinnersModal(false)}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>
