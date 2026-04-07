@@ -1024,10 +1024,9 @@ useEffect(() => {
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: "#f0f0f0", borderBottom: "2px solid #ddd" }}>
-                    <th style={{ padding: "12px", textAlign: "center", fontWeight: "600", width: "60px" }}>Rank</th>
-                    <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", width: "120px" }}>Tier</th>
+                    <th style={{ padding: "12px", textAlign: "left", fontWeight: "600" }}>Rank</th>
                     <th style={{ padding: "12px", textAlign: "left", fontWeight: "600" }}>Name</th>
-                    <th style={{ padding: "12px", textAlign: "center", fontWeight: "600", width: "80px" }}>Score</th>
+                    <th style={{ padding: "12px", textAlign: "center", fontWeight: "600" }}>Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1042,15 +1041,7 @@ useEffect(() => {
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3f3f3"}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? "#fafafa" : "#fff"}
                     >
-                      <td style={{ padding: "12px", fontWeight: "600", textAlign: "center" }}>{winner.rank || "-"}</td>
-                      <td style={{ padding: "12px", fontSize: "13px" }}>
-                        <span style={{ display: "inline-block" }}>
-                          {winner.tier === "Silver Scholar" && "⭐ Silver Scholar"}
-                          {winner.tier === "Gold Scholar" && "🏅 Gold Scholar"}
-                          {winner.tier === "Platinum Scholar" && "💎 Platinum Scholar"}
-                          {!winner.tier && "-"}
-                        </span>
-                      </td>
+                      <td style={{ padding: "12px", fontWeight: "600" }}>#{winner.rank}</td>
                       <td style={{ padding: "12px" }}>{winner.name}</td>
                       <td style={{ padding: "12px", textAlign: "center", fontWeight: "600", color: "#4CAF50" }}>
                         {winner.score}/10
