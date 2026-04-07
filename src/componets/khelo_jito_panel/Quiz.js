@@ -60,9 +60,6 @@ const Quiz = () => {
   const [addSuccess, setAddSuccess] = useState("");
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
 
-  // Language preference state
-  const [language, setLanguage] = useState("english");
-  
   // Quiz questions state
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [attemptId, setAttemptId] = useState(null);
@@ -338,7 +335,6 @@ const Quiz = () => {
         // Store in localStorage for QuizTest page
         localStorage.setItem("quiz_questions", JSON.stringify(response.data.questions));
         localStorage.setItem("quiz_attempt_id", response.data.attempt_id);
-        localStorage.setItem("quiz_language", language);
         // Navigate to QuizTest page
         navigate("/QuizTest");
       } else {
@@ -372,26 +368,7 @@ const Quiz = () => {
         <UserHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="dashboard-body">
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h1 className="page-title">Quiz Categories</h1>
-            <div className="language-toggle">
-              <Button
-                variant={language === "english" ? "primary" : "outline-primary"}
-                size="sm"
-                onClick={() => setLanguage("english")}
-                className="me-2"
-              >
-                English
-              </Button>
-              <Button
-                variant={language === "hindi" ? "primary" : "outline-primary"}
-                size="sm"
-                onClick={() => setLanguage("hindi")}
-              >
-                हिंदी
-              </Button>
-            </div>
-          </div>
+          <h1 className="page-title">Quiz Categories</h1>
           
           <div className="br-box-container mt-2">
             {loading ? (
