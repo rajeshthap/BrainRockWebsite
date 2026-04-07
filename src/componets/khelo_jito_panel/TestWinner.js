@@ -234,14 +234,9 @@ const TestWinner = () => {
         <UserHeader toggleSidebar={toggleSidebar} />
 
         {/* Dashboard Body */}
-        <Container fluid className="dashboard-body">
+        <Container fluid className="dashboard-body mt-2">
           <div className="br-box-container">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="mb-0">
-                <FaTrophy className="me-2 text-warning" />
-                Test Winner Details
-              </h2>
-            </div>
+            
             
             {error && (
               <Alert variant="danger" className="mb-4">
@@ -293,7 +288,7 @@ const TestWinner = () => {
                 </Row> */}
 
                 {/* Test Attempts Table */}
-                <Row className="mt-3">
+                <Row className="">
                   <div className="col-md-12">
                     <div className="d-flex justify-content-between align-items-center mb-3">
                       <h3 className="mb-0">
