@@ -360,7 +360,14 @@ const TestWinner = () => {
               <div
                 className="nav nav-tabs"
                 role="tablist"
-                style={{ borderBottom: "2px solid #e9ecef" }}
+                style={{
+                  borderBottom: "2px solid #e9ecef",
+                  background: "#f8f9fa",
+                  borderRadius: "8px",
+                  padding: "4px",
+                  display: "flex",
+                  gap: "8px",
+                }}
               >
                 <button
                   className={`nav-link ${activeTab === "khelo-jito" ? "active" : ""}`}
@@ -369,15 +376,21 @@ const TestWinner = () => {
                     setCurrentPage(1);
                   }}
                   style={{
-                    padding: "12px 20px",
+                    padding: "12px 24px",
                     border: "none",
-                    background: "none",
-                    borderBottom:
-                      activeTab === "khelo-jito" ? "3px solid #007bff" : "none",
+                    borderRadius: "6px",
+                    background:
+                      activeTab === "khelo-jito" ? "#007bff" : "#ffffff",
                     cursor: "pointer",
                     fontWeight: activeTab === "khelo-jito" ? "600" : "500",
-                    color: activeTab === "khelo-jito" ? "#007bff" : "#666",
+                    color: activeTab === "khelo-jito" ? "#ffffff" : "#6c757d",
                     transition: "all 0.3s ease",
+                    flex: "1",
+                    textAlign: "center",
+                    boxShadow:
+                      activeTab === "khelo-jito"
+                        ? "0 2px 8px rgba(0, 123, 255, 0.3)"
+                        : "none",
                   }}
                 >
                   <FaBook className="me-2" />
@@ -390,15 +403,20 @@ const TestWinner = () => {
                     setQuizCurrentPage(1);
                   }}
                   style={{
-                    padding: "12px 20px",
+                    padding: "12px 24px",
                     border: "none",
-                    background: "none",
-                    borderBottom:
-                      activeTab === "quizes" ? "3px solid #007bff" : "none",
+                    borderRadius: "6px",
+                    background: activeTab === "quizes" ? "#28a745" : "#ffffff",
                     cursor: "pointer",
                     fontWeight: activeTab === "quizes" ? "600" : "500",
-                    color: activeTab === "quizes" ? "#007bff" : "#666",
+                    color: activeTab === "quizes" ? "#ffffff" : "#6c757d",
                     transition: "all 0.3s ease",
+                    flex: "1",
+                    textAlign: "center",
+                    boxShadow:
+                      activeTab === "quizes"
+                        ? "0 2px 8px rgba(40, 167, 69, 0.3)"
+                        : "none",
                   }}
                 >
                   <FaTrophy className="me-2" />
