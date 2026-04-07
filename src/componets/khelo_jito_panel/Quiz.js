@@ -65,6 +65,16 @@ const Quiz = () => {
   const [attemptId, setAttemptId] = useState(null);
   const [quizLoading, setQuizLoading] = useState(false);
 
+  // Leaderboard state for quiz cards
+  const [quizLeaderboardData, setQuizLeaderboardData] = useState({});
+  const [quizWinnerData, setQuizWinnerData] = useState({});
+  const [quizUserRanks, setQuizUserRanks] = useState({});
+  const [quizParticipantsCounts, setQuizParticipantsCounts] = useState({});
+  const [quizWinnersCounts, setQuizWinnersCounts] = useState({});
+  const [showWinnersModal, setShowWinnersModal] = useState(false);
+  const [selectedQuizForWinners, setSelectedQuizForWinners] = useState(null);
+  const [shuffledWinners, setShuffledWinners] = useState([]);
+
   const { user, loading: authLoading } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -164,6 +174,46 @@ const Quiz = () => {
       }
     };
 
+    const fetchQuizLeaderboard = async (quizzes) => {
+      if (quizzes && quizzes.length > 0 && user && user.unique_id) {
+        const leaderboardMap = {};
+        const userRanksMap = {};
+        const participantsMap = {};
+        const winnersMap = {};
+
+        for (const quiz of quizzes) {
+          try {
+            const response = await axios.get(
+              `${API_BASE_URL}/quiz-leaderboard/?quiz_id=${quiz.quiz_id}`,
+              { withCredentials: true }
+            );
+
+            if (response.data.status) {
+              leaderboardMap[quiz.quiz_id] = response.data.leaderboard || [];
+              participantsMap[quiz.quiz_id] = response.data.total_users || 0;
+              winnersMap[quiz.quiz_id] = response.data.winner ? response.data.winner.length : 0;
+
+              // Find user's rank
+              const userLeaderboard = response.data.leaderboard || [];
+              const userRank = userLeaderboard.find(
+                (entry) => entry.user_id === user.unique_id
+              )?.rank;
+              if (userRank) {
+                userRanksMap[quiz.quiz_id] = userRank;
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching leaderboard for quiz ${quiz.quiz_id}:`, error);
+          }
+        }
+
+        setQuizLeaderboardData(leaderboardMap);
+        setQuizUserRanks(userRanksMap);
+        setQuizParticipantsCounts(participantsMap);
+        setQuizWinnersCounts(winnersMap);
+      }
+    };
+
     fetchQuizzes();
     fetchParticipatedQuizzes();
   }, [user, authLoading]);
@@ -205,11 +255,76 @@ const Quiz = () => {
     fetchWalletAmount();
   }, [user, authLoading]);
 
+  useEffect(() => {
+    if (quizzes.length > 0 && user && user.unique_id) {
+      // Fetch leaderboard data for all quizzes
+      const fetchLeaderboards = async () => {
+        const leaderboardMap = {};
+        const winnerMap = {};
+        const userRanksMap = {};
+        const participantsMap = {};
+        const winnersMap = {};
+
+        for (const quiz of quizzes) {
+          try {
+            const response = await axios.get(
+              `${API_BASE_URL}/quiz-leaderboard/?quiz_id=${quiz.quiz_id}`,
+              { withCredentials: true }
+            );
+
+            if (response.data.status) {
+              leaderboardMap[quiz.quiz_id] = response.data.leaderboard || [];
+              winnerMap[quiz.quiz_id] = response.data.winner || [];
+              participantsMap[quiz.quiz_id] = response.data.total_users || 0;
+              winnersMap[quiz.quiz_id] = response.data.winner ? response.data.winner.length : 0;
+
+              // Find user's rank
+              const userLeaderboard = response.data.leaderboard || [];
+              const userRank = userLeaderboard.find(
+                (entry) => entry.user_id === user.unique_id
+              )?.rank;
+              if (userRank) {
+                userRanksMap[quiz.quiz_id] = userRank;
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching leaderboard for quiz ${quiz.quiz_id}:`, error);
+          }
+        }
+
+        setQuizLeaderboardData(leaderboardMap);
+        setQuizWinnerData(winnerMap);
+        setQuizUserRanks(userRanksMap);
+        setQuizParticipantsCounts(participantsMap);
+        setQuizWinnersCounts(winnersMap);
+      };
+
+      fetchLeaderboards();
+    }
+  }, [quizzes, user, authLoading]);
+
    const handleQuizSelect = (quiz) => {
     setSelectedQuiz(quiz);
     setShowPaymentModal(true);
     setPaymentMethod(null);
     setPaymentSuccess(false);
+  };
+
+  const handleShowWinnersModal = (quiz) => {
+    setSelectedQuizForWinners(quiz);
+    const winners = quizWinnerData[quiz.quiz_id] || [];
+    // Shuffle and get top 10 winners
+    const shuffled = winners.sort(() => Math.random() - 0.5).slice(0, 10);
+    setShuffledWinners(shuffled);
+    setShowWinnersModal(true);
+  };
+
+  const handleShuffleWinners = () => {
+    if (selectedQuizForWinners && quizWinnerData[selectedQuizForWinners.quiz_id]) {
+      const winners = quizWinnerData[selectedQuizForWinners.quiz_id] || [];
+      const shuffled = winners.sort(() => Math.random() - 0.5).slice(0, 10);
+      setShuffledWinners(shuffled);
+    }
   };
 
   const handleSelectPaymentMethod = (method) => {
@@ -390,12 +505,83 @@ const Quiz = () => {
               <Row className="br-stats-row">
                 {quizzes.map((quiz) => (
                   <Col xs={12} md={6} lg={4} key={quiz.quiz_id} className="mb-4">
-                    <Card className="quiz-card">
+                    <Card className="quiz-card" style={{ position: "relative" }}>
+                      {/* Top Left - Participants Count */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "12px",
+                          left: "12px",
+                          backgroundColor: "rgba(255, 255, 255, 0.85)",
+                          padding: "12px 16px",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          minWidth: "100px",
+                          textAlign: "center",
+                          zIndex: 10,
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                        }}
+                      >
+                        <span style={{ marginRight: "6px" }}>👥</span> Participants: {quizParticipantsCounts[quiz.quiz_id] || 0}
+                      </div>
+
+                      {/* Top Right - Winners Count (Clickable) */}
+                      <div
+                        onClick={() => handleShowWinnersModal(quiz)}
+                        style={{
+                          position: "absolute",
+                          top: "12px",
+                          right: "12px",
+                          backgroundColor: "rgba(255, 255, 255, 0.85)",
+                          padding: "12px 16px",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          minWidth: "100px",
+                          textAlign: "center",
+                          cursor: "pointer",
+                          transition: "all 0.3s ease",
+                          zIndex: 10,
+                          userSelect: "none",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+                          e.target.style.transform = "scale(1.08)";
+                          e.target.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "rgba(255, 255, 255, 0.85)";
+                          e.target.style.transform = "scale(1)";
+                          e.target.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
+                        }}
+                      >
+                        <span style={{ marginRight: "6px" }}>🏆</span> Winners: {quizWinnersCounts[quiz.quiz_id] || 0}
+                      </div>
+
                       <Card.Body>
-                        <Card.Title className="quiz-card-title">{quiz.title}</Card.Title>
+                        <Card.Title className="quiz-card-title" style={{ marginTop: "44px" }}>{quiz.title}</Card.Title>
                         {quiz.title_hindi && (
                           <Card.Title className="quiz-card-title-hindi">{quiz.title_hindi}</Card.Title>
                         )}
+
+                        {/* User Rank Display */}
+                        {quizUserRanks[quiz.quiz_id] && (
+                          <div style={{
+                            textAlign: "center",
+                            padding: "12px 0",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "6px",
+                            marginBottom: "12px"
+                          }}>
+                            <p style={{ fontSize: "12px", marginBottom: "4px", opacity: "0.8" }}>Your Rank</p>
+                            <p style={{ fontSize: "28px", fontWeight: "700", margin: 0, color: "#4a5b7d" }}>
+                              #{quizUserRanks[quiz.quiz_id]}
+                            </p>
+                          </div>
+                        )}
+
                         <Card.Text className="quiz-card-description">
                           {quiz.description}
                         </Card.Text>
@@ -695,6 +881,75 @@ const Quiz = () => {
                 {quizLoading ? "Loading..." : "I Understand - Start Quiz"}
               </Button>
             </Modal.Footer>
+      </Modal>
+
+      {/* Winners Modal */}
+      <Modal
+        show={showWinnersModal}
+        onHide={() => setShowWinnersModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>🏆 Top Winners - {selectedQuizForWinners?.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {shuffledWinners && shuffledWinners.length > 0 ? (
+            <>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#4a5b7d", borderBottom: "2px solid #dee2e6" }}>
+                    <th style={{ padding: "14px", textAlign: "left", fontWeight: "600", color: "#fff" }}>Rank</th>
+                    <th style={{ padding: "14px", textAlign: "left", fontWeight: "600", color: "#fff" }}>Winner Name</th>
+                    <th style={{ padding: "14px", textAlign: "center", fontWeight: "600", color: "#fff" }}>Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shuffledWinners.map((winner, index) => (
+                    <tr
+                      key={index}
+                      style={{
+                        backgroundColor: index % 2 === 0 ? "#f8f9fa" : "#fff",
+                        borderBottom: "1px solid #eee",
+                        transition: "background-color 0.3s ease",
+                      }}
+                      onMouseEnter={(e) => (e.target.parentElement.style.backgroundColor = "#e8f0f8")}
+                      onMouseLeave={(e) => (
+                        e.target.parentElement.style.backgroundColor =
+                          index % 2 === 0 ? "#f8f9fa" : "#fff"
+                      )}
+                    >
+                      <td style={{ padding: "14px", fontWeight: "700", color: "#4a5b7d", fontSize: "15px" }}>
+                        #{winner.rank}
+                      </td>
+                      <td style={{ padding: "14px", fontWeight: "500", color: "#333" }}>{winner.name}</td>
+                      <td style={{ padding: "14px", textAlign: "center", color: "#4CAF50", fontWeight: "700", fontSize: "15px" }}>
+                        {winner.score}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <Button
+                variant="outline-primary"
+                onClick={handleShuffleWinners}
+                className="mt-4"
+                style={{ width: "100%", fontWeight: "600" }}
+              >
+                🔄 Shuffle Winners
+              </Button>
+            </>
+          ) : (
+            <div className="text-center" style={{ padding: "30px" }}>
+              <p style={{ fontSize: "16px", color: "#666" }}>No winners available for this quiz yet.</p>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowWinnersModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
 
       
