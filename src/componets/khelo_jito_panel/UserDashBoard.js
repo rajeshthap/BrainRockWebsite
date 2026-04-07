@@ -510,7 +510,7 @@ useEffect(() => {
         // Clear payment success state from localStorage
         localStorage.removeItem(PAYMENT_SUCCESS_KEY);
         // Navigate to test page
-        navigate("/test");
+        navigate("/Test");
       }
     } catch (error) {
       console.error("Error starting test:", error);
