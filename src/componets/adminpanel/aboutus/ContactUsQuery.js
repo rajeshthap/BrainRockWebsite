@@ -154,7 +154,7 @@ const ContactUsQuery = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="form-control me-3"
-                  style={{ width: '300px' }}
+                  style={{ width: '278px' }}
                 />
               </div>
             </div>

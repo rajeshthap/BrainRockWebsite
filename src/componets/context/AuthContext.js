@@ -45,6 +45,11 @@ export const AuthProvider = ({ children }) => {
  
   const login = async (email_or_phone, password, role = null) => {
     try {
+      // Clear localStorage when login starts
+      if (typeof window !== "undefined") {
+        localStorage.clear();
+      }
+
       const loginData = {
         email_or_phone,
         password,

@@ -6,6 +6,8 @@ import { QRCodeCanvas } from 'qrcode.react';
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 import "../../../assets/css/attendance.css";
+import "../../../assets/css/ManagePaymentsRefunds.css";
+
 
 // Define base URLs for your APIs
 const REFUND_API_URL = 'https://brjobsedu.com/girls_course/girls_course_backend/api/refund-request/';
@@ -585,14 +587,15 @@ const ManagePaymentsRefunds = () => {
 
         {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
-          <div className="br-box-container">
+          <div className="">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="mb-0">Payments & Refunds</h2>
-              <div className="d-flex gap-2">
-                <div style={{ width: '200px' }}>
+              <div className="d-flex flex-column flex-md-row gap-2">
+                <div style={{ width: '200px' }} className="w-100 w-md-auto">
                   <Form.Select
                     value={statusFilter}
                     onChange={handleStatusFilterChange}
+                    className="w-100"
                   >
                     <option value="all">All Status</option>
                     <option value="pending">Pending</option>
@@ -601,11 +604,11 @@ const ManagePaymentsRefunds = () => {
                     <option value="rejected">Rejected</option>
                   </Form.Select>
                 </div>
-                <div style={{ width: '300px' }}>
+                <div style={{ width: '300px' }} className="w-100 w-md-auto">
                   <input
                     type="text"
                     placeholder="Search by name, phone, txn id, amount, course id..."
-                    className="form-control"
+                    className="form-control w-100"
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
@@ -641,7 +644,7 @@ const ManagePaymentsRefunds = () => {
             )}
             
             {/* Tab Navigation */}
-            <Nav variant="tabs" defaultActiveKey="refunds" activeKey={activeTab} onSelect={(key) => setActiveTab(key)} className="mb-3">
+            <Nav variant="tabs" defaultActiveKey="refunds" activeKey={activeTab} onSelect={(key) => setActiveTab(key)} className="mb-3 flex-column flex-sm-row">
               <Nav.Item>
                 <Nav.Link eventKey="refunds">Refunds</Nav.Link>
               </Nav.Item>
@@ -663,10 +666,11 @@ const ManagePaymentsRefunds = () => {
                 {activeTab === 'refunds' && (
                   <>
                     <Row className="mt-3">
-                      <div className="col-md-12">
-                        <table className="temp-rwd-table">
-                          <tbody>
-                            <tr>
+                      <div className="col-12">
+                        <div className="table-responsive">
+                          <table className="temp-rwd-table">
+                            <tbody>
+                              <tr>
                               <th>
                                 <Form.Check 
                                   type="checkbox"
@@ -773,10 +777,11 @@ const ManagePaymentsRefunds = () => {
                               </td>
                             </tr>
                           </tfoot>
-                        </table>
+                          </table>
+                        </div>
                       </div>
                     </Row>
-                    
+
                     {/* Pagination for Refunds */}
                     {totalRefundPages > 1 && (
                       <div className="d-flex justify-content-center mt-4">
@@ -808,10 +813,11 @@ const ManagePaymentsRefunds = () => {
                 {activeTab === 'withdrawals' && (
                   <>
                     <Row className="mt-3">
-                      <div className="col-md-12">
-                        <table className="temp-rwd-table">
-                          <tbody>
-                             <tr>
+                      <div className="col-12">
+                        <div className="table-responsive">
+                          <table className="temp-rwd-table">
+                            <tbody>
+                              <tr>
                                <th>Withdraw ID</th>
                                <th>User ID</th>
                                <th>Account Holder Name</th>
@@ -903,10 +909,11 @@ const ManagePaymentsRefunds = () => {
                               </td>
                             </tr>
                           </tfoot>
-                        </table>
+                          </table>
+                        </div>
                       </div>
                     </Row>
-                    
+
                     {/* Pagination for Withdrawals */}
                     {totalWithdrawalPages > 1 && (
                       <div className="d-flex justify-content-center mt-4">
@@ -940,7 +947,7 @@ const ManagePaymentsRefunds = () => {
       </div>
       
       {/* Refund Confirmation Modal */}
-      <Modal show={showRefundModal} onHide={closeRefundModal}>
+      <Modal show={showRefundModal} onHide={closeRefundModal} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Process Refund</Modal.Title>
         </Modal.Header>
@@ -975,7 +982,7 @@ const ManagePaymentsRefunds = () => {
       </Modal>
 
       {/* View Refund Details Modal */}
-      <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg">
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Refund Details</Modal.Title>
         </Modal.Header>
@@ -1036,7 +1043,7 @@ const ManagePaymentsRefunds = () => {
        </Modal>
 
        {/* View Withdrawal Details Modal */}
-       <Modal show={showWithdrawalViewModal} onHide={() => setShowWithdrawalViewModal(false)} size="lg">
+       <Modal show={showWithdrawalViewModal} onHide={() => setShowWithdrawalViewModal(false)} size="lg" centered>
          <Modal.Header closeButton>
            <Modal.Title>Wallet Withdrawal Details</Modal.Title>
          </Modal.Header>
@@ -1080,7 +1087,7 @@ const ManagePaymentsRefunds = () => {
        </Modal>
 
        {/* UPI Payment Error/Fallback Modal */}
-       <Modal show={showUpiErrorModal} onHide={() => setShowUpiErrorModal(false)} size="lg">
+       <Modal show={showUpiErrorModal} onHide={() => setShowUpiErrorModal(false)} size="lg" centered>
          <Modal.Header closeButton>
            <Modal.Title>UPI Payment - Attention Required</Modal.Title>
          </Modal.Header>
@@ -1127,8 +1134,8 @@ const ManagePaymentsRefunds = () => {
          </Modal.Footer>
        </Modal>
 
-       {/* Payment Method Selection Modal */}
-       <Modal show={showPaymentMethodModal} onHide={closePaymentMethodModal} centered>
+        {/* Payment Method Selection Modal */}
+        <Modal show={showPaymentMethodModal} onHide={closePaymentMethodModal} centered size="md">
          <Modal.Header closeButton>
            <Modal.Title>Select Payment Method</Modal.Title>
          </Modal.Header>
@@ -1170,8 +1177,8 @@ const ManagePaymentsRefunds = () => {
          </Modal.Body>
        </Modal>
 
-       {/* QR Code Display Modal */}
-       <Modal show={showQrCodeModal} onHide={closeQrCodeModal} centered size="sm">
+        {/* QR Code Display Modal */}
+        <Modal show={showQrCodeModal} onHide={closeQrCodeModal} centered size="md">
          <Modal.Header closeButton>
            <Modal.Title>Scan QR Code for Payment</Modal.Title>
          </Modal.Header>
@@ -1181,17 +1188,19 @@ const ManagePaymentsRefunds = () => {
                Scan this QR code with your UPI app to complete the payment
              </p>
              
-             {qrCodeData ? (
-               <div className="d-flex justify-content-center mb-3">
-                 <div className="p-3 bg-white rounded border" style={{ display: 'inline-block' }}>
-                   <QRCodeCanvas 
-                     value={qrCodeData} 
-                     size={256}
-                     level="H"
-                     includeMargin={true}
-                   />
-                 </div>
-               </div>
+              {qrCodeData ? (
+                <div className="qr-code-container mb-3">
+                  <div className="d-flex justify-content-center">
+                    <div className="p-3 bg-white rounded border qr-code-wrapper">
+                      <QRCodeCanvas
+                        value={qrCodeData}
+                        size={256}
+                        level="H"
+                        includeMargin={true}
+                      />
+                    </div>
+                  </div>
+                </div>
              ) : (
                <Alert variant="warning" className="mb-3">
                  QR Code generation failed. Please try again.
