@@ -218,7 +218,23 @@ color: #0056b3;
   padding: var(--br-space-800);
   margin-bottom: var(--br-space-1000);
 }
+.wrong-answers {
+ background: linear-gradient(90deg, #ff9800 0%, #f57c00);
+    color: white;
+    border: none;
+    padding: 0px 50px;
+    font-size: 13px !important;
+    /* font-weight: 600; */
+    /* width: 297px; */
+    height: 42px;
+    margin-top: 12px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px 
 
+
+}
 .reject-st-btn {
   font-size: var(--br-space-250);
   width: 68px;

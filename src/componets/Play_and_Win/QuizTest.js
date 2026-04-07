@@ -589,6 +589,7 @@ function QuizTest() {
               </button>
             </div>
           ) : (
+            
             <div className="failure-message">
               <p>Sorry, you did not pass the quiz this time.</p>
               <button className="restart-button" onClick={handleCloseTest}>
@@ -599,7 +600,7 @@ function QuizTest() {
 
           {userAnswers.length === questions.length && !isPassed && (
             <div className="wrong-answers-section">
-              <button className="wrong-answers-button" onClick={handleShowWrongAnswers}>
+              <button className="wrong-answers" onClick={handleShowWrongAnswers}>
                 View Wrong Answers
               </button>
             </div>
