@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Badge, Button, Pagination, Alert, Modal, Form, Nav, NavDropdown } from "react-bootstrap";
 import { AiFillEdit } from "react-icons/ai";
 import { AiOutlineUser } from 'react-icons/ai';
+import { QRCodeCanvas } from 'qrcode.react';
 import LeftNavManagement from "../LeftNavManagement";
 import AdminHeader from "../AdminHeader";
 import "../../../assets/css/attendance.css";
@@ -45,6 +46,20 @@ const ManagePaymentsRefunds = () => {
   
   // Selected refunds for bulk actions
   const [selectedRefunds, setSelectedRefunds] = useState([]);
+  
+  // UPI payment states for wallet withdrawals
+  const [upiProcessingWithdrawalId, setUpiProcessingWithdrawalId] = useState(null);
+  const [upiLoading, setUpiLoading] = useState(false);
+  const [showUpiErrorModal, setShowUpiErrorModal] = useState(false);
+  const [upiErrorMessage, setUpiErrorMessage] = useState('');
+  const [upiQrCode, setUpiQrCode] = useState(null);
+  
+  // Payment method selection
+  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
+  const [pendingWithdrawalForPayment, setPendingWithdrawalForPayment] = useState(null);
+  const [showQrCodeModal, setShowQrCodeModal] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState(null);
+  const [selectedWithdrawalForQr, setSelectedWithdrawalForQr] = useState(null);
 
   // Responsive check
   useEffect(() => {
@@ -302,6 +317,254 @@ const ManagePaymentsRefunds = () => {
       case 'pending':
       default:
         return 'warning';
+    }
+  };
+
+  // Validate UPI payment data
+  const validateUpiData = (withdrawal) => {
+    const errors = [];
+    
+    if (!withdrawal.upi_id || withdrawal.upi_id.trim() === '') {
+      errors.push('UPI ID is missing');
+    }
+    
+    if (!withdrawal.withdraw_amount || withdrawal.withdraw_amount <= 0) {
+      errors.push('Invalid withdrawal amount');
+    }
+    
+    if (!withdrawal.account_holder_name || withdrawal.account_holder_name.trim() === '') {
+      errors.push('Account holder name is missing');
+    }
+    
+    if (!withdrawal.withdraw_id) {
+      errors.push('Withdrawal ID is missing (transaction reference)');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors: errors
+    };
+  };
+
+  // Build UPI deep link
+  const buildUpiDeepLink = (withdrawal) => {
+    const {
+      upi_id,
+      withdraw_amount,
+      account_holder_name,
+      withdraw_id
+    } = withdrawal;
+    
+    // Format merchant name (remove special characters and limit length)
+    const merchantName = account_holder_name
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .substring(0, 60)
+      .trim();
+    
+    // Build the UPI URL
+    const upiUrl = new URL('upi://pay');
+    upiUrl.searchParams.append('pa', upi_id); // Payee address (UPI ID)
+    upiUrl.searchParams.append('pn', merchantName); // Payee name
+    upiUrl.searchParams.append('am', withdraw_amount.toString()); // Amount
+    upiUrl.searchParams.append('tr', `WD${withdraw_id}`); // Transaction reference
+    upiUrl.searchParams.append('tn', 'Wallet Withdrawal Payment'); // Transaction note
+    
+    return upiUrl.toString();
+  };
+
+  // Handle UPI payment process for wallet withdrawal
+  const handleUpiPaymentProcess = async (withdrawal) => {
+    try {
+      console.log('Starting UPI payment process for withdrawal:', withdrawal);
+      setUpiLoading(true);
+      setShowUpiErrorModal(false);
+      setUpiErrorMessage('');
+      setUpiQrCode(null);
+      setUpiProcessingWithdrawalId(withdrawal.withdraw_id);
+      
+      // Validate withdrawal data
+      const validation = validateUpiData(withdrawal);
+      console.log('Validation result:', validation);
+      
+      if (!validation.isValid) {
+        throw new Error(validation.errors.join(', '));
+      }
+      
+      // Build UPI deep link
+      const upiDeepLink = buildUpiDeepLink(withdrawal);
+      console.log('Generated UPI Deep Link:', upiDeepLink);
+      
+      // Attempt to open UPI app via deep link
+      // Set a timeout to handle case where app doesn't open
+      const upiAppTimeoutId = setTimeout(() => {
+        console.log('UPI app did not open, showing fallback');
+        // If app didn't open, show fallback message
+        setUpiErrorMessage(
+          'UPI app could not be opened. Please ensure you have a UPI app installed (Google Pay, PhonePe, Paytm, etc.).\n\n' +
+          `Withdrawal Details:\n` +
+          `Amount: ₹${withdrawal.withdraw_amount}\n` +
+          `UPI ID: ${withdrawal.upi_id}\n` +
+          `Account Holder: ${withdrawal.account_holder_name}\n\n` +
+          `If the UPI app did not open, please manually open your preferred UPI app and send the payment to the above UPI ID.`
+        );
+        setShowUpiErrorModal(true);
+        setUpiLoading(false);
+      }, 2000);
+      
+      console.log('Attempting to redirect to UPI app...');
+      // Attempt to redirect to UPI app
+      window.location.href = upiDeepLink;
+      
+      // Clear the timeout if navigation succeeded (page will unload)
+      setTimeout(() => {
+        clearTimeout(upiAppTimeoutId);
+      }, 100);
+      
+    } catch (err) {
+      console.error('Error in UPI payment process:', err);
+      setUpiLoading(false);
+      setUpiErrorMessage(`Error processing UPI payment: ${err.message || 'Unknown error occurred'}`);
+      setShowUpiErrorModal(true);
+      setUpiProcessingWithdrawalId(null);
+    }
+  };
+
+  // Open payment method selection modal
+  const handleOpenPaymentMethod = (withdrawal) => {
+    console.log('Opening payment method modal for withdrawal:', withdrawal);
+    setPendingWithdrawalForPayment(withdrawal);
+    setShowPaymentMethodModal(true);
+  };
+
+  // Generate QR code for wallet withdrawal
+  const handleGenerateQr = (withdrawal) => {
+    try {
+      console.log('Generating QR code for withdrawal:', withdrawal);
+      
+      if (!withdrawal) {
+        throw new Error('Withdrawal data is missing');
+      }
+
+      // Validate data
+      const validation = validateUpiData(withdrawal);
+      if (!validation.isValid) {
+        throw new Error(validation.errors.join(', '));
+      }
+
+      // Build UPI string for QR code
+      const upiDeepLink = buildUpiDeepLink(withdrawal);
+      console.log('Generated UPI Deep Link:', upiDeepLink);
+      
+      setSelectedWithdrawalForQr(withdrawal);
+      setQrCodeData(upiDeepLink);
+      setShowPaymentMethodModal(false);
+      setShowQrCodeModal(true);
+    } catch (err) {
+      console.error('Error generating QR code:', err);
+      setUpiErrorMessage(`Error generating QR code: ${err.message || 'Unknown error occurred'}`);
+      setShowUpiErrorModal(true);
+    }
+  };
+
+  // Download QR code as image
+  const handleDownloadQr = () => {
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      const url = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `withdrawal-${selectedWithdrawalForQr?.withdraw_id}-qr.png`;
+      link.click();
+    }
+  };
+
+  // Close payment method modal
+  const closePaymentMethodModal = () => {
+    setShowPaymentMethodModal(false);
+    setPendingWithdrawalForPayment(null);
+  };
+
+  // Close QR code modal
+  const closeQrCodeModal = () => {
+    setShowQrCodeModal(false);
+    setQrCodeData(null);
+    setSelectedWithdrawalForQr(null);
+  };
+
+  // Update withdrawal status to completed
+  const handleUpdateWithdrawalStatus = async (withdrawalId) => {
+    try {
+      setUpiLoading(true);
+      console.log('Updating withdrawal status for ID:', withdrawalId);
+      
+      if (!withdrawalId) {
+        throw new Error('Withdrawal ID is missing');
+      }
+
+      const payload = {
+        withdraw_id: withdrawalId,
+        status: 'completed'
+      };
+
+      console.log('Sending update request with payload:', payload);
+
+      const response = await fetch(WALLET_WITHDRAW_API_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+
+      const responseText = await response.text();
+      console.log('Update response status:', response.status);
+      console.log('Update response text:', responseText);
+
+      if (!response.ok) {
+        throw new Error(`Failed to update withdrawal status: ${response.status} - ${responseText}`);
+      }
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        // Response might not be JSON
+        data = { success: response.ok };
+      }
+
+      if (data.success || response.ok) {
+        console.log('Withdrawal status updated successfully');
+        setSuccessMessage(`Withdrawal payment marked as completed!`);
+        
+        // Update the withdrawal status in the list
+        setWithdrawals(prev => 
+          prev.map(withdrawal => 
+            withdrawal.withdraw_id === withdrawalId 
+              ? { ...withdrawal, status: 'completed' } 
+              : withdrawal
+          )
+        );
+
+        // Close all modals and reset state
+        setShowQrCodeModal(false);
+        setQrCodeData(null);
+        setSelectedWithdrawalForQr(null);
+        setShowUpiErrorModal(false);
+        setUpiErrorMessage('');
+        setUpiProcessingWithdrawalId(null);
+        setUpiLoading(false);
+
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        throw new Error(data.message || 'Failed to update withdrawal status');
+      }
+    } catch (err) {
+      console.error('Error updating withdrawal status:', err);
+      setUpiLoading(false);
+      setUpiErrorMessage(`Error marking payment as complete: ${err.message || 'Unknown error occurred'}`);
+      setShowUpiErrorModal(true);
     }
   };
 
@@ -595,9 +858,11 @@ const ManagePaymentsRefunds = () => {
                                        {withdrawal.status?.toLowerCase() === 'pending' && (
                                          <Button 
                                            variant="success" 
-                                           size="sm" 
+                                           size="sm"
+                                           onClick={() => handleOpenPaymentMethod(withdrawal)}
+                                           disabled={upiLoading}
                                          >
-                                           Process
+                                           {upiLoading && upiProcessingWithdrawalId === withdrawal.withdraw_id ? 'Processing...' : 'Process'}
                                          </Button>
                                        )}
                                      </div>
@@ -810,6 +1075,162 @@ const ManagePaymentsRefunds = () => {
          <Modal.Footer>
            <Button variant="secondary" onClick={() => setShowWithdrawalViewModal(false)}>
              Close
+           </Button>
+         </Modal.Footer>
+       </Modal>
+
+       {/* UPI Payment Error/Fallback Modal */}
+       <Modal show={showUpiErrorModal} onHide={() => setShowUpiErrorModal(false)} size="lg">
+         <Modal.Header closeButton>
+           <Modal.Title>UPI Payment - Attention Required</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+           <Alert variant="warning">
+             <strong>Note:</strong> Please complete your withdrawal payment using your UPI app.
+           </Alert>
+           <div className="bg-light p-4 rounded mb-3">
+             <p style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: '14px' }}>
+               {upiErrorMessage}
+             </p>
+           </div>
+           <div className="mt-3">
+             <p className="text-muted small">
+               If you were redirected to a UPI app, please complete the payment there. 
+               If not, manually open your preferred UPI app (Google Pay, PhonePe, Paytm, etc.) 
+               and send the payment to the UPI ID specified above.
+             </p>
+           </div>
+         </Modal.Body>
+         <Modal.Footer>
+           <Button 
+             variant="secondary" 
+             onClick={() => {
+               setShowUpiErrorModal(false);
+               setUpiProcessingWithdrawalId(null);
+             }}
+           >
+             Close
+           </Button>
+           <Button 
+             variant="primary" 
+             onClick={() => {
+               if (upiProcessingWithdrawalId) {
+                 handleUpdateWithdrawalStatus(upiProcessingWithdrawalId);
+               } else {
+                 setShowUpiErrorModal(false);
+               }
+             }}
+             disabled={upiLoading}
+           >
+             {upiLoading ? '⟳ Completing...' : 'I\'ve Completed the Payment'}
+           </Button>
+         </Modal.Footer>
+       </Modal>
+
+       {/* Payment Method Selection Modal */}
+       <Modal show={showPaymentMethodModal} onHide={closePaymentMethodModal} centered>
+         <Modal.Header closeButton>
+           <Modal.Title>Select Payment Method</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+           <div className="text-center mb-4">
+             <p className="text-muted mb-2">Withdrawal ID: <strong>{pendingWithdrawalForPayment?.withdraw_id}</strong></p>
+             <p className="text-muted mb-4">Amount: <strong className="text-success">₹{pendingWithdrawalForPayment?.withdraw_amount}</strong></p>
+             <p>Choose your preferred payment method:</p>
+           </div>
+           <div className="d-flex flex-column gap-3">
+             <Button 
+               variant="info" 
+               size="lg" 
+               className="d-flex align-items-center justify-content-center"
+               onClick={() => handleGenerateQr(pendingWithdrawalForPayment)}
+               style={{ height: '70px' }}
+             >
+               <div className="text-center">
+                 <div style={{ fontSize: '20px', marginBottom: '5px' }}>📱 Generate QR Code</div>
+                 <div style={{ fontSize: '12px' }}>Scan with any UPI app</div>
+               </div>
+             </Button>
+             <Button 
+               variant="primary" 
+               size="lg"
+               className="d-flex align-items-center justify-content-center"
+               onClick={() => {
+                 handleUpiPaymentProcess(pendingWithdrawalForPayment);
+                 closePaymentMethodModal();
+               }}
+               style={{ height: '70px' }}
+             >
+               <div className="text-center">
+                 <div style={{ fontSize: '20px', marginBottom: '5px' }}>🚀 Open UPI App</div>
+                 <div style={{ fontSize: '12px' }}>Direct payment via installed app</div>
+               </div>
+             </Button>
+           </div>
+         </Modal.Body>
+       </Modal>
+
+       {/* QR Code Display Modal */}
+       <Modal show={showQrCodeModal} onHide={closeQrCodeModal} centered size="sm">
+         <Modal.Header closeButton>
+           <Modal.Title>Scan QR Code for Payment</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+           <div className="text-center">
+             <p className="text-muted mb-3">
+               Scan this QR code with your UPI app to complete the payment
+             </p>
+             
+             {qrCodeData ? (
+               <div className="d-flex justify-content-center mb-3">
+                 <div className="p-3 bg-white rounded border" style={{ display: 'inline-block' }}>
+                   <QRCodeCanvas 
+                     value={qrCodeData} 
+                     size={256}
+                     level="H"
+                     includeMargin={true}
+                   />
+                 </div>
+               </div>
+             ) : (
+               <Alert variant="warning" className="mb-3">
+                 QR Code generation failed. Please try again.
+               </Alert>
+             )}
+             
+             <div className="bg-light p-3 rounded mb-3">
+               <p className="mb-2"><strong>Payment Details:</strong></p>
+               <p className="mb-1">Amount: <strong>₹{selectedWithdrawalForQr?.withdraw_amount}</strong></p>
+               <p className="mb-1">To: <strong>{selectedWithdrawalForQr?.upi_id}</strong></p>
+               <p className="mb-0">Ref: <strong>WD{selectedWithdrawalForQr?.withdraw_id}</strong></p>
+             </div>
+
+             <Alert variant="info" className="small mb-0">
+               <strong>Tip:</strong> If scanning doesn't work, open your UPI app and manually send payment to the UPI ID shown above.
+             </Alert>
+           </div>
+         </Modal.Body>
+         <Modal.Footer>
+           <Button 
+             variant="secondary" 
+             onClick={closeQrCodeModal}
+           >
+             Close
+           </Button>
+           {qrCodeData && (
+             <Button 
+               variant="outline-primary" 
+               onClick={handleDownloadQr}
+             >
+               📥 Download QR
+             </Button>
+           )}
+           <Button 
+             variant="success" 
+             onClick={() => handleUpdateWithdrawalStatus(selectedWithdrawalForQr?.withdraw_id)}
+             disabled={upiLoading}
+           >
+             {upiLoading ? '⟳ Completing...' : '✓ Payment Done'}
            </Button>
          </Modal.Footer>
        </Modal>
