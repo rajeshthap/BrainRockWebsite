@@ -54,24 +54,47 @@ function QuizTest() {
   const [userAnswers, setUserAnswers] = useState([]);
   const [timeLeft, setTimeLeft] = useState(30);
   const [testResult, setTestResult] = useState(null);
-  const [tabSwitchWarning, setTabSwitchWarning] = useState(false); // New state for tab switch warning
-  const [tabSwitchCount, setTabSwitchCount] = useState(0); // New state for tab switch count
-  const [animateScore, setAnimateScore] = useState(false); // For score animation
-  const [showWinnerForm, setShowWinnerForm] = useState(false); // State for winner form visibility
+  const [tabSwitchWarning, setTabSwitchWarning] = useState(false);
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [animateScore, setAnimateScore] = useState(false);
+  const [showWinnerForm, setShowWinnerForm] = useState(false);
   const [winnerFormData, setWinnerFormData] = useState({
     phone: localStorage.getItem("quiz_user_phone") || "",
     password: "",
     account_holder_name: "",
     account_number: "",
     ifsc_code: "",
-  }); // State for winner form data
-  const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(false); // State for wrong answers modal
-  const [wrongAnswers, setWrongAnswers] = useState([]); // State to store wrong answers
-  const [certificateUrl, setCertificateUrl] = useState(null); // State for certificate URL
+  });
+  const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(false);
+  const [wrongAnswers, setWrongAnswers] = useState([]);
+  const [certificateUrl, setCertificateUrl] = useState(null);
+  
+  // Language preference from localStorage
+  const [language, setLanguage] = useState(() => localStorage.getItem("quiz_language") || "english");
 
-  // Start quiz and fetch questions from API
+  // Get questions from localStorage instead of API
   useEffect(() => {
-    const startQuiz = async () => {
+    const loadQuestions = () => {
+      try {
+        const storedQuestions = localStorage.getItem("quiz_questions");
+        const storedAttemptId = localStorage.getItem("quiz_attempt_id");
+        
+        if (storedQuestions) {
+          const parsedQuestions = JSON.parse(storedQuestions);
+          setQuestions(parsedQuestions);
+          setAttemptId(storedAttemptId || null);
+          setLoading(false);
+        } else {
+          // Fallback: fetch from API if no stored questions
+          startQuizFromAPI();
+        }
+      } catch (err) {
+        console.error("Error loading questions from localStorage:", err);
+        startQuizFromAPI();
+      }
+    };
+
+    const startQuizFromAPI = async () => {
       try {
         if (!userId || !quizId) {
           throw new Error("User ID or Quiz ID not found. Please register first.");
@@ -91,24 +114,19 @@ function QuizTest() {
         if (response.data.status) {
           setQuestions(response.data.questions);
           setAttemptId(response.data.attempt_id);
+          // Store for potential page refresh
+          localStorage.setItem("quiz_questions", JSON.stringify(response.data.questions));
+          localStorage.setItem("quiz_attempt_id", response.data.attempt_id);
         } else {
           throw new Error(response.data.message || "Failed to start quiz");
         }
       } catch (err) {
         let errorMessage = "Failed to start quiz";
-        if (err.response) {
-          // Server responded with error status (400, 401, 403, 500, etc.)
-          if (err.response.data && err.response.data.message) {
-            errorMessage = err.response.data.message;
-          } else {
-            errorMessage = `Server error: ${err.response.status}`;
-          }
+        if (err.response && err.response.data && err.response.data.message) {
+          errorMessage = err.response.data.message;
         } else if (err.request) {
-          // Request made but no response
-          errorMessage =
-            "No response from server. Please check your connection.";
+          errorMessage = "No response from server. Please check your connection.";
         } else {
-          // Error in request setup
           errorMessage = err.message;
         }
         setError(errorMessage);
@@ -117,7 +135,7 @@ function QuizTest() {
       }
     };
 
-    startQuiz();
+    loadQuestions();
   }, [userId, quizId]);
 
   // Timer effect
@@ -670,7 +688,14 @@ function QuizTest() {
         </div>
 
         <div className="question-container">
-          <div className="question-text">{questions[currentQuestion].question_text}</div>
+          <div className="question-text">
+            {questions[currentQuestion].question_text}
+            {questions[currentQuestion].question_text_hindi && (
+              <div className="question-text-hindi mt-2">
+                {questions[currentQuestion].question_text_hindi}
+              </div>
+            )}
+          </div>
           <div className="options-container">
             {questions[currentQuestion].options.map((option, index) => (
               <div
@@ -684,7 +709,7 @@ function QuizTest() {
                 <div className="option-text">
                   {option}
                   {questions[currentQuestion].options_hindi && questions[currentQuestion].options_hindi[index] && (
-                    <div className="text-muted" style={{ fontSize: '0.85em', marginTop: '2px' }}>
+                    <div className="option-text-hindi mt-1">
                       {questions[currentQuestion].options_hindi[index]}
                     </div>
                   )}

@@ -60,6 +60,14 @@ const Quiz = () => {
   const [addSuccess, setAddSuccess] = useState("");
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
 
+  // Language preference state
+  const [language, setLanguage] = useState("english");
+  
+  // Quiz questions state
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [attemptId, setAttemptId] = useState(null);
+  const [quizLoading, setQuizLoading] = useState(false);
+
   const { user, loading: authLoading } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -307,12 +315,41 @@ const Quiz = () => {
     setShowInstructionsModal(true);
   };
 
-  const handleAcceptInstructions = () => {
+  const handleAcceptInstructions = async () => {
     localStorage.setItem("quiz_user_id", user.unique_id);
     localStorage.setItem("quiz_quiz_id", selectedQuiz.quiz_id);
     setShowInstructionsModal(false);
-    // Navigate to QuizTest page to start the quiz
-    navigate("/QuizTest");
+    
+    // Fetch questions from quiz-start API
+    setQuizLoading(true);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/quiz-start/`,
+        {
+          user_id: user.unique_id,
+          quiz_id: selectedQuiz.quiz_id
+        },
+        { withCredentials: true }
+      );
+      
+      if (response.data.status && response.data.questions) {
+        setQuizQuestions(response.data.questions);
+        setAttemptId(response.data.attempt_id);
+        // Store in localStorage for QuizTest page
+        localStorage.setItem("quiz_questions", JSON.stringify(response.data.questions));
+        localStorage.setItem("quiz_attempt_id", response.data.attempt_id);
+        localStorage.setItem("quiz_language", language);
+        // Navigate to QuizTest page
+        navigate("/QuizTest");
+      } else {
+        alert("Failed to load quiz questions. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error starting quiz:", error);
+      alert("Failed to start quiz. Please try again.");
+    } finally {
+      setQuizLoading(false);
+    }
   };
 
   const handleClosePaymentModal = () => {
@@ -335,9 +372,28 @@ const Quiz = () => {
         <UserHeader toggleSidebar={toggleSidebar} />
 
         <Container fluid className="dashboard-body">
-          <h1 className="page-title">Quiz Categories</h1>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h1 className="page-title">Quiz Categories</h1>
+            <div className="language-toggle">
+              <Button
+                variant={language === "english" ? "primary" : "outline-primary"}
+                size="sm"
+                onClick={() => setLanguage("english")}
+                className="me-2"
+              >
+                English
+              </Button>
+              <Button
+                variant={language === "hindi" ? "primary" : "outline-primary"}
+                size="sm"
+                onClick={() => setLanguage("hindi")}
+              >
+                हिंदी
+              </Button>
+            </div>
+          </div>
           
-          <div className="br-box-container mt-4">
+          <div className="br-box-container mt-2">
             {loading ? (
               <div className="text-center my-5">
                 <div className="spinner-border text-primary" role="status">
@@ -360,9 +416,17 @@ const Quiz = () => {
                     <Card className="quiz-card">
                       <Card.Body>
                         <Card.Title className="quiz-card-title">{quiz.title}</Card.Title>
+                        {quiz.title_hindi && (
+                          <Card.Title className="quiz-card-title-hindi">{quiz.title_hindi}</Card.Title>
+                        )}
                         <Card.Text className="quiz-card-description">
                           {quiz.description}
                         </Card.Text>
+                        {quiz.description_hindi && (
+                          <Card.Text className="quiz-card-description-hindi">
+                            {quiz.description_hindi}
+                          </Card.Text>
+                        )}
                         <div className="quiz-card-details">
                           <div className="quiz-detail-item">
                             <span className="detail-label">Questions:</span>
@@ -641,6 +705,7 @@ const Quiz = () => {
                 onClick={() => {
                   setShowInstructionsModal(false);
                 }}
+                disabled={quizLoading}
               >
                 Cancel
               </Button>
@@ -648,8 +713,9 @@ const Quiz = () => {
                 variant="primary" 
                 onClick={handleAcceptInstructions}
                 className="px-4"
+                disabled={quizLoading}
               >
-                I Understand - Start Quiz
+                {quizLoading ? "Loading..." : "I Understand - Start Quiz"}
               </Button>
             </Modal.Footer>
       </Modal>

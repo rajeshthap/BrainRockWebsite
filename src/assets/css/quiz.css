@@ -18,14 +18,33 @@
           color: #212529;
           margin-bottom: 15px;
         }
+        
+        .quiz-card-title-hindi {
+          font-size: 13px;
+          font-weight: 500;
+          color: #6c757d;
+          margin-bottom: 15px;
+          font-style: italic;
+        }
+        
         .start-btn{
         font-size:12px;
         }
+        
         .quiz-card-description {
           color: #6c757d;
           margin-bottom: 20px;
           line-height: 1.5;
           font-size:12px;
+        }
+        
+        .quiz-card-description-hindi {
+          color: #6c757d;
+          margin-bottom: 20px;
+          line-height: 1.5;
+          font-size:12px;
+          font-style: italic;
+          margin-top: -10px;
         }
         
         .quiz-card-details {
@@ -83,6 +102,14 @@
           line-height: 1.5;
         }
         
+        .question-text-hindi {
+          font-size: 18px;
+          font-weight: 400;
+          color: #6c757d;
+          font-style: italic;
+          margin-top: 8px;
+        }
+        
         .quiz-options {
           display: grid;
           gap: 10px;
@@ -120,6 +147,12 @@
           background-color: #dc3545;
           border-color: #dc3545;
           color: white;
+        }
+        
+        .option-text-hindi {
+          font-size: 14px;
+          color: #6c757d;
+          font-style: italic;
         }
         
         .quiz-controls {
