@@ -16,8 +16,11 @@ const AddQuiz = () => {
   // Form state
   const [formData, setFormData] = useState({
     title: "",
+    title_hindi: "",
     description: "",
+    description_hindi: "",
     quiz_category: "",
+    quiz_category_hindi: "",
     start_date_time: "",
     end_date_time: "",
     price: 0,
@@ -26,7 +29,9 @@ const AddQuiz = () => {
     questions: [
       {
         question_text: "",
+        question_text_hindi: "",
         options: ["", "", "", ""],
+        options_hindi: ["", "", "", ""],
         correct_answer: 0
       }
     ]
@@ -70,11 +75,14 @@ const AddQuiz = () => {
       const newQuestions = [...prev.questions];
       
       if (name.startsWith('option')) {
-        // Handle option inputs
         const optionIndex = parseInt(name.split('-')[1]);
         newQuestions[questionIndex].options[optionIndex] = value;
+      } else if (name.startsWith('option-hindi')) {
+        const optionIndex = parseInt(name.split('-')[1]);
+        newQuestions[questionIndex].options_hindi[optionIndex] = value;
+      } else if (name.startsWith('question-hindi')) {
+        newQuestions[questionIndex].question_text_hindi = value;
       } else {
-        // Handle question text and correct answer
         newQuestions[questionIndex][name] = name === 'correct_answer' ? parseInt(value) : value;
       }
       
@@ -93,7 +101,9 @@ const AddQuiz = () => {
         ...prev.questions,
         {
           question_text: "",
+          question_text_hindi: "",
           options: ["", "", "", ""],
+          options_hindi: ["", "", "", ""],
           correct_answer: 0
         }
       ]
@@ -114,8 +124,11 @@ const AddQuiz = () => {
   const clearForm = () => {
     setFormData({
       title: "",
+      title_hindi: "",
       description: "",
+      description_hindi: "",
       quiz_category: "",
+      quiz_category_hindi: "",
       start_date_time: "",
       end_date_time: "",
       price: 0,
@@ -124,7 +137,9 @@ const AddQuiz = () => {
       questions: [
         {
           question_text: "",
+          question_text_hindi: "",
           options: ["", "", "", ""],
+          options_hindi: ["", "", "", ""],
           correct_answer: 0
         }
       ]
@@ -226,7 +241,7 @@ const AddQuiz = () => {
               <Row>
                 <Col lg={6} md={6} sm={12}>
                   <Form.Group className="mb-2">
-                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Quiz Title</Form.Label>
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Quiz Title (English)</Form.Label>
                     <Form.Control
                       type="text"
                       placeholder="Enter quiz title"
@@ -238,10 +253,22 @@ const AddQuiz = () => {
                       style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '300px' }}
                     />
                   </Form.Group>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Quiz Title (Hindi)</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="क्विज का शीर्षक हिंदी में"
+                      name="title_hindi"
+                      value={formData.title_hindi}
+                      onChange={handleChange}
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '300px' }}
+                    />
+                  </Form.Group>
                 </Col>
                 <Col lg={6} md={6} sm={12}>
                   <Form.Group className="mb-2">
-                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Description</Form.Label>
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Description (English)</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={1}
@@ -254,6 +281,19 @@ const AddQuiz = () => {
                       style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '300px' }}
                     />
                   </Form.Group>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Description (Hindi)</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={1}
+                      placeholder="क्विज का विवरण हिंदी में"
+                      name="description_hindi"
+                      value={formData.description_hindi}
+                      onChange={handleChange}
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '300px' }}
+                    />
+                  </Form.Group>
                 </Col>
               </Row>
               
@@ -261,7 +301,7 @@ const AddQuiz = () => {
               <Row>
                 <Col lg={3} md={4} sm={12}>
                   <Form.Group className="mb-2">
-                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Category</Form.Label>
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Category (English)</Form.Label>
                     <Form.Control
                       type="text"
                       placeholder="Enter quiz category"
@@ -269,6 +309,18 @@ const AddQuiz = () => {
                       value={formData.quiz_category}
                       onChange={handleChange}
                       required
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '150px' }}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Category (Hindi)</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="श्रेणी हिंदी में"
+                      name="quiz_category_hindi"
+                      value={formData.quiz_category_hindi}
+                      onChange={handleChange}
                       size="sm"
                       style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '150px' }}
                     />
@@ -367,7 +419,7 @@ const AddQuiz = () => {
                   </div>
                   
                   <Form.Group className="mb-2">
-                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Question Text</Form.Label>
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Question Text (English)</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={1}
@@ -380,9 +432,22 @@ const AddQuiz = () => {
                       style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '400px' }}
                     />
                   </Form.Group>
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Question Text (Hindi)</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={1}
+                      placeholder="प्रश्न हिंदी में"
+                      name="question_text_hindi"
+                      value={question.question_text_hindi}
+                      onChange={(e) => handleQuestionChange(questionIndex, e)}
+                      size="sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '400px' }}
+                    />
+                  </Form.Group>
                   
                   <Form.Group className="mb-2">
-                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Options</Form.Label>
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Options (English)</Form.Label>
                     <div className="options-container">
                       {question.options.map((option, optionIndex) => (
                         <div key={optionIndex} className="option-item mb-1">
@@ -395,6 +460,27 @@ const AddQuiz = () => {
                               value={option}
                               onChange={(e) => handleQuestionChange(questionIndex, e)}
                               required
+                              style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '350px' }}
+                            />
+                          </InputGroup>
+                        </div>
+                      ))}
+                    </div>
+                  </Form.Group>
+
+                  <Form.Group className="mb-2">
+                    <Form.Label style={{ fontSize: '0.8rem', fontWeight: '500' }}>Options (Hindi)</Form.Label>
+                    <div className="options-container">
+                      {question.options_hindi && question.options_hindi.map((option, optionIndex) => (
+                        <div key={optionIndex} className="option-item mb-1">
+                          <InputGroup size="sm">
+                            <InputGroup.Text style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>Option {optionIndex + 1}</InputGroup.Text>
+                            <Form.Control
+                              type="text"
+                              placeholder={`विकल्प ${optionIndex + 1} हिंदी में`}
+                              name={`option-hindi-${optionIndex}`}
+                              value={option}
+                              onChange={(e) => handleQuestionChange(questionIndex, e)}
                               style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', maxWidth: '350px' }}
                             />
                           </InputGroup>

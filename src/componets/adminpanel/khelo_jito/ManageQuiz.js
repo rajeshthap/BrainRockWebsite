@@ -34,8 +34,11 @@ const ManageQuiz = () => {
   const [editFormData, setEditFormData] = useState({
     quiz_id: "",
     title: "",
+    title_hindi: "",
     description: "",
+    description_hindi: "",
     quiz_category: "",
+    quiz_category_hindi: "",
     start_date_time: "",
     end_date_time: "",
     price: 0,
@@ -44,7 +47,9 @@ const ManageQuiz = () => {
     questions: [
       {
         question_text: "",
+        question_text_hindi: "",
         options: ["", "", "", ""],
+        options_hindi: ["", "", "", ""],
         correct_answer: 0
       }
     ]
@@ -183,8 +188,22 @@ const ManageQuiz = () => {
     setCurrentEditItem(quiz);
     setEditFormData({
       ...quiz,
+      title_hindi: quiz.title_hindi || "",
+      description_hindi: quiz.description_hindi || "",
+      quiz_category_hindi: quiz.quiz_category_hindi || "",
       start_date_time: new Date(quiz.start_date_time).toISOString().slice(0, 16),
-      end_date_time: new Date(quiz.end_date_time).toISOString().slice(0, 16)
+      end_date_time: new Date(quiz.end_date_time).toISOString().slice(0, 16),
+      questions: quiz.questions?.map(q => ({
+        ...q,
+        question_text_hindi: q.question_text_hindi || "",
+        options_hindi: q.options_hindi || ["", "", "", ""]
+      })) || [{
+        question_text: "",
+        question_text_hindi: "",
+        options: ["", "", "", ""],
+        options_hindi: ["", "", "", ""],
+        correct_answer: 0
+      }]
     });
     setShowEditModal(true);
   };
@@ -206,11 +225,14 @@ const ManageQuiz = () => {
       const newQuestions = [...prev.questions];
       
       if (name.startsWith('option')) {
-        // Handle option inputs
         const optionIndex = parseInt(name.split('-')[1]);
         newQuestions[questionIndex].options[optionIndex] = value;
+      } else if (name.startsWith('option-hindi')) {
+        const optionIndex = parseInt(name.split('-')[1]);
+        newQuestions[questionIndex].options_hindi[optionIndex] = value;
+      } else if (name.startsWith('question-hindi')) {
+        newQuestions[questionIndex].question_text_hindi = value;
       } else {
-        // Handle question text and correct answer
         newQuestions[questionIndex][name] = name === 'correct_answer' ? parseInt(value) : value;
       }
       
@@ -229,7 +251,9 @@ const ManageQuiz = () => {
         ...prev.questions,
         {
           question_text: "",
+          question_text_hindi: "",
           options: ["", "", "", ""],
+          options_hindi: ["", "", "", ""],
           correct_answer: 0
         }
       ]
@@ -482,7 +506,7 @@ const ManageQuiz = () => {
                 </Form.Group>
                 
                 <Form.Group className="mb-3">
-                  <Form.Label>Quiz Title</Form.Label>
+                  <Form.Label>Quiz Title (English)</Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Enter quiz title"
@@ -492,9 +516,19 @@ const ManageQuiz = () => {
                     required
                   />
                 </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Quiz Title (Hindi)</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="क्विज का शीर्षक हिंदी में"
+                    name="title_hindi"
+                    value={editFormData.title_hindi}
+                    onChange={handleEditChange}
+                  />
+                </Form.Group>
                 
                 <Form.Group className="mb-3">
-                  <Form.Label>Description</Form.Label>
+                  <Form.Label>Description (English)</Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={3}
@@ -505,11 +539,22 @@ const ManageQuiz = () => {
                     required
                   />
                 </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Description (Hindi)</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    placeholder="क्विज का विवरण हिंदी में"
+                    name="description_hindi"
+                    value={editFormData.description_hindi}
+                    onChange={handleEditChange}
+                  />
+                </Form.Group>
                 
                 <Row>
                   <Col lg={6} md={6} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Category</Form.Label>
+                      <Form.Label>Category (English)</Form.Label>
                       <Form.Control
                         type="text"
                         placeholder="Enter quiz category"
@@ -517,6 +562,18 @@ const ManageQuiz = () => {
                         value={editFormData.quiz_category}
                         onChange={handleEditChange}
                         required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col lg={6} md={6} sm={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Category (Hindi)</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="श्रेणी हिंदी में"
+                        name="quiz_category_hindi"
+                        value={editFormData.quiz_category_hindi}
+                        onChange={handleEditChange}
                       />
                     </Form.Group>
                   </Col>
@@ -607,7 +664,7 @@ const ManageQuiz = () => {
                     </div>
                     
                     <Form.Group className="mb-3">
-                      <Form.Label>Question Text</Form.Label>
+                      <Form.Label>Question Text (English)</Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={2}
@@ -618,9 +675,20 @@ const ManageQuiz = () => {
                         required
                       />
                     </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Question Text (Hindi)</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        placeholder="प्रश्न हिंदी में"
+                        name="question_text_hindi"
+                        value={question.question_text_hindi || ""}
+                        onChange={(e) => handleEditQuestionChange(questionIndex, e)}
+                      />
+                    </Form.Group>
                     
                     <Form.Group className="mb-3">
-                      <Form.Label>Options</Form.Label>
+                      <Form.Label>Options (English)</Form.Label>
                       <div className="options-container">
                         {question.options.map((option, optionIndex) => (
                           <div key={optionIndex} className="option-item mb-2">
@@ -633,6 +701,26 @@ const ManageQuiz = () => {
                                 value={option}
                                 onChange={(e) => handleEditQuestionChange(questionIndex, e)}
                                 required
+                              />
+                            </InputGroup>
+                          </div>
+                        ))}
+                      </div>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                      <Form.Label>Options (Hindi)</Form.Label>
+                      <div className="options-container">
+                        {question.options_hindi && question.options_hindi.map((option, optionIndex) => (
+                          <div key={optionIndex} className="option-item mb-2">
+                            <InputGroup>
+                              <InputGroup.Text>Option {optionIndex + 1}</InputGroup.Text>
+                              <Form.Control
+                                type="text"
+                                placeholder={`विकल्प ${optionIndex + 1} हिंदी में`}
+                                name={`option-hindi-${optionIndex}`}
+                                value={option}
+                                onChange={(e) => handleEditQuestionChange(questionIndex, e)}
                               />
                             </InputGroup>
                           </div>
@@ -689,14 +777,23 @@ const ManageQuiz = () => {
           {currentViewItem && (
             <>
               <div className="mb-4">
-                <h5>Description</h5>
+                <h5>Description (English)</h5>
                 <p>{currentViewItem.description}</p>
+                {currentViewItem.description_hindi && (
+                  <>
+                    <h5 className="mt-3">Description (Hindi)</h5>
+                    <p>{currentViewItem.description_hindi}</p>
+                  </>
+                )}
               </div>
               
               <div className="row mb-4">
                 <div className="col-md-6">
                   <h5>Category</h5>
                   <p>{currentViewItem.quiz_category}</p>
+                  {currentViewItem.quiz_category_hindi && (
+                    <p className="text-muted">{currentViewItem.quiz_category_hindi}</p>
+                  )}
                 </div>
                 <div className="col-md-6">
                   <h5>Price</h5>
@@ -729,13 +826,16 @@ const ManageQuiz = () => {
               <hr className="my-4" />
               
               <h5>Questions</h5>
-              {currentViewItem.questions && currentViewItem.questions.length > 0 ? (
+                  {currentViewItem.questions && currentViewItem.questions.length > 0 ? (
                 currentViewItem.questions.map((question, index) => (
                   <div key={index} className="mb-3 p-3 border rounded">
                     <h6>Question {index + 1}</h6>
-                    <p>{question.question_text}</p>
+                    <p><strong>English:</strong> {question.question_text}</p>
+                    {question.question_text_hindi && (
+                      <p><strong>Hindi:</strong> {question.question_text_hindi}</p>
+                    )}
                     <div className="mb-2">
-                      <strong>Options:</strong>
+                      <strong>Options (English):</strong>
                       <ul className="list-unstyled mt-1">
                         {question.options.map((option, optIndex) => (
                           <li key={optIndex} className={`${optIndex === question.correct_answer ? 'text-success' : ''}`}>
@@ -744,6 +844,19 @@ const ManageQuiz = () => {
                           </li>
                         ))}
                       </ul>
+                      {question.options_hindi && (
+                        <>
+                          <strong>Options (Hindi):</strong>
+                          <ul className="list-unstyled mt-1">
+                            {question.options_hindi.map((option, optIndex) => (
+                              <li key={optIndex} className={`${optIndex === question.correct_answer ? 'text-success' : 'text-muted'}`}>
+                                {optIndex === question.correct_answer && '✓ '}
+                                {option}
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
                     </div>
                     <div>
                       <strong>Correct Answer:</strong> 
