@@ -104,6 +104,11 @@
   background: linear-gradient(135deg, #475569, #334155);
 }
 
+/* Mail Requests - Amber */
+.card-mail {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .br-stat-card {

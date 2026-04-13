@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Modal, Pagination, Alert, Button } from "react-bootstrap";
-import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice } from "react-icons/fa";
+import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice, FaEnvelope } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -22,6 +22,7 @@ const WebsiteManagement = () => {
   const [zeeBillsCount, setZeeBillsCount] = useState(0);
   const [kheloJitoUsersCount, setKheloJitoUsersCount] = useState(0);
   const [quizParticipantsCount, setQuizParticipantsCount] = useState(0);
+  const [serviceRenewalsCount, setServiceRenewalsCount] = useState(0);
 
   // Loading and error states
   const [loading, setLoading] = useState({
@@ -32,6 +33,7 @@ const WebsiteManagement = () => {
     zeeBills: false,
     kheloJitoUsers: false,
     quizParticipants: false,
+    serviceRenewals: false,
   });
 
   const [errors, setErrors] = useState({
@@ -42,6 +44,7 @@ const WebsiteManagement = () => {
     zeeBills: null,
     kheloJitoUsers: null,
     quizParticipants: null,
+    serviceRenewals: null,
   });
 
   // Table view states
@@ -53,6 +56,12 @@ const WebsiteManagement = () => {
     const [studentCount, setStudentCount] = useState(0); // To store the total number of students
   
     const [error, setError] = useState(null); // To store any error messages
+  
+  const [serviceRenewalsData, setServiceRenewalsData] = useState([]);
+  
+  const [showServiceRenewalModal, setShowServiceRenewalModal] = useState(false);
+  const [showAddServiceRenewalModal, setShowAddServiceRenewalModal] = useState(false);
+  const [newServiceRenewal, setNewServiceRenewal] = useState({ domain_name: '', email: '', product: '', amount: '', renewal_date: '', expiry_date: '' });
   // Detail view modal states
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -414,6 +423,45 @@ const goToQuizParticipants = () => {
     fetchKheloJitoUsers();
   }, []);
 
+  useEffect(() => {
+    const fetchServiceRenewals = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, serviceRenewals: true }));
+        const response = await fetch(
+          "https://brainrock.in/brainrock/backend/api/service-renewals/",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch service renewals");
+        }
+
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          setServiceRenewalsData(data.data);
+          setServiceRenewalsCount(data.data.length);
+          setErrors((prev) => ({ ...prev, serviceRenewals: null }));
+        } else if (Array.isArray(data)) {
+          setServiceRenewalsData(data);
+          setServiceRenewalsCount(data.length);
+          setErrors((prev) => ({ ...prev, serviceRenewals: null }));
+        } else {
+          throw new Error(data.message || "Failed to fetch service renewals");
+        }
+      } catch (err) {
+        setErrors((prev) => ({ ...prev, serviceRenewals: err.message }));
+        setServiceRenewalsCount(0);
+      } finally {
+        setLoading((prev) => ({ ...prev, serviceRenewals: false }));
+      }
+    };
+
+    fetchServiceRenewals();
+  }, []);
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const handleCardClick = (cardType) => {
@@ -442,6 +490,8 @@ const goToQuizParticipants = () => {
         return employeesData;
       case "projects":
         return projectsData;
+      case "serviceRenewals":
+        return serviceRenewalsData;
       default:
         return [];
     }
@@ -455,6 +505,8 @@ const goToQuizParticipants = () => {
         return "Employees";
       case "projects":
         return "Projects";
+      case "serviceRenewals":
+        return "Service Renewals";
       default:
         return "";
     }
@@ -492,6 +544,13 @@ const goToQuizParticipants = () => {
           item.project_id?.toLowerCase().includes(lowerSearch) ||
           item.project_name?.toLowerCase().includes(lowerSearch) ||
           item.status?.toLowerCase().includes(lowerSearch)
+      );
+    } else if (selectedCardType === "serviceRenewals") {
+      return data.filter(
+        (item) =>
+          item.domain_name?.toLowerCase().includes(lowerSearch) ||
+          item.renewal_date?.toLowerCase().includes(lowerSearch) ||
+          item.amount?.toLowerCase().includes(lowerSearch)
       );
     }
 
@@ -656,6 +715,51 @@ const goToQuizParticipants = () => {
     );
   };
 
+  const renderServiceRenewalsTable = (items) => {
+    return (
+      <table className="temp-rwd-table">
+        <tbody>
+          <tr>
+            <th>S.No</th>
+            <th>Domain Name</th>
+            <th>Email</th>
+            <th>Product</th>
+            <th>Amount</th>
+            <th>Renewal Date</th>
+            <th>Expiry Date</th>
+            <th>Action</th>
+          </tr>
+          {items.length > 0 ? (
+            items.map((renewal, index) => (
+              <tr key={renewal.id}>
+                <td data-th="S.No">
+                  {(currentPage - 1) * itemsPerPage + index + 1}
+                </td>
+                <td data-th="Domain Name">{renewal.domain_name}</td>
+                <td data-th="Email">{renewal.email}</td>
+                <td data-th="Product">{renewal.product}</td>
+                <td data-th="Amount">₹{renewal.amount}</td>
+                <td data-th="Renewal Date">{formatDate(renewal.renewal_date)}</td>
+                <td data-th="Expiry Date">{formatDate(renewal.expiry_date)}</td>
+                <td data-th="Action">
+                  <Button variant="primary" size="sm" onClick={() => handleViewItem(renewal)}>
+                    View
+                  </Button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="7" className="text-center">
+                No service renewals available.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    );
+  };
+
   const renderTable = (items) => {
     switch (selectedCardType) {
       case "courses":
@@ -664,6 +768,8 @@ const goToQuizParticipants = () => {
         return renderEmployeesTable(items);
       case "projects":
         return renderProjectsTable(items);
+      case "serviceRenewals":
+        return renderServiceRenewalsTable(items);
       default:
         return null;
     }
@@ -892,6 +998,165 @@ const goToQuizParticipants = () => {
     }
   };
 
+  const handleAddServiceRenewal = async () => {
+    try {
+      setLoading((prev) => ({ ...prev, serviceRenewals: true }));
+      const response = await fetch(
+        "https://brainrock.in/brainrock/backend/api/service-renewals/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(newServiceRenewal),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create service renewal");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setShowAddServiceRenewalModal(false);
+        setNewServiceRenewal({ domain_name: '', email: '', product: '', amount: '', renewal_date: '', expiry_date: '' });
+        const fetchServiceRenewals = await fetch(
+          "https://brainrock.in/brainrock/backend/api/service-renewals/",
+          { method: "GET", credentials: "include" }
+        );
+        const result = await fetchServiceRenewals.json();
+        if (result.success && Array.isArray(result.data)) {
+          setServiceRenewalsData(result.data);
+          setServiceRenewalsCount(result.data.length);
+        }
+      } else {
+        throw new Error(data.message || "Failed to create service renewal");
+      }
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, serviceRenewals: err.message }));
+    } finally {
+      setLoading((prev) => ({ ...prev, serviceRenewals: false }));
+    }
+  };
+
+  const renderServiceRenewalDetailModal = () => {
+    if (!selectedItem) return null;
+    return (
+      <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Service Renewal Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="detail-view">
+            <div className="mb-3">
+              <h5>Domain Name</h5>
+              <p>{selectedItem.domain_name}</p>
+            </div>
+            <div className="mb-3">
+              <h5>Email</h5>
+              <p>{selectedItem.email}</p>
+            </div>
+            <div className="mb-3">
+              <h5>Product</h5>
+              <p>{selectedItem.product}</p>
+            </div>
+            <div className="mb-3">
+              <h5>Amount</h5>
+              <p>₹{selectedItem.amount}</p>
+            </div>
+            <div className="mb-3">
+              <h5>Renewal Date</h5>
+              <p>{formatDate(selectedItem.renewal_date)}</p>
+            </div>
+            <div className="mb-3">
+              <h5>Expiry Date</h5>
+              <p>{formatDate(selectedItem.expiry_date)}</p>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
+    );
+  };
+
+  const renderAddServiceRenewalModal = () => {
+    return (
+      <Modal show={showAddServiceRenewalModal} onHide={() => setShowAddServiceRenewalModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Service Renewal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            <label>Domain Name</label>
+            <input
+              type="text"
+              className="form-control"
+              value={newServiceRenewal.domain_name}
+              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, domain_name: e.target.value })}
+              placeholder="Enter domain name"
+            />
+          </div>
+          <div className="mb-3">
+            <label>Email</label>
+            <input
+              type="email"
+              className="form-control"
+              value={newServiceRenewal.email}
+              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, email: e.target.value })}
+              placeholder="Enter email"
+            />
+          </div>
+          <div className="mb-3">
+            <label>Product</label>
+            <input
+              type="text"
+              className="form-control"
+              value={newServiceRenewal.product}
+              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, product: e.target.value })}
+              placeholder="Enter product"
+            />
+          </div>
+          <div className="mb-3">
+            <label>Amount</label>
+            <input
+              type="number"
+              className="form-control"
+              value={newServiceRenewal.amount}
+              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, amount: e.target.value })}
+              placeholder="Enter amount"
+            />
+          </div>
+          <div className="mb-3">
+            <label>Renewal Date</label>
+            <input
+              type="date"
+              className="form-control"
+              value={newServiceRenewal.renewal_date}
+              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, renewal_date: e.target.value })}
+            />
+          </div>
+          <div className="mb-3">
+            <label>Expiry Date</label>
+            <input
+              type="date"
+              className="form-control"
+              value={newServiceRenewal.expiry_date}
+              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, expiry_date: e.target.value })}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAddServiceRenewalModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleAddServiceRenewal} disabled={loading.serviceRenewals}>
+            {loading.serviceRenewals ? 'Saving...' : 'Save Service Renewal'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  };
+
   const filteredData = getFilteredData();
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -1052,6 +1317,23 @@ const goToQuizParticipants = () => {
                 </div>
               </Col>
 
+               {/* Service Renewals Card */}
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
+                <div
+                  className="br-stat-card card-mail"
+                  onClick={() => handleCardClick("serviceRenewals")}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="br-stat-icon">
+                    <FaEnvelope />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Service Renewals</h5>
+                    <h2>{serviceRenewalsCount}</h2>
+                  </div>
+                </div>
+              </Col>
+
             </Row>
           </div>
 
@@ -1061,6 +1343,15 @@ const goToQuizParticipants = () => {
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2 className="mb-0">{getModalTitle()} List</h2>
                 <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  {selectedCardType === "serviceRenewals" && (
+                    <Button
+                      variant="primary"
+                      onClick={() => setShowAddServiceRenewalModal(true)}
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      Add New Request
+                    </Button>
+                  )}
                   <input
                     type="text"
                     placeholder={`Search ${getModalTitle().toLowerCase()}...`}
@@ -1138,6 +1429,8 @@ const goToQuizParticipants = () => {
 
       {/* Detail View Modal */}
       {renderDetailModal()}
+      {selectedCardType === "serviceRenewals" && renderServiceRenewalDetailModal()}
+      {renderAddServiceRenewalModal()}
     </div>
   );
 };
