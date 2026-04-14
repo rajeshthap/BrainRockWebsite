@@ -1356,7 +1356,7 @@ const goToQuizParticipants = () => {
                     type="text"
                     placeholder={`Search ${getModalTitle().toLowerCase()}...`}
                     className="form-control"
-                    style={{ width: "300px" }}
+                    
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);

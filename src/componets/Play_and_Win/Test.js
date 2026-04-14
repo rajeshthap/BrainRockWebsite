@@ -779,7 +779,7 @@ function Test() {
     return (
       <div className="test-container">
         <div className="test-card">
-          <div className="error">Error: {error}</div>
+          <div className="error"> {error}</div>
         </div>
       </div>
     );

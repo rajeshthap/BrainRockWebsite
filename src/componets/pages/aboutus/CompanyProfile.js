@@ -52,7 +52,7 @@ function CompanyProfile() {
   }
 
   if (error) {
-    return <div className="ourteam-section"><div className="ourteam-box"><Container fluid><div className="text-center my-5 text-danger">Error: {error}</div></Container></div></div>;
+    return <div className="ourteam-section"><div className="ourteam-box"><Container fluid><div className="text-center my-5 text-danger"> {error}</div></Container></div></div>;
   }
 
   return (
