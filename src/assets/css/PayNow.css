@@ -26,3 +26,42 @@
 .paynow-btn:active {
   transform: scale(0.98);
 }
+
+.paynow-loading,
+.paynow-error {
+  text-align: center;
+  padding: 20px;
+}
+
+.paynow-loading .spinner-border {
+  width: 50px;
+  height: 50px;
+  border-width: 4px;
+}
+
+.paynow-loading p,
+.paynow-error p {
+  margin-top: 15px;
+  font-size: 16px;
+  color: #333;
+}
+
+.paynow-error {
+  color: #dc3545;
+}
+
+.paynow-retry-btn {
+  margin-top: 15px;
+  background: #007bff;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.paynow-retry-btn:hover {
+  background: #0056b3;
+}
