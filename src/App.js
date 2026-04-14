@@ -109,6 +109,7 @@ import TestWinner from "./componets/khelo_jito_panel/TestWinner";
 import WalletPaymentStatus from "./componets/khelo_jito_panel/WalletPaymentStatus";
 import Quiz from "./componets/khelo_jito_panel/Quiz";
 import QuizTest from "./componets/Play_and_Win/QuizTest";
+import PayNow from "./componets/adminpanel/pay_now/PayNow";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -177,6 +178,7 @@ function AppContent() {
     "/WalletPaymentStatus",
     "/Quiz",
     "/QuizTest",
+    "/PayNow"
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -220,6 +222,7 @@ function AppContent() {
         <Route path="/faq" element={<Faq />} />
         <Route path="/KheloJito" element={<KheloJito />} />
         <Route path="/test" element={<Test />} />
+        <Route path="/PayNow" element={<PayNow />} />
 
         {/* Hr  Payroll (protected) */}
         <Route

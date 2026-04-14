@@ -1,0 +1,28 @@
+.paynow-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.paynow-btn {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 14px 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.paynow-btn:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: scale(1.05);
+}
+
+.paynow-btn:active {
+  transform: scale(0.98);
+}
