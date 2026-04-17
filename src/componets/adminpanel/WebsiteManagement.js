@@ -52,12 +52,14 @@ const WebsiteManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
   const [students, setStudents] = useState([]); // To store the list of students
     const [studentCount, setStudentCount] = useState(0); // To store the total number of students
   
     const [error, setError] = useState(null); // To store any error messages
   
   const [serviceRenewalsData, setServiceRenewalsData] = useState([]);
+  const [sendingEmailId, setSendingEmailId] = useState(null);
   
   const [showServiceRenewalModal, setShowServiceRenewalModal] = useState(false);
   const [showAddServiceRenewalModal, setShowAddServiceRenewalModal] = useState(false);
@@ -468,6 +470,7 @@ const goToQuizParticipants = () => {
     setSelectedCardType(cardType);
     setCurrentPage(1);
     setSearchTerm("");
+    setPaymentStatusFilter("");
     setTimeout(() => {
       const tableSection = document.getElementById("table-section");
       if (tableSection) {
@@ -480,6 +483,7 @@ const goToQuizParticipants = () => {
     setSelectedCardType(null);
     setCurrentPage(1);
     setSearchTerm("");
+    setPaymentStatusFilter("");
   };
 
   const getModalData = () => {
@@ -515,6 +519,12 @@ const goToQuizParticipants = () => {
   const getFilteredData = () => {
     let data = getModalData();
 
+    // Always apply payment status filter first for serviceRenewals
+    if (selectedCardType === "serviceRenewals" && paymentStatusFilter) {
+      data = data.filter((item) => item.payment_status === paymentStatusFilter);
+    }
+
+    // Then apply search filter if exists
     if (searchTerm.trim() === "") {
       return data;
     }
@@ -546,12 +556,14 @@ const goToQuizParticipants = () => {
           item.status?.toLowerCase().includes(lowerSearch)
       );
     } else if (selectedCardType === "serviceRenewals") {
-      return data.filter(
-        (item) =>
+      return data.filter((item) => {
+        const matchesSearch =
           item.domain_name?.toLowerCase().includes(lowerSearch) ||
           item.renewal_date?.toLowerCase().includes(lowerSearch) ||
-          item.amount?.toLowerCase().includes(lowerSearch)
-      );
+          item.amount?.toLowerCase().includes(lowerSearch) ||
+          item.payment_status?.toLowerCase().includes(lowerSearch);
+        return matchesSearch;
+      });
     }
 
     return data;
@@ -727,6 +739,8 @@ const goToQuizParticipants = () => {
             <th>Amount</th>
             <th>Renewal Date</th>
             <th>Expiry Date</th>
+            <th>Payment Status</th>
+            <th>Email</th>
             <th>Action</th>
           </tr>
           {items.length > 0 ? (
@@ -741,6 +755,37 @@ const goToQuizParticipants = () => {
                 <td data-th="Amount">₹{renewal.amount}</td>
                 <td data-th="Renewal Date">{formatDate(renewal.renewal_date)}</td>
                 <td data-th="Expiry Date">{formatDate(renewal.expiry_date)}</td>
+                <td data-th="Payment Status">
+                  <span
+                    className={`badge ${
+                      renewal.payment_status === "completed"
+                        ? "bg-success"
+                        : renewal.payment_status === "failed"
+                        ? "bg-danger"
+                        : "bg-warning"
+                    }`}
+                  >
+                    {renewal.payment_status || "pending"}
+                  </span>
+                </td>
+                <td data-th="Email">
+                  {renewal.payment_status === "completed" ? (
+                    renewal.is_email ? (
+                      <span className="badge bg-success">Email Sent</span>
+                    ) : (
+                      <Button
+                        variant="info"
+                        size="sm"
+                        onClick={() => handleSendRenewalEmail(renewal)}
+                        disabled={sendingEmailId === renewal.id}
+                      >
+                        {sendingEmailId === renewal.id ? "Sending..." : "Send Email"}
+                      </Button>
+                    )
+                  ) : (
+                    <span className="text-muted">-</span>
+                  )}
+                </td>
                 <td data-th="Action">
                   <Button variant="primary" size="sm" onClick={() => handleViewItem(renewal)}>
                     View
@@ -750,7 +795,7 @@ const goToQuizParticipants = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="text-center">
+              <td colSpan="9" className="text-center">
                 No service renewals available.
               </td>
             </tr>
@@ -1037,6 +1082,42 @@ const goToQuizParticipants = () => {
       setErrors((prev) => ({ ...prev, serviceRenewals: err.message }));
     } finally {
       setLoading((prev) => ({ ...prev, serviceRenewals: false }));
+    }
+  };
+
+  const handleSendRenewalEmail = async (renewal) => {
+    try {
+      setSendingEmailId(renewal.id);
+      const response = await fetch(
+        "https://brainrock.in/brainrock/backend/api/send-renewal-email/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ order_id: renewal.order_id }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+
+      const data = await response.json();
+      if (data.success || data.status) {
+        setServiceRenewalsData((prev) =>
+          prev.map((item) =>
+            item.id === renewal.id ? { ...item, is_email: true } : item
+          )
+        );
+      } else {
+        throw new Error(data.message || "Failed to send email");
+      }
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, serviceRenewals: err.message }));
+    } finally {
+      setSendingEmailId(null);
     }
   };
 
@@ -1363,6 +1444,22 @@ const goToQuizParticipants = () => {
                       setCurrentPage(1);
                     }}
                   />
+                  {selectedCardType === "serviceRenewals" && (
+                    <select
+                      className="form-control"
+                      value={paymentStatusFilter}
+                      onChange={(e) => {
+                        setPaymentStatusFilter(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      style={{ maxWidth: "180px" }}
+                    >
+                      <option value="">All Status</option>
+                      <option value="pending">Pending</option>
+                      <option value="completed">Completed</option>
+                      <option value="failed">Failed</option>
+                    </select>
+                  )}
                   <Button
                     variant="secondary"
                     onClick={handleCloseTable}

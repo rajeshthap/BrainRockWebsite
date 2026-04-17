@@ -426,15 +426,40 @@ const ManageStudent = () => {
                         onClick={() => handlePageChange(currentPage - 1)} 
                         disabled={currentPage === 1}
                       />
-                      {[...Array(totalPages).keys()].map(page => (
+                      <Pagination.Item 
+                        onClick={() => handlePageChange(1)}
+                        disabled={currentPage === 1}
+                      >
+                        1
+                      </Pagination.Item>
+                      {currentPage > 3 && (
+                        <Pagination.Ellipsis disabled />
+                      )}
+                      {[...Array(totalPages).keys()].map(page => {
+                        const pageNum = page + 1;
+                        if (pageNum === 1 || pageNum === totalPages) return null;
+                        if (pageNum < currentPage - 1 || pageNum > currentPage + 1) return null;
+                        return (
+                          <Pagination.Item 
+                            key={pageNum}
+                            active={pageNum === currentPage}
+                            onClick={() => handlePageChange(pageNum)}
+                          >
+                            {pageNum}
+                          </Pagination.Item>
+                        );
+                      })}
+                      {currentPage < totalPages - 2 && (
+                        <Pagination.Ellipsis disabled />
+                      )}
+                      {totalPages > 1 && (
                         <Pagination.Item 
-                          key={page + 1} 
-                          active={page + 1 === currentPage}
-                          onClick={() => handlePageChange(page + 1)}
+                          onClick={() => handlePageChange(totalPages)}
+                          disabled={currentPage === totalPages}
                         >
-                          {page + 1}
+                          {totalPages}
                         </Pagination.Item>
-                      ))}
+                      )}
                       <Pagination.Next 
                         onClick={() => handlePageChange(currentPage + 1)} 
                         disabled={currentPage === totalPages}
