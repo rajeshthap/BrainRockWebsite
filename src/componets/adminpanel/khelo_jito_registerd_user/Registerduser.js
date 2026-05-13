@@ -297,7 +297,7 @@ const Registerduser = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user_ids: selectedUsers }),
+        body: JSON.stringify({ id: selectedUsers }),
       });
 
       if (!response.ok) {
