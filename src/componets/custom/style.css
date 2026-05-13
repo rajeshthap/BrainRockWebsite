@@ -218,6 +218,10 @@ color: #0056b3;
   padding: var(--br-space-800);
   margin-bottom: var(--br-space-1000);
 }
+.table-style tr th{
+  color: #fff;
+  font-size: 12px !important;
+}
 .wrong-answers {
  background: linear-gradient(90deg, #ff9800 0%, #f57c00);
     color: white;

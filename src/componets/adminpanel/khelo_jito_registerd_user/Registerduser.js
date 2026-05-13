@@ -474,18 +474,18 @@ const Registerduser = () => {
                     <td data-th="Phone">{user.phone}</td>
                     <td data-th="Fee">₹{parseFloat(user.fee).toFixed(2)}</td>
                     <td data-th="Payment Status">
-                      <span
-                        className={`badge bg-${user.payment_status === "completed" ? "success" : "warning"}`}
-                      >
-                        {user.payment_status}
-                      </span>
+<span
+  className={`badge ${user.payment_status === "completed" ? "success" : "warning"}`}
+>
+  {user.payment_status}
+</span>
                     </td>
                     <td data-th="Test Status">
-                      <span
-                        className={`badge bg-${user.test_status === "passed" ? "success" : user.test_status === "failed" ? "danger" : "warning"}`}
-                      >
-                        {user.test_status || "Not Attempted"}
-                      </span>
+<span
+  className={`badge ${user.test_status === "passed" ? "success" : user.test_status === "failed" ? "danger" : "warning"}`}
+>
+  {user.test_status || "Not Attempted"}
+</span>
                     </td>
                     <td data-th="Score">{user.score || "N/A"}</td>
                     <td data-th="Date">{formatDate(user.created_at)}</td>
@@ -635,18 +635,18 @@ const Registerduser = () => {
                      <td data-th="Phone">{participant.student?.phone}</td>
                      <td data-th="Quiz">{participant.quiz}</td>
                      <td data-th="Payment Status">
-                       <span
-                         className={`badge bg-${participant.payment_status === "wallet-completed" || participant.payment_status === "completed" ? "success" : "warning"}`}
-                       >
-                         {participant.payment_status}
-                       </span>
+<span
+  className={`badge ${participant.payment_status === "wallet-completed" || participant.payment_status === "completed" ? "success" : "warning"}`}
+>
+  {participant.payment_status}
+</span>
                      </td>
                      <td data-th="Attempt Status">
-                       <span
-                         className={`badge bg-${participant.attempt?.status === "submitted" ? "success" : participant.attempt?.status === "started" ? "info" : "warning"}`}
-                       >
-                         {participant.attempt?.status || "Not Attempted"}
-                       </span>
+<span
+  className={`badge ${participant.attempt?.status === "submitted" ? "success" : participant.attempt?.status === "started" ? "info" : "warning"}`}
+>
+  {participant.attempt?.status || "Not Attempted"}
+</span>
                      </td>
                      <td data-th="Total Questions">
                        {participant.attempt?.total_questions || "N/A"}
@@ -1138,19 +1138,19 @@ const Registerduser = () => {
          </Modal.Header>
          <Modal.Body>
            {selectedAttempts.length > 0 ? (
-             <table className="temp-rwd-table">
-               <thead>
-                 <tr>
-                   <th>S.No</th>
-                   <th>Attempt ID</th>
-                   <th>Total Questions</th>
-                   <th>Score</th>
-                   <th>Status</th>
-                   <th>Started At</th>
-                   <th>Submitted At</th>
-                   <th>Certificate</th>
-                 </tr>
-               </thead>
+<table className="temp-rwd-table">
+              <thead className="table-style">
+                  <tr>
+                    <th>S.No</th>
+                    <th>Attempt ID</th>
+                    <th>Total Questions</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th>Started At</th>
+                    <th>Submitted At</th>
+                    <th>Certificate</th>
+                  </tr>
+                </thead>
                <tbody>
                  {selectedAttempts
                    .sort((a, b) => new Date(b.started_at) - new Date(a.started_at))
@@ -1160,13 +1160,19 @@ const Registerduser = () => {
                        <td>{attempt.id}</td>
                        <td>{attempt.total_questions}</td>
                        <td>{attempt.score}</td>
-                       <td>
-                         <span
-                           className={`badge bg-${attempt.test_status === "passed" ? "success" : attempt.test_status === "failed" ? "danger" : "warning"}`}
-                         >
-                           {attempt.test_status}
-                         </span>
-                       </td>
+<td>
+  <span
+    className={`badge ${
+      attempt.test_status === "passed"
+        ? "bg-success"
+        : attempt.test_status === "failed"
+        ? "bg-danger"
+        : "bg-warning text-dark"
+    }`}
+  >
+    {attempt.test_status}
+  </span>
+</td>
                        <td>{formatDate(attempt.started_at)}</td>
                        <td>{attempt.submitted_at ? formatDate(attempt.submitted_at) : "N/A"}</td>
                        <td>
@@ -1247,11 +1253,11 @@ const Registerduser = () => {
                       </p>
                       <p>
                         <strong>Payment Status:</strong>
-                        <span
-                          className={`badge bg-${selectedUser.payment_status === "completed" ? "success" : "warning"} ms-2`}
-                        >
-                          {selectedUser.payment_status}
-                        </span>
+<span
+  className={`badge ${selectedUser.payment_status === "completed" ? "success" : "warning"} ms-2`}
+>
+  {selectedUser.payment_status}
+</span>
                       </p>
                     </Col>
                   </Row>
@@ -1278,11 +1284,11 @@ const Registerduser = () => {
                       <Col md={6} className="mb-3">
                         <p>
                           <strong>Test Status:</strong>
-                          <span
-                            className={`badge bg-${selectedUser.test_status === "passed" ? "success" : "danger"} ms-2`}
-                          >
-                            {selectedUser.test_status}
-                          </span>
+<span
+  className={`badge ${selectedUser.test_status === "passed" ? "success" : "danger"} ms-2`}
+>
+  {selectedUser.test_status}
+</span>
                         </p>
                       </Col>
                       {selectedUser.score !== undefined && (
@@ -1330,11 +1336,11 @@ const Registerduser = () => {
                     <Col md={6} className="mb-3">
                       <p>
                         <strong>Payment Status:</strong>
-                        <span
-                          className={`badge bg-${selectedUser.payment_status === "wallet-completed" || selectedUser.payment_status === "completed" ? "success" : "warning"} ms-2`}
-                        >
-                          {selectedUser.payment_status}
-                        </span>
+<span
+  className={`badge ${selectedUser.payment_status === "wallet-completed" || selectedUser.payment_status === "completed" ? "success" : "warning"} ms-2`}
+>
+  {selectedUser.payment_status}
+</span>
                       </p>
                     </Col>
                   </Row>
@@ -1344,11 +1350,11 @@ const Registerduser = () => {
                        <Col md={6} className="mb-3">
                          <p>
                            <strong>Attempt Status:</strong>
-                           <span
-                             className={`badge bg-${selectedUser.attempt.status === "submitted" ? "success" : selectedUser.attempt.status === "started" ? "info" : "warning"} ms-2`}
-                           >
-                             {selectedUser.attempt.status}
-                           </span>
+<span
+  className={`badge ${selectedUser.attempt.status === "submitted" ? "success" : selectedUser.attempt.status === "started" ? "info" : "warning"} ms-2`}
+>
+  {selectedUser.attempt.status}
+</span>
                          </p>
                          <p>
                            <strong>Total Questions:</strong>{" "}
