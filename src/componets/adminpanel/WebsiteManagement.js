@@ -1556,7 +1556,7 @@ const WebsiteManagement = () => {
                     <FaUserGraduate />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Khelo Jito Users</h5>
+                    <h5>All Khelo Jito Users</h5>
                     <h2>{kheloJitoUsersCount}</h2>
                   </div>
                 </div>
@@ -1573,7 +1573,7 @@ const WebsiteManagement = () => {
                     <FaUsers />
                   </div>
                   <div className="br-stat-details">
-                    <h5>Completed Winners</h5>
+                    <h5>Khelo Jito Completed Winners</h5>
                     <h2>{kheloJitoCompletedUsersCount}</h2>
                   </div>
                 </div>
