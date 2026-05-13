@@ -446,16 +446,16 @@ const Registerduser = () => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Fee</th>
-                <th>Payment Status</th>
-                <th>Test Status</th>
-                <th>Score</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
+<th>Fee</th>
+                 <th>Payment Status</th>
+                 <th>Test Status</th>
+                 <th>Score</th>
+                 <th>Date</th>
+                 <th>Action</th>
+               </tr>
 
-              {currentItems.length > 0 ? (
-                currentItems.map((user, index) => (
+               {currentItems.length > 0 ? (
+                 currentItems.map((user, index) => (
                   <tr key={user.user_id}>
                     <td data-th="Select">
                       <Form.Check
@@ -473,18 +473,18 @@ const Registerduser = () => {
                     <td data-th="Email">{user.email}</td>
                     <td data-th="Phone">{user.phone}</td>
                     <td data-th="Fee">₹{parseFloat(user.fee).toFixed(2)}</td>
-                    <td data-th="Payment Status">
+<td data-th="Payment Status">
 <span
-  className={`badge ${user.payment_status === "completed" ? "success" : "warning"}`}
+   className={`badge ${user.payment_status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
 >
-  {user.payment_status}
+   {user.payment_status}
 </span>
-                    </td>
-                    <td data-th="Test Status">
+                     </td>
+                     <td data-th="Test Status">
 <span
-  className={`badge ${user.test_status === "passed" ? "success" : user.test_status === "failed" ? "danger" : "warning"}`}
+   className={`badge ${user.test_status === "passed" ? "bg-success" : user.test_status === "failed" ? "bg-danger" : "bg-warning text-dark"}`}
 >
-  {user.test_status || "Not Attempted"}
+   {user.test_status || "Not Attempted"}
 </span>
                     </td>
                     <td data-th="Score">{user.score || "N/A"}</td>
@@ -606,10 +606,10 @@ const Registerduser = () => {
                  <th>Name</th>
                  <th>Email</th>
                  <th>Phone</th>
-                 <th>Quiz</th>
-                 <th>Payment Status</th>
-                 <th>Attempt Status</th>
-                 <th>Total Questions</th>
+<th>Quiz</th>
+                  <th >Payment Status</th>
+                  <th >Attempt Status</th>
+                  <th>Total Questions</th>
                  <th>Score</th>
                  <th>Joined At</th>
                  <th>Action</th>
@@ -634,18 +634,18 @@ const Registerduser = () => {
                      <td data-th="Email">{participant.student?.email}</td>
                      <td data-th="Phone">{participant.student?.phone}</td>
                      <td data-th="Quiz">{participant.quiz}</td>
-                     <td data-th="Payment Status">
-<span
-  className={`badge ${participant.payment_status === "wallet-completed" || participant.payment_status === "completed" ? "success" : "warning"}`}
+<td data-th="Payment Status">
+ <span
+   className={`badge ${participant.payment_status === "wallet-completed" || participant.payment_status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
 >
-  {participant.payment_status}
+   {participant.payment_status}
 </span>
-                     </td>
-                     <td data-th="Attempt Status">
+                      </td>
+                      <td data-th="Attempt Status">
 <span
-  className={`badge ${participant.attempt?.status === "submitted" ? "success" : participant.attempt?.status === "started" ? "info" : "warning"}`}
+   className={`badge ${participant.attempt?.status === "submitted" ? "bg-success" : participant.attempt?.status === "started" ? "bg-info" : "bg-warning text-dark"}`}
 >
-  {participant.attempt?.status || "Not Attempted"}
+   {participant.attempt?.status || "Not Attempted"}
 </span>
                      </td>
                      <td data-th="Total Questions">
