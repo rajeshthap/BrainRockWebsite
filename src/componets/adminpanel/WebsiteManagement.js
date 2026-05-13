@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Modal, Pagination, Alert, Button } from "react-bootstrap";
-import { FaUsers, FaBook, FaUserGraduate, FaFileInvoice, FaEnvelope } from "react-icons/fa";
+import {
+  Container,
+  Row,
+  Col,
+  Modal,
+  Pagination,
+  Alert,
+  Button,
+} from "react-bootstrap";
+import {
+  FaUsers,
+  FaBook,
+  FaUserGraduate,
+  FaFileInvoice,
+  FaEnvelope,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import LeftNavManagement from "./LeftNavManagement";
 import AdminHeader from "./AdminHeader";
 import "../../assets/css/websitemanagement.css";
-const API_BASE_URL = 'https://brainrock.in/brainrock/backend/api';
+const API_BASE_URL = "https://brainrock.in/brainrock/backend/api";
 const WebsiteManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -21,6 +35,8 @@ const WebsiteManagement = () => {
   const [brainrockBillsCount, setBrainrockBillsCount] = useState(0);
   const [zeeBillsCount, setZeeBillsCount] = useState(0);
   const [kheloJitoUsersCount, setKheloJitoUsersCount] = useState(0);
+  const [kheloJitoCompletedUsersCount, setKheloJitoCompletedUsersCount] =
+    useState(0);
   const [quizParticipantsCount, setQuizParticipantsCount] = useState(0);
   const [serviceRenewalsCount, setServiceRenewalsCount] = useState(0);
 
@@ -32,6 +48,7 @@ const WebsiteManagement = () => {
     brainrockBills: false,
     zeeBills: false,
     kheloJitoUsers: false,
+    kheloJitoCompletedUsers: false,
     quizParticipants: false,
     serviceRenewals: false,
   });
@@ -43,6 +60,7 @@ const WebsiteManagement = () => {
     brainrockBills: null,
     zeeBills: null,
     kheloJitoUsers: null,
+    kheloJitoCompletedUsers: null,
     quizParticipants: null,
     serviceRenewals: null,
   });
@@ -54,59 +72,70 @@ const WebsiteManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
   const [students, setStudents] = useState([]); // To store the list of students
-    const [studentCount, setStudentCount] = useState(0); // To store the total number of students
-  
-    const [error, setError] = useState(null); // To store any error messages
-  
+  const [studentCount, setStudentCount] = useState(0); // To store the total number of students
+
+  const [error, setError] = useState(null); // To store any error messages
+
   const [serviceRenewalsData, setServiceRenewalsData] = useState([]);
   const [sendingEmailId, setSendingEmailId] = useState(null);
-  
+
   const [showServiceRenewalModal, setShowServiceRenewalModal] = useState(false);
-  const [showAddServiceRenewalModal, setShowAddServiceRenewalModal] = useState(false);
-  const [newServiceRenewal, setNewServiceRenewal] = useState({ domain_name: '', email: '', product: '', amount: '', renewal_date: '', expiry_date: '' });
+  const [showAddServiceRenewalModal, setShowAddServiceRenewalModal] =
+    useState(false);
+  const [newServiceRenewal, setNewServiceRenewal] = useState({
+    domain_name: "",
+    email: "",
+    product: "",
+    amount: "",
+    renewal_date: "",
+    expiry_date: "",
+  });
   // Detail view modal states
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-useEffect(() => {
-  const fetchStudents = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
 
-      const response = await fetch(`https://brainrock.in/brainrock/backend/api/course-registration/`, {
-        method: 'GET',
-        credentials: 'include',
-      });
+        const response = await fetch(
+          `https://brainrock.in/brainrock/backend/api/course-registration/`,
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch student data');
+        if (!response.ok) {
+          throw new Error("Failed to fetch student data");
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          const processedStudents = data.data.map((student) => ({
+            ...student,
+            profile_photo: student.profile_photo
+              ? `${API_BASE_URL}${student.profile_photo}?t=${Date.now()}`
+              : null,
+          }));
+
+          setStudents(processedStudents);
+
+          //  SET TOTAL REGISTERED STUDENTS COUNT
+          setStudentCount(data.data.length);
+        } else {
+          throw new Error(data.message || "Failed to fetch student data");
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await response.json();
-
-      if (data.success) {
-        const processedStudents = data.data.map(student => ({
-          ...student,
-          profile_photo: student.profile_photo
-            ? `${API_BASE_URL}${student.profile_photo}?t=${Date.now()}`
-            : null,
-        }));
-
-        setStudents(processedStudents);
-
-        //  SET TOTAL REGISTERED STUDENTS COUNT
-        setStudentCount(data.data.length);
-      } else {
-        throw new Error(data.message || 'Failed to fetch student data');
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchStudents();
-}, []);
+    fetchStudents();
+  }, []);
 
   useEffect(() => {
     const checkDevice = () => {
@@ -130,7 +159,7 @@ useEffect(() => {
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
         if (!response.ok) {
@@ -153,64 +182,71 @@ useEffect(() => {
 
     fetchCourses();
   }, []);
-const goToNextComponent = () => {
-  navigate("/ManageStudent");   // ← change URL as per your route
-};
+  const goToNextComponent = () => {
+    navigate("/ManageStudent"); // ← change URL as per your route
+  };
 
-const goToBrainrockBills = () => {
-  navigate("/ManageBills", { state: { billType: "ukssovm" } });
-};
+  const goToBrainrockBills = () => {
+    navigate("/ManageBills", { state: { billType: "ukssovm" } });
+  };
 
-const goToZeeBills = () => {
-  navigate("/ManageBills", { state: { billType: "zee" } });
-};
+  const goToZeeBills = () => {
+    navigate("/ManageBills", { state: { billType: "zee" } });
+  };
 
-const goToKheloJitoUsers = () => {
-  navigate("/Registerduser");
-};
+  const goToKheloJitoUsers = () => {
+    navigate("/Registerduser");
+  };
 
-const goToQuizParticipants = () => {
-  navigate("/Registerduser", { state: { activeTab: "quiz-participants" } });
-};
+  const goToKheloJitoCompletedUsers = () => {
+    navigate("/Registerduser", { state: { activeTab: "completed" } });
+  };
+
+  const goToQuizParticipants = () => {
+    navigate("/Registerduser", { state: { activeTab: "quiz-participants" } });
+  };
 
   // Fetch Quiz Participants count
   useEffect(() => {
     const fetchQuizParticipants = async () => {
       try {
         setLoading((prev) => ({ ...prev, quizParticipants: true }));
-        console.log('=== Fetching quiz participants ===');
+        console.log("=== Fetching quiz participants ===");
         const response = await fetch(
           "https://brainrock.in/brainrock/backend/api/quiz-participants/",
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('HTTP error response:', errorText);
+          console.error("HTTP error response:", errorText);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('=== API response data ===', JSON.stringify(data, null, 2));
+        console.log("=== API response data ===", JSON.stringify(data, null, 2));
 
         if (data.status && Array.isArray(data.data)) {
           setQuizParticipantsCount(data.data.length);
           setErrors((prev) => ({ ...prev, quizParticipants: null }));
-          console.log('Success - Quiz participants count:', data.data.length);
+          console.log("Success - Quiz participants count:", data.data.length);
         } else {
-          console.error('Unexpected data format:', typeof data, data);
-          throw new Error(data.message || "Failed to fetch quiz participants - unexpected data format");
+          console.error("Unexpected data format:", typeof data, data);
+          throw new Error(
+            data.message ||
+              "Failed to fetch quiz participants - unexpected data format",
+          );
         }
       } catch (err) {
-        console.error('=== Error fetching quiz participants ===');
-        console.error('Error message:', err.message);
-        console.error('Error stack:', err.stack);
+        console.error("=== Error fetching quiz participants ===");
+        console.error("Error message:", err.message);
+        console.error("Error stack:", err.stack);
         setErrors((prev) => ({ ...prev, quizParticipants: err.message }));
         setQuizParticipantsCount(0);
       } finally {
@@ -230,7 +266,7 @@ const goToQuizParticipants = () => {
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
         if (!response.ok) {
@@ -271,7 +307,7 @@ const goToQuizParticipants = () => {
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
         if (!response.ok) {
@@ -305,7 +341,7 @@ const goToQuizParticipants = () => {
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
         if (!response.ok) {
@@ -343,7 +379,7 @@ const goToQuizParticipants = () => {
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
         if (!response.ok) {
@@ -376,45 +412,51 @@ const goToQuizParticipants = () => {
     const fetchKheloJitoUsers = async () => {
       try {
         setLoading((prev) => ({ ...prev, kheloJitoUsers: true }));
-        console.log('=== Fetching Khelo Jito users ===');
+        console.log("=== Fetching Khelo Jito users ===");
         const response = await fetch(
           "https://brainrock.in/brainrock/backend/api/register-test/",
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('HTTP error response:', errorText);
+          console.error("HTTP error response:", errorText);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('=== API response data ===', JSON.stringify(data, null, 2));
+        console.log("=== API response data ===", JSON.stringify(data, null, 2));
 
         // Check if response is an array (direct data format)
         if (Array.isArray(data)) {
           setKheloJitoUsersCount(data.length);
           setErrors((prev) => ({ ...prev, kheloJitoUsers: null }));
-          console.log('Success - Users count:', data.length);
+          console.log("Success - Users count:", data.length);
         } else if (data.status && Array.isArray(data.data)) {
           // API uses status: true instead of success: true
           setKheloJitoUsersCount(data.data.length);
           setErrors((prev) => ({ ...prev, kheloJitoUsers: null }));
-          console.log('Success (wrapped format) - Users count:', data.data.length);
+          console.log(
+            "Success (wrapped format) - Users count:",
+            data.data.length,
+          );
         } else {
-          console.error('Unexpected data format:', typeof data, data);
-          throw new Error(data.message || "Failed to fetch Khelo Jito users - unexpected data format");
+          console.error("Unexpected data format:", typeof data, data);
+          throw new Error(
+            data.message ||
+              "Failed to fetch Khelo Jito users - unexpected data format",
+          );
         }
       } catch (err) {
-        console.error('=== Error fetching Khelo Jito users ===');
-        console.error('Error message:', err.message);
-        console.error('Error stack:', err.stack);
+        console.error("=== Error fetching Khelo Jito users ===");
+        console.error("Error message:", err.message);
+        console.error("Error stack:", err.stack);
         setErrors((prev) => ({ ...prev, kheloJitoUsers: err.message }));
         setKheloJitoUsersCount(0);
       } finally {
@@ -423,6 +465,70 @@ const goToQuizParticipants = () => {
     };
 
     fetchKheloJitoUsers();
+  }, []);
+
+  // Fetch Khelo Jito Completed Users count
+  useEffect(() => {
+    const fetchKheloJitoCompletedUsers = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, kheloJitoCompletedUsers: true }));
+        console.log("=== Fetching Khelo Jito completed users ===");
+        const response = await fetch(
+          "https://brainrock.in/brainrock/backend/api/all-khelo-jetto-user/",
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
+
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("HTTP error response:", errorText);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("=== API response data ===", JSON.stringify(data, null, 2));
+
+        if (data.status && data.total_winners_count) {
+          setKheloJitoCompletedUsersCount(data.total_winners_count);
+          setErrors((prev) => ({ ...prev, kheloJitoCompletedUsers: null }));
+          console.log(
+            "Success - Completed users count:",
+            data.total_winners_count,
+          );
+        } else if (Array.isArray(data.data)) {
+          setKheloJitoCompletedUsersCount(data.data.length);
+          setErrors((prev) => ({ ...prev, kheloJitoCompletedUsers: null }));
+          console.log(
+            "Success (array format) - Completed users count:",
+            data.data.length,
+          );
+        } else {
+          console.error("Unexpected data format:", typeof data, data);
+          throw new Error(
+            data.message ||
+              "Failed to fetch completed users - unexpected data format",
+          );
+        }
+      } catch (err) {
+        console.error("=== Error fetching Khelo Jito completed users ===");
+        console.error("Error message:", err.message);
+        console.error("Error stack:", err.stack);
+        setErrors((prev) => ({
+          ...prev,
+          kheloJitoCompletedUsers: err.message,
+        }));
+        setKheloJitoCompletedUsersCount(0);
+      } finally {
+        setLoading((prev) => ({ ...prev, kheloJitoCompletedUsers: false }));
+      }
+    };
+
+    fetchKheloJitoCompletedUsers();
   }, []);
 
   useEffect(() => {
@@ -434,7 +540,7 @@ const goToQuizParticipants = () => {
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
         if (!response.ok) {
@@ -536,7 +642,7 @@ const goToQuizParticipants = () => {
         (item) =>
           item.course_id?.toLowerCase().includes(lowerSearch) ||
           item.title?.toLowerCase().includes(lowerSearch) ||
-          item.description?.toLowerCase().includes(lowerSearch)
+          item.description?.toLowerCase().includes(lowerSearch),
       );
     } else if (selectedCardType === "employees") {
       return data.filter(
@@ -546,14 +652,14 @@ const goToQuizParticipants = () => {
           item.last_name?.toLowerCase().includes(lowerSearch) ||
           item.email?.toLowerCase().includes(lowerSearch) ||
           item.phone?.toLowerCase().includes(lowerSearch) ||
-          item.department?.toLowerCase().includes(lowerSearch)
+          item.department?.toLowerCase().includes(lowerSearch),
       );
     } else if (selectedCardType === "projects") {
       return data.filter(
         (item) =>
           item.project_id?.toLowerCase().includes(lowerSearch) ||
           item.project_name?.toLowerCase().includes(lowerSearch) ||
-          item.status?.toLowerCase().includes(lowerSearch)
+          item.status?.toLowerCase().includes(lowerSearch),
       );
     } else if (selectedCardType === "serviceRenewals") {
       return data.filter((item) => {
@@ -703,8 +809,8 @@ const goToQuizParticipants = () => {
                       project.status === "completed"
                         ? "bg-success"
                         : project.status === "pending"
-                        ? "bg-warning"
-                        : "bg-info"
+                          ? "bg-warning"
+                          : "bg-info"
                     }`}
                   >
                     {project.status}
@@ -753,7 +859,9 @@ const goToQuizParticipants = () => {
                 <td data-th="Email">{renewal.email}</td>
                 <td data-th="Product">{renewal.product}</td>
                 <td data-th="Amount">₹{renewal.amount}</td>
-                <td data-th="Renewal Date">{formatDate(renewal.renewal_date)}</td>
+                <td data-th="Renewal Date">
+                  {formatDate(renewal.renewal_date)}
+                </td>
                 <td data-th="Expiry Date">{formatDate(renewal.expiry_date)}</td>
                 <td data-th="Payment Status">
                   <span
@@ -761,8 +869,8 @@ const goToQuizParticipants = () => {
                       renewal.payment_status === "completed"
                         ? "bg-success"
                         : renewal.payment_status === "failed"
-                        ? "bg-danger"
-                        : "bg-warning"
+                          ? "bg-danger"
+                          : "bg-warning"
                     }`}
                   >
                     {renewal.payment_status || "pending"}
@@ -779,7 +887,9 @@ const goToQuizParticipants = () => {
                         onClick={() => handleSendRenewalEmail(renewal)}
                         disabled={sendingEmailId === renewal.id}
                       >
-                        {sendingEmailId === renewal.id ? "Sending..." : "Send Email"}
+                        {sendingEmailId === renewal.id
+                          ? "Sending..."
+                          : "Send Email"}
                       </Button>
                     )
                   ) : (
@@ -787,7 +897,11 @@ const goToQuizParticipants = () => {
                   )}
                 </td>
                 <td data-th="Action">
-                  <Button variant="primary" size="sm" onClick={() => handleViewItem(renewal)}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleViewItem(renewal)}
+                  >
                     View
                   </Button>
                 </td>
@@ -825,7 +939,11 @@ const goToQuizParticipants = () => {
 
     if (selectedCardType === "courses") {
       return (
-        <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} size="lg">
+        <Modal
+          show={showDetailModal}
+          onHide={() => setShowDetailModal(false)}
+          size="lg"
+        >
           <Modal.Header closeButton>
             <Modal.Title>Course Details</Modal.Title>
           </Modal.Header>
@@ -880,7 +998,11 @@ const goToQuizParticipants = () => {
       );
     } else if (selectedCardType === "employees") {
       return (
-        <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} size="lg">
+        <Modal
+          show={showDetailModal}
+          onHide={() => setShowDetailModal(false)}
+          size="lg"
+        >
           <Modal.Header closeButton>
             <Modal.Title>Employee Details</Modal.Title>
           </Modal.Header>
@@ -893,7 +1015,9 @@ const goToQuizParticipants = () => {
                 </div>
                 <div className="col-md-6 mb-3">
                   <h5>Name</h5>
-                  <p>{selectedItem.first_name} {selectedItem.last_name}</p>
+                  <p>
+                    {selectedItem.first_name} {selectedItem.last_name}
+                  </p>
                 </div>
               </div>
               <div className="row">
@@ -1004,7 +1128,8 @@ const goToQuizParticipants = () => {
                 <div className="col-md-6 mb-3">
                   <h5>Skills</h5>
                   <p>
-                    {selectedItem.skills_set && selectedItem.skills_set.length > 0
+                    {selectedItem.skills_set &&
+                    selectedItem.skills_set.length > 0
                       ? selectedItem.skills_set.join(", ")
                       : "N/A"}
                   </p>
@@ -1014,7 +1139,9 @@ const goToQuizParticipants = () => {
                 <div className="col-md-6 mb-3">
                   <h5>Status</h5>
                   <p>
-                    <span className={`badge ${selectedItem.is_active ? "bg-success" : "bg-danger"}`}>
+                    <span
+                      className={`badge ${selectedItem.is_active ? "bg-success" : "bg-danger"}`}
+                    >
                       {selectedItem.is_active ? "Active" : "Inactive"}
                     </span>
                   </p>
@@ -1022,7 +1149,9 @@ const goToQuizParticipants = () => {
                 <div className="col-md-6 mb-3">
                   <h5>Verified</h5>
                   <p>
-                    <span className={`badge ${selectedItem.is_verified ? "bg-success" : "bg-danger"}`}>
+                    <span
+                      className={`badge ${selectedItem.is_verified ? "bg-success" : "bg-danger"}`}
+                    >
                       {selectedItem.is_verified ? "Verified" : "Not Verified"}
                     </span>
                   </p>
@@ -1055,7 +1184,7 @@ const goToQuizParticipants = () => {
           },
           credentials: "include",
           body: JSON.stringify(newServiceRenewal),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -1065,10 +1194,17 @@ const goToQuizParticipants = () => {
       const data = await response.json();
       if (data.success) {
         setShowAddServiceRenewalModal(false);
-        setNewServiceRenewal({ domain_name: '', email: '', product: '', amount: '', renewal_date: '', expiry_date: '' });
+        setNewServiceRenewal({
+          domain_name: "",
+          email: "",
+          product: "",
+          amount: "",
+          renewal_date: "",
+          expiry_date: "",
+        });
         const fetchServiceRenewals = await fetch(
           "https://brainrock.in/brainrock/backend/api/service-renewals/",
-          { method: "GET", credentials: "include" }
+          { method: "GET", credentials: "include" },
         );
         const result = await fetchServiceRenewals.json();
         if (result.success && Array.isArray(result.data)) {
@@ -1097,7 +1233,7 @@ const goToQuizParticipants = () => {
           },
           credentials: "include",
           body: JSON.stringify({ order_id: renewal.order_id }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -1108,8 +1244,8 @@ const goToQuizParticipants = () => {
       if (data.success || data.status) {
         setServiceRenewalsData((prev) =>
           prev.map((item) =>
-            item.id === renewal.id ? { ...item, is_email: true } : item
-          )
+            item.id === renewal.id ? { ...item, is_email: true } : item,
+          ),
         );
       } else {
         throw new Error(data.message || "Failed to send email");
@@ -1124,7 +1260,11 @@ const goToQuizParticipants = () => {
   const renderServiceRenewalDetailModal = () => {
     if (!selectedItem) return null;
     return (
-      <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} size="lg">
+      <Modal
+        show={showDetailModal}
+        onHide={() => setShowDetailModal(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Service Renewal Details</Modal.Title>
         </Modal.Header>
@@ -1162,7 +1302,11 @@ const goToQuizParticipants = () => {
 
   const renderAddServiceRenewalModal = () => {
     return (
-      <Modal show={showAddServiceRenewalModal} onHide={() => setShowAddServiceRenewalModal(false)} size="lg">
+      <Modal
+        show={showAddServiceRenewalModal}
+        onHide={() => setShowAddServiceRenewalModal(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Add New Service Renewal</Modal.Title>
         </Modal.Header>
@@ -1173,7 +1317,12 @@ const goToQuizParticipants = () => {
               type="text"
               className="form-control"
               value={newServiceRenewal.domain_name}
-              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, domain_name: e.target.value })}
+              onChange={(e) =>
+                setNewServiceRenewal({
+                  ...newServiceRenewal,
+                  domain_name: e.target.value,
+                })
+              }
               placeholder="Enter domain name"
             />
           </div>
@@ -1183,7 +1332,12 @@ const goToQuizParticipants = () => {
               type="email"
               className="form-control"
               value={newServiceRenewal.email}
-              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, email: e.target.value })}
+              onChange={(e) =>
+                setNewServiceRenewal({
+                  ...newServiceRenewal,
+                  email: e.target.value,
+                })
+              }
               placeholder="Enter email"
             />
           </div>
@@ -1193,7 +1347,12 @@ const goToQuizParticipants = () => {
               type="text"
               className="form-control"
               value={newServiceRenewal.product}
-              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, product: e.target.value })}
+              onChange={(e) =>
+                setNewServiceRenewal({
+                  ...newServiceRenewal,
+                  product: e.target.value,
+                })
+              }
               placeholder="Enter product"
             />
           </div>
@@ -1203,7 +1362,12 @@ const goToQuizParticipants = () => {
               type="number"
               className="form-control"
               value={newServiceRenewal.amount}
-              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, amount: e.target.value })}
+              onChange={(e) =>
+                setNewServiceRenewal({
+                  ...newServiceRenewal,
+                  amount: e.target.value,
+                })
+              }
               placeholder="Enter amount"
             />
           </div>
@@ -1213,7 +1377,12 @@ const goToQuizParticipants = () => {
               type="date"
               className="form-control"
               value={newServiceRenewal.renewal_date}
-              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, renewal_date: e.target.value })}
+              onChange={(e) =>
+                setNewServiceRenewal({
+                  ...newServiceRenewal,
+                  renewal_date: e.target.value,
+                })
+              }
             />
           </div>
           <div className="mb-3">
@@ -1222,16 +1391,28 @@ const goToQuizParticipants = () => {
               type="date"
               className="form-control"
               value={newServiceRenewal.expiry_date}
-              onChange={(e) => setNewServiceRenewal({ ...newServiceRenewal, expiry_date: e.target.value })}
+              onChange={(e) =>
+                setNewServiceRenewal({
+                  ...newServiceRenewal,
+                  expiry_date: e.target.value,
+                })
+              }
             />
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddServiceRenewalModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowAddServiceRenewalModal(false)}
+          >
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleAddServiceRenewal} disabled={loading.serviceRenewals}>
-            {loading.serviceRenewals ? 'Saving...' : 'Save Service Renewal'}
+          <Button
+            variant="primary"
+            onClick={handleAddServiceRenewal}
+            disabled={loading.serviceRenewals}
+          >
+            {loading.serviceRenewals ? "Saving..." : "Save Service Renewal"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -1312,23 +1493,23 @@ const goToQuizParticipants = () => {
                   </div>
                 </div>
               </Col> */}
-               
-               {/* Total Registr student */}
+
+              {/* Total Registr student */}
               <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
-  <div
-    className="br-stat-card card-students"
-      onClick={goToNextComponent}
-    style={{ cursor: "pointer" }}
-  >
-    <div className="br-stat-icon">
-      <FaUserGraduate />
-    </div>
-    <div className="br-stat-details">
-      <h5>Students</h5>
-      <h2>{studentCount}</h2>
-    </div>
-  </div>
-</Col>
+                <div
+                  className="br-stat-card card-students"
+                  onClick={goToNextComponent}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="br-stat-icon">
+                    <FaUserGraduate />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Students</h5>
+                    <h2>{studentCount}</h2>
+                  </div>
+                </div>
+              </Col>
 
               {/* BrainRock Bills Card */}
               <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
@@ -1364,7 +1545,7 @@ const goToQuizParticipants = () => {
                 </div>
               </Col>
 
-               {/* Khelo Jito Users Card */}
+              {/* Khelo Jito Users Card */}
               <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
                   className="br-stat-card card-khelo"
@@ -1377,6 +1558,23 @@ const goToQuizParticipants = () => {
                   <div className="br-stat-details">
                     <h5>Khelo Jito Users</h5>
                     <h2>{kheloJitoUsersCount}</h2>
+                  </div>
+                </div>
+              </Col>
+
+              {/* Khelo Jito Completed Users Card */}
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
+                <div
+                  className="br-stat-card card-khelo"
+                  onClick={goToKheloJitoCompletedUsers}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="br-stat-icon">
+                    <FaUsers />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>Completed Winners</h5>
+                    <h2>{kheloJitoCompletedUsersCount}</h2>
                   </div>
                 </div>
               </Col>
@@ -1398,7 +1596,7 @@ const goToQuizParticipants = () => {
                 </div>
               </Col>
 
-               {/* Service Renewals Card */}
+              {/* Service Renewals Card */}
               <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
                 <div
                   className="br-stat-card card-mail"
@@ -1414,7 +1612,6 @@ const goToQuizParticipants = () => {
                   </div>
                 </div>
               </Col>
-
             </Row>
           </div>
 
@@ -1423,7 +1620,9 @@ const goToQuizParticipants = () => {
             <div id="table-section" className="br-box-container mt-5">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2 className="mb-0">{getModalTitle()} List</h2>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <div
+                  style={{ display: "flex", gap: "10px", alignItems: "center" }}
+                >
                   {selectedCardType === "serviceRenewals" && (
                     <Button
                       variant="primary"
@@ -1437,7 +1636,6 @@ const goToQuizParticipants = () => {
                     type="text"
                     placeholder={`Search ${getModalTitle().toLowerCase()}...`}
                     className="form-control"
-                    
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
@@ -1488,9 +1686,7 @@ const goToQuizParticipants = () => {
               ) : (
                 <>
                   <Row className="mt-3">
-                    <div className="col-md-12">
-                      {renderTable(currentItems)}
-                    </div>
+                    <div className="col-md-12">{renderTable(currentItems)}</div>
                   </Row>
 
                   {/* Pagination */}
@@ -1526,7 +1722,8 @@ const goToQuizParticipants = () => {
 
       {/* Detail View Modal */}
       {renderDetailModal()}
-      {selectedCardType === "serviceRenewals" && renderServiceRenewalDetailModal()}
+      {selectedCardType === "serviceRenewals" &&
+        renderServiceRenewalDetailModal()}
       {renderAddServiceRenewalModal()}
     </div>
   );
