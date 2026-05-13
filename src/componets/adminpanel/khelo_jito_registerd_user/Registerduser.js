@@ -81,117 +81,117 @@ const Registerduser = () => {
   }, [location.state]);
 
 // Fetch data based on active tab
-   useEffect(() => {
-     const fetchData = async () => {
-       try {
-         setLoading(true);
-         let url, dataKey, dataSetter;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        let url, dataKey, dataSetter;
 
-         if (activeTab === "registered") {
-           url = `${API_BASE_URL}/api/register-test/`;
-           dataKey = "users";
-           dataSetter = setUsers;
-         } else if (activeTab === "participated") {
-           url = `${API_BASE_URL}/api/quiz-participants/`;
-           dataKey = "participants";
-           dataSetter = setParticipants;
-         } else if (activeTab === "completed") {
-           url = `${API_BASE_URL}/api/all-khelo-jetto-user/`;
-           dataKey = "winners";
-           dataSetter = (data) => {
-             // Transform the nested data structure to flat format for table display
-             const transformedData = data.map((item, index) => ({
-               id: index + 1,
-               user_id: item.student_profile?.user_id,
-               full_name: item.student_profile?.full_name,
-               email: item.student_profile?.email,
-               phone: item.student_profile?.phone,
-               created_at: item.student_profile?.created_at,
-               score: item.winner_details?.score,
-               cashback: item.winner_details?.cashback,
-               wallet_balance: item.winner_details?.wallet_balance,
-               upi_id: item.winner_details?.upi_id,
-               account_holder_name: item.winner_details?.account_holder_name,
-               account_number: item.winner_details?.account_number,
-               ifsc_code: item.winner_details?.ifsc_code,
-               total_attempts: item.total_attempts,
-               won_at: item.winner_details?.created_at,
-               attempts: item.attempts || [],
-             }));
-             setWinners(transformedData);
-           };
-         }
+        if (activeTab === "registered") {
+          url = `${API_BASE_URL}/api/register-test/`;
+          dataKey = "users";
+          dataSetter = setUsers;
+        } else if (activeTab === "participated") {
+          url = `${API_BASE_URL}/api/quiz-participants/`;
+          dataKey = "participants";
+          dataSetter = setParticipants;
+        } else if (activeTab === "completed") {
+          url = `${API_BASE_URL}/api/all-khelo-jetto-user/`;
+          dataKey = "winners";
+          dataSetter = (data) => {
+            // Transform the nested data structure to flat format for table display
+            const transformedData = data.map((item, index) => ({
+              id: index + 1,
+              user_id: item.student_profile?.user_id,
+              full_name: item.student_profile?.full_name,
+              email: item.student_profile?.email,
+              phone: item.student_profile?.phone,
+              created_at: item.student_profile?.created_at,
+              score: item.winner_details?.score,
+              cashback: item.winner_details?.cashback,
+              wallet_balance: item.winner_details?.wallet_balance,
+              upi_id: item.winner_details?.upi_id,
+              account_holder_name: item.winner_details?.account_holder_name,
+              account_number: item.winner_details?.account_number,
+              ifsc_code: item.winner_details?.ifsc_code,
+              total_attempts: item.total_attempts,
+              won_at: item.winner_details?.created_at,
+              attempts: item.attempts || [],
+            }));
+            setWinners(transformedData);
+          };
+        }
 
-         console.log(`=== Fetching ${activeTab} data ===`);
-         const response = await fetch(url, {
-           method: "GET",
-           credentials: "include",
-         });
+        console.log(`=== Fetching ${activeTab} data ===`);
+        const response = await fetch(url, {
+          method: "GET",
+          credentials: "include",
+        });
 
-         console.log("Response status:", response.status);
-         console.log("Response headers:", response.headers);
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
 
-         if (!response.ok) {
-           const errorText = await response.text();
-           console.error("HTTP error response:", errorText);
-           throw new Error(`HTTP error! status: ${response.status}`);
-         }
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("HTTP error response:", errorText);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-         let data;
-         const contentType = response.headers.get("content-type");
-         if (contentType && contentType.includes("application/json")) {
-           data = await response.json();
-         } else {
-           try {
-             data = await response.json();
-           } catch {
-             throw new Error("Invalid response format from server");
-           }
-         }
+        let data;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          data = await response.json();
+        } else {
+          try {
+            data = await response.json();
+          } catch {
+            throw new Error("Invalid response format from server");
+          }
+        }
 
-         console.log("=== API response data ===", JSON.stringify(data, null, 2));
+        console.log("=== API response data ===", JSON.stringify(data, null, 2));
 
-         // Check if response is an array (direct data format)
-         if (activeTab === "completed") {
-           // Handle the winners API response
-           if (data.status && Array.isArray(data.data)) {
-             dataSetter(data.data);
-             console.log("Success - Winners count:", data.total_winners_count);
-           } else {
-             console.error(
-               "Unexpected data format for winners:",
-               typeof data,
-               data,
-             );
-             throw new Error(data.message || "Failed to fetch winners data");
-           }
-         } else if (Array.isArray(data)) {
-           dataSetter(data);
-           console.log(`Success - ${dataKey} data:`, data);
-         } else if (data.status && Array.isArray(data.data)) {
-           // API uses status: true instead of success: true
-           dataSetter(data.data);
-           console.log(`Success - ${dataKey} data:`, data.data);
-         } else {
-           console.error(
-             "API returned unexpected data format:",
-             typeof data,
-             data,
-           );
-           throw new Error(data.message || `Failed to fetch ${activeTab} data`);
-         }
-       } catch (err) {
-         console.error(`=== Error fetching ${activeTab} data ===`);
-         console.error("Error message:", err.message);
-         console.error("Error stack:", err.stack);
-         setError(err.message || `Failed to fetch ${activeTab} data. Please check the API endpoint.`);
-       } finally {
-         setLoading(false);
-       }
-     };
+        // Check if response is an array (direct data format)
+        if (activeTab === "completed") {
+          // Handle the winners API response
+          if (data.status && Array.isArray(data.data)) {
+            dataSetter(data.data);
+            console.log("Success - Winners count:", data.total_winners_count);
+          } else {
+            console.error(
+              "Unexpected data format for winners:",
+              typeof data,
+              data,
+            );
+            throw new Error(data.message || "Failed to fetch winners data");
+          }
+        } else if (Array.isArray(data)) {
+          dataSetter(data);
+          console.log(`Success - ${dataKey} data:`, data);
+        } else if (data.status && Array.isArray(data.data)) {
+          // API uses status: true instead of success: true
+          dataSetter(data.data);
+          console.log(`Success - ${dataKey} data:`, data.data);
+        } else {
+          console.error(
+            "API returned unexpected data format:",
+            typeof data,
+            data,
+          );
+          throw new Error(data.message || `Failed to fetch ${activeTab} data`);
+        }
+      } catch (err) {
+        console.error(`=== Error fetching ${activeTab} data ===`);
+        console.error("Error message:", err.message);
+        console.error("Error stack:", err.stack);
+        setError(err.message || `Failed to fetch ${activeTab} data. Please check the API endpoint.`);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-     fetchData();
-   }, [activeTab]);
+    fetchData();
+  }, [activeTab]);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -302,77 +302,75 @@ const Registerduser = () => {
   };
 
 // Handle delete selected users
-   const handleDeleteUsers = async () => {
-     try {
-       setLoading(true);
-       const deleteUrl =
-         activeTab === "registered"
-           ? `${API_BASE_URL}/api/register-test/`
-           : `${API_BASE_URL}/api/quiz-participants/`;
+  const handleDeleteUsers = async () => {
+    try {
+      setLoading(true);
+      const deleteUrl =
+        activeTab === "registered"
+          ? `${API_BASE_URL}/api/register-test/`
+          : `${API_BASE_URL}/api/quiz-participants/`;
 
-       const response = await fetch(deleteUrl, {
-         method: "DELETE",
-         credentials: "include",
-         headers: {
-           "Content-Type": "application/json",
-         },
-         body: JSON.stringify({ id: selectedUsers }),
-       });
+      const response = await fetch(deleteUrl, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: selectedUsers }),
+      });
 
-       if (!response.ok) {
-         const errorText = await response.text();
-         console.error("HTTP error response:", errorText);
-         throw new Error("Failed to delete users");
-       }
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("HTTP error response:", errorText);
+        throw new Error("Failed to delete users");
+      }
 
-       const contentType = response.headers.get("content-type");
-       let data;
-       if (contentType && contentType.includes("application/json")) {
-         data = await response.json();
-       } else {
-         // Try to parse as JSON even if content-type is not set correctly
-         try {
-           data = await response.json();
-         } catch {
-           // If no JSON body, check if delete was successful by status
-           if (response.status === 200 || response.status === 204) {
-             setSelectedUsers([]);
-             setShowDeleteModal(false);
-             if (activeTab === "registered") {
-               setUsers((prev) =>
-                 prev.filter((user) => !selectedUsers.includes(user.user_id)),
-               );
-             } else {
-               setParticipants((prev) =>
-                 prev.filter(
-                   (participant) => !selectedUsers.includes(participant.id),
-                 ),
-               );
-             }
-             return;
-           }
-           throw new Error("Invalid response format from server");
-         }
-}
-
-        if (data.status) {
-          // Remove deleted users from the appropriate state based on active tab
-          if (activeTab === "registered") {
-            setUsers((prev) =>
-              prev.filter((user) => !selectedUsers.includes(user.user_id)),
-            );
-          } else {
-            setParticipants((prev) =>
-              prev.filter(
-                (participant) => !selectedUsers.includes(participant.id),
-              ),
-            );
+      const contentType = response.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        try {
+          data = await response.json();
+        } catch {
+          if (response.status === 200 || response.status === 204) {
+            setSelectedUsers([]);
+            setShowDeleteModal(false);
+            if (activeTab === "registered") {
+              setUsers((prev) =>
+                prev.filter((user) => !selectedUsers.includes(user.user_id)),
+              );
+            } else {
+              setParticipants((prev) =>
+                prev.filter(
+                  (participant) => !selectedUsers.includes(participant.id),
+                ),
+              );
+            }
+            return;
           }
-          setSelectedUsers([]);
-          setShowDeleteModal(false);
-        } else {
-          throw new Error(data.message || "Failed to delete users");
+          throw new Error("Invalid response format from server");
         }
+      }
+
+      if (data.status) {
+        // Remove deleted users from the appropriate state based on active tab
+        if (activeTab === "registered") {
+          setUsers((prev) =>
+            prev.filter((user) => !selectedUsers.includes(user.user_id)),
+          );
+        } else {
+          setParticipants((prev) =>
+            prev.filter(
+              (participant) => !selectedUsers.includes(participant.id),
+            ),
+          );
+        }
+        setSelectedUsers([]);
+        setShowDeleteModal(false);
+      } else {
+        throw new Error(data.message || "Failed to delete users");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -741,142 +739,192 @@ const Registerduser = () => {
        // Completed Winners tab
        return (
          <>
-           <table className="temp-rwd-table">
-             <tbody>
-               <tr>
-                 <th>S.No</th>
-                 <th>User ID</th>
-                 <th>Name</th>
-                 <th>Email</th>
-                 <th>Phone</th>
-                 <th>Score</th>
-                 <th>Cashback</th>
-                 <th>Wallet Balance</th>
-                 <th>UPI ID</th>
-                 <th>Account Holder</th>
-                 <th>Account Number</th>
-                 <th>IFSC Code</th>
-                 <th>Registration Date</th>
-                 <th>Win Date</th>
-                 <th>Total Attempts</th>
-                 <th>Action</th>
-               </tr>
-
+           {isMobile ? (
+             // Mobile Card Layout
+             <div className="winners-cards-container">
                {currentItems.length > 0 ? (
                  currentItems.map((winner, index) => (
-                   <tr key={winner.id}>
-                     <td data-th="S.No">
-                       {(currentPage - 1) * itemsPerPage + index + 1}
-                     </td>
-                     <td data-th="User ID">{winner.user_id}</td>
-                     <td data-th="Name">{winner.full_name}</td>
-                     <td data-th="Email">{winner.email}</td>
-                     <td data-th="Phone">{winner.phone}</td>
-                     <td data-th="Score">{winner.score || "N/A"}</td>
-                     <td data-th="Cashback">
-                       ₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}
-                     </td>
-                     <td data-th="Wallet Balance">
-                       ₹
-                       {winner.wallet_balance
-                         ? winner.wallet_balance.toFixed(2)
-                         : "0.00"}
-                     </td>
-                     <td data-th="UPI ID">{winner.upi_id || "N/A"}</td>
-                     <td data-th="Account Holder">
-                       {winner.account_holder_name || "N/A"}
-                     </td>
-                     <td data-th="Account Number">
-                       {winner.account_number || "N/A"}
-                     </td>
-                     <td data-th="IFSC Code">{winner.ifsc_code || "N/A"}</td>
-                     <td data-th="Registration Date">
-                       {formatDate(winner.created_at)}
-                     </td>
-                     <td data-th="Win Date">
-                       {winner.won_at ? formatDate(winner.won_at) : "N/A"}
-                     </td>
-                     <td
-                       data-th="Total Attempts"
-                       style={{
-                         cursor: "pointer",
-                         color: "#0066cc",
-                         fontWeight: "bold",
-                       }}
-                       onClick={() =>
-                         openAttemptsModal(winner.attempts, winner.full_name)
-                       }
-                     >
-                       {winner.total_attempts || "N/A"}
-                     </td>
-                     <td data-th="Action">
+                   <div key={winner.id} className="winner-card">
+                     <div className="card-header">
+                       <span className="card-sno">#{(currentPage - 1) * itemsPerPage + index + 1}</span>
+                       <span className="card-status" style={{ backgroundColor: "#007bff", color: "white", padding: "4px 12px", borderRadius: "20px", fontSize: "12px" }}>⭐ Winner</span>
+                     </div>
+                     <div className="card-body">
+                       <div className="card-row">
+                         <span className="card-label">Name:</span>
+                         <span className="card-value">{winner.full_name}</span>
+                       </div>
+                       <div className="card-row">
+                         <span className="card-label">User ID:</span>
+                         <span className="card-value">{winner.user_id}</span>
+                       </div>
+                       <div className="card-row">
+                         <span className="card-label">Email:</span>
+                         <span className="card-value">{winner.email}</span>
+                       </div>
+                       <div className="card-row">
+                         <span className="card-label">Phone:</span>
+                         <span className="card-value">{winner.phone}</span>
+                       </div>
+                       <div className="card-row" style={{ backgroundColor: "#f8f9fa", padding: "10px" }}>
+                         <span className="card-label">Score:</span>
+                         <span className="card-value" style={{ fontWeight: "bold", color: "#28a745" }}>{winner.score || "N/A"}</span>
+                       </div>
+                       <div className="card-row" style={{ backgroundColor: "#f8f9fa", padding: "10px" }}>
+                         <span className="card-label">Cashback:</span>
+                         <span className="card-value" style={{ fontWeight: "bold", color: "#28a745" }}>₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}</span>
+                       </div>
+                       <div className="card-row">
+                         <span className="card-label">Attempts:</span>
+                         <span 
+                           className="card-value" 
+                           style={{ cursor: "pointer", color: "#0066cc", fontWeight: "bold" }}
+                           onClick={() => openAttemptsModal(winner.attempts, winner.full_name)}
+                         >
+                           {winner.total_attempts || "N/A"} →
+                         </span>
+                       </div>
+                     </div>
+                     <div className="card-footer">
                        <Button
                          variant="primary"
                          size="sm"
                          onClick={() => handleViewUser(winner)}
+                         style={{ width: "100%" }}
                        >
-                         View
+                         View Details
                        </Button>
-                     </td>
-                   </tr>
+                     </div>
+                   </div>
                  ))
                ) : (
-                 <tr>
-                   <td colSpan="16" className="text-center">
-                     No completed winners data available.
-                   </td>
-                 </tr>
+                 <div style={{ textAlign: "center", padding: "30px" }}>
+                   No completed winners data available.
+                 </div>
                )}
-             </tbody>
-             <tfoot>
-               <tr
-                 style={{
-                   backgroundColor: "#f0f8ff",
-                   fontWeight: "bold",
-                   borderTop: "2px solid #0066cc",
-                 }}
-               >
-                 <td
-                   colSpan="6"
-                   className="text-end pe-3"
-                   style={{ color: "#333" }}
+             </div>
+           ) : (
+             // Desktop Table Layout
+             <table className="temp-rwd-table">
+               <tbody>
+                 <tr>
+                   <th>S.No</th>
+                   <th>User ID</th>
+                   <th>Name</th>
+                   <th>Email</th>
+                   <th>Phone</th>
+                   <th>Score</th>
+                   <th>Cashback</th>
+                   <th>Wallet</th>
+                   <th>Attempts</th>
+                   <th>Win Date</th>
+                   <th>Action</th>
+                 </tr>
+
+                 {currentItems.length > 0 ? (
+                   currentItems.map((winner, index) => (
+                     <tr key={winner.id}>
+                       <td data-th="S.No">
+                         {(currentPage - 1) * itemsPerPage + index + 1}
+                       </td>
+                       <td data-th="User ID">{winner.user_id}</td>
+                       <td data-th="Name">{winner.full_name}</td>
+                       <td data-th="Email">{winner.email}</td>
+                       <td data-th="Phone">{winner.phone}</td>
+                       <td data-th="Score" style={{ fontWeight: "bold", color: "#28a745" }}>
+                         {winner.score || "N/A"}
+                       </td>
+                       <td data-th="Cashback" style={{ fontWeight: "bold", color: "#28a745" }}>
+                         ₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}
+                       </td>
+                       <td data-th="Wallet">
+                         ₹{winner.wallet_balance ? winner.wallet_balance.toFixed(2) : "0.00"}
+                       </td>
+                       <td
+                         data-th="Attempts"
+                         style={{
+                           cursor: "pointer",
+                           color: "#0066cc",
+                           fontWeight: "bold",
+                         }}
+                         onClick={() =>
+                           openAttemptsModal(winner.attempts, winner.full_name)
+                         }
+                       >
+                         {winner.total_attempts || "N/A"} →
+                       </td>
+                       <td data-th="Win Date">
+                         {winner.won_at ? formatDate(winner.won_at) : "N/A"}
+                       </td>
+                       <td data-th="Action">
+                         <Button
+                           variant="primary"
+                           size="sm"
+                           onClick={() => handleViewUser(winner)}
+                         >
+                           View
+                         </Button>
+                       </td>
+                     </tr>
+                   ))
+                 ) : (
+                   <tr>
+                     <td colSpan="11" className="text-center">
+                       No completed winners data available.
+                     </td>
+                   </tr>
+                 )}
+               </tbody>
+               <tfoot>
+                 <tr
+                   style={{
+                     backgroundColor: "#f0f8ff",
+                     fontWeight: "bold",
+                     borderTop: "2px solid #0066cc",
+                   }}
                  >
-                   <strong>Winners Summary:</strong>
-                 </td>
-                 <td colSpan="10" style={{ paddingLeft: "20px" }}>
-                  <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
-                    <div style={{ color: "#27ae60", fontWeight: "600" }}>
-                      ✓ Total Winners: {filteredData.length}
+                   <td
+                     colSpan="4"
+                     className="text-end pe-3"
+                     style={{ color: "#333" }}
+                   >
+                     <strong>Winners Summary:</strong>
+                   </td>
+                   <td colSpan="7" style={{ paddingLeft: "20px" }}>
+                    <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
+                      <div style={{ color: "#27ae60", fontWeight: "600" }}>
+                        ✓ Total Winners: {filteredData.length}
+                      </div>
+                      <div style={{ color: "#3498db", fontWeight: "600" }}>
+                        ₹ Total Cashback:{" "}
+                        {filteredData
+                          .reduce(
+                            (sum, w) => sum + (parseFloat(w.cashback) || 0),
+                            0,
+                          )
+                          .toFixed(2)}
+                      </div>
+                      <div
+                        style={{
+                          color: "#0066cc",
+                          fontWeight: "600",
+                          marginTop: "8px",
+                        }}
+                      >
+                        Total in Wallet: ₹
+                        {filteredData
+                          .reduce(
+                            (sum, w) => sum + (parseFloat(w.wallet_balance) || 0),
+                            0,
+                          )
+                          .toFixed(2)}
+                      </div>
                     </div>
-                    <div style={{ color: "#3498db", fontWeight: "600" }}>
-                      ₹ Total Cashback:{" "}
-                      {filteredData
-                        .reduce(
-                          (sum, w) => sum + (parseFloat(w.cashback) || 0),
-                          0,
-                        )
-                        .toFixed(2)}
-                    </div>
-                    <div
-                      style={{
-                        color: "#0066cc",
-                        fontWeight: "600",
-                        marginTop: "8px",
-                      }}
-                    >
-                      Total in Wallet: ₹
-                      {filteredData
-                        .reduce(
-                          (sum, w) => sum + (parseFloat(w.wallet_balance) || 0),
-                          0,
-                        )
-                        .toFixed(2)}
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+           )}
         </>
       );
     }
