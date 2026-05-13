@@ -54,6 +54,11 @@ const Registerduser = () => {
   // Selected users for deletion
   const [selectedUsers, setSelectedUsers] = useState([]);
 
+  // Attempts detail modal state
+  const [showAttemptsModal, setShowAttemptsModal] = useState(false);
+  const [selectedAttempts, setSelectedAttempts] = useState([]);
+  const [selectedWinnerName, setSelectedWinnerName] = useState("");
+
   // Responsive check
   useEffect(() => {
     const checkDevice = () => {
@@ -75,104 +80,118 @@ const Registerduser = () => {
     }
   }, [location.state]);
 
-  // Fetch data based on active tab
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        let url, dataKey, dataSetter;
+// Fetch data based on active tab
+   useEffect(() => {
+     const fetchData = async () => {
+       try {
+         setLoading(true);
+         let url, dataKey, dataSetter;
 
-        if (activeTab === "registered") {
-          url = `${API_BASE_URL}/api/register-test/`;
-          dataKey = "users";
-          dataSetter = setUsers;
-        } else if (activeTab === "participated") {
-          url = `${API_BASE_URL}/api/quiz-participants/`;
-          dataKey = "participants";
-          dataSetter = setParticipants;
-        } else if (activeTab === "completed") {
-          url = `${API_BASE_URL}/api/all-khelo-jetto-user/`;
-          dataKey = "winners";
-          dataSetter = (data) => {
-            // Transform the nested data structure to flat format for table display
-            const transformedData = data.map((item, index) => ({
-              id: index + 1,
-              user_id: item.student_profile?.user_id,
-              full_name: item.student_profile?.full_name,
-              email: item.student_profile?.email,
-              phone: item.student_profile?.phone,
-              created_at: item.student_profile?.created_at,
-              score: item.winner_details?.score,
-              cashback: item.winner_details?.cashback,
-              wallet_balance: item.winner_details?.wallet_balance,
-              upi_id: item.winner_details?.upi_id,
-              account_holder_name: item.winner_details?.account_holder_name,
-              account_number: item.winner_details?.account_number,
-              ifsc_code: item.winner_details?.ifsc_code,
-            }));
-            setWinners(transformedData);
-          };
-        }
+         if (activeTab === "registered") {
+           url = `${API_BASE_URL}/api/register-test/`;
+           dataKey = "users";
+           dataSetter = setUsers;
+         } else if (activeTab === "participated") {
+           url = `${API_BASE_URL}/api/quiz-participants/`;
+           dataKey = "participants";
+           dataSetter = setParticipants;
+         } else if (activeTab === "completed") {
+           url = `${API_BASE_URL}/api/all-khelo-jetto-user/`;
+           dataKey = "winners";
+           dataSetter = (data) => {
+             // Transform the nested data structure to flat format for table display
+             const transformedData = data.map((item, index) => ({
+               id: index + 1,
+               user_id: item.student_profile?.user_id,
+               full_name: item.student_profile?.full_name,
+               email: item.student_profile?.email,
+               phone: item.student_profile?.phone,
+               created_at: item.student_profile?.created_at,
+               score: item.winner_details?.score,
+               cashback: item.winner_details?.cashback,
+               wallet_balance: item.winner_details?.wallet_balance,
+               upi_id: item.winner_details?.upi_id,
+               account_holder_name: item.winner_details?.account_holder_name,
+               account_number: item.winner_details?.account_number,
+               ifsc_code: item.winner_details?.ifsc_code,
+               total_attempts: item.total_attempts,
+               won_at: item.winner_details?.created_at,
+               attempts: item.attempts || [],
+             }));
+             setWinners(transformedData);
+           };
+         }
 
-        console.log(`=== Fetching ${activeTab} data ===`);
-        const response = await fetch(url, {
-          method: "GET",
-          credentials: "include",
-        });
+         console.log(`=== Fetching ${activeTab} data ===`);
+         const response = await fetch(url, {
+           method: "GET",
+           credentials: "include",
+         });
 
-        console.log("Response status:", response.status);
-        console.log("Response headers:", response.headers);
+         console.log("Response status:", response.status);
+         console.log("Response headers:", response.headers);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("HTTP error response:", errorText);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+         if (!response.ok) {
+           const errorText = await response.text();
+           console.error("HTTP error response:", errorText);
+           throw new Error(`HTTP error! status: ${response.status}`);
+         }
 
-        const data = await response.json();
-        console.log("=== API response data ===", JSON.stringify(data, null, 2));
+         let data;
+         const contentType = response.headers.get("content-type");
+         if (contentType && contentType.includes("application/json")) {
+           data = await response.json();
+         } else {
+           try {
+             data = await response.json();
+           } catch {
+             throw new Error("Invalid response format from server");
+           }
+         }
 
-        // Check if response is an array (direct data format)
-        if (activeTab === "completed") {
-          // Handle the winners API response
-          if (data.status && Array.isArray(data.data)) {
-            dataSetter(data.data);
-            console.log("Success - Winners count:", data.total_winners_count);
-          } else {
-            console.error(
-              "Unexpected data format for winners:",
-              typeof data,
-              data,
-            );
-            throw new Error(data.message || "Failed to fetch winners data");
-          }
-        } else if (Array.isArray(data)) {
-          dataSetter(data);
-          console.log(`Success - ${dataKey} data:`, data);
-        } else if (data.status && Array.isArray(data.data)) {
-          // API uses status: true instead of success: true
-          dataSetter(data.data);
-          console.log(`Success - ${dataKey} data:`, data.data);
-        } else {
-          console.error(
-            "API returned unexpected data format:",
-            typeof data,
-            data,
-          );
-          throw new Error(data.message || `Failed to fetch ${activeTab} data`);
-        }
-      } catch (err) {
-        console.error(`=== Error fetching ${activeTab} data ===`);
-        console.error("Error message:", err.message);
-        console.error("Error stack:", err.stack);
-        setError(err.message || `Failed to fetch ${activeTab} data`);
-      } finally {
-        setLoading(false);
-      }
-    };
+         console.log("=== API response data ===", JSON.stringify(data, null, 2));
 
-    fetchData();
-  }, [activeTab]);
+         // Check if response is an array (direct data format)
+         if (activeTab === "completed") {
+           // Handle the winners API response
+           if (data.status && Array.isArray(data.data)) {
+             dataSetter(data.data);
+             console.log("Success - Winners count:", data.total_winners_count);
+           } else {
+             console.error(
+               "Unexpected data format for winners:",
+               typeof data,
+               data,
+             );
+             throw new Error(data.message || "Failed to fetch winners data");
+           }
+         } else if (Array.isArray(data)) {
+           dataSetter(data);
+           console.log(`Success - ${dataKey} data:`, data);
+         } else if (data.status && Array.isArray(data.data)) {
+           // API uses status: true instead of success: true
+           dataSetter(data.data);
+           console.log(`Success - ${dataKey} data:`, data.data);
+         } else {
+           console.error(
+             "API returned unexpected data format:",
+             typeof data,
+             data,
+           );
+           throw new Error(data.message || `Failed to fetch ${activeTab} data`);
+         }
+       } catch (err) {
+         console.error(`=== Error fetching ${activeTab} data ===`);
+         console.error("Error message:", err.message);
+         console.error("Error stack:", err.stack);
+         setError(err.message || `Failed to fetch ${activeTab} data. Please check the API endpoint.`);
+       } finally {
+         setLoading(false);
+       }
+     };
+
+     fetchData();
+   }, [activeTab]);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -282,47 +301,78 @@ const Registerduser = () => {
     }
   };
 
-  // Handle delete selected users
-  const handleDeleteUsers = async () => {
-    try {
-      setLoading(true);
-      const deleteUrl =
-        activeTab === "registered"
-          ? `${API_BASE_URL}/api/register-test/`
-          : `${API_BASE_URL}/api/quiz-participants/`;
+// Handle delete selected users
+   const handleDeleteUsers = async () => {
+     try {
+       setLoading(true);
+       const deleteUrl =
+         activeTab === "registered"
+           ? `${API_BASE_URL}/api/register-test/`
+           : `${API_BASE_URL}/api/quiz-participants/`;
 
-      const response = await fetch(deleteUrl, {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: selectedUsers }),
-      });
+       const response = await fetch(deleteUrl, {
+         method: "DELETE",
+         credentials: "include",
+         headers: {
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify({ id: selectedUsers }),
+       });
 
-      if (!response.ok) {
-        throw new Error("Failed to delete users");
-      }
+       if (!response.ok) {
+         const errorText = await response.text();
+         console.error("HTTP error response:", errorText);
+         throw new Error("Failed to delete users");
+       }
 
-      const data = await response.json();
-      if (data.status) {
-        // Remove deleted users from the appropriate state based on active tab
-        if (activeTab === "registered") {
-          setUsers((prev) =>
-            prev.filter((user) => !selectedUsers.includes(user.user_id)),
-          );
+       const contentType = response.headers.get("content-type");
+       let data;
+       if (contentType && contentType.includes("application/json")) {
+         data = await response.json();
+       } else {
+         // Try to parse as JSON even if content-type is not set correctly
+         try {
+           data = await response.json();
+         } catch {
+           // If no JSON body, check if delete was successful by status
+           if (response.status === 200 || response.status === 204) {
+             setSelectedUsers([]);
+             setShowDeleteModal(false);
+             if (activeTab === "registered") {
+               setUsers((prev) =>
+                 prev.filter((user) => !selectedUsers.includes(user.user_id)),
+               );
+             } else {
+               setParticipants((prev) =>
+                 prev.filter(
+                   (participant) => !selectedUsers.includes(participant.id),
+                 ),
+               );
+             }
+             return;
+           }
+           throw new Error("Invalid response format from server");
+         }
+}
+
+        if (data.status) {
+          // Remove deleted users from the appropriate state based on active tab
+          if (activeTab === "registered") {
+            setUsers((prev) =>
+              prev.filter((user) => !selectedUsers.includes(user.user_id)),
+            );
+          } else {
+            setParticipants((prev) =>
+              prev.filter(
+                (participant) => !selectedUsers.includes(participant.id),
+              ),
+            );
+          }
+          setSelectedUsers([]);
+          setShowDeleteModal(false);
         } else {
-          setParticipants((prev) =>
-            prev.filter(
-              (participant) => !selectedUsers.includes(participant.id),
-            ),
-          );
+          throw new Error(data.message || "Failed to delete users");
         }
-        setSelectedUsers([]);
-        setShowDeleteModal(false);
-      } else {
-        throw new Error(data.message || "Failed to delete users");
-      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -338,6 +388,20 @@ const Registerduser = () => {
   // Close delete confirmation modal
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
+  };
+
+  // Open attempts detail modal
+  const openAttemptsModal = (attempts, fullName) => {
+    setSelectedAttempts(attempts);
+    setSelectedWinnerName(fullName);
+    setShowAttemptsModal(true);
+  };
+
+  // Close attempts detail modal
+  const closeAttemptsModal = () => {
+    setShowAttemptsModal(false);
+    setSelectedAttempts([]);
+    setSelectedWinnerName("");
   };
 
   // Handle payment status filter change
@@ -521,99 +585,99 @@ const Registerduser = () => {
           </table>
         </>
       );
-    } else if (activeTab === "participated") {
-      // Participated Quiz tab
-      return (
-        <>
-          <table className="temp-rwd-table">
-            <tbody>
-              <tr>
-                <th>
-                  <Form.Check
-                    type="checkbox"
-                    checked={
-                      selectedUsers.length === currentItems.length &&
-                      currentItems.length > 0
-                    }
-                    onChange={handleSelectAll}
-                    label=""
-                  />
-                </th>
-                <th>S.No</th>
-                <th>User ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Quiz</th>
-                <th>Payment Status</th>
-                <th>Attempt Status</th>
-                <th>Total Questions</th>
-                <th>Score</th>
-                <th>Joined At</th>
-                <th>Action</th>
-              </tr>
+} else if (activeTab === "participated") {
+       // Participated Quiz tab
+       return (
+         <>
+           <table className="temp-rwd-table">
+             <tbody>
+               <tr>
+                 <th>
+                   <Form.Check
+                     type="checkbox"
+                     checked={
+                       selectedUsers.length === currentItems.length &&
+                       currentItems.length > 0
+                     }
+                     onChange={handleSelectAll}
+                     label=""
+                   />
+                 </th>
+                 <th>S.No</th>
+                 <th>User ID</th>
+                 <th>Name</th>
+                 <th>Email</th>
+                 <th>Phone</th>
+                 <th>Quiz</th>
+                 <th>Payment Status</th>
+                 <th>Attempt Status</th>
+                 <th>Total Questions</th>
+                 <th>Score</th>
+                 <th>Joined At</th>
+                 <th>Action</th>
+               </tr>
 
-              {currentItems.length > 0 ? (
-                currentItems.map((participant, index) => (
-                  <tr key={participant.id}>
-                    <td data-th="Select">
-                      <Form.Check
-                        type="checkbox"
-                        checked={selectedUsers.includes(participant.id)}
-                        onChange={() => handleSelectUser(participant.id)}
-                        label=""
-                      />
-                    </td>
-                    <td data-th="S.No">
-                      {(currentPage - 1) * itemsPerPage + index + 1}
-                    </td>
-                    <td data-th="User ID">{participant.student?.user_id}</td>
-                    <td data-th="Name">{participant.student?.full_name}</td>
-                    <td data-th="Email">{participant.student?.email}</td>
-                    <td data-th="Phone">{participant.student?.phone}</td>
-                    <td data-th="Quiz">{participant.quiz}</td>
-                    <td data-th="Payment Status">
-                      <span
-                        className={`badge bg-${participant.payment_status === "wallet-completed" || participant.payment_status === "completed" ? "success" : "warning"}`}
-                      >
-                        {participant.payment_status}
-                      </span>
-                    </td>
-                    <td data-th="Attempt Status">
-                      <span
-                        className={`badge bg-${participant.attempt?.attempt_status === "submitted" ? "success" : participant.attempt?.attempt_status === "started" ? "info" : "warning"}`}
-                      >
-                        {participant.attempt?.attempt_status || "Not Attempted"}
-                      </span>
-                    </td>
-                    <td data-th="Total Questions">
-                      {participant.attempt?.total_questions || "N/A"}
-                    </td>
-                    <td data-th="Score">
-                      {participant.attempt?.score || "N/A"}
-                    </td>
-                    <td data-th="Joined At">
-                      {formatDate(participant.joined_at)}
-                    </td>
-                    <td data-th="Action">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => handleViewUser(participant)}
-                      >
-                        View
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="13" className="text-center">
-                    No quiz participants data available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+               {currentItems.length > 0 ? (
+                 currentItems.map((participant, index) => (
+                   <tr key={participant.id}>
+                     <td data-th="Select">
+                       <Form.Check
+                         type="checkbox"
+                         checked={selectedUsers.includes(participant.id)}
+                         onChange={() => handleSelectUser(participant.id)}
+                         label=""
+                       />
+                     </td>
+                     <td data-th="S.No">
+                       {(currentPage - 1) * itemsPerPage + index + 1}
+                     </td>
+                     <td data-th="User ID">{participant.student?.user_id}</td>
+                     <td data-th="Name">{participant.student?.full_name}</td>
+                     <td data-th="Email">{participant.student?.email}</td>
+                     <td data-th="Phone">{participant.student?.phone}</td>
+                     <td data-th="Quiz">{participant.quiz}</td>
+                     <td data-th="Payment Status">
+                       <span
+                         className={`badge bg-${participant.payment_status === "wallet-completed" || participant.payment_status === "completed" ? "success" : "warning"}`}
+                       >
+                         {participant.payment_status}
+                       </span>
+                     </td>
+                     <td data-th="Attempt Status">
+                       <span
+                         className={`badge bg-${participant.attempt?.status === "submitted" ? "success" : participant.attempt?.status === "started" ? "info" : "warning"}`}
+                       >
+                         {participant.attempt?.status || "Not Attempted"}
+                       </span>
+                     </td>
+                     <td data-th="Total Questions">
+                       {participant.attempt?.total_questions || "N/A"}
+                     </td>
+                     <td data-th="Score">
+                       {participant.attempt?.score || "N/A"}
+                     </td>
+                     <td data-th="Joined At">
+                       {formatDate(participant.joined_at)}
+                     </td>
+                     <td data-th="Action">
+                       <Button
+                         variant="primary"
+                         size="sm"
+                         onClick={() => handleViewUser(participant)}
+                       >
+                         View
+                       </Button>
+                     </td>
+                   </tr>
+                 ))
+               ) : (
+                 <tr>
+                   <td colSpan="13" className="text-center">
+                     No quiz participants data available.
+                   </td>
+                 </tr>
+               )}
+             </tbody>
             <tfoot>
               <tr
                 style={{
@@ -673,93 +737,113 @@ const Registerduser = () => {
           </table>
         </>
       );
-    } else if (activeTab === "completed") {
-      // Completed Winners tab
-      return (
-        <>
-          <table className="temp-rwd-table">
-            <tbody>
-              <tr>
-                <th>S.No</th>
-                <th>User ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Score</th>
-                <th>Cashback</th>
-                <th>Wallet Balance</th>
-                <th>UPI ID</th>
-                <th>Account Holder</th>
-                <th>Account Number</th>
-                <th>IFSC Code</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
+} else if (activeTab === "completed") {
+       // Completed Winners tab
+       return (
+         <>
+           <table className="temp-rwd-table">
+             <tbody>
+               <tr>
+                 <th>S.No</th>
+                 <th>User ID</th>
+                 <th>Name</th>
+                 <th>Email</th>
+                 <th>Phone</th>
+                 <th>Score</th>
+                 <th>Cashback</th>
+                 <th>Wallet Balance</th>
+                 <th>UPI ID</th>
+                 <th>Account Holder</th>
+                 <th>Account Number</th>
+                 <th>IFSC Code</th>
+                 <th>Registration Date</th>
+                 <th>Win Date</th>
+                 <th>Total Attempts</th>
+                 <th>Action</th>
+               </tr>
 
-              {currentItems.length > 0 ? (
-                currentItems.map((winner, index) => (
-                  <tr key={winner.id}>
-                    <td data-th="S.No">
-                      {(currentPage - 1) * itemsPerPage + index + 1}
-                    </td>
-                    <td data-th="User ID">{winner.user_id}</td>
-                    <td data-th="Name">{winner.full_name}</td>
-                    <td data-th="Email">{winner.email}</td>
-                    <td data-th="Phone">{winner.phone}</td>
-                    <td data-th="Score">{winner.score || "N/A"}</td>
-                    <td data-th="Cashback">
-                      ₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}
-                    </td>
-                    <td data-th="Wallet Balance">
-                      ₹
-                      {winner.wallet_balance
-                        ? winner.wallet_balance.toFixed(2)
-                        : "0.00"}
-                    </td>
-                    <td data-th="UPI ID">{winner.upi_id || "N/A"}</td>
-                    <td data-th="Account Holder">
-                      {winner.account_holder_name || "N/A"}
-                    </td>
-                    <td data-th="Account Number">
-                      {winner.account_number || "N/A"}
-                    </td>
-                    <td data-th="IFSC Code">{winner.ifsc_code || "N/A"}</td>
-                    <td data-th="Date">{formatDate(winner.created_at)}</td>
-                    <td data-th="Action">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => handleViewUser(winner)}
-                      >
-                        View
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="14" className="text-center">
-                    No completed winners data available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-            <tfoot>
-              <tr
-                style={{
-                  backgroundColor: "#f0f8ff",
-                  fontWeight: "bold",
-                  borderTop: "2px solid #0066cc",
-                }}
-              >
-                <td
-                  colSpan="6"
-                  className="text-end pe-3"
-                  style={{ color: "#333" }}
-                >
-                  <strong>Winners Summary:</strong>
-                </td>
-                <td colSpan="8" style={{ paddingLeft: "20px" }}>
+               {currentItems.length > 0 ? (
+                 currentItems.map((winner, index) => (
+                   <tr key={winner.id}>
+                     <td data-th="S.No">
+                       {(currentPage - 1) * itemsPerPage + index + 1}
+                     </td>
+                     <td data-th="User ID">{winner.user_id}</td>
+                     <td data-th="Name">{winner.full_name}</td>
+                     <td data-th="Email">{winner.email}</td>
+                     <td data-th="Phone">{winner.phone}</td>
+                     <td data-th="Score">{winner.score || "N/A"}</td>
+                     <td data-th="Cashback">
+                       ₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}
+                     </td>
+                     <td data-th="Wallet Balance">
+                       ₹
+                       {winner.wallet_balance
+                         ? winner.wallet_balance.toFixed(2)
+                         : "0.00"}
+                     </td>
+                     <td data-th="UPI ID">{winner.upi_id || "N/A"}</td>
+                     <td data-th="Account Holder">
+                       {winner.account_holder_name || "N/A"}
+                     </td>
+                     <td data-th="Account Number">
+                       {winner.account_number || "N/A"}
+                     </td>
+                     <td data-th="IFSC Code">{winner.ifsc_code || "N/A"}</td>
+                     <td data-th="Registration Date">
+                       {formatDate(winner.created_at)}
+                     </td>
+                     <td data-th="Win Date">
+                       {winner.won_at ? formatDate(winner.won_at) : "N/A"}
+                     </td>
+                     <td
+                       data-th="Total Attempts"
+                       style={{
+                         cursor: "pointer",
+                         color: "#0066cc",
+                         fontWeight: "bold",
+                       }}
+                       onClick={() =>
+                         openAttemptsModal(winner.attempts, winner.full_name)
+                       }
+                     >
+                       {winner.total_attempts || "N/A"}
+                     </td>
+                     <td data-th="Action">
+                       <Button
+                         variant="primary"
+                         size="sm"
+                         onClick={() => handleViewUser(winner)}
+                       >
+                         View
+                       </Button>
+                     </td>
+                   </tr>
+                 ))
+               ) : (
+                 <tr>
+                   <td colSpan="16" className="text-center">
+                     No completed winners data available.
+                   </td>
+                 </tr>
+               )}
+             </tbody>
+             <tfoot>
+               <tr
+                 style={{
+                   backgroundColor: "#f0f8ff",
+                   fontWeight: "bold",
+                   borderTop: "2px solid #0066cc",
+                 }}
+               >
+                 <td
+                   colSpan="6"
+                   className="text-end pe-3"
+                   style={{ color: "#333" }}
+                 >
+                   <strong>Winners Summary:</strong>
+                 </td>
+                 <td colSpan="10" style={{ paddingLeft: "20px" }}>
                   <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
                     <div style={{ color: "#27ae60", fontWeight: "600" }}>
                       ✓ Total Winners: {filteredData.length}
@@ -977,27 +1061,89 @@ const Registerduser = () => {
         </Container>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      <Modal show={showDeleteModal} onHide={closeDeleteModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            Are you sure you want to delete {selectedUsers.length} selected
-            user(s)?
-          </p>
-          <p>This action cannot be undone.</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={closeDeleteModal}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleDeleteUsers}>
-            Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
+{/* Delete Confirmation Modal */}
+       <Modal show={showDeleteModal} onHide={closeDeleteModal}>
+         <Modal.Header closeButton>
+           <Modal.Title>Confirm Delete</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+           <p>
+             Are you sure you want to delete {selectedUsers.length} selected
+             user(s)?
+           </p>
+           <p>This action cannot be undone.</p>
+         </Modal.Body>
+         <Modal.Footer>
+           <Button variant="secondary" onClick={closeDeleteModal}>
+             Cancel
+           </Button>
+           <Button variant="danger" onClick={handleDeleteUsers}>
+             Delete
+           </Button>
+         </Modal.Footer>
+       </Modal>
+
+       {/* Attempts Detail Modal */}
+       <Modal show={showAttemptsModal} onHide={closeAttemptsModal} size="lg">
+         <Modal.Header closeButton>
+           <Modal.Title>Attempt Details - {selectedWinnerName}</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+           {selectedAttempts.length > 0 ? (
+             <table className="temp-rwd-table">
+               <thead>
+                 <tr>
+                   <th>S.No</th>
+                   <th>Attempt ID</th>
+                   <th>Total Questions</th>
+                   <th>Score</th>
+                   <th>Status</th>
+                   <th>Started At</th>
+                   <th>Submitted At</th>
+                   <th>Certificate</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 {selectedAttempts
+                   .sort((a, b) => new Date(b.started_at) - new Date(a.started_at))
+                   .map((attempt, index) => (
+                     <tr key={attempt.id}>
+                       <td>{index + 1}</td>
+                       <td>{attempt.id}</td>
+                       <td>{attempt.total_questions}</td>
+                       <td>{attempt.score}</td>
+                       <td>
+                         <span
+                           className={`badge bg-${attempt.test_status === "passed" ? "success" : attempt.test_status === "failed" ? "danger" : "warning"}`}
+                         >
+                           {attempt.test_status}
+                         </span>
+                       </td>
+                       <td>{formatDate(attempt.started_at)}</td>
+                       <td>{attempt.submitted_at ? formatDate(attempt.submitted_at) : "N/A"}</td>
+                       <td>
+{attempt.certificate ? (
+                            <a href={`${API_BASE_URL}${attempt.certificate}`} target="_blank" rel="noopener noreferrer">
+                              View Certificate
+                            </a>
+                         ) : (
+                           "N/A"
+                         )}
+                       </td>
+                     </tr>
+                   ))}
+               </tbody>
+             </table>
+           ) : (
+             <p>No attempts data available.</p>
+           )}
+         </Modal.Body>
+         <Modal.Footer>
+           <Button variant="secondary" onClick={closeAttemptsModal}>
+             Close
+           </Button>
+         </Modal.Footer>
+       </Modal>
 
       {/* View User Details Modal */}
       <Modal
@@ -1145,43 +1291,43 @@ const Registerduser = () => {
                     </Col>
                   </Row>
 
-                  {selectedUser.attempt && (
-                    <Row>
-                      <Col md={6} className="mb-3">
-                        <p>
-                          <strong>Attempt Status:</strong>
-                          <span
-                            className={`badge bg-${selectedUser.attempt.attempt_status === "submitted" ? "success" : selectedUser.attempt.attempt_status === "started" ? "info" : "warning"} ms-2`}
-                          >
-                            {selectedUser.attempt.attempt_status}
-                          </span>
-                        </p>
-                        <p>
-                          <strong>Total Questions:</strong>{" "}
-                          {selectedUser.attempt.total_questions}
-                        </p>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <p>
-                          <strong>Score:</strong> {selectedUser.attempt.score}
-                        </p>
-                        {selectedUser.attempt.started_at && (
-                          <p>
-                            <strong>Started At:</strong>{" "}
-                            {formatDate(selectedUser.attempt.started_at)}
-                          </p>
-                        )}
-                        {selectedUser.attempt.submitted_at && (
-                          <p>
-                            <strong>Submitted At:</strong>{" "}
-                            {formatDate(selectedUser.attempt.submitted_at)}
-                          </p>
-                        )}
-                      </Col>
-                    </Row>
-                  )}
-                </>
-              ) : (
+{selectedUser.attempt && (
+                     <Row>
+                       <Col md={6} className="mb-3">
+                         <p>
+                           <strong>Attempt Status:</strong>
+                           <span
+                             className={`badge bg-${selectedUser.attempt.status === "submitted" ? "success" : selectedUser.attempt.status === "started" ? "info" : "warning"} ms-2`}
+                           >
+                             {selectedUser.attempt.status}
+                           </span>
+                         </p>
+                         <p>
+                           <strong>Total Questions:</strong>{" "}
+                           {selectedUser.attempt.total_questions}
+                         </p>
+                       </Col>
+                       <Col md={6} className="mb-3">
+                         <p>
+                           <strong>Score:</strong> {selectedUser.attempt.score}
+                         </p>
+                         {selectedUser.attempt.started_at && (
+                           <p>
+                             <strong>Started At:</strong>{" "}
+                             {formatDate(selectedUser.attempt.started_at)}
+                           </p>
+                         )}
+                         {selectedUser.attempt.submitted_at && (
+                           <p>
+                             <strong>Submitted At:</strong>{" "}
+                             {formatDate(selectedUser.attempt.submitted_at)}
+                           </p>
+                         )}
+                       </Col>
+                     </Row>
+                   )}
+                 </>
+               ) : (
                 // Winner details
                 <>
                   <Row>
