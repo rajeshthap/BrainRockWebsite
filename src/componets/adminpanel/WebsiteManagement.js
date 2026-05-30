@@ -202,9 +202,9 @@ const WebsiteManagement = () => {
     navigate("/Registerduser", { state: { activeTab: "completed" } });
   };
 
-  const goToQuizParticipants = () => {
-    navigate("/Registerduser", { state: { activeTab: "quiz-participants" } });
-  };
+    const goToQuizParticipants = () => {
+        navigate("/Registerduser", { state: { activeTab: "participated" } });
+    };
 
   // Fetch Quiz Participants count
   useEffect(() => {
