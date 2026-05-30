@@ -73,12 +73,19 @@ const Registerduser = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  // Handle navigation state for tab selection
-  useEffect(() => {
-    if (location.state && location.state.activeTab) {
-      setActiveTab(location.state.activeTab);
-    }
-  }, [location.state]);
+   // Handle navigation state for tab selection
+   useEffect(() => {
+     if (location.state && location.state.activeTab) {
+       setActiveTab(location.state.activeTab);
+     }
+   }, [location.state]);
+
+   // Reset filters when tab changes
+   useEffect(() => {
+     setSearchTerm("");
+     setPaymentStatusFilter("all");
+     setCurrentPage(1);
+   }, [activeTab]);
 
 // Fetch data based on active tab
   useEffect(() => {
