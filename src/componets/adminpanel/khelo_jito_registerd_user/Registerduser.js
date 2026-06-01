@@ -1269,33 +1269,33 @@ const Registerduser = () => {
                     </Col>
                   </Row>
 
-                  {selectedUser.payment_status === "completed" && (
-                    <Row>
-                      <Col md={6} className="mb-3">
-                        <p>
-                          <strong>PhonePe Order ID:</strong>{" "}
-                          {selectedUser.phonepe_order_id}
-                        </p>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <p>
-                          <strong>Transaction ID:</strong>{" "}
-                          {selectedUser.transaction_id}
-                        </p>
-                      </Col>
-                    </Row>
-                  )}
+                   {selectedUser.payment_status === "completed" && (
+                     <Row>
+                       <Col md={6} className="mb-3">
+                         <p>
+                           <strong>PhonePe Order ID:</strong>{" "}
+                           {selectedUser.order_id || selectedUser.phonepeOrderId || selectedUser.order_id || 'N/A'}
+                         </p>
+                       </Col>
+                       <Col md={6} className="mb-3">
+                         <p>
+                           <strong>Transaction ID:</strong>{" "}
+                           {selectedUser.transaction_id || selectedUser.transactionId || selectedUser.orderId || 'N/A'}
+                         </p>
+                       </Col>
+                     </Row>
+                   )}
 
                   {selectedUser.test_status && (
                     <Row>
                       <Col md={6} className="mb-3">
                         <p>
                           <strong>Test Status:</strong>
-<span
+<button
   className={`badge ${selectedUser.test_status === "passed" ? "success" : "danger"} ms-2`}
 >
   {selectedUser.test_status}
-</span>
+</button>
                         </p>
                       </Col>
                       {selectedUser.score !== undefined && (
