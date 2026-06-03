@@ -745,7 +745,7 @@ const GenerateBill = () => {
                             {ukssoMFormData.items.map((item, index) => {
                               const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0);
                               return (
-                                <tr key={index} style={{ height: "2.5rem" }}>
+                                <tr key={index}>
                                   <td style={{ padding: "0.3rem" }}>
                                     <Form.Control
                                       type="text"
@@ -760,11 +760,11 @@ const GenerateBill = () => {
                                   <td style={{ padding: "0.3rem" }}>
                                     <Form.Control
                                       as="textarea"
-                                      rows={1}
+                                      rows={3}
                                       placeholder="Description"
                                       value={item.description}
                                       onChange={(e) => handleItemChange(index, "description", e.target.value)}
-                                      style={{ fontSize: "0.8rem", padding: "0.3rem", resize: "none" }}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem" }}
                                       size="sm"
                                     />
                                   </td>
@@ -1015,7 +1015,7 @@ const GenerateBill = () => {
                               const price = parseFloat(item.price) || 0;
                               const itemTotal = quantity * price;
                               return (
-                                <tr key={index} style={{ height: "2.5rem" }}>
+                                <tr key={index}>
                                   <td style={{ padding: "0.3rem" }}>
                                     <Form.Control
                                       type="text"
@@ -1030,11 +1030,11 @@ const GenerateBill = () => {
                                   <td style={{ padding: "0.3rem" }}>
                                     <Form.Control
                                       as="textarea"
-                                      rows={1}
+                                      rows={3}
                                       placeholder="Description"
                                       value={item.description}
                                       onChange={(e) => handleZeeItemChange(index, "description", e.target.value)}
-                                      style={{ fontSize: "0.8rem", padding: "0.3rem", resize: "none" }}
+                                      style={{ fontSize: "0.8rem", padding: "0.3rem" }}
                                       size="sm"
                                     />
                                   </td>
