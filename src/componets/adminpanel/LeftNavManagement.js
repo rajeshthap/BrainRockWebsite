@@ -336,32 +336,32 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
                 },
             ],
         },
-        {
-            icon: <FaTrophy />,  // Added for Khelo Jito
-            label: "Khelo Jito",
-            submenu: [
-                {
-                    label: "Add Question",
-                    path: "/AddPlay",
-                    icon: <FaPlusCircle />,
-                },
-                {
-                    label: "Manage Questions",
-                    path: "/ManagePlay",
-                    icon: <FaEdit />,
-                },
-                {
-                    label: "Add Quiz",
-                    path: "/AddQuiz",
-                    icon: <FaPlusCircle />,
-                },
-                {
-                    label: "Manage Quiz",
-                    path: "/ManageQuiz",
-                    icon: <FaEdit />,
-                },
-            ],
-        },
+        // {
+        //     icon: <FaTrophy />,  
+        //     label: "Khelo Jito",
+        //     submenu: [
+        //         {
+        //             label: "Add Question",
+        //             path: "/AddPlay",
+        //             icon: <FaPlusCircle />,
+        //         },
+        //         {
+        //             label: "Manage Questions",
+        //             path: "/ManagePlay",
+        //             icon: <FaEdit />,
+        //         },
+        //         {
+        //             label: "Add Quiz",
+        //             path: "/AddQuiz",
+        //             icon: <FaPlusCircle />,
+        //         },
+        //         {
+        //             label: "Manage Quiz",
+        //             path: "/ManageQuiz",
+        //             icon: <FaEdit />,
+        //         },
+        //     ],
+        // },
     ];
 
     return (

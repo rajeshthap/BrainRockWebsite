@@ -192,8 +192,9 @@ export default function Login() {
                         disabled={authLoading}
                       >
                         {/* <option value="">Select Role</option> */}
+                           <option value="Select Role">Select Role</option>
                         <option value="admin">Admin</option>
-                        {/* <option value="khelo-aur-jeeto">Khelo Aur Jeeto</option> */}
+                     
                       
                       </Form.Select>
                     </Form.Group>
