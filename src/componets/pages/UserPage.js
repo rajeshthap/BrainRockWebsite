@@ -323,50 +323,7 @@ function UserPage() {
   return (
     <div className="container-fluid p-0">
       {/* Khelo Jito Popup */}
-      <Modal
-        show={showPopup}
-        onHide={handleClosePopup}
-        centered
-        size="lg"
-        backdrop="static"
-        className="khelo-jito-popup"
-      >
-        <Modal.Header closeButton className="bg-gradient-to-r from-purple-600 to-blue-600 term-nd-condi">
-          <Modal.Title className="w-100">
-            <h3 className="mb-0 text-white">Get Knowledge, Certificate, and Money</h3>
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="p-4">
-          <div className="row align-items-center">
-            {/* Left side - content */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-             
-              <p className="mb-4 text-gray-700">
-                Join our quiz challenge and win exciting prizes. Test your knowledge and earn rewards.
-              </p>
-              
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={handleKheloJitoClick}
-                className="px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 border-0 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
-                style={{ borderRadius: '50px', fontSize: '1.1rem' }}
-              >
-                Start Quiz
-              </Button>
-            </div>
-            {/* Right side - banner */}
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <img 
-                src={KheloBanner} 
-                alt="Khelo Aur Jeeto Banner" 
-                className="w-100 rounded"
-                style={{ height: '250px', objectFit: 'cover' }}
-              />
-            </div>
-          </div>
-        </Modal.Body>
-      </Modal>
+      
       <TopNotificationBanner />
       <div className="craousal-main" style={{ overflow: "hidden" }}>
         <Carousel className="resorce-craousal" interval={3000} pause={false}>

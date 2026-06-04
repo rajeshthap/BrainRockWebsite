@@ -105,42 +105,37 @@ const Registerduser = () => {
         } else if (activeTab === "completed") {
           url = `${API_BASE_URL}/api/all-khelo-jetto-user/`;
           dataKey = "winners";
-          dataSetter = (data) => {
-            // Transform the nested data structure to flat format for table display
-            const transformedData = data.map((item, index) => ({
-              id: index + 1,
-              user_id: item.student_profile?.user_id,
-              full_name: item.student_profile?.full_name,
-              email: item.student_profile?.email,
-              phone: item.student_profile?.phone,
-              created_at: item.student_profile?.created_at,
-              score: item.winner_details?.score,
-              cashback: item.winner_details?.cashback,
-              wallet_balance: item.winner_details?.wallet_balance,
-              upi_id: item.winner_details?.upi_id,
-              account_holder_name: item.winner_details?.account_holder_name,
-              account_number: item.winner_details?.account_number,
-              ifsc_code: item.winner_details?.ifsc_code,
-              total_attempts: item.total_attempts,
-              won_at: item.winner_details?.created_at,
-              attempts: item.attempts || [],
-            }));
-            setWinners(transformedData);
-          };
-        }
+dataSetter = (data) => {
+             // Transform the nested data structure to flat format for table display
+             const transformedData = data.map((item, index) => ({
+               id: index + 1,
+               user_id: item.student_profile?.user_id,
+               full_name: item.student_profile?.full_name,
+               email: item.student_profile?.email,
+               phone: item.student_profile?.phone,
+               created_at: item.student_profile?.created_at,
+               score: item.winner_details?.score,
+               cashback: item.winner_details?.cashback,
+               wallet_balance: item.winner_details?.wallet_balance,
+               upi_id: item.winner_details?.upi_id,
+               account_holder_name: item.winner_details?.account_holder_name,
+               account_number: item.winner_details?.account_number,
+               ifsc_code: item.winner_details?.ifsc_code,
+               total_attempts: item.total_attempts,
+               won_at: item.winner_details?.created_at,
+               attempts: item.attempts || [],
+             }));
+             setWinners(transformedData);
+           };
+         }
 
-        console.log(`=== Fetching ${activeTab} data ===`);
         const response = await fetch(url, {
           method: "GET",
           credentials: "include",
         });
 
-        console.log("Response status:", response.status);
-        console.log("Response headers:", response.headers);
-
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("HTTP error response:", errorText);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
@@ -156,41 +151,23 @@ const Registerduser = () => {
           }
         }
 
-        console.log("=== API response data ===", JSON.stringify(data, null, 2));
-
         // Check if response is an array (direct data format)
         if (activeTab === "completed") {
           // Handle the winners API response
           if (data.status && Array.isArray(data.data)) {
             dataSetter(data.data);
-            console.log("Success - Winners count:", data.total_winners_count);
           } else {
-            console.error(
-              "Unexpected data format for winners:",
-              typeof data,
-              data,
-            );
             throw new Error(data.message || "Failed to fetch winners data");
           }
         } else if (Array.isArray(data)) {
           dataSetter(data);
-          console.log(`Success - ${dataKey} data:`, data);
         } else if (data.status && Array.isArray(data.data)) {
           // API uses status: true instead of success: true
           dataSetter(data.data);
-          console.log(`Success - ${dataKey} data:`, data.data);
         } else {
-          console.error(
-            "API returned unexpected data format:",
-            typeof data,
-            data,
-          );
           throw new Error(data.message || `Failed to fetch ${activeTab} data`);
         }
       } catch (err) {
-        console.error(`=== Error fetching ${activeTab} data ===`);
-        console.error("Error message:", err.message);
-        console.error("Error stack:", err.stack);
         setError(err.message || `Failed to fetch ${activeTab} data. Please check the API endpoint.`);
       } finally {
         setLoading(false);
@@ -202,7 +179,7 @@ const Registerduser = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Filter data based on active tab
+// Filter data based on active tab
   const filteredData =
     activeTab === "registered"
       ? users.filter((user) => {
@@ -253,15 +230,11 @@ const Registerduser = () => {
             return matchesSearch;
           });
 
-  console.log(`=== Filtered ${activeTab} data ===`, filteredData);
-
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  console.log("=== Current items (page", currentPage, ") ===", currentItems);
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -327,8 +300,6 @@ const Registerduser = () => {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("HTTP error response:", errorText);
         throw new Error("Failed to delete users");
       }
 

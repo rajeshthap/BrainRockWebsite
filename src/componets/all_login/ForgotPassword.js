@@ -330,8 +330,8 @@ const handleSendOtp = async (e) => {
                         onChange={(e) => setRole(e.target.value)}
                       >
                         <option value="admin">Admin</option>
-                        <option value="hr">HR</option>
-                        <option value="khelo-aur-jeeto">Khelo aur Jeeto</option>
+                        {/* <option value="hr">HR</option>
+                        <option value="khelo-aur-jeeto">Khelo aur Jeeto</option> */}
                       </Form.Select>
                     </Form.Group>
 

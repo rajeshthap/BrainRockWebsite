@@ -191,9 +191,9 @@ export default function Login() {
                         className="br-form-control"
                         disabled={authLoading}
                       >
-                        <option value="">Select Role</option>
+                        {/* <option value="">Select Role</option> */}
                         <option value="admin">Admin</option>
-                        <option value="khelo-aur-jeeto">Khelo Aur Jeeto</option>
+                        {/* <option value="khelo-aur-jeeto">Khelo Aur Jeeto</option> */}
                       
                       </Form.Select>
                     </Form.Group>
