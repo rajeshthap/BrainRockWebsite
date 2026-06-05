@@ -37,6 +37,7 @@ function CoursesTest() {
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [showWrongAnswers, setShowWrongAnswers] = useState(false);
 
   useEffect(() => {
     const storedCourseData = localStorage.getItem("test_courseData");
@@ -74,8 +75,7 @@ function CoursesTest() {
   const startTest = async () => {
     try {
       const userId =
-        localStorage.getItem("test_user_id") ||
-        searchParams.get("user_id");
+        localStorage.getItem("test_user_id") || searchParams.get("user_id");
       if (!userId) {
         setError("User ID not found. Please register first.");
         setLoading(false);
@@ -182,6 +182,26 @@ function CoursesTest() {
         0,
       );
 
+      // Calculate wrong answers
+      const wrongAnswers = testData.questions
+        .map((question, index) => {
+          const userAnswer = finalizedAnswers[index];
+          const isCorrect = userAnswer === question.correct_answer;
+          return {
+            questionId: question.id,
+            questionText: question.question_text,
+            userAnswer:
+              userAnswer !== null
+                ? question.options[userAnswer]
+                : "Not answered",
+            correctAnswer: question.options[question.correct_answer],
+            isCorrect,
+          };
+        })
+        .filter((item) => !item.isCorrect);
+
+      const correctCount = testData.questions.length - wrongAnswers.length;
+
       setResult({
         score: apiResult.score || 0,
         total: totalMarks,
@@ -193,8 +213,9 @@ function CoursesTest() {
         certificate: apiResult.certificate || null,
         courseName:
           courseDataRef.current?.title || courseData?.title || "Course Test",
-        correct: apiResult.score || 0,
+        correct: correctCount,
         totalQuestions: testData.total_questions,
+        wrongAnswers: wrongAnswers,
       });
       setShowSubmitConfirm(false);
     } catch (err) {
@@ -233,82 +254,375 @@ function CoursesTest() {
     const passed = result.status === "passed" || result.percentage >= 80;
 
     return (
-      <Container className="my-5">
-        <Card className="result-card">
-          <Card.Body className="text-center">
-            <Card.Title className={passed ? "text-success" : "text-danger"}>
-              {passed ? "Congratulations!" : "Test Completed"}
-            </Card.Title>
+      <Container fluid className="test-result-container">
+        <Container className="my-5">
+          {/* Header Section */}
+          <Row className="mb-5">
+            <Col md={12}>
+              <div className="text-center mb-4">
+                <h1
+                  className="test-result-title"
+                  style={{
+                    fontSize: "2.5rem",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                >
+                  {result.courseName}
+                </h1>
+                <p
+                  className="test-result-subtitle"
+                  style={{ fontSize: "1.1rem", color: "#666" }}
+                >
+                  Test Results
+                </p>
+              </div>
+            </Col>
+          </Row>
 
-            <div className="result-icon">
-              {passed ? (
-                <span style={{ fontSize: "4rem" }}>🎉</span>
-              ) : (
-                <span style={{ fontSize: "4rem" }}>📝</span>
-              )}
-            </div>
-
-            <h3>{result.courseName}</h3>
-
-            <div className="result-details">
-              <Row className="mt-4">
-                <Col md={4}>
-                  <div className="result-item">
-                    <h4>{result.score}</h4>
-                    <p>Score</p>
+          {/* Result Card */}
+          <Row className="mb-4">
+            <Col md={12}>
+              <Card
+                className={`result-card shadow-lg ${passed ? "border-success" : "border-warning"}`}
+                style={{ borderWidth: "3px" }}
+              >
+                <Card.Body className="text-center py-5">
+                  <div className="result-icon mb-4">
+                    {passed ? (
+                      <span style={{ fontSize: "5rem" }}>🎉</span>
+                    ) : (
+                      <span style={{ fontSize: "5rem" }}>📝</span>
+                    )}
                   </div>
-                </Col>
-                <Col md={4}>
-                  <div className="result-item">
-                    <h4>{result.percentage}%</h4>
-                    <p>Result</p>
-                  </div>
-                </Col>
-                <Col md={4}>
-                  <div className="result-item">
-                    <h4 style={{ textTransform: "capitalize" }}>
-                      {result.status}
-                    </h4>
-                    <p>Status</p>
-                  </div>
-                </Col>
-              </Row>
-            </div>
 
-            {passed && (
-              <Alert variant="success" className="mt-4">
-                <strong>You passed!</strong> You can proceed with the course.
-                {result.certificate && (
-                  <div className="mt-3">
-                    <a
-                      href={`${API_BASE_URL}${result.certificate}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-success"
+                  <Card.Title
+                    className={`mb-4 ${passed ? "text-success" : "text-warning"}`}
+                    style={{ fontSize: "2rem", fontWeight: "bold" }}
+                  >
+                    {passed ? "Congratulations!" : "Test Completed"}
+                  </Card.Title>
+
+                  {/* Result Details Grid */}
+                  <Row className="mt-5 mb-5">
+                    <Col md={3} className="mb-3">
+                      <div
+                        className="result-stat"
+                        style={{
+                          padding: "20px",
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: "10px",
+                          border: "2px solid #007bff",
+                        }}
+                      >
+                        <h5
+                          style={{
+                            color: "#007bff",
+                            fontSize: "0.9rem",
+                            textTransform: "uppercase",
+                            letterSpacing: "1px",
+                          }}
+                        >
+                          Score
+                        </h5>
+                        <h2
+                          style={{
+                            color: "#007bff",
+                            fontSize: "2.5rem",
+                            fontWeight: "bold",
+                            margin: "10px 0",
+                          }}
+                        >
+                          {result.score}
+                        </h2>
+                        <p style={{ color: "#666", margin: "0" }}>
+                          out of {result.total}
+                        </p>
+                      </div>
+                    </Col>
+                    <Col md={3} className="mb-3">
+                      <div
+                        className="result-stat"
+                        style={{
+                          padding: "20px",
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: "10px",
+                          border: "2px solid #28a745",
+                        }}
+                      >
+                        <h5
+                          style={{
+                            color: "#28a745",
+                            fontSize: "0.9rem",
+                            textTransform: "uppercase",
+                            letterSpacing: "1px",
+                          }}
+                        >
+                          Correct
+                        </h5>
+                        <h2
+                          style={{
+                            color: "#28a745",
+                            fontSize: "2.5rem",
+                            fontWeight: "bold",
+                            margin: "10px 0",
+                          }}
+                        >
+                          {result.correct}
+                        </h2>
+                        <p style={{ color: "#666", margin: "0" }}>
+                          out of {result.totalQuestions}
+                        </p>
+                      </div>
+                    </Col>
+                    <Col md={3} className="mb-3">
+                      <div
+                        className="result-stat"
+                        style={{
+                          padding: "20px",
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: "10px",
+                          border: "2px solid #dc3545",
+                        }}
+                      >
+                        <h5
+                          style={{
+                            color: "#dc3545",
+                            fontSize: "0.9rem",
+                            textTransform: "uppercase",
+                            letterSpacing: "1px",
+                          }}
+                        >
+                          Wrong
+                        </h5>
+                        <h2
+                          style={{
+                            color: "#dc3545",
+                            fontSize: "2.5rem",
+                            fontWeight: "bold",
+                            margin: "10px 0",
+                          }}
+                        >
+                          {result.totalQuestions - result.correct}
+                        </h2>
+                        <p style={{ color: "#666", margin: "0" }}>
+                          answered incorrectly
+                        </p>
+                      </div>
+                    </Col>
+                    <Col md={3} className="mb-3">
+                      <div
+                        className="result-stat"
+                        style={{
+                          padding: "20px",
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: "10px",
+                          border: `2px solid ${result.percentage >= 80 ? "#28a745" : "#ffc107"}`,
+                        }}
+                      >
+                        <h5
+                          style={{
+                            color:
+                              result.percentage >= 80 ? "#28a745" : "#ffc107",
+                            fontSize: "0.9rem",
+                            textTransform: "uppercase",
+                            letterSpacing: "1px",
+                          }}
+                        >
+                          Percentage
+                        </h5>
+                        <h2
+                          style={{
+                            color:
+                              result.percentage >= 80 ? "#28a745" : "#ffc107",
+                            fontSize: "2.5rem",
+                            fontWeight: "bold",
+                            margin: "10px 0",
+                          }}
+                        >
+                          {result.percentage}%
+                        </h2>
+                        <p style={{ color: "#666", margin: "0" }}>
+                          performance
+                        </p>
+                      </div>
+                    </Col>
+                  </Row>
+
+                  {/* Progress Bar */}
+                  <div className="mt-4 mb-4">
+                    <ProgressBar
+                      now={result.percentage}
+                      variant={passed ? "success" : "warning"}
+                      style={{
+                        height: "30px",
+                        fontSize: "1rem",
+                        fontWeight: "bold",
+                      }}
+                      label={`${result.percentage}% Complete`}
+                    />
+                  </div>
+
+                  {/* Status Badge */}
+                  <div className="mt-4">
+                    <span
+                      style={{
+                        padding: "10px 20px",
+                        fontSize: "1.1rem",
+                        fontWeight: "bold",
+                        borderRadius: "20px",
+                        backgroundColor: passed ? "#d4edda" : "#fff3cd",
+                        color: passed ? "#155724" : "#856404",
+                        textTransform: "capitalize",
+                      }}
                     >
-                      Download Certificate
-                    </a>
+                      Status: {result.status}
+                    </span>
                   </div>
-                )}
-              </Alert>
-            )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
-            {!passed && (
-              <Alert variant="warning" className="mt-4">
-                <strong>Please try again!</strong> You need 80% to pass the
-                test.
-              </Alert>
-            )}
+          {/* Certificate Alert */}
+          {passed && (
+            <Row className="mb-4">
+              <Col md={12}>
+                <Alert
+                  variant="success"
+                  className="shadow"
+                  style={{ borderRadius: "10px", padding: "20px" }}
+                >
+                  <Alert.Heading
+                    style={{ fontSize: "1.3rem", fontWeight: "bold" }}
+                  >
+                    ✓ Test Passed Successfully!
+                  </Alert.Heading>
+                  <p style={{ fontSize: "1rem", marginBottom: "10px" }}>
+                    Congratulations! You have successfully passed the test with{" "}
+                    <strong>{result.percentage}%</strong> score. You can now
+                    proceed with the course.
+                  </p>
+                  {result.certificate && (
+                    <div className="mt-3">
+                      <a
+                        href={`${API_BASE_URL}${result.certificate}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-success btn-lg"
+                        style={{ marginRight: "10px" }}
+                      >
+                        📜 Download Certificate
+                      </a>
+                    </div>
+                  )}
+                </Alert>
+              </Col>
+            </Row>
+          )}
 
-            <Button
-              variant="primary"
-              className="mt-4"
-              onClick={() => navigate("/Courses")}
-            >
-              Back to Courses
-            </Button>
-          </Card.Body>
-        </Card>
+          {/* Failure Alert */}
+          {!passed && (
+            <Row className="mb-4">
+              <Col md={12}>
+                <Alert
+                  variant="warning"
+                  className="shadow"
+                  style={{ borderRadius: "10px", padding: "20px" }}
+                >
+                  <Alert.Heading
+                    style={{ fontSize: "1.3rem", fontWeight: "bold" }}
+                  >
+                    ⚠ Please Try Again
+                  </Alert.Heading>
+                  <p style={{ fontSize: "1rem", marginBottom: "10px" }}>
+                    You scored <strong>{result.percentage}%</strong>. You need{" "}
+                    <strong>80%</strong> or more to pass the test. Please review
+                    the incorrect answers below and try again.
+                  </p>
+                </Alert>
+              </Col>
+            </Row>
+          )}
+
+          {/* Wrong Answers Section */}
+          {result.wrongAnswers && result.wrongAnswers.length > 0 && (
+            <Row className="mb-4">
+              <Col md={12}>
+                <Card className="shadow-sm">
+                  <Card.Header
+                    className="bg-danger text-white"
+                    style={{ padding: "15px" }}
+                  >
+                    <h5
+                      style={{
+                        margin: "0",
+                        fontSize: "1.2rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      ❌ Wrong Answers ({result.wrongAnswers.length})
+                    </h5>
+                  </Card.Header>
+                  <Card.Body>
+                    {result.wrongAnswers.map((wrongAnswer, index) => (
+                      <div
+                        key={index}
+                        className="wrong-answer-item mb-4 p-3"
+                        style={{
+                          backgroundColor: "#fff5f5",
+                          borderLeft: "4px solid #dc3545",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        <h6
+                          style={{
+                            color: "#dc3545",
+                            fontWeight: "bold",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          Question {index + 1}: {wrongAnswer.questionText}
+                        </h6>
+                        <div
+                          style={{ marginLeft: "20px", marginBottom: "10px" }}
+                        >
+                          <p style={{ color: "#dc3545", margin: "5px 0" }}>
+                            <strong>Your Answer:</strong>{" "}
+                            {wrongAnswer.userAnswer}
+                          </p>
+                          <p style={{ color: "#28a745", margin: "5px 0" }}>
+                            <strong>Correct Answer:</strong>{" "}
+                            {wrongAnswer.correctAnswer}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          )}
+
+          {/* Action Buttons */}
+          <Row className="mt-5">
+            <Col md={12} className="text-center">
+              <Button
+                variant={passed ? "primary" : "warning"}
+                size="lg"
+                onClick={() => navigate("/Courses")}
+                style={{
+                  padding: "12px 30px",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                }}
+              >
+                ← Back to Courses
+              </Button>
+            </Col>
+          </Row>
+        </Container>
+        <FooterPage />
       </Container>
     );
   }
