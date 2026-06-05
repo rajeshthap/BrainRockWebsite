@@ -513,7 +513,7 @@ const [termsError, setTermsError] = useState("");
                 <FaPercentage className="me-2" /> Register & Claim 20% Loyalty Offer
               </Button>
               <div className="text-danger fw-bold text-center" style={{ fontSize: '0.85rem' }}>
-                * 20% additional discount on offer price available for returning students with qualifying scores.
+                * 20% additional discount on offer price available for returning students with qualifying scores. To claim offer fill registration form with registered mobile number.
               </div>
             </div>
 
