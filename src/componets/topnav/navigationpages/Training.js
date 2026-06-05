@@ -154,9 +154,10 @@ const Training = () => {
                     onClick={() =>
                       navigate("/RegisFee", {
                         state: {
-                          courseId: course.id,
+                          courseId: course.course_id || course.id,
                           courseData: {
                             id: course.id,
+                            course_id: course.course_id,
                             title: course.title,
                             description: course.description,
                             duration: course.duration,

@@ -73,7 +73,7 @@ function RegisFee() {
 
   useEffect(() => {
     if (courseData) {
-      setCourseId(courseData.id || "");
+      setCourseId(courseData.course_id || courseData.id || "");
       setSelectedCategory(courseData.category || "");
     }
   }, [courseData]);
@@ -181,7 +181,7 @@ function RegisFee() {
       // Store course data in localStorage for recovery
       if (isCourseRegistration && courseData) {
         localStorage.setItem("test_courseData", JSON.stringify(courseData));
-        localStorage.setItem("test_courseId", courseData.id);
+        localStorage.setItem("test_courseId", courseData.course_id || courseData.id);
       }
 
       // Clear previous test progress to ensure the new registration starts fresh
@@ -197,21 +197,17 @@ function RegisFee() {
       // Clear form
       setFormData({ full_name: "", email: "", phone: "", fee: apiFee || 8 });
 
-      // Redirect directly to payment URL without showing success message
+      // Open payment in new tab, navigate current tab to test
       if (
         response.data.payment_order &&
         response.data.payment_order.redirectUrl
       ) {
-        window.location.href = response.data.payment_order.redirectUrl;
-      } else {
-        // Redirect to CoursesTest with user_id in URL
+        window.open(response.data.payment_order.redirectUrl, "_blank");
+      }
       if (isCourseRegistration) {
         window.location.href = `/CoursesTest?user_id=${response.data.user_id}`;
       } else {
-        navigate("/CoursesTest", {
-          state: { userId: response.data.user_id }
-        });
-      }
+        navigate("/Test");
       }
     } catch (error) {
       console.error("Error during registration:", error);
