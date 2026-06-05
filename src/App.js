@@ -96,7 +96,7 @@ import ManageBills from "./componets/adminpanel/billgeneration/ManageBills";
 import BillUpload from "./componets/adminpanel/billgeneration/BillUpload";
 import Terms from "./componets/pdf_page/Terms";
 import Faq from "./componets/pdf_page/Faq";
-import KheloJito from "./componets/Play_and_Win/KheloJito";
+import RegisFee from "./componets/Play_and_Win/RegisFee";
 import Test from "./componets/Play_and_Win/Test";
 import AddPlay from "./componets/adminpanel/khelo_jito/AddPlay";
 import ManagePlay from "./componets/adminpanel/khelo_jito/ManagePlay";
@@ -220,7 +220,7 @@ function AppContent() {
         <Route path="/Terms" element={<Terms />} />
         <Route path="/WalletPaymentStatus" element={<WalletPaymentStatus />} />
         <Route path="/faq" element={<Faq />} />
-        <Route path="/KheloJito" element={<KheloJito />} />
+        <Route path="/RegisFee" element={<RegisFee />} />
         <Route path="/test" element={<Test />} />
         <Route path="/PayNow" element={<PayNow />} />
 

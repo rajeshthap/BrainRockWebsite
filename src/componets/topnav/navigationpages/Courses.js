@@ -124,6 +124,20 @@ function Courses() {
                         {getShortDescription(course.description, 15)}
                       </p>
 
+                      {course.category && (
+                        <p className="course-info">
+                          <span className="course-label">Category:</span>
+                          <span className="course-value">{course.category}</span>
+                        </p>
+                      )}
+
+                      {course.sub_category && (
+                        <p className="course-info">
+                          <span className="course-label">Sub Category:</span>
+                          <span className="course-value">{course.sub_category}</span>
+                        </p>
+                      )}
+
                       {/* ===== AMAZON STYLE PRICE DISPLAY ===== */}
                       {course.formattedOfferPrice ? (
                         <>
@@ -157,8 +171,22 @@ function Courses() {
                       <button
                         className="service-btn-read mt-auto"  // Added mt-auto to push button to bottom
                         onClick={() =>
-                          navigate("/Training", {
-                            state: { courseId: course.id }
+                          navigate("/RegisFee", {
+                            state: { 
+                              courseId: course.id,
+                              courseData: {
+                                id: course.id,
+                                title: course.title,
+                                description: course.description,
+                                duration: course.duration,
+                                price: course.price,
+                                offer_price: course.offer_price,
+                                formattedPrice: course.formattedPrice,
+                                formattedOfferPrice: course.formattedOfferPrice,
+                                category: course.category,
+                                sub_category: course.sub_category
+                              }
+                            }
                           })
                         }
                       >

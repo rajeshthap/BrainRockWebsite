@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
   Row,
@@ -14,9 +14,17 @@ import { Link } from "react-router-dom";
 import "../../assets/css/KheloJito.css";
 import axios from "axios";
 import FooterPage from "../footer/FooterPage";
-import kheloImage from "../../assets/images/khelo-img-banner.jpeg";
+import RegisFeeImage from "../../assets/images/img-regi.png";
 
-function KheloJito() {
+
+function RegisFee() {
+ 
+  const location = useLocation();
+
+  // Get course data from location state (if navigated from Courses page)
+  const courseData = location?.state?.courseData || null;
+  const isCourseRegistration = !!location?.state?.courseData;
+
   // State to hold the form data
   const [formData, setFormData] = useState({
     phone: "",
@@ -27,33 +35,30 @@ function KheloJito() {
 
   const [apiFee, setApiFee] = useState(null);
 
-  // Fetch fee from API on component mount
- // Fetch fee from API on component mount
-useEffect(() => {
-  const fetchFee = async () => {
-    try {
-      const response = await axios.get(
-        "https://brainrock.in/brainrock/backend/api/fee-item/",
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      
-      // Extract fee from the correct path in the response
-      const feeValue = response.data.data[0].fee;
-      setApiFee(feeValue);
-      setFormData((prev) => ({ ...prev, fee: feeValue }));
-    } catch (error) {
-      console.error("Error fetching fee:", error);
-      setApiFee(8);
-      setFormData((prev) => ({ ...prev, fee: 8 }));
-    }
-  };
-  fetchFee();
-}, []);
+  useEffect(() => {
+    const fetchFee = async () => {
+      try {
+        const response = await axios.get(
+          "https://brainrock.in/brainrock/backend/api/fee-item/",
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        
+        const feeValue = response.data.data[0].fee;
+        setApiFee(feeValue);
+        setFormData((prev) => ({ ...prev, fee: feeValue }));
+      } catch (error) {
+        console.error("Error fetching fee:", error);
+        setApiFee(8);
+        setFormData((prev) => ({ ...prev, fee: 8 }));
+      }
+    };
+    fetchFee();
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -196,9 +201,21 @@ useEffect(() => {
     setShowSuccess(false);
 
     try {
+      const submitData = {
+        ...formData,
+      };
+
+      // If this is a course registration, add course-specific fields
+      if (isCourseRegistration && courseData) {
+        submitData.application_for = "Course";
+        submitData.application_for_course = courseData.id;
+        submitData.course_category = courseData.category || "";
+        submitData.course_sub_category = courseData.sub_category || "";
+      }
+
       const response = await axios.post(
         "https://brainrock.in/brainrock/backend/api/register-test/",
-        formData,
+        submitData,
         {
           withCredentials: true,
           headers: {
@@ -210,10 +227,10 @@ useEffect(() => {
       console.log("Registration successful:", response.data);
       console.log("User ID:", response.data.user_id);
 
-      // Store user_id, phone number, and source in localStorage for Test component to retrieve
+      // Store user_id, phone number, and source in localStorage
       localStorage.setItem("test_user_id", response.data.user_id);
       localStorage.setItem("test_user_phone", formData.phone);
-      localStorage.setItem("test_source", "khelojito");
+      localStorage.setItem("test_source", isCourseRegistration ? "course_registration" : "khelojito");
 
       // Clear previous test progress to ensure the new registration starts fresh
       const testKeys = [
@@ -235,8 +252,16 @@ useEffect(() => {
       ) {
         window.location.href = response.data.payment_order.redirectUrl;
       } else {
-        // If no payment required, redirect directly to test page
-        navigate("/Test");
+        if (isCourseRegistration) {
+          navigate("/Training", {
+            state: { 
+              courseId: courseData?.id,
+              registeredUserId: response.data.user_id 
+            }
+          });
+        } else {
+          navigate("/Test");
+        }
       }
     } catch (error) {
       console.error("Error during registration:", error);
@@ -281,18 +306,28 @@ useEffect(() => {
   return (
     <>
       {/* Banner Section */}
-      <div className="KheloJito-banner">
+      <div className="Services-banner">
         
       </div>
 
         <div className="khelojito-section">
          <Container className="mt-4 mb-3">
            <Row className="align-items-center">
-             {/* Left Side - Image */}
-             <Col md={6} className="mb-4 mb-md-0">
-               <div className="khelo-image-container">
+              {/* Left Side - Back & Image */}
+              <Col md={6} className="mb-4 mb-md-0">
+                {isCourseRegistration && (
+                  <Button
+                    variant="outline-secondary"
+                    className="br-button mb-3"
+                    onClick={() => navigate("/Courses")}
+                  >
+                    ← Back to Courses
+                  </Button>
+                )}
+                <div className="khelo-image-container">
+
                  <img 
-                   src={kheloImage} 
+                   src={RegisFeeImage}
                    alt="Khelo aur Jeeto" 
                    className="khelo-image"
                  />
@@ -303,6 +338,7 @@ useEffect(() => {
              <Col md={6}>
                <div className="khelojito-box text-heading">
             {/* Success Alert */}
+
             {showSuccess && (
               <Card className="mb-4 border-success success-card">
                 <Card.Body className="text-center">
@@ -642,4 +678,4 @@ useEffect(() => {
   );
 }
 
-export default KheloJito;
+export default RegisFee;

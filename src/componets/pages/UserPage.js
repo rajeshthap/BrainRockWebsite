@@ -27,7 +27,7 @@ import { MdEngineering } from "react-icons/md";
 
 import FooterPage from "../footer/FooterPage";
 import ServicesPage from "./ServicesPage";
-import KheloJito from "../Play_and_Win/KheloJito";
+import RegisFee from "../Play_and_Win/RegisFee";
 
 function UserPage() {
   const navigate = useNavigate();
