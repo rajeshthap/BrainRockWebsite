@@ -387,8 +387,12 @@ function RegisFee() {
                       onChange={(e) => setSelectedCategory(e.target.value)}
                     >
                       <option value="">Select Category</option>
-                      <option value="React">React</option>
-                      <option value="Python">Python</option>
+                      <option value="PHP">PHP</option>
+                      <option value="Node.js">Node.js</option>
+                      <option value="Front End Development">Front End Development</option>
+                      <option value="AJAX and XML">AJAX and XML</option>
+                      <option value="Network Security">Network Security</option>
+                      <option value="Laravel Framework">Laravel Framework</option>
                     </Form.Select>
                     {errors.course_category && (
                       <div className="invalid-feedback">{errors.course_category}</div>

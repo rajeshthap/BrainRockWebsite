@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
+import { Container, Row, Col, Spinner, Alert, Button } from "react-bootstrap";
 import "../../../assets/css/course.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import TrainingRegistration from "./TrainingRegistration";
@@ -43,6 +43,14 @@ const Training = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStartTest = () => {
+    if (course) {
+      navigate("/CoursesTest", {
+        state: { courseData: course }
+      });
     }
   };
 
@@ -139,6 +147,32 @@ const Training = () => {
               </Col>
 
               <Col md={6} sm={6}>
+                <div className="mb-3">
+                  <Button
+                    variant="info"
+                    className="br-button me-2"
+                    onClick={() =>
+                      navigate("/RegisFee", {
+                        state: {
+                          courseId: course.id,
+                          courseData: {
+                            id: course.id,
+                            title: course.title,
+                            description: course.description,
+                            duration: course.duration,
+                            price: course.price,
+                            offer_price: course.offer_price,
+                            category: course.category,
+                            sub_category: course.sub_category,
+                          },
+                        },
+                      })
+                    }
+                  >
+                    Register Now
+                  </Button>
+                 
+                </div>
                 <TrainingRegistration
                   courseTitle={course.title}
                   courseDuration={course.duration}

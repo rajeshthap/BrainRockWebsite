@@ -169,9 +169,9 @@ function Courses() {
                       </p>
 
                       <button
-                        className="service-btn-read mt-auto"  // Added mt-auto to push button to bottom
+                        className="service-btn-read mt-auto"
                         onClick={() =>
-                          navigate("/RegisFee", {
+                          navigate("/Training", {
                             state: { 
                               courseId: course.id,
                               courseData: {
