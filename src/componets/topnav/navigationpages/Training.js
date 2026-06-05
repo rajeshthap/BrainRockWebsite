@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Spinner, Alert, Button } from "react-bootstrap";
 import "../../../assets/css/course.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FaPercentage } from "react-icons/fa";
 import TrainingRegistration from "./TrainingRegistration";
 import FooterPage from "../../footer/FooterPage";
 
@@ -147,32 +148,6 @@ const Training = () => {
               </Col>
 
               <Col md={6} sm={6}>
-                <div className="mb-3">
-                  <Button
-                    variant="info"
-                    className="br-button me-2"
-                    onClick={() =>
-                      navigate("/RegisFee", {
-                        state: {
-                          courseId: course.course_id || course.id,
-                          courseData: {
-                            id: course.id,
-                            course_id: course.course_id,
-                            title: course.title,
-                            description: course.description,
-                            duration: course.duration,
-                            price: course.price,
-                            offer_price: course.offer_price,
-                            category: course.category,
-                            sub_category: course.sub_category,
-                          },
-                        },
-                      })
-                    }
-                  >
-                    Register fee
-                  </Button>
-                </div>
                 <TrainingRegistration
                   courseTitle={course.title}
                   courseDuration={course.duration}

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, Form, Button, Alert, Spinner, InputGroup, Card } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash, FaCheckCircle, FaPercentage } from "react-icons/fa";
 import "../../../assets/css/Trainingregistration.css";
 import FooterPage from "../../footer/FooterPage";
 
 function TrainingRegistration({ courseTitle, courseDuration, onCourseChange }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [courseData, setCourseData] = useState([]);
   const [maxDate, setMaxDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -481,6 +482,42 @@ const [termsError, setTermsError] = useState("");
       <div className={`ourteam-section ${isFromTrainingPage ? 'no-footer' : ''}`}>
         <Container className="mt-4 mb-3">
           <div className="ourteam-box text-heading">
+
+            {/* Loyalty Offer Header Section */}
+            <div className="mb-4">
+              <Button
+                variant="success"
+                className="br-button w-100 d-flex align-items-center justify-content-center shadow-sm mb-2"
+                onClick={() => {
+                  const currentCourse = courseData.find(c => c.course_name === formData.application_for_course);
+                  if (currentCourse) {
+                    navigate("/RegisFee", {
+                      state: {
+                        courseId: currentCourse.course_id || currentCourse.id,
+                        courseData: {
+                          id: currentCourse.id,
+                          course_id: currentCourse.course_id,
+                          title: currentCourse.course_name,
+                          description: currentCourse.description,
+                          duration: currentCourse.duration,
+                          price: currentCourse.price,
+                          offer_price: currentCourse.offer_price,
+                          category: currentCourse.category,
+                          sub_category: currentCourse.sub_category,
+                        },
+                      },
+                    });
+                  }
+                }}
+              >
+                <FaPercentage className="me-2" /> Register & Claim 20% Loyalty Offer
+              </Button>
+              <div className="text-danger fw-bold text-center" style={{ fontSize: '0.85rem' }}>
+                * 20% additional discount on offer price available for returning students with qualifying scores.
+              </div>
+            </div>
+
+            <hr className="my-4" />
 
             {/* Enhanced Success Alert */}
             {showSuccess && (
