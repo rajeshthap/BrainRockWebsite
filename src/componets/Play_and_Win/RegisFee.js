@@ -199,7 +199,7 @@ function RegisFee() {
         window.location.href = response.data.payment_order.redirectUrl;
       } else {
         if (isCourseRegistration) {
-          navigate("/Training", {
+          navigate("/CoursesTest", {
             state: { 
               courseId: courseId,
               courseData: courseData,

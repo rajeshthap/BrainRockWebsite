@@ -95,26 +95,38 @@ function CoursesTest() {
     setSubmitting(true);
     try {
       const userId = localStorage.getItem("test_user_id");
-      const correctCount = finalizedAnswers.reduce((count, answer, index) => {
-        if (answer === null) return count;
-        return testData.questions[index].correct_answer === answer ? count + 1 : count;
-      }, 0);
+
+      const answersPayload = finalizedAnswers
+        .filter((answer) => answer !== null)
+        .map((answer, index) => {
+          const actualIndex = finalizedAnswers.indexOf(answer);
+          return {
+            question_id: testData.questions[actualIndex].id,
+            selected_option: answer,
+          };
+        });
+
+      const submitResponse = await axios.post(
+        `${API_BASE_URL}/api/submit-test/`,
+        {
+          user_id: userId,
+          answers: answersPayload,
+        }
+      );
+
+      const apiResult = submitResponse.data;
 
       const totalMarks = testData.questions.reduce((sum, q) => sum + (q.marks || 1), 0);
-      const obtainedMarks = finalizedAnswers.reduce((sum, answer, index) => {
-        if (answer === null) return sum;
-        return testData.questions[index].correct_answer === answer ? sum + (testData.questions[index].marks || 1) : sum;
-      }, 0);
-
-      const percentage = totalMarks > 0 ? Math.round((obtainedMarks / totalMarks) * 100) : 0;
 
       setResult({
-        score: obtainedMarks,
+        score: apiResult.score || 0,
         total: totalMarks,
-        percentage,
-        correct: correctCount,
-        totalQuestions: testData.total_questions,
+        percentage: totalMarks > 0 ? Math.round(((apiResult.score || 0) / totalMarks) * 100) : 0,
+        status: apiResult.status || "failed",
+        certificate: apiResult.certificate || null,
         courseName: courseData.title,
+        correct: apiResult.score || 0,
+        totalQuestions: testData.total_questions,
       });
       setShowSubmitConfirm(false);
     } catch (err) {
@@ -145,7 +157,7 @@ function CoursesTest() {
   }
 
   if (result) {
-    const passed = result.percentage >= 80;
+    const passed = result.status === "passed" || result.percentage >= 80;
 
     return (
       <Container className="my-5">
@@ -175,14 +187,14 @@ function CoursesTest() {
                 </Col>
                 <Col md={4}>
                   <div className="result-item">
-                    <h4>{result.correct}/{result.totalQuestions}</h4>
-                    <p>Correct</p>
+                    <h4>{result.percentage}%</h4>
+                    <p>Result</p>
                   </div>
                 </Col>
                 <Col md={4}>
                   <div className="result-item">
-                    <h4>{result.percentage}%</h4>
-                    <p>Result</p>
+                    <h4 style={{ textTransform: "capitalize" }}>{result.status}</h4>
+                    <p>Status</p>
                   </div>
                 </Col>
               </Row>
@@ -190,7 +202,19 @@ function CoursesTest() {
 
             {passed && (
               <Alert variant="success" className="mt-4">
-                <strong>You passed!</strong> You scored above 80%. You can proceed with the course.
+                <strong>You passed!</strong> You can proceed with the course.
+                {result.certificate && (
+                  <div className="mt-3">
+                    <a
+                      href={`${API_BASE_URL}${result.certificate}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-success"
+                    >
+                      Download Certificate
+                    </a>
+                  </div>
+                )}
               </Alert>
             )}
 
@@ -238,6 +262,7 @@ function CoursesTest() {
       </Container>
     );
   }
+  
 
   const currentQuestion = testData?.questions[currentQuestionIndex];
   if (!currentQuestion) {
