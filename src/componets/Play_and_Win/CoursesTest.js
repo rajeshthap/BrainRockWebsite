@@ -56,16 +56,20 @@ function CoursesTest() {
       courseIdRef.current = storedCourseId;
     }
 
+    if (urlCourseId && !courseIdRef.current) {
+      courseIdRef.current = urlCourseId;
+    }
+
     if (urlUserId && !storedUserId) {
       localStorage.setItem("test_user_id", urlUserId);
     }
 
-    if (!courseDataRef.current || !courseIdRef.current) {
+    if (!courseIdRef.current) {
       navigate("/Courses");
       return;
     }
     startTest();
-  }, [location?.state, navigate, urlUserId]);
+  }, [location?.state, navigate, urlUserId, urlCourseId]);
 
   const startTest = async () => {
     try {
