@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Button, Alert, Spinner, Card, ProgressBar } from "react-bootstrap";
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Alert,
+  Spinner,
+  Card,
+  ProgressBar,
+} from "react-bootstrap";
 import "../../assets/css/Test.css";
 import FooterPage from "../footer/FooterPage";
 import axios from "axios";
@@ -10,9 +19,14 @@ const API_BASE_URL = "https://brainrock.in/brainrock/backend";
 function CoursesTest() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const courseData = location?.state?.courseData || null;
   const isCourseRegistration = !!location?.state?.courseData;
+  const courseIdRef = useRef(location?.state?.courseId || null);
+  const courseDataRef = useRef(courseData);
+  const urlUserId = searchParams.get("user_id");
+  const urlCourseId = searchParams.get("course_id");
 
   const [testData, setTestData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,38 +39,76 @@ function CoursesTest() {
   const [result, setResult] = useState(null);
 
   useEffect(() => {
-    if (!isCourseRegistration || !courseData) {
+    const storedCourseData = localStorage.getItem("test_courseData");
+    const storedCourseId = localStorage.getItem("test_courseId");
+    const storedUserId = localStorage.getItem("test_user_id");
+
+    if (storedCourseData && !courseData) {
+      try {
+        const parsed = JSON.parse(storedCourseData);
+        courseDataRef.current = parsed;
+      } catch (e) {
+        console.error("Failed to parse stored courseData");
+      }
+    }
+
+    if (storedCourseId && !location?.state?.courseId) {
+      courseIdRef.current = storedCourseId;
+    }
+
+    if (urlUserId && !storedUserId) {
+      localStorage.setItem("test_user_id", urlUserId);
+    }
+
+    if (!courseDataRef.current || !courseIdRef.current) {
       navigate("/Courses");
       return;
     }
     startTest();
-  }, [courseData, isCourseRegistration]);
+  }, [location?.state, navigate, urlUserId]);
 
   const startTest = async () => {
     try {
-      const userId = localStorage.getItem("test_user_id");
+      const userId =
+        localStorage.getItem("test_user_id") ||
+        searchParams.get("user_id");
       if (!userId) {
         setError("User ID not found. Please register first.");
         setLoading(false);
         return;
       }
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/start-test/`,
-        {
-          user_id: userId,
-          course_id: courseData.id,
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}/api/start-test/`, {
+        user_id: userId,
+        course_id: courseIdRef.current || courseData?.id,
+      });
 
-      if (response.data.status) {
+      if (
+        response.data.status &&
+        response.data.questions &&
+        Array.isArray(response.data.questions)
+      ) {
         setTestData(response.data);
         setUserAnswers(new Array(response.data.total_questions).fill(null));
+        console.log(
+          "Test data loaded successfully with",
+          response.data.total_questions,
+          "questions",
+        );
       } else {
-        setError(response.data.message || "Failed to start test");
+        const errorMsg =
+          response.data.message ||
+          "Failed to start test - Invalid response format";
+        console.error("Test start failed:", errorMsg, response.data);
+        setError(errorMsg);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to start test. Please try again.");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to start test. Please try again.";
+      console.error("Test API Error:", err);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -97,40 +149,57 @@ function CoursesTest() {
       const userId = localStorage.getItem("test_user_id");
 
       const answersPayload = finalizedAnswers
-        .filter((answer) => answer !== null)
         .map((answer, index) => {
-          const actualIndex = finalizedAnswers.indexOf(answer);
-          return {
-            question_id: testData.questions[actualIndex].id,
-            selected_option: answer,
-          };
-        });
+          if (answer !== null && testData?.questions?.[index]) {
+            return {
+              question_id: testData.questions[index].id,
+              selected_option: answer,
+            };
+          }
+          return null;
+        })
+        .filter((item) => item !== null);
+
+      console.log("Submitting answers:", answersPayload);
 
       const submitResponse = await axios.post(
         `${API_BASE_URL}/api/submit-test/`,
         {
           user_id: userId,
           answers: answersPayload,
-        }
+        },
       );
 
       const apiResult = submitResponse.data;
+      console.log("Submit Response:", apiResult);
 
-      const totalMarks = testData.questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+      const totalMarks = testData.questions.reduce(
+        (sum, q) => sum + (q.marks || 1),
+        0,
+      );
 
       setResult({
         score: apiResult.score || 0,
         total: totalMarks,
-        percentage: totalMarks > 0 ? Math.round(((apiResult.score || 0) / totalMarks) * 100) : 0,
+        percentage:
+          totalMarks > 0
+            ? Math.round(((apiResult.score || 0) / totalMarks) * 100)
+            : 0,
         status: apiResult.status || "failed",
         certificate: apiResult.certificate || null,
-        courseName: courseData.title,
+        courseName:
+          courseDataRef.current?.title || courseData?.title || "Course Test",
         correct: apiResult.score || 0,
         totalQuestions: testData.total_questions,
       });
       setShowSubmitConfirm(false);
     } catch (err) {
-      setError("Failed to submit test. Please try again.");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to submit test. Please try again.";
+      console.error("Submit Test Error:", err);
+      setError(errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -193,7 +262,9 @@ function CoursesTest() {
                 </Col>
                 <Col md={4}>
                   <div className="result-item">
-                    <h4 style={{ textTransform: "capitalize" }}>{result.status}</h4>
+                    <h4 style={{ textTransform: "capitalize" }}>
+                      {result.status}
+                    </h4>
                     <p>Status</p>
                   </div>
                 </Col>
@@ -220,7 +291,8 @@ function CoursesTest() {
 
             {!passed && (
               <Alert variant="warning" className="mt-4">
-                <strong>Please try again!</strong> You need 80% to pass the test.
+                <strong>Please try again!</strong> You need 80% to pass the
+                test.
               </Alert>
             )}
 
@@ -247,14 +319,23 @@ function CoursesTest() {
             <Card.Title>Submit Test?</Card.Title>
             {unanswered > 0 && (
               <Alert variant="warning">
-                You have {unanswered} unanswered question(s). They will be marked as incorrect.
+                You have {unanswered} unanswered question(s). They will be
+                marked as incorrect.
               </Alert>
             )}
             <p>Are you sure you want to submit your test?</p>
-            <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
               {submitting ? "Submitting..." : "Submit Test"}
             </Button>
-            <Button variant="secondary" className="ms-2" onClick={() => setShowSubmitConfirm(false)}>
+            <Button
+              variant="secondary"
+              className="ms-2"
+              onClick={() => setShowSubmitConfirm(false)}
+            >
               Review Answers
             </Button>
           </Card.Body>
@@ -262,23 +343,46 @@ function CoursesTest() {
       </Container>
     );
   }
-  
 
-  const currentQuestion = testData?.questions[currentQuestionIndex];
+  const currentQuestion = testData?.questions?.[currentQuestionIndex];
+
+  if (!testData) {
+    return (
+      <Container className="my-5">
+        <Alert variant="warning">
+          Test data not loaded. Please refresh the page.
+        </Alert>
+      </Container>
+    );
+  }
+
   if (!currentQuestion) {
+    console.error("Current question not found:", {
+      currentQuestionIndex,
+      totalQuestions: testData?.total_questions,
+      hasQuestions: !!testData?.questions,
+      questionsLength: testData?.questions?.length,
+    });
     return <Container className="my-5">No questions available.</Container>;
   }
 
-  const progress = ((currentQuestionIndex + 1) / testData.total_questions) * 100;
+  const progress =
+    ((currentQuestionIndex + 1) / testData.total_questions) * 100;
 
   return (
     <Container className="test-container">
       <div className="test-header">
-        <h2>{courseData?.title || "Course Test"}</h2>
+        <h2>
+          {courseDataRef.current?.title || courseData?.title || "Course Test"}
+        </h2>
         <p className="text-muted">
           Question {currentQuestionIndex + 1} of {testData.total_questions}
         </p>
-        <ProgressBar now={progress} className="test-progress" label={`${Math.round(progress)}%`} />
+        <ProgressBar
+          now={progress}
+          className="test-progress"
+          label={`${Math.round(progress)}%`}
+        />
       </div>
 
       <Row className="justify-content-center mt-4">
@@ -321,11 +425,19 @@ function CoursesTest() {
             </Button>
 
             {currentQuestionIndex < testData.total_questions - 1 ? (
-              <Button variant="primary" onClick={handleNext} disabled={selectedAnswer === null}>
+              <Button
+                variant="primary"
+                onClick={handleNext}
+                disabled={selectedAnswer === null}
+              >
                 Next
               </Button>
             ) : (
-              <Button variant="success" onClick={() => setShowSubmitConfirm(true)} disabled={selectedAnswer === null}>
+              <Button
+                variant="success"
+                onClick={() => setShowSubmitConfirm(true)}
+                disabled={selectedAnswer === null}
+              >
                 Submit Test
               </Button>
             )}

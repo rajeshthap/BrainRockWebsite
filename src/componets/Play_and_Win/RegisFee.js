@@ -178,6 +178,12 @@ function RegisFee() {
       localStorage.setItem("test_user_phone", formData.phone);
       localStorage.setItem("test_source", isCourseRegistration ? "course_registration" : "khelojito");
 
+      // Store course data in localStorage for recovery
+      if (isCourseRegistration && courseData) {
+        localStorage.setItem("test_courseData", JSON.stringify(courseData));
+        localStorage.setItem("test_courseId", courseData.id);
+      }
+
       // Clear previous test progress to ensure the new registration starts fresh
       const testKeys = [
         "test_currentQuestion", "test_score", "test_showResults", 
@@ -198,17 +204,14 @@ function RegisFee() {
       ) {
         window.location.href = response.data.payment_order.redirectUrl;
       } else {
-        if (isCourseRegistration) {
-          navigate("/CoursesTest", {
-            state: { 
-              courseId: courseId,
-              courseData: courseData,
-              registeredUserId: response.data.user_id 
-            }
-          });
-        } else {
-          navigate("/Test");
-        }
+        // Redirect to CoursesTest with user_id in URL
+      if (isCourseRegistration) {
+        window.location.href = `/CoursesTest?user_id=${response.data.user_id}`;
+      } else {
+        navigate("/CoursesTest", {
+          state: { userId: response.data.user_id }
+        });
+      }
       }
     } catch (error) {
       console.error("Error during registration:", error);

@@ -169,9 +169,8 @@ const Training = () => {
                       })
                     }
                   >
-                    Register Now
+                    Register fee
                   </Button>
-                 
                 </div>
                 <TrainingRegistration
                   courseTitle={course.title}
