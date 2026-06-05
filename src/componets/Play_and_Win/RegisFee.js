@@ -65,13 +65,18 @@ function RegisFee() {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState({});
-  const [phoneValidation, setPhoneValidation] = useState({
-    isChecking: false,
-    isRegistered: false,
-    isValid: false,
-  });
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [courseId, setCourseId] = useState("");
+
+  useEffect(() => {
+    if (courseData) {
+      setCourseId(courseData.id || "");
+      setSelectedCategory(courseData.category || "");
+    }
+  }, [courseData]);
 
   const navigate = useNavigate();
 
@@ -83,55 +88,6 @@ function RegisFee() {
       [name]: value,
     }));
     validateField(name, value);
-    
-    // Real-time phone number validation
-    if (name === "phone") {
-      const isValidPhone = /^[0-9]{10}$/.test(value);
-      setPhoneValidation(prev => ({
-        ...prev,
-        isValid: isValidPhone,
-      }));
-      
-      if (isValidPhone) {
-        checkPhoneNumber(value);
-      } else {
-        setPhoneValidation(prev => ({
-          ...prev,
-          isChecking: false,
-          isRegistered: false,
-        }));
-      }
-    }
-  };
-
-  // Check if phone number exists in registered users API
-  const checkPhoneNumber = async (phone) => {
-    setPhoneValidation(prev => ({ ...prev, isChecking: true }));
-    try {
-      const response = await axios.get(
-        "https://brainrock.in/brainrock/backend/api/test/winner-phones/",
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      
-      const isRegistered = response.data.phones.includes(phone);
-      setPhoneValidation(prev => ({
-        ...prev,
-        isChecking: false,
-        isRegistered: isRegistered,
-      }));
-    } catch (error) {
-      console.error("Error checking phone number:", error);
-      setPhoneValidation(prev => ({
-        ...prev,
-        isChecking: false,
-        isRegistered: false,
-      }));
-    }
   };
 
   // Validation for form fields
@@ -202,26 +158,16 @@ function RegisFee() {
 
     try {
       const submitData = {
-        ...formData,
+        full_name: formData.full_name,
+        email: formData.email,
+        phone: formData.phone,
+        fee: apiFee || 8,
+        course_id: courseId || ""
       };
-
-      // If this is a course registration, add course-specific fields
-      if (isCourseRegistration && courseData) {
-        submitData.application_for = "Course";
-        submitData.application_for_course = courseData.id;
-        submitData.course_category = courseData.category || "";
-        submitData.course_sub_category = courseData.sub_category || "";
-      }
 
       const response = await axios.post(
         "https://brainrock.in/brainrock/backend/api/register-test/",
-        submitData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+        submitData
       );
 
       console.log("Registration successful:", response.data);
@@ -255,7 +201,7 @@ function RegisFee() {
         if (isCourseRegistration) {
           navigate("/Training", {
             state: { 
-              courseId: courseData?.id,
+              courseId: courseId,
               registeredUserId: response.data.user_id 
             }
           });
@@ -400,7 +346,6 @@ function RegisFee() {
                       value={formData.full_name}
                       onChange={handleInputChange}
                       placeholder="Enter your full name"
-                      disabled={phoneValidation.isRegistered}
                     />
                     {errors.full_name && (
                       <div className="invalid-feedback">{errors.full_name}</div>
@@ -421,7 +366,6 @@ function RegisFee() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="Enter your email"
-                      disabled={phoneValidation.isRegistered}
                     />
                     {errors.email && (
                       <div className="invalid-feedback">{errors.email}</div>
@@ -429,72 +373,55 @@ function RegisFee() {
                   </Form.Group>
                 </Col>
 
-                {/* Fee Display */}
-                {/* <Col md={6} className="mt-3">
+                {/* Category Dropdown */}
+                <Col md={6} className="mt-3">
                   <Form.Group>
-                    <Form.Label className="br-label">Registration Fee</Form.Label>
-                    <Form.Control
-                      type="text"
-                      className="br-form-control"
-                      value={apiFee !== null ? `₹${apiFee}` : "Loading..."}
-                      disabled
-                    />
+                    <Form.Label className="br-label">
+                      Category <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Select
+                      className={`br-form-control ${errors.course_category ? "is-invalid" : ""}`}
+                      name="course_category"
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                    >
+                      <option value="">Select Category</option>
+                      <option value="React">React</option>
+                      <option value="Python">Python</option>
+                    </Form.Select>
+                    {errors.course_category && (
+                      <div className="invalid-feedback">{errors.course_category}</div>
+                    )}
                   </Form.Group>
-                </Col> */}
+                </Col>
 
-                {/* Phone Validation Message */}
-                {phoneValidation.isChecking && (
-                  <Col md={12} className="mt-3">
-                    <Alert variant="info">Checking phone number...</Alert>
-                  </Col>
-                )}
-
-                {phoneValidation.isRegistered && (
-                  <Col md={12} className="mt-3">
-                    <Alert variant="danger">
-                      This number is already registered, please use a different number or login with this mobile number.
-                    </Alert>
-                    <Button
-                      variant="warning"
-                      className="br-button"
-                      onClick={() => navigate("/login")}
-                    >
-                          Go to Login
-                    </Button>
-                  </Col>
-                )}
-
-                {/* Login Button for New Users */}
-               
-  <Form.Group className="mt-3">
-              <Form.Check
-                type="checkbox"
-                label={
-                  <>
-                    I agree to the <a href="#" onClick={(e) => {
-                      e.preventDefault();
-                      setShowTermsModal(true);
-                    }}>Terms and Conditions</a>
-                  </>
-                }
-                checked={termsAccepted}
-                onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="br-checkbox"
-              />
-            </Form.Group>
+                <Form.Group className="mt-3">
+                  <Form.Check
+                    type="checkbox"
+                    label={
+                      <>
+                        I agree to the <a href="#" onClick={(e) => {
+                          e.preventDefault();
+                          setShowTermsModal(true);
+                        }}>Terms and Conditions</a>
+                      </>
+                    }
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="br-checkbox"
+                  />
+                </Form.Group>
                 {/* Submit Button */}
-                {!phoneValidation.isRegistered && (
-                  <Col md={12} className="mt-4">
-                    <Button
-                      variant="primary"
-                      type="submit"
-                      className="br-button"
-                      disabled={isLoading || !termsAccepted}
-                    >
-                      {isLoading ? "Registering..." : "Register"}
-                    </Button>
-                  </Col>
-                )}
+                <Col md={12} className="mt-4">
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    className="br-button"
+                    disabled={isLoading || !termsAccepted}
+                  >
+                    {isLoading ? "Registering..." : "Register"}
+                  </Button>
+                </Col>
               </Row>
             </Form>
               </div>
