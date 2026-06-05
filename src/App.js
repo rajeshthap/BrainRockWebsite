@@ -109,6 +109,7 @@ import TestWinner from "./componets/khelo_jito_panel/TestWinner";
 import WalletPaymentStatus from "./componets/khelo_jito_panel/WalletPaymentStatus";
 import Quiz from "./componets/khelo_jito_panel/Quiz";
 import QuizTest from "./componets/Play_and_Win/QuizTest";
+import CoursesTest from "./componets/Play_and_Win/CoursesTest";
 import PayNow from "./componets/adminpanel/pay_now/PayNow";
 
 // import Terms from "./componets/pdf_page/Terms";
@@ -221,6 +222,7 @@ function AppContent() {
         <Route path="/WalletPaymentStatus" element={<WalletPaymentStatus />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/RegisFee" element={<RegisFee />} />
+        <Route path="/CoursesTest" element={<CoursesTest />} />
         <Route path="/test" element={<Test />} />
         <Route path="/PayNow" element={<PayNow />} />
 

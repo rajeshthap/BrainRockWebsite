@@ -202,6 +202,7 @@ function RegisFee() {
           navigate("/Training", {
             state: { 
               courseId: courseId,
+              courseData: courseData,
               registeredUserId: response.data.user_id 
             }
           });
