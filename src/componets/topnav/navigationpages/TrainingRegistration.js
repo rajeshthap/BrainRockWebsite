@@ -20,6 +20,14 @@ const [termsError, setTermsError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const [discountApplied, setDiscountApplied] = useState(false);
+  const [discountMessage, setDiscountMessage] = useState("");
+  const [pricingInfo, setPricingInfo] = useState({
+    basePrice: 0,
+    discountAmount: 0,
+    finalPrice: 0
+  });
+
   const isFromTrainingPage = (location.state &&
     (location.state.training_name || location.state.courseTitle)) ||
     courseTitle;
@@ -88,8 +96,13 @@ const [termsError, setTermsError] = useState("");
                 ...prev,
                 application_for_course: courseName,
                 application_for_course_id: matchingCourse.course_id,
-                course_fee: matchingCourse.price.toString() // Set course fee when initializing from state
+                course_fee: (matchingCourse.offer_price || "0").toString()
               }));
+              setPricingInfo({
+                basePrice: parseFloat(matchingCourse.offer_price || "0"),
+                discountAmount: 0,
+                finalPrice: parseFloat(matchingCourse.offer_price || "0")
+              });
             }
           }
         }
@@ -99,6 +112,68 @@ const [termsError, setTermsError] = useState("");
         setShowError(true);
       });
   }, [location.state, courseTitle]);
+
+  const checkDiscountEligibility = async (phone, selectedCourseId) => {
+    if (!phone || phone.length !== 10 || !selectedCourseId) {
+      setDiscountApplied(false);
+      setPricingInfo({ basePrice: 0, discountAmount: 0, finalPrice: 0 });
+      return;
+    }
+
+    try {
+      const response = await axios.get("https://brainrock.in/brainrock/backend/api/student-payment-score/");
+
+      const studentScores = Array.isArray(response.data) ? response.data : (response.data.data || []);
+
+      // Match logic: phone, course_id, and score strictly equals 10
+      const match = studentScores.find(item => 
+        String(item.phone) === String(phone) && 
+        String(item.course_id) === String(selectedCourseId) && 
+        Number(item.score) === 10
+      );
+
+      const selectedCourse = courseData.find(c => String(c.course_id) === String(selectedCourseId));
+      if (!selectedCourse) return;
+
+      const basePrice = parseFloat(selectedCourse.offer_price) || 0;
+
+      if (match) {
+        // Apply 20% discount on the offer price
+        const discountAmount = basePrice * 0.2;
+        const finalPrice = basePrice - discountAmount;
+
+        setPricingInfo({
+          basePrice,
+          discountAmount,
+          finalPrice
+        });
+
+        setDiscountApplied(true);
+        setDiscountMessage("Offer applied successfully!");
+
+        setFormData(prev => ({
+          ...prev,
+          candidate_name: match.full_name || prev.candidate_name,
+          course_fee: finalPrice.toFixed(2).toString()
+        }));
+      } else {
+        setDiscountApplied(false);
+        setDiscountMessage("");
+        setPricingInfo({
+          // Reset to current course's base price if no discount applies
+          basePrice: basePrice,
+          // No discount applied
+          discountAmount: 0,
+          finalPrice: basePrice
+        });
+        // Reset fee to original if eligibility check fails
+        setFormData(prev => ({ ...prev, course_fee: basePrice.toString() }));
+      }
+    } catch (err) {
+      console.error("Error fetching student score API:", err);
+      setDiscountApplied(false);
+    }
+  };
 
   const validateField = (name, value) => {
     let msg = "";
@@ -156,21 +231,54 @@ const [termsError, setTermsError] = useState("");
    const handleChange = (e) => {
     const { name, value, files } = e.target;
     
-     // Handle course selection differently
-     if (name === "application_for_course") {
-       const selectedCourse = courseData.find(course => course.course_name === value);
-       setFormData(prev => ({
-         ...prev,
-         application_for_course: value,
-         application_for_course_id: selectedCourse ? selectedCourse.course_id : "",
-         course_fee: selectedCourse ? selectedCourse.price.toString() : "" // Set course fee from selected course
-       }));
-       validateField(name, value);
-       
-       // Notify parent component about course change
-       if (onCourseChange) {
-         onCourseChange(selectedCourse);
-       }
+    // Handle course selection differently
+    if (name === "application_for_course") {
+      const selectedCourse = courseData.find(course => course.course_name === value);
+      const courseId = selectedCourse ? selectedCourse.course_id : "";
+      const basePrice = selectedCourse ? (selectedCourse.offer_price || "0") : "";
+
+      setFormData(prev => ({
+        ...prev,
+        application_for_course: value,
+        application_for_course_id: courseId,
+        course_fee: basePrice.toString()
+      }));
+      validateField(name, value);
+
+      // Always update pricingInfo when course changes, reset discount
+      setDiscountApplied(false);
+      setPricingInfo({
+        basePrice: parseFloat(basePrice),
+        discountAmount: 0,
+        finalPrice: parseFloat(basePrice)
+      });
+      
+      if (formData.mobile_no.length === 10) {
+        checkDiscountEligibility(formData.mobile_no, courseId);
+      } else {
+        // If mobile number is not 10 digits, ensure no discount is shown
+      }
+
+      if (onCourseChange) {
+        onCourseChange(selectedCourse);
+      }
+    } else if (name === "mobile_no") {
+      setFormData({ ...formData, [name]: value });
+      validateField(name, value);
+      if (value.length === 10 && formData.application_for_course_id) {
+        checkDiscountEligibility(value, formData.application_for_course_id);
+      } else if (discountApplied) {
+        // Reset discount state if mobile number becomes invalid
+        setDiscountApplied(false);
+        setPricingInfo({ basePrice: 0, discountAmount: 0, finalPrice: 0 });
+        // Re-evaluate base price from selected course
+        const selectedCourse = courseData.find(c => String(c.course_id) === String(formData.application_for_course_id));
+
+        if (selectedCourse) {
+          const standardPrice = selectedCourse.offer_price || "0";
+          setFormData(prev => ({ ...prev, course_fee: standardPrice.toString() }));
+        }
+      }
     } else {
       const newValue = files ? files[0] : value;
       setFormData({ ...formData, [name]: newValue });
@@ -403,6 +511,30 @@ const [termsError, setTermsError] = useState("");
               </Alert>
             )}
 
+            {discountApplied && (
+              <Alert variant="success" className="mb-4">
+                <div className="d-flex align-items-center mb-2">
+                  <FaCheckCircle className="me-2" size={20} />
+                  <strong style={{ fontSize: "1.1rem" }}>{discountMessage}</strong>
+                </div>
+                <div className="pricing-breakdown p-2 rounded bg-white bg-opacity-25" style={{ fontSize: "0.95rem" }}>
+                  <Row className="mb-1">
+                    <Col xs={7}>Course Price:</Col>
+                    <Col xs={5} className="text-end">₹{pricingInfo.basePrice.toFixed(2)}</Col>
+                  </Row>
+                  <Row className="mb-1 text-success fw-bold">
+                    <Col xs={7}>Loyalty Discount (20% off):</Col>
+                    <Col xs={5} className="text-end">- ₹{pricingInfo.discountAmount.toFixed(2)}</Col>
+                  </Row>
+                  <hr className="my-2" />
+                  <Row className="fw-bold" style={{ fontSize: "1.05rem" }}>
+                    <Col xs={7}>Total Amount to Pay:</Col>
+                    <Col xs={5} className="text-end">₹{pricingInfo.finalPrice.toFixed(2)}</Col>
+                  </Row>
+                </div>
+              </Alert>
+            )}
+
             <Form onSubmit={handleSubmit}>
               <Row>
                 {/* COURSE */}
@@ -427,6 +559,28 @@ const [termsError, setTermsError] = useState("");
                     {errors.application_for_course && (
                       <div className="invalid-feedback d-block">
                         {errors.application_for_course}
+                      </div>
+                    )}
+                  </Form.Group>
+                </Col>
+
+                {/* Mobile Number - Moved to 2nd position */}
+                <Col md={6} className="mt-3">
+                  <Form.Group>
+                    <Form.Label className="br-label">
+                      Mobile Number <span className="br-span-star">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      className={`br-form-control ${errors.mobile_no ? "is-invalid" : ""}`}
+                      name="mobile_no"
+                      value={formData.mobile_no}
+                      onChange={handleChange}
+                      placeholder="Enter your phone number"
+                    />
+                    {errors.mobile_no && (
+                      <div className="invalid-feedback">
+                        {errors.mobile_no}
                       </div>
                     )}
                   </Form.Group>
@@ -467,6 +621,7 @@ const [termsError, setTermsError] = useState("");
                       className={`br-form-control ${errors.candidate_name ? "is-invalid" : ""}`}
                       name="candidate_name"
                       value={formData.candidate_name}
+                      disabled={discountApplied}
                       onChange={handleChange}
                       placeholder="Enter your name"
                     />
@@ -602,28 +757,6 @@ const [termsError, setTermsError] = useState("");
                     {errors.confirm_password && (
                       <div className="invalid-feedback d-block">
                         {errors.confirm_password}
-                      </div>
-                    )}
-                  </Form.Group>
-                </Col>
-
-                {/* Mobile */}
-                <Col md={6} className="mt-3">
-                  <Form.Group>
-                    <Form.Label className="br-label">
-                      Mobile Number <span className="br-span-star">*</span>
-                    </Form.Label>
-                    <Form.Control
-                      type="text"
-                      className={`br-form-control ${errors.mobile_no ? "is-invalid" : ""}`}
-                      name="mobile_no"
-                      value={formData.mobile_no}
-                      onChange={handleChange}
-                      placeholder="Enter your phone number"
-                    />
-                    {errors.mobile_no && (
-                      <div className="invalid-feedback">
-                        {errors.mobile_no}
                       </div>
                     )}
                   </Form.Group>
