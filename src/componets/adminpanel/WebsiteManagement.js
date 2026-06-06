@@ -34,6 +34,7 @@ const WebsiteManagement = () => {
   const [projectsData, setProjectsData] = useState([]);
   const [brainrockBillsCount, setBrainrockBillsCount] = useState(0);
   const [zeeBillsCount, setZeeBillsCount] = useState(0);
+  const [kheloJitoUsersCount, setKheloJitoUsersCount] = useState(0);
   const [serviceRenewalsCount, setServiceRenewalsCount] = useState(0);
 
   // Loading and error states
@@ -43,6 +44,7 @@ const WebsiteManagement = () => {
     projects: false,
     brainrockBills: false,
     zeeBills: false,
+    kheloJitoUsers: false,
     serviceRenewals: false,
   });
 
@@ -52,6 +54,7 @@ const WebsiteManagement = () => {
     projects: null,
     brainrockBills: null,
     zeeBills: null,
+    kheloJitoUsers: null,
     serviceRenewals: null,
   });
 
@@ -185,15 +188,7 @@ const WebsiteManagement = () => {
   };
 
   const goToKheloJitoUsers = () => {
-    navigate("/KheloJitoUsers");
-  };
-
-  const goToKheloJitoCompletedUsers = () => {
-    navigate("/KheloJitoCompletedUsers");
-  };
-
-  const goToQuizParticipants = () => {
-    navigate("/QuizParticipants");
+    navigate("/Registerduser");
   };
 
   // Fetch Employees data
@@ -347,7 +342,66 @@ const WebsiteManagement = () => {
     fetchZeeBills();
   }, []);
 
-  // Fetch service renewals
+  // Fetch Khelo Jito Users count
+  useEffect(() => {
+    const fetchKheloJitoUsers = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, kheloJitoUsers: true }));
+        console.log("=== Fetching Khelo Jito users ===");
+        const response = await fetch(
+          "https://brainrock.in/brainrock/backend/api/register-test/",
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
+
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("HTTP error response:", errorText);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("=== API response data ===", JSON.stringify(data, null, 2));
+
+        // Check if response is an array (direct data format)
+        if (Array.isArray(data)) {
+          setKheloJitoUsersCount(data.length);
+          setErrors((prev) => ({ ...prev, kheloJitoUsers: null }));
+          console.log("Success - Users count:", data.length);
+        } else if (data.status && Array.isArray(data.data)) {
+          // API uses status: true instead of success: true
+          setKheloJitoUsersCount(data.data.length);
+          setErrors((prev) => ({ ...prev, kheloJitoUsers: null }));
+          console.log(
+            "Success (wrapped format) - Users count:",
+            data.data.length,
+          );
+        } else {
+          console.error("Unexpected data format:", typeof data, data);
+          throw new Error(
+            data.message ||
+              "Failed to fetch Khelo Jito users - unexpected data format",
+          );
+        }
+      } catch (err) {
+        console.error("=== Error fetching Khelo Jito users ===");
+        console.error("Error message:", err.message);
+        console.error("Error stack:", err.stack);
+        setErrors((prev) => ({ ...prev, kheloJitoUsers: err.message }));
+        setKheloJitoUsersCount(0);
+      } finally {
+        setLoading((prev) => ({ ...prev, kheloJitoUsers: false }));
+      }
+    };
+
+    fetchKheloJitoUsers();
+  }, []);
+
   useEffect(() => {
     const fetchServiceRenewals = async () => {
       try {
@@ -1358,6 +1412,23 @@ const WebsiteManagement = () => {
                   <div className="br-stat-details">
                     <h5>Zee Bills</h5>
                     <h2>{zeeBillsCount}</h2>
+                  </div>
+                </div>
+              </Col>
+
+              {/* Khelo Jito Users Card */}
+              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
+                <div
+                  className="br-stat-card card-khelo"
+                  onClick={goToKheloJitoUsers}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="br-stat-icon">
+                    <FaUserGraduate />
+                  </div>
+                  <div className="br-stat-details">
+                    <h5>All Khelo Jito Users</h5>
+                    <h2>{kheloJitoUsersCount}</h2>
                   </div>
                 </div>
               </Col>

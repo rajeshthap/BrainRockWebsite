@@ -501,15 +501,15 @@ function CoursesTest() {
                   ) : (
                     <div className="d-flex flex-column align-items-center">
                       <div className="d-flex-file">
-                        <button
-                          className="restart-button"
-                          onClick={() => {
-                            clearTestState();
-                            window.location.href = `/CoursesTest?user_id=${localStorage.getItem("test_user_id")}&course_id=${courseIdRef.current}`;
-                          }}
-                        >
+<button
+                           className="restart-button"
+                           onClick={() => {
+                             clearTestState();
+                             navigate("/RegisFee", { state: { courseId: courseIdRef.current } } );
+                           }}
+                         >
                           Retake Quiz
-                        </button>
+                         </button>
                         <button
                           className="wrong-answers-button"
                           onClick={handleShowWrongAnswers}

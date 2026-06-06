@@ -29,11 +29,10 @@ const Registerduser = () => {
   // Tab state - initialize from location state if available
   const [activeTab, setActiveTab] = useState(
     location.state?.activeTab || "registered",
-  ); // 'registered', 'participated', or 'completed'
+  );
 
   // Registered users data state
   const [users, setUsers] = useState([]);
-  const [participants, setParticipants] = useState([]);
   const [winners, setWinners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -98,15 +97,10 @@ const Registerduser = () => {
           url = `${API_BASE_URL}/api/register-test/`;
           dataKey = "users";
           dataSetter = setUsers;
-        } else if (activeTab === "participated") {
-          url = `${API_BASE_URL}/api/quiz-participants/`;
-          dataKey = "participants";
-          dataSetter = setParticipants;
         } else if (activeTab === "completed") {
           url = `${API_BASE_URL}/api/all-khelo-jetto-user/`;
           dataKey = "winners";
 dataSetter = (data) => {
-             // Transform the nested data structure to flat format for table display
              const transformedData = data.map((item, index) => ({
                id: index + 1,
                user_id: item.student_profile?.user_id,
@@ -197,38 +191,17 @@ dataSetter = (data) => {
 
           return matchesSearch && matchesPaymentStatus;
         })
-      : activeTab === "participated"
-        ? participants.filter((participant) => {
-            const lowerSearch = searchTerm.toLowerCase();
+      : winners.filter((winner) => {
+          const lowerSearch = searchTerm.toLowerCase();
 
-            const matchesSearch =
-              participant.student?.full_name
-                ?.toLowerCase()
-                .includes(lowerSearch) ||
-              participant.student?.email?.toLowerCase().includes(lowerSearch) ||
-              participant.student?.phone?.toLowerCase().includes(lowerSearch) ||
-              participant.student?.user_id
-                ?.toLowerCase()
-                .includes(lowerSearch) ||
-              participant.quiz?.toLowerCase().includes(lowerSearch);
+          const matchesSearch =
+            winner.full_name?.toLowerCase().includes(lowerSearch) ||
+            winner.email?.toLowerCase().includes(lowerSearch) ||
+            winner.phone?.toLowerCase().includes(lowerSearch) ||
+            winner.user_id?.toLowerCase().includes(lowerSearch);
 
-            const matchesPaymentStatus =
-              paymentStatusFilter === "all" ||
-              participant.payment_status === paymentStatusFilter;
-
-            return matchesSearch && matchesPaymentStatus;
-          })
-        : winners.filter((winner) => {
-            const lowerSearch = searchTerm.toLowerCase();
-
-            const matchesSearch =
-              winner.full_name?.toLowerCase().includes(lowerSearch) ||
-              winner.email?.toLowerCase().includes(lowerSearch) ||
-              winner.phone?.toLowerCase().includes(lowerSearch) ||
-              winner.user_id?.toLowerCase().includes(lowerSearch);
-
-            return matchesSearch;
-          });
+          return matchesSearch;
+        });
 
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -285,10 +258,7 @@ dataSetter = (data) => {
   const handleDeleteUsers = async () => {
     try {
       setLoading(true);
-      const deleteUrl =
-        activeTab === "registered"
-          ? `${API_BASE_URL}/api/register-test/`
-          : `${API_BASE_URL}/api/quiz-participants/`;
+      const deleteUrl = `${API_BASE_URL}/api/register-test/`;
 
       const response = await fetch(deleteUrl, {
         method: "DELETE",
@@ -314,17 +284,9 @@ dataSetter = (data) => {
           if (response.status === 200 || response.status === 204) {
             setSelectedUsers([]);
             setShowDeleteModal(false);
-            if (activeTab === "registered") {
-              setUsers((prev) =>
-                prev.filter((user) => !selectedUsers.includes(user.user_id)),
-              );
-            } else {
-              setParticipants((prev) =>
-                prev.filter(
-                  (participant) => !selectedUsers.includes(participant.id),
-                ),
-              );
-            }
+            setUsers((prev) =>
+              prev.filter((user) => !selectedUsers.includes(user.user_id)),
+            );
             return;
           }
           throw new Error("Invalid response format from server");
@@ -332,18 +294,9 @@ dataSetter = (data) => {
       }
 
       if (data.status) {
-        // Remove deleted users from the appropriate state based on active tab
-        if (activeTab === "registered") {
-          setUsers((prev) =>
-            prev.filter((user) => !selectedUsers.includes(user.user_id)),
-          );
-        } else {
-          setParticipants((prev) =>
-            prev.filter(
-              (participant) => !selectedUsers.includes(participant.id),
-            ),
-          );
-        }
+        setUsers((prev) =>
+          prev.filter((user) => !selectedUsers.includes(user.user_id)),
+        );
         setSelectedUsers([]);
         setShowDeleteModal(false);
       } else {
@@ -424,16 +377,17 @@ dataSetter = (data) => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-<th>Fee</th>
-                 <th>Payment Status</th>
-                 <th>Test Status</th>
-                 <th>Score</th>
-                 <th>Date</th>
-                 <th>Action</th>
-               </tr>
+                <th>Course</th>
+                <th>Fee</th>
+                <th>Payment Status</th>
+                <th>Test Status</th>
+                <th>Score</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
 
-               {currentItems.length > 0 ? (
-                 currentItems.map((user, index) => (
+              {currentItems.length > 0 ? (
+                currentItems.map((user, index) => (
                   <tr key={user.user_id}>
                     <td data-th="Select">
                       <Form.Check
@@ -450,20 +404,21 @@ dataSetter = (data) => {
                     <td data-th="Name">{user.full_name}</td>
                     <td data-th="Email">{user.email}</td>
                     <td data-th="Phone">{user.phone}</td>
+                    <td data-th="Course">{user.course_name || user.course_id || "N/A"}</td>
                     <td data-th="Fee">₹{parseFloat(user.fee).toFixed(2)}</td>
-<td data-th="Payment Status">
-<span
-   className={`badge ${user.payment_status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
->
-   {user.payment_status}
-</span>
-                     </td>
-                     <td data-th="Test Status">
-<span
-   className={`badge ${user.test_status === "passed" ? "bg-success" : user.test_status === "failed" ? "bg-danger" : "bg-warning text-dark"}`}
->
-   {user.test_status || "Not Attempted"}
-</span>
+                    <td data-th="Payment Status">
+                      <span
+                        className={`badge ${user.payment_status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
+                      >
+                        {user.payment_status}
+                      </span>
+                    </td>
+                    <td data-th="Test Status">
+                      <span
+                        className={`badge ${user.test_status === "passed" ? "bg-success" : user.test_status === "failed" ? "bg-danger" : "bg-warning text-dark"}`}
+                      >
+                        {user.test_status || "Not Attempted"}
+                      </span>
                     </td>
                     <td data-th="Score">{user.score || "N/A"}</td>
                     <td data-th="Date">{formatDate(user.created_at)}</td>
@@ -480,7 +435,7 @@ dataSetter = (data) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="12" className="text-center">
+                  <td colSpan="13" className="text-center">
                     No registered users data available.
                   </td>
                 </tr>
@@ -501,7 +456,7 @@ dataSetter = (data) => {
                 >
                   <strong>Payment Summary:</strong>
                 </td>
-                <td colSpan="4" style={{ paddingLeft: "20px" }}>
+                <td colSpan="5" style={{ paddingLeft: "20px" }}>
                   <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
                     <div style={{ color: "#27ae60", fontWeight: "600" }}>
                       ✓ Completed:{" "}
@@ -561,348 +516,196 @@ dataSetter = (data) => {
           </table>
         </>
       );
-} else if (activeTab === "participated") {
-       // Participated Quiz tab
-       return (
-         <>
-           <table className="temp-rwd-table">
-             <tbody>
-               <tr>
-                 <th>
-                   <Form.Check
-                     type="checkbox"
-                     checked={
-                       selectedUsers.length === currentItems.length &&
-                       currentItems.length > 0
-                     }
-                     onChange={handleSelectAll}
-                     label=""
-                   />
-                 </th>
-                 <th>S.No</th>
-                 <th>User ID</th>
-                 <th>Name</th>
-                 <th>Email</th>
-                 <th>Phone</th>
-<th>Quiz</th>
-                  <th >Payment Status</th>
-                  <th >Attempt Status</th>
-                  <th>Total Questions</th>
-                 <th>Score</th>
-                 <th>Joined At</th>
-                 <th>Action</th>
-               </tr>
-
-               {currentItems.length > 0 ? (
-                 currentItems.map((participant, index) => (
-                   <tr key={participant.id}>
-                     <td data-th="Select">
-                       <Form.Check
-                         type="checkbox"
-                         checked={selectedUsers.includes(participant.id)}
-                         onChange={() => handleSelectUser(participant.id)}
-                         label=""
-                       />
-                     </td>
-                     <td data-th="S.No">
-                       {(currentPage - 1) * itemsPerPage + index + 1}
-                     </td>
-                     <td data-th="User ID">{participant.student?.user_id}</td>
-                     <td data-th="Name">{participant.student?.full_name}</td>
-                     <td data-th="Email">{participant.student?.email}</td>
-                     <td data-th="Phone">{participant.student?.phone}</td>
-                     <td data-th="Quiz">{participant.quiz}</td>
-<td data-th="Payment Status">
- <span
-   className={`badge ${participant.payment_status === "wallet-completed" || participant.payment_status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
->
-   {participant.payment_status}
-</span>
-                      </td>
-                      <td data-th="Attempt Status">
-<span
-   className={`badge ${participant.attempt?.status === "submitted" ? "bg-success" : participant.attempt?.status === "started" ? "bg-info" : "bg-warning text-dark"}`}
->
-   {participant.attempt?.status || "Not Attempted"}
-</span>
-                     </td>
-                     <td data-th="Total Questions">
-                       {participant.attempt?.total_questions || "N/A"}
-                     </td>
-                     <td data-th="Score">
-                       {participant.attempt?.score || "N/A"}
-                     </td>
-                     <td data-th="Joined At">
-                       {formatDate(participant.joined_at)}
-                     </td>
-                     <td data-th="Action">
-                       <Button
-                         variant="primary"
-                         size="sm"
-                         onClick={() => handleViewUser(participant)}
-                       >
-                         View
-                       </Button>
-                     </td>
-                   </tr>
-                 ))
-               ) : (
-                 <tr>
-                   <td colSpan="13" className="text-center">
-                     No quiz participants data available.
-                   </td>
-                 </tr>
-               )}
-             </tbody>
-            <tfoot>
-              <tr
-                style={{
-                  backgroundColor: "#f0f8ff",
-                  fontWeight: "bold",
-                  borderTop: "2px solid #0066cc",
-                }}
-              >
-                <td
-                  colSpan="8"
-                  className="text-end pe-3"
-                  style={{ color: "#333" }}
-                >
-                  <strong>Quiz Participation Summary:</strong>
-                </td>
-                <td colSpan="5" style={{ paddingLeft: "20px" }}>
-                  <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
-                    <div style={{ color: "#27ae60", fontWeight: "600" }}>
-                      ✓ Completed:{" "}
-                      {
-                        filteredData.filter(
-                          (p) => p.attempt?.attempt_status === "submitted",
-                        ).length
-                      }
+    } else if (activeTab === "completed") {
+      // Completed Winners tab
+      return (
+        <>
+          {isMobile ? (
+            // Mobile Card Layout
+            <div className="winners-cards-container">
+              {currentItems.length > 0 ? (
+                currentItems.map((winner, index) => (
+                  <div key={winner.id} className="winner-card">
+                    <div className="card-header">
+                      <span className="card-sno">#{(currentPage - 1) * itemsPerPage + index + 1}</span>
+                      <span className="card-status" style={{ backgroundColor: "#007bff", color: "white", padding: "4px 12px", borderRadius: "20px", fontSize: "12px" }}>⭐ Winner</span>
                     </div>
-                    <div style={{ color: "#3498db", fontWeight: "600" }}>
-                      ⏳ Started:{" "}
-                      {
-                        filteredData.filter(
-                          (p) => p.attempt?.attempt_status === "started",
-                        ).length
-                      }
+                    <div className="card-body">
+                      <div className="card-row">
+                        <span className="card-label">Name:</span>
+                        <span className="card-value">{winner.full_name}</span>
+                      </div>
+                      <div className="card-row">
+                        <span className="card-label">User ID:</span>
+                        <span className="card-value">{winner.user_id}</span>
+                      </div>
+                      <div className="card-row">
+                        <span className="card-label">Email:</span>
+                        <span className="card-value">{winner.email}</span>
+                      </div>
+                      <div className="card-row">
+                        <span className="card-label">Phone:</span>
+                        <span className="card-value">{winner.phone}</span>
+                      </div>
+                      <div className="card-row" style={{ backgroundColor: "#f8f9fa", padding: "10px" }}>
+                        <span className="card-label">Score:</span>
+                        <span className="card-value" style={{ fontWeight: "bold", color: "#28a745" }}>{winner.score || "N/A"}</span>
+                      </div>
+                      <div className="card-row" style={{ backgroundColor: "#f8f9fa", padding: "10px" }}>
+                        <span className="card-label">Cashback:</span>
+                        <span className="card-value" style={{ fontWeight: "bold", color: "#28a745" }}>₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}</span>
+                      </div>
+                      <div className="card-row">
+                        <span className="card-label">Attempts:</span>
+                        <span 
+                          className="card-value" 
+                          style={{ cursor: "pointer", color: "#0066cc", fontWeight: "bold" }}
+                          onClick={() => openAttemptsModal(winner.attempts, winner.full_name)}
+                        >
+                          {winner.total_attempts || "N/A"} →
+                        </span>
+                      </div>
                     </div>
-                    <div style={{ color: "#f39c12", fontWeight: "600" }}>
-                      ⏰ Not Attempted:{" "}
-                      {
-                        filteredData.filter(
-                          (p) => !p.attempt || !p.attempt.attempt_status,
-                        ).length
-                      }
-                    </div>
-                    <div
-                      style={{
-                        marginTop: "8px",
-                        borderTop: "1px solid #bdc3c7",
-                        paddingTop: "8px",
-                        color: "#0066cc",
-                        fontWeight: "700",
-                      }}
-                    >
-                      Total Participants: {filteredData.length}
+                    <div className="card-footer">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleViewUser(winner)}
+                        style={{ width: "100%" }}
+                      >
+                        View Details
+                      </Button>
                     </div>
                   </div>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </>
-      );
-} else if (activeTab === "completed") {
-       // Completed Winners tab
-       return (
-         <>
-           {isMobile ? (
-             // Mobile Card Layout
-             <div className="winners-cards-container">
-               {currentItems.length > 0 ? (
-                 currentItems.map((winner, index) => (
-                   <div key={winner.id} className="winner-card">
-                     <div className="card-header">
-                       <span className="card-sno">#{(currentPage - 1) * itemsPerPage + index + 1}</span>
-                       <span className="card-status" style={{ backgroundColor: "#007bff", color: "white", padding: "4px 12px", borderRadius: "20px", fontSize: "12px" }}>⭐ Winner</span>
+                ))
+              ) : (
+                <div style={{ textAlign: "center", padding: "30px" }}>
+                  No completed winners data available.
+                </div>
+              )}
+            </div>
+          ) : (
+            // Desktop Table Layout
+            <table className="temp-rwd-table">
+              <tbody>
+                <tr>
+                  <th>S.No</th>
+                  <th>User ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Score</th>
+                  <th>Cashback</th>
+                  <th>Wallet</th>
+                  <th>Attempts</th>
+                  <th>Win Date</th>
+                  <th>Action</th>
+                </tr>
+
+                {currentItems.length > 0 ? (
+                  currentItems.map((winner, index) => (
+                    <tr key={winner.id}>
+                      <td data-th="S.No">
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
+                      <td data-th="User ID">{winner.user_id}</td>
+                      <td data-th="Name">{winner.full_name}</td>
+                      <td data-th="Email">{winner.email}</td>
+                      <td data-th="Phone">{winner.phone}</td>
+                      <td data-th="Score" style={{ fontWeight: "bold", color: "#28a745" }}>
+                        {winner.score || "N/A"}
+                      </td>
+                      <td data-th="Cashback" style={{ fontWeight: "bold", color: "#28a745" }}>
+                        ₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}
+                      </td>
+                      <td data-th="Wallet">
+                        ₹{winner.wallet_balance ? winner.wallet_balance.toFixed(2) : "0.00"}
+                      </td>
+                      <td
+                        data-th="Attempts"
+                        style={{
+                          cursor: "pointer",
+                          color: "#0066cc",
+                          fontWeight: "bold",
+                        }}
+                        onClick={() =>
+                          openAttemptsModal(winner.attempts, winner.full_name)
+                        }
+                      >
+                        {winner.total_attempts || "N/A"} →
+                      </td>
+                      <td data-th="Win Date">
+                        {winner.won_at ? formatDate(winner.won_at) : "N/A"}
+                      </td>
+                      <td data-th="Action">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleViewUser(winner)}
+                        >
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="11" className="text-center">
+                      No completed winners data available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+              <tfoot>
+                <tr
+                  style={{
+                    backgroundColor: "#f0f8ff",
+                    fontWeight: "bold",
+                    borderTop: "2px solid #0066cc",
+                  }}
+                >
+                  <td
+                    colSpan="4"
+                    className="text-end pe-3"
+                    style={{ color: "#333" }}
+                  >
+                    <strong>Winners Summary:</strong>
+                  </td>
+                  <td colSpan="7" style={{ paddingLeft: "20px" }}>
+                   <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
+                     <div style={{ color: "#27ae60", fontWeight: "600" }}>
+                       ✓ Total Winners: {filteredData.length}
                      </div>
-                     <div className="card-body">
-                       <div className="card-row">
-                         <span className="card-label">Name:</span>
-                         <span className="card-value">{winner.full_name}</span>
-                       </div>
-                       <div className="card-row">
-                         <span className="card-label">User ID:</span>
-                         <span className="card-value">{winner.user_id}</span>
-                       </div>
-                       <div className="card-row">
-                         <span className="card-label">Email:</span>
-                         <span className="card-value">{winner.email}</span>
-                       </div>
-                       <div className="card-row">
-                         <span className="card-label">Phone:</span>
-                         <span className="card-value">{winner.phone}</span>
-                       </div>
-                       <div className="card-row" style={{ backgroundColor: "#f8f9fa", padding: "10px" }}>
-                         <span className="card-label">Score:</span>
-                         <span className="card-value" style={{ fontWeight: "bold", color: "#28a745" }}>{winner.score || "N/A"}</span>
-                       </div>
-                       <div className="card-row" style={{ backgroundColor: "#f8f9fa", padding: "10px" }}>
-                         <span className="card-label">Cashback:</span>
-                         <span className="card-value" style={{ fontWeight: "bold", color: "#28a745" }}>₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}</span>
-                       </div>
-                       <div className="card-row">
-                         <span className="card-label">Attempts:</span>
-                         <span 
-                           className="card-value" 
-                           style={{ cursor: "pointer", color: "#0066cc", fontWeight: "bold" }}
-                           onClick={() => openAttemptsModal(winner.attempts, winner.full_name)}
-                         >
-                           {winner.total_attempts || "N/A"} →
-                         </span>
-                       </div>
+                     <div style={{ color: "#3498db", fontWeight: "600" }}>
+                       ₹ Total Cashback:{" "}
+                       {filteredData
+                         .reduce(
+                           (sum, w) => sum + (parseFloat(w.cashback) || 0),
+                           0,
+                         )
+                         .toFixed(2)}
                      </div>
-                     <div className="card-footer">
-                       <Button
-                         variant="primary"
-                         size="sm"
-                         onClick={() => handleViewUser(winner)}
-                         style={{ width: "100%" }}
-                       >
-                         View Details
-                       </Button>
+                     <div
+                       style={{
+                         color: "#0066cc",
+                         fontWeight: "600",
+                         marginTop: "8px",
+                       }}
+                     >
+                       Total in Wallet: ₹
+                       {filteredData
+                         .reduce(
+                           (sum, w) => sum + (parseFloat(w.wallet_balance) || 0),
+                           0,
+                         )
+                         .toFixed(2)}
                      </div>
                    </div>
-                 ))
-               ) : (
-                 <div style={{ textAlign: "center", padding: "30px" }}>
-                   No completed winners data available.
-                 </div>
-               )}
-             </div>
-           ) : (
-             // Desktop Table Layout
-             <table className="temp-rwd-table">
-               <tbody>
-                 <tr>
-                   <th>S.No</th>
-                   <th>User ID</th>
-                   <th>Name</th>
-                   <th>Email</th>
-                   <th>Phone</th>
-                   <th>Score</th>
-                   <th>Cashback</th>
-                   <th>Wallet</th>
-                   <th>Attempts</th>
-                   <th>Win Date</th>
-                   <th>Action</th>
-                 </tr>
-
-                 {currentItems.length > 0 ? (
-                   currentItems.map((winner, index) => (
-                     <tr key={winner.id}>
-                       <td data-th="S.No">
-                         {(currentPage - 1) * itemsPerPage + index + 1}
-                       </td>
-                       <td data-th="User ID">{winner.user_id}</td>
-                       <td data-th="Name">{winner.full_name}</td>
-                       <td data-th="Email">{winner.email}</td>
-                       <td data-th="Phone">{winner.phone}</td>
-                       <td data-th="Score" style={{ fontWeight: "bold", color: "#28a745" }}>
-                         {winner.score || "N/A"}
-                       </td>
-                       <td data-th="Cashback" style={{ fontWeight: "bold", color: "#28a745" }}>
-                         ₹{winner.cashback ? winner.cashback.toFixed(2) : "0.00"}
-                       </td>
-                       <td data-th="Wallet">
-                         ₹{winner.wallet_balance ? winner.wallet_balance.toFixed(2) : "0.00"}
-                       </td>
-                       <td
-                         data-th="Attempts"
-                         style={{
-                           cursor: "pointer",
-                           color: "#0066cc",
-                           fontWeight: "bold",
-                         }}
-                         onClick={() =>
-                           openAttemptsModal(winner.attempts, winner.full_name)
-                         }
-                       >
-                         {winner.total_attempts || "N/A"} →
-                       </td>
-                       <td data-th="Win Date">
-                         {winner.won_at ? formatDate(winner.won_at) : "N/A"}
-                       </td>
-                       <td data-th="Action">
-                         <Button
-                           variant="primary"
-                           size="sm"
-                           onClick={() => handleViewUser(winner)}
-                         >
-                           View
-                         </Button>
-                       </td>
-                     </tr>
-                   ))
-                 ) : (
-                   <tr>
-                     <td colSpan="11" className="text-center">
-                       No completed winners data available.
-                     </td>
-                   </tr>
-                 )}
-               </tbody>
-               <tfoot>
-                 <tr
-                   style={{
-                     backgroundColor: "#f0f8ff",
-                     fontWeight: "bold",
-                     borderTop: "2px solid #0066cc",
-                   }}
-                 >
-                   <td
-                     colSpan="4"
-                     className="text-end pe-3"
-                     style={{ color: "#333" }}
-                   >
-                     <strong>Winners Summary:</strong>
-                   </td>
-                   <td colSpan="7" style={{ paddingLeft: "20px" }}>
-                    <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
-                      <div style={{ color: "#27ae60", fontWeight: "600" }}>
-                        ✓ Total Winners: {filteredData.length}
-                      </div>
-                      <div style={{ color: "#3498db", fontWeight: "600" }}>
-                        ₹ Total Cashback:{" "}
-                        {filteredData
-                          .reduce(
-                            (sum, w) => sum + (parseFloat(w.cashback) || 0),
-                            0,
-                          )
-                          .toFixed(2)}
-                      </div>
-                      <div
-                        style={{
-                          color: "#0066cc",
-                          fontWeight: "600",
-                          marginTop: "8px",
-                        }}
-                      >
-                        Total in Wallet: ₹
-                        {filteredData
-                          .reduce(
-                            (sum, w) => sum + (parseFloat(w.wallet_balance) || 0),
-                            0,
-                          )
-                          .toFixed(2)}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-           )}
+                 </td>
+               </tr>
+             </tfoot>
+           </table>
+          )}
         </>
       );
     }
@@ -938,14 +741,6 @@ dataSetter = (data) => {
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link
-                  active={activeTab === "participated"}
-                  onClick={() => setActiveTab("participated")}
-                >
-                  Participated Quiz
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link
                   active={activeTab === "completed"}
                   onClick={() => setActiveTab("completed")}
                 >
@@ -956,12 +751,7 @@ dataSetter = (data) => {
 
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="mb-0">
-                Khelo Jito{" "}
-                {activeTab === "registered"
-                  ? "Registered Users"
-                  : activeTab === "participated"
-                    ? "Participated Quiz"
-                    : "Completed Winners"}
+                Course Quiz Registrations
               </h2>
               {activeTab !== "completed" && selectedUsers.length > 0 && (
                 <Button
@@ -1017,9 +807,7 @@ dataSetter = (data) => {
                   Loading{" "}
                   {activeTab === "registered"
                     ? "registered users"
-                    : activeTab === "participated"
-                      ? "quiz participants"
-                      : "completed winners"}{" "}
+                    : "completed winners"}{" "}
                   data...
                 </p>
               </div>
@@ -1138,29 +926,29 @@ dataSetter = (data) => {
                        <td>{attempt.id}</td>
                        <td>{attempt.total_questions}</td>
                        <td>{attempt.score}</td>
-<td>
-  <span
-    className={`badge ${
-      attempt.test_status === "passed"
-        ? "bg-success"
-        : attempt.test_status === "failed"
-        ? "bg-danger"
-        : "bg-warning text-dark"
-    }`}
-  >
-    {attempt.test_status}
-  </span>
-</td>
+ <td>
+   <span
+     className={`badge ${
+       attempt.test_status === "passed"
+         ? "bg-success"
+         : attempt.test_status === "failed"
+         ? "bg-danger"
+         : "bg-warning text-dark"
+     }`}
+   >
+     {attempt.test_status}
+   </span>
+ </td>
                        <td>{formatDate(attempt.started_at)}</td>
                        <td>{attempt.submitted_at ? formatDate(attempt.submitted_at) : "N/A"}</td>
                        <td>
-{attempt.certificate ? (
-                            <a href={`${API_BASE_URL}${attempt.certificate}`} target="_blank" rel="noopener noreferrer">
-                              View Certificate
-                            </a>
-                         ) : (
-                           "N/A"
-                         )}
+ {attempt.certificate ? (
+                             <a href={`${API_BASE_URL}${attempt.certificate}`} target="_blank" rel="noopener noreferrer">
+                               View Certificate
+                             </a>
+                          ) : (
+                            "N/A"
+                          )}
                        </td>
                      </tr>
                    ))}
@@ -1187,9 +975,7 @@ dataSetter = (data) => {
           <Modal.Title>
             {activeTab === "registered"
               ? "User Details"
-              : activeTab === "participated"
-                ? "Quiz Participant Details"
-                : "Winner Details"}
+              : "Winner Details"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -1226,16 +1012,20 @@ dataSetter = (data) => {
                     </Col>
                     <Col md={6} className="mb-3">
                       <p>
+                        <strong>Course ID:</strong>{" "}
+                        {selectedUser.course_id || selectedUser.course_name || "N/A"}
+                      </p>
+                      <p>
                         <strong>Fee:</strong> ₹
                         {parseFloat(selectedUser.fee).toFixed(2)}
                       </p>
                       <p>
                         <strong>Payment Status:</strong>
-<span
-  className={`badge ${selectedUser.payment_status === "completed" ? "success" : "warning"} ms-2`}
->
-  {selectedUser.payment_status}
-</span>
+ <span
+   className={`badge ${selectedUser.payment_status === "completed" ? "success" : "warning"} ms-2`}
+ >
+   {selectedUser.payment_status}
+ </span>
                       </p>
                     </Col>
                   </Row>
@@ -1257,109 +1047,29 @@ dataSetter = (data) => {
                      </Row>
                    )}
 
-                  {selectedUser.test_status && (
-                    <Row>
-                      <Col md={6} className="mb-3">
-                        <p>
-                          <strong>Test Status:</strong>
-<button
-  className={`badge ${selectedUser.test_status === "passed" ? "success" : "danger"} ms-2`}
->
-  {selectedUser.test_status}
-</button>
-                        </p>
-                      </Col>
-                      {selectedUser.score !== undefined && (
-                        <Col md={6} className="mb-3">
-                          <p>
-                            <strong>Score:</strong> {selectedUser.score}
-                          </p>
-                        </Col>
-                      )}
-                    </Row>
-                  )}
-                </>
-              ) : activeTab === "participated" ? (
-                // Quiz participant details
-                <>
-                  <Row>
-                    <Col md={6} className="mb-3">
-                      <div>
-                        <h5>{selectedUser.student?.full_name}</h5>
-                        <p className="text-muted">
-                          User ID: {selectedUser.student?.user_id}
-                        </p>
-                      </div>
-                    </Col>
-                    <Col md={6} className="mb-3">
-                      <p>
-                        <strong>Quiz:</strong> {selectedUser.quiz}
-                      </p>
-                      <p>
-                        <strong>Joined At:</strong>{" "}
-                        {formatDate(selectedUser.joined_at)}
-                      </p>
-                    </Col>
-                  </Row>
-
-                  <Row>
-                    <Col md={6} className="mb-3">
-                      <p>
-                        <strong>Email:</strong> {selectedUser.student?.email}
-                      </p>
-                      <p>
-                        <strong>Phone:</strong> {selectedUser.student?.phone}
-                      </p>
-                    </Col>
-                    <Col md={6} className="mb-3">
-                      <p>
-                        <strong>Payment Status:</strong>
-<span
-  className={`badge ${selectedUser.payment_status === "wallet-completed" || selectedUser.payment_status === "completed" ? "success" : "warning"} ms-2`}
->
-  {selectedUser.payment_status}
-</span>
-                      </p>
-                    </Col>
-                  </Row>
-
-{selectedUser.attempt && (
+                   {selectedUser.test_status && (
                      <Row>
                        <Col md={6} className="mb-3">
                          <p>
-                           <strong>Attempt Status:</strong>
-<span
-  className={`badge ${selectedUser.attempt.status === "submitted" ? "success" : selectedUser.attempt.status === "started" ? "info" : "warning"} ms-2`}
->
-  {selectedUser.attempt.status}
-</span>
-                         </p>
-                         <p>
-                           <strong>Total Questions:</strong>{" "}
-                           {selectedUser.attempt.total_questions}
+                           <strong>Test Status:</strong>
+ <button
+   className={`badge ${selectedUser.test_status === "passed" ? "success" : "danger"} ms-2`}
+ >
+   {selectedUser.test_status}
+ </button>
                          </p>
                        </Col>
-                       <Col md={6} className="mb-3">
-                         <p>
-                           <strong>Score:</strong> {selectedUser.attempt.score}
-                         </p>
-                         {selectedUser.attempt.started_at && (
+                       {selectedUser.score !== undefined && (
+                         <Col md={6} className="mb-3">
                            <p>
-                             <strong>Started At:</strong>{" "}
-                             {formatDate(selectedUser.attempt.started_at)}
+                             <strong>Score:</strong> {selectedUser.score}
                            </p>
-                         )}
-                         {selectedUser.attempt.submitted_at && (
-                           <p>
-                             <strong>Submitted At:</strong>{" "}
-                             {formatDate(selectedUser.attempt.submitted_at)}
-                           </p>
-                         )}
-                       </Col>
+                         </Col>
+                       )}
                      </Row>
                    )}
-                 </>
-               ) : (
+                </>
+              ) : (
                 // Winner details
                 <>
                   <Row>
