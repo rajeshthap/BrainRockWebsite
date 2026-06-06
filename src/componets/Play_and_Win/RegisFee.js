@@ -68,8 +68,9 @@ function RegisFee() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] = useState("");
+const [selectedCategory, setSelectedCategory] = useState("");
   const [courseId, setCourseId] = useState("");
+   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     if (courseData) {
@@ -77,6 +78,26 @@ function RegisFee() {
       setSelectedCategory(courseData.category || "");
     }
   }, [courseData]);
+
+   useEffect(() => {
+     const fetchCourses = async () => {
+       try {
+         const response = await axios.get(
+           "https://brainrock.in/brainrock/backend/api/course-list/",
+           {
+             withCredentials: true,
+             headers: {
+               "Content-Type": "application/json",
+             },
+           }
+         );
+         setCategories(response.data.courses || []);
+       } catch (error) {
+         console.error("Error fetching courses:", error);
+       }
+     };
+     fetchCourses();
+   }, []);
 
   const navigate = useNavigate();
 
@@ -156,14 +177,15 @@ function RegisFee() {
     setShowError(false);
     setShowSuccess(false);
 
-    try {
-      const submitData = {
-        full_name: formData.full_name,
-        email: formData.email,
-        phone: formData.phone,
-        fee: apiFee || 8,
-        course_id: courseId || ""
-      };
+try {
+       const submitData = {
+         full_name: formData.full_name,
+         email: formData.email,
+         phone: formData.phone,
+         fee: apiFee || 8,
+         course_id: courseId || "",
+         category: selectedCategory || ""
+       };
 
       const response = await axios.post(
         "https://brainrock.in/brainrock/backend/api/register-test/",
@@ -379,20 +401,19 @@ function RegisFee() {
                     <Form.Label className="br-label">
                       Category <span className="br-span-star">*</span>
                     </Form.Label>
-                    <Form.Select
-                      className={`br-form-control ${errors.course_category ? "is-invalid" : ""}`}
-                      name="course_category"
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                    >
-                      <option value="">Select Category</option>
-                      <option value="PHP">PHP</option>
-                      <option value="Node.js">Node.js</option>
-                      <option value="Front End Development">Front End Development</option>
-                      <option value="AJAX and XML">AJAX and XML</option>
-                      <option value="Network Security">Network Security</option>
-                      <option value="Laravel Framework">Laravel Framework</option>
-                    </Form.Select>
+<Form.Select
+                       className={`br-form-control ${errors.course_category ? "is-invalid" : ""}`}
+                       name="course_category"
+                       value={selectedCategory}
+                       onChange={(e) => setSelectedCategory(e.target.value)}
+                     >
+                       <option value="">Select Category</option>
+                       {categories.map((course) => (
+                         <option key={course.id} value={course.course_name}>
+                           {course.course_name}
+                         </option>
+                       ))}
+                     </Form.Select>
                     {errors.course_category && (
                       <div className="invalid-feedback">{errors.course_category}</div>
                     )}

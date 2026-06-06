@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Alert,
-  Spinner,
-  Card,
-  ProgressBar,
-} from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import "../../assets/css/Test.css";
 import FooterPage from "../footer/FooterPage";
 import axios from "axios";
@@ -22,22 +13,63 @@ function CoursesTest() {
   const [searchParams] = useSearchParams();
 
   const courseData = location?.state?.courseData || null;
-  const isCourseRegistration = !!location?.state?.courseData;
   const courseIdRef = useRef(location?.state?.courseId || null);
   const courseDataRef = useRef(courseData);
   const urlUserId = searchParams.get("user_id");
   const urlCourseId = searchParams.get("course_id");
 
-  const [testData, setTestData] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(() => {
+    const saved = localStorage.getItem("test_currentQuestion");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  const [score, setScore] = useState(() => {
+    const saved = localStorage.getItem("test_score");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [showResults, setShowResults] = useState(() => {
+    const saved = localStorage.getItem("test_showResults");
+    return saved === "true";
+  });
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [userAnswers, setUserAnswers] = useState([]);
-  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
-  const [showWrongAnswers, setShowWrongAnswers] = useState(false);
+  const [attemptId, setAttemptId] = useState(null);
+  const [userAnswers, setUserAnswers] = useState(() => {
+    const saved = localStorage.getItem("test_userAnswers");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const saved = localStorage.getItem("test_timeLeft");
+    return saved ? parseInt(saved, 10) : 15;
+  });
+  const [testResult, setTestResult] = useState(() => {
+    const saved = localStorage.getItem("test_testResult");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [tabSwitchWarning, setTabSwitchWarning] = useState(() => {
+    const saved = localStorage.getItem("test_tabSwitchWarning");
+    return saved === "true";
+  });
+  const [tabSwitchCount, setTabSwitchCount] = useState(() => {
+    const saved = localStorage.getItem("test_tabSwitchCount");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [showWrongAnswersModal, setShowWrongAnswersModal] = useState(() => {
+    const saved = localStorage.getItem("test_showWrongAnswersModal");
+    return saved === "true";
+  });
+  const [wrongAnswers, setWrongAnswers] = useState(() => {
+    const saved = localStorage.getItem("test_wrongAnswers");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [certificateUrl, setCertificateUrl] = useState(() => {
+    const saved = localStorage.getItem("test_certificateUrl");
+    return saved || null;
+  });
+
+  const prevQuestionRef = useRef(currentQuestion);
 
   useEffect(() => {
     const storedCourseData = localStorage.getItem("test_courseData");
@@ -72,6 +104,86 @@ function CoursesTest() {
     startTest();
   }, [location?.state, navigate, urlUserId, urlCourseId]);
 
+  useEffect(() => {
+    if (prevQuestionRef.current !== currentQuestion) {
+      setTimeLeft(15);
+      prevQuestionRef.current = currentQuestion;
+    }
+  }, [currentQuestion]);
+
+  useEffect(() => {
+    if (loading || showResults || !questions.length) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          handleNextQuestion();
+          return 15;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [currentQuestion, loading, showResults, questions.length]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && !loading && !showResults) {
+        setTabSwitchCount((prevCount) => {
+          const newCount = prevCount + 1;
+          if (newCount === 1) {
+            setTabSwitchWarning(true);
+          } else if (newCount === 2) {
+            setShowResults(true);
+            setScore(0);
+          }
+          return newCount;
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [loading, showResults]);
+
+  useEffect(() => {
+    if (!showResults) {
+      localStorage.setItem("test_currentQuestion", currentQuestion.toString());
+      localStorage.setItem("test_score", score.toString());
+      localStorage.setItem("test_showResults", showResults.toString());
+      localStorage.setItem("test_userAnswers", JSON.stringify(userAnswers));
+      localStorage.setItem("test_timeLeft", timeLeft.toString());
+      localStorage.setItem(
+        "test_tabSwitchWarning",
+        tabSwitchWarning.toString(),
+      );
+      localStorage.setItem("test_tabSwitchCount", tabSwitchCount.toString());
+      localStorage.setItem(
+        "test_showWrongAnswersModal",
+        showWrongAnswersModal.toString(),
+      );
+      localStorage.setItem("test_wrongAnswers", JSON.stringify(wrongAnswers));
+      if (certificateUrl)
+        localStorage.setItem("test_certificateUrl", certificateUrl);
+      if (testResult)
+        localStorage.setItem("test_testResult", JSON.stringify(testResult));
+    }
+  }, [
+    currentQuestion,
+    score,
+    showResults,
+    userAnswers,
+    timeLeft,
+    tabSwitchWarning,
+    tabSwitchCount,
+    showWrongAnswersModal,
+    wrongAnswers,
+    certificateUrl,
+    testResult,
+  ]);
+
   const startTest = async () => {
     try {
       const userId =
@@ -84,7 +196,7 @@ function CoursesTest() {
 
       const response = await axios.post(`${API_BASE_URL}/api/start-test/`, {
         user_id: userId,
-        course_id: courseIdRef.current || courseData?.id,
+        course_id: courseIdRef.current,
       });
 
       if (
@@ -92,677 +204,458 @@ function CoursesTest() {
         response.data.questions &&
         Array.isArray(response.data.questions)
       ) {
-        setTestData(response.data);
-        setUserAnswers(new Array(response.data.total_questions).fill(null));
-        console.log(
-          "Test data loaded successfully with",
-          response.data.total_questions,
-          "questions",
-        );
+        setQuestions(response.data.questions);
+        setAttemptId(response.data.attempt_id);
       } else {
-        const errorMsg =
+        setError(
           response.data.message ||
-          "Failed to start test - Invalid response format";
-        console.error("Test start failed:", errorMsg, response.data);
-        setError(errorMsg);
+            "Failed to start test - Invalid response format",
+        );
       }
     } catch (err) {
-      const errorMsg =
+      setError(
         err.response?.data?.message ||
-        err.message ||
-        "Failed to start test. Please try again.";
-      console.error("Test API Error:", err);
-      setError(errorMsg);
+          "Failed to start test. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleOptionSelect = (optionIndex) => {
-    setSelectedAnswer(optionIndex);
+    setSelectedOption(optionIndex);
   };
 
-  const handleNext = () => {
-    const updatedAnswers = [...userAnswers];
-    updatedAnswers[currentQuestionIndex] = selectedAnswer;
-    setUserAnswers(updatedAnswers);
-    setSelectedAnswer(null);
+  const handleNextQuestion = () => {
+    const newAnswers = [
+      ...userAnswers,
+      {
+        question_id: questions[currentQuestion].id,
+        selected_option: selectedOption,
+      },
+    ];
+    setUserAnswers(newAnswers);
 
-    if (currentQuestionIndex < testData.total_questions - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    if (selectedOption === questions[currentQuestion].correct_answer) {
+      setScore(score + 1);
+    }
+
+    const nextQuestion = currentQuestion + 1;
+    if (nextQuestion < questions.length) {
+      setCurrentQuestion(nextQuestion);
+      setSelectedOption(null);
     } else {
-      setShowSubmitConfirm(true);
+      submitTest(newAnswers);
     }
   };
 
-  const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
-      const prevAnswer = userAnswers[currentQuestionIndex - 1];
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-      setSelectedAnswer(prevAnswer);
-    }
-  };
-
-  const handleSubmit = async () => {
-    const finalizedAnswers = [...userAnswers];
-    finalizedAnswers[currentQuestionIndex] = selectedAnswer;
-    setUserAnswers(finalizedAnswers);
-
-    setSubmitting(true);
+  const submitTest = async (answers) => {
     try {
-      const userId = localStorage.getItem("test_user_id");
-
-      const answersPayload = finalizedAnswers
-        .map((answer, index) => {
-          if (answer !== null && testData?.questions?.[index]) {
-            return {
-              question_id: testData.questions[index].id,
-              selected_option: answer,
-            };
-          }
-          return null;
-        })
-        .filter((item) => item !== null);
-
-      console.log("Submitting answers:", answersPayload);
-
-      const submitResponse = await axios.post(
-        `${API_BASE_URL}/api/submit-test/`,
-        {
-          user_id: userId,
-          answers: answersPayload,
-        },
-      );
-
-      const apiResult = submitResponse.data;
-      console.log("Submit Response:", apiResult);
-
-      const totalMarks = testData.questions.reduce(
-        (sum, q) => sum + (q.marks || 1),
-        0,
-      );
-
-      // Calculate wrong answers
-      const wrongAnswers = testData.questions
-        .map((question, index) => {
-          const userAnswer = finalizedAnswers[index];
-          const isCorrect = userAnswer === question.correct_answer;
-          return {
-            questionId: question.id,
-            questionText: question.question_text,
-            userAnswer:
-              userAnswer !== null
-                ? question.options[userAnswer]
-                : "Not answered",
-            correctAnswer: question.options[question.correct_answer],
-            isCorrect,
-          };
-        })
-        .filter((item) => !item.isCorrect);
-
-      const correctCount = testData.questions.length - wrongAnswers.length;
-
-      setResult({
-        score: apiResult.score || 0,
-        total: totalMarks,
-        percentage:
-          totalMarks > 0
-            ? Math.round(((apiResult.score || 0) / totalMarks) * 100)
-            : 0,
-        status: apiResult.status || "failed",
-        certificate: apiResult.certificate || null,
-        courseName:
-          courseDataRef.current?.title || courseData?.title || "Course Test",
-        correct: correctCount,
-        totalQuestions: testData.total_questions,
-        wrongAnswers: wrongAnswers,
+      const userId =
+        localStorage.getItem("test_user_id") || searchParams.get("user_id");
+      const response = await axios.post(`${API_BASE_URL}/api/submit-test/`, {
+        user_id: userId,
+        answers: answers,
       });
-      setShowSubmitConfirm(false);
+
+      console.log("Test submission successful:", response.data);
+      setTestResult(response.data);
+
+      if (response.data.certificate) {
+        const certificatePath = response.data.certificate.startsWith("http")
+          ? response.data.certificate
+          : `${API_BASE_URL}${response.data.certificate}`;
+        setCertificateUrl(certificatePath);
+      }
+
+      setShowResults(true);
     } catch (err) {
-      const errorMsg =
-        err.response?.data?.message ||
-        err.message ||
-        "Failed to submit test. Please try again.";
-      console.error("Submit Test Error:", err);
-      setError(errorMsg);
-    } finally {
-      setSubmitting(false);
+      console.error("Error submitting quiz:", err);
+      setError(err.message);
     }
+  };
+
+  const handleShowWrongAnswers = () => {
+    const wrong = [];
+    userAnswers.forEach((answer, index) => {
+      if (answer.selected_option !== questions[index].correct_answer) {
+        wrong.push({
+          question: questions[index].question_text,
+          question_hindi_text: questions[index].question_hindi_text || "",
+          userAnswer: questions[index].options[answer.selected_option],
+          correctAnswer:
+            questions[index].options[questions[index].correct_answer],
+          questionNumber: index + 1,
+        });
+      }
+    });
+    setWrongAnswers(wrong);
+    setShowWrongAnswersModal(true);
+  };
+
+  const shareOnWhatsApp = (percent) => {
+    const text = `I passed the BrainRock quiz with ${percent}% score! Check out my certificate: ${certificateUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const shareOnLinkedIn = (percent) => {
+    const text = `I passed the BrainRock quiz with ${percent}% score! Check out my certificate: ${certificateUrl}`;
+    window.open(
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certificateUrl)}&title=BrainRock Certificate&summary=${encodeURIComponent(text)}`,
+      "_blank",
+    );
+  };
+
+  const clearTestState = () => {
+    localStorage.removeItem("test_currentQuestion");
+    localStorage.removeItem("test_score");
+    localStorage.removeItem("test_showResults");
+    localStorage.removeItem("test_userAnswers");
+    localStorage.removeItem("test_timeLeft");
+    localStorage.removeItem("test_testResult");
+    localStorage.removeItem("test_tabSwitchWarning");
+    localStorage.removeItem("test_tabSwitchCount");
+    localStorage.removeItem("test_showWinnerForm");
+    localStorage.removeItem("test_showWrongAnswersModal");
+    localStorage.removeItem("test_wrongAnswers");
+    localStorage.removeItem("test_certificateUrl");
+    localStorage.removeItem("test_showInstructionsModal");
+    localStorage.removeItem("test_courseData");
+    localStorage.removeItem("test_courseId");
   };
 
   if (loading) {
     return (
-      <Container className="text-center my-5">
-        <Spinner animation="border" />
-        <p className="mt-3">Loading test questions...</p>
-      </Container>
+      <div className="test-container">
+        <div className="test-card">
+          <div className="loading">Loading questions...</div>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container className="my-5">
-        <Alert variant="danger">{error}</Alert>
-        <Button variant="primary" onClick={() => navigate("/Courses")}>
-          Back to Courses
-        </Button>
-      </Container>
-    );
-  }
-
-  if (result) {
-    const passed = result.status === "passed" || result.percentage >= 80;
-
-    return (
-      <Container fluid className="test-result-container">
-        <Container className="my-5">
-          {/* Header Section */}
-          <Row className="mb-5">
-            <Col md={12}>
-              <div className="text-center mb-4">
-                <h1
-                  className="test-result-title"
-                  style={{
-                    fontSize: "2.5rem",
-                    fontWeight: "bold",
-                    color: "#333",
-                  }}
-                >
-                  {result.courseName}
-                </h1>
-                <p
-                  className="test-result-subtitle"
-                  style={{ fontSize: "1.1rem", color: "#666" }}
-                >
-                  Test Results
-                </p>
-              </div>
-            </Col>
-          </Row>
-
-          {/* Result Card */}
-          <Row className="mb-4">
-            <Col md={12}>
-              <Card
-                className={`result-card shadow-lg ${passed ? "border-success" : "border-warning"}`}
-                style={{ borderWidth: "3px" }}
-              >
-                <Card.Body className="text-center py-5">
-                  <div className="result-icon mb-4">
-                    {passed ? (
-                      <span style={{ fontSize: "5rem" }}>🎉</span>
-                    ) : (
-                      <span style={{ fontSize: "5rem" }}>📝</span>
-                    )}
-                  </div>
-
-                  <Card.Title
-                    className={`mb-4 ${passed ? "text-success" : "text-warning"}`}
-                    style={{ fontSize: "2rem", fontWeight: "bold" }}
-                  >
-                    {passed ? "Congratulations!" : "Test Completed"}
-                  </Card.Title>
-
-                  {/* Result Details Grid */}
-                  <Row className="mt-5 mb-5">
-                    <Col md={3} className="mb-3">
-                      <div
-                        className="result-stat"
-                        style={{
-                          padding: "20px",
-                          backgroundColor: "#f8f9fa",
-                          borderRadius: "10px",
-                          border: "2px solid #007bff",
-                        }}
-                      >
-                        <h5
-                          style={{
-                            color: "#007bff",
-                            fontSize: "0.9rem",
-                            textTransform: "uppercase",
-                            letterSpacing: "1px",
-                          }}
-                        >
-                          Score
-                        </h5>
-                        <h2
-                          style={{
-                            color: "#007bff",
-                            fontSize: "2.5rem",
-                            fontWeight: "bold",
-                            margin: "10px 0",
-                          }}
-                        >
-                          {result.score}
-                        </h2>
-                        <p style={{ color: "#666", margin: "0" }}>
-                          out of {result.total}
-                        </p>
-                      </div>
-                    </Col>
-                    <Col md={3} className="mb-3">
-                      <div
-                        className="result-stat"
-                        style={{
-                          padding: "20px",
-                          backgroundColor: "#f8f9fa",
-                          borderRadius: "10px",
-                          border: "2px solid #28a745",
-                        }}
-                      >
-                        <h5
-                          style={{
-                            color: "#28a745",
-                            fontSize: "0.9rem",
-                            textTransform: "uppercase",
-                            letterSpacing: "1px",
-                          }}
-                        >
-                          Correct
-                        </h5>
-                        <h2
-                          style={{
-                            color: "#28a745",
-                            fontSize: "2.5rem",
-                            fontWeight: "bold",
-                            margin: "10px 0",
-                          }}
-                        >
-                          {result.correct}
-                        </h2>
-                        <p style={{ color: "#666", margin: "0" }}>
-                          out of {result.totalQuestions}
-                        </p>
-                      </div>
-                    </Col>
-                    <Col md={3} className="mb-3">
-                      <div
-                        className="result-stat"
-                        style={{
-                          padding: "20px",
-                          backgroundColor: "#f8f9fa",
-                          borderRadius: "10px",
-                          border: "2px solid #dc3545",
-                        }}
-                      >
-                        <h5
-                          style={{
-                            color: "#dc3545",
-                            fontSize: "0.9rem",
-                            textTransform: "uppercase",
-                            letterSpacing: "1px",
-                          }}
-                        >
-                          Wrong
-                        </h5>
-                        <h2
-                          style={{
-                            color: "#dc3545",
-                            fontSize: "2.5rem",
-                            fontWeight: "bold",
-                            margin: "10px 0",
-                          }}
-                        >
-                          {result.totalQuestions - result.correct}
-                        </h2>
-                        <p style={{ color: "#666", margin: "0" }}>
-                          answered incorrectly
-                        </p>
-                      </div>
-                    </Col>
-                    <Col md={3} className="mb-3">
-                      <div
-                        className="result-stat"
-                        style={{
-                          padding: "20px",
-                          backgroundColor: "#f8f9fa",
-                          borderRadius: "10px",
-                          border: `2px solid ${result.percentage >= 80 ? "#28a745" : "#ffc107"}`,
-                        }}
-                      >
-                        <h5
-                          style={{
-                            color:
-                              result.percentage >= 80 ? "#28a745" : "#ffc107",
-                            fontSize: "0.9rem",
-                            textTransform: "uppercase",
-                            letterSpacing: "1px",
-                          }}
-                        >
-                          Percentage
-                        </h5>
-                        <h2
-                          style={{
-                            color:
-                              result.percentage >= 80 ? "#28a745" : "#ffc107",
-                            fontSize: "2.5rem",
-                            fontWeight: "bold",
-                            margin: "10px 0",
-                          }}
-                        >
-                          {result.percentage}%
-                        </h2>
-                        <p style={{ color: "#666", margin: "0" }}>
-                          performance
-                        </p>
-                      </div>
-                    </Col>
-                  </Row>
-
-                  {/* Progress Bar */}
-                  <div className="mt-4 mb-4">
-                    <ProgressBar
-                      now={result.percentage}
-                      variant={passed ? "success" : "warning"}
-                      style={{
-                        height: "30px",
-                        fontSize: "1rem",
-                        fontWeight: "bold",
-                      }}
-                      label={`${result.percentage}% Complete`}
-                    />
-                  </div>
-
-                  {/* Status Badge */}
-                  <div className="mt-4">
-                    <span
-                      style={{
-                        padding: "10px 20px",
-                        fontSize: "1.1rem",
-                        fontWeight: "bold",
-                        borderRadius: "20px",
-                        backgroundColor: passed ? "#d4edda" : "#fff3cd",
-                        color: passed ? "#155724" : "#856404",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      Status: {result.status}
-                    </span>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* Certificate Alert */}
-          {passed && (
-            <Row className="mb-4">
-              <Col md={12}>
-                <Alert
-                  variant="success"
-                  className="shadow"
-                  style={{ borderRadius: "10px", padding: "20px" }}
-                >
-                  <Alert.Heading
-                    style={{ fontSize: "1.3rem", fontWeight: "bold" }}
-                  >
-                    ✓ Test Passed Successfully!
-                  </Alert.Heading>
-                  <p style={{ fontSize: "1rem", marginBottom: "10px" }}>
-                    Congratulations! You have successfully passed the test with{" "}
-                    <strong>{result.percentage}%</strong> score. You can now
-                    proceed with the course.
-                  </p>
-                  {result.certificate && (
-                    <div className="mt-3">
-                      <a
-                        href={`${API_BASE_URL}${result.certificate}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-success btn-lg"
-                        style={{ marginRight: "10px" }}
-                      >
-                        📜 Download Certificate
-                      </a>
-                    </div>
-                  )}
-                </Alert>
-              </Col>
-            </Row>
-          )}
-
-          {/* Failure Alert */}
-          {!passed && (
-            <Row className="mb-4">
-              <Col md={12}>
-                <Alert
-                  variant="warning"
-                  className="shadow"
-                  style={{ borderRadius: "10px", padding: "20px" }}
-                >
-                  <Alert.Heading
-                    style={{ fontSize: "1.3rem", fontWeight: "bold" }}
-                  >
-                    ⚠ Please Try Again
-                  </Alert.Heading>
-                  <p style={{ fontSize: "1rem", marginBottom: "10px" }}>
-                    You scored <strong>{result.percentage}%</strong>. You need{" "}
-                    <strong>80%</strong> or more to pass the test. Please review
-                    the incorrect answers below and try again.
-                  </p>
-                </Alert>
-              </Col>
-            </Row>
-          )}
-
-          {/* Wrong Answers Section */}
-          {result.wrongAnswers && result.wrongAnswers.length > 0 && (
-            <Row className="mb-4">
-              <Col md={12}>
-                <Card className="shadow-sm">
-                  <Card.Header
-                    className="bg-danger text-white"
-                    style={{ padding: "15px" }}
-                  >
-                    <h5
-                      style={{
-                        margin: "0",
-                        fontSize: "1.2rem",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      ❌ Wrong Answers ({result.wrongAnswers.length})
-                    </h5>
-                  </Card.Header>
-                  <Card.Body>
-                    {result.wrongAnswers.map((wrongAnswer, index) => (
-                      <div
-                        key={index}
-                        className="wrong-answer-item mb-4 p-3"
-                        style={{
-                          backgroundColor: "#fff5f5",
-                          borderLeft: "4px solid #dc3545",
-                          borderRadius: "5px",
-                        }}
-                      >
-                        <h6
-                          style={{
-                            color: "#dc3545",
-                            fontWeight: "bold",
-                            marginBottom: "10px",
-                          }}
-                        >
-                          Question {index + 1}: {wrongAnswer.questionText}
-                        </h6>
-                        <div
-                          style={{ marginLeft: "20px", marginBottom: "10px" }}
-                        >
-                          <p style={{ color: "#dc3545", margin: "5px 0" }}>
-                            <strong>Your Answer:</strong>{" "}
-                            {wrongAnswer.userAnswer}
-                          </p>
-                          <p style={{ color: "#28a745", margin: "5px 0" }}>
-                            <strong>Correct Answer:</strong>{" "}
-                            {wrongAnswer.correctAnswer}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          )}
-
-          {/* Action Buttons */}
-          <Row className="mt-5">
-            <Col md={12} className="text-center">
-              <Button
-                variant={passed ? "primary" : "warning"}
-                size="lg"
-                onClick={() => navigate("/Courses")}
-                style={{
-                  padding: "12px 30px",
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                }}
-              >
-                ← Back to Courses
-              </Button>
-            </Col>
-          </Row>
-        </Container>
-        <FooterPage />
-      </Container>
-    );
-  }
-
-  if (showSubmitConfirm) {
-    const unanswered = userAnswers.filter((a) => a === null).length;
-
-    return (
-      <Container className="my-5">
-        <Card>
-          <Card.Body className="text-center">
-            <Card.Title>Submit Test?</Card.Title>
-            {unanswered > 0 && (
-              <Alert variant="warning">
-                You have {unanswered} unanswered question(s). They will be
-                marked as incorrect.
-              </Alert>
-            )}
-            <p>Are you sure you want to submit your test?</p>
-            <Button
-              variant="primary"
-              onClick={handleSubmit}
-              disabled={submitting}
-            >
-              {submitting ? "Submitting..." : "Submit Test"}
-            </Button>
-            <Button
-              variant="secondary"
-              className="ms-2"
-              onClick={() => setShowSubmitConfirm(false)}
-            >
-              Review Answers
-            </Button>
-          </Card.Body>
-        </Card>
-      </Container>
-    );
-  }
-
-  const currentQuestion = testData?.questions?.[currentQuestionIndex];
-
-  if (!testData) {
-    return (
-      <Container className="my-5">
-        <Alert variant="warning">
-          Test data not loaded. Please refresh the page.
-        </Alert>
-      </Container>
-    );
-  }
-
-  if (!currentQuestion) {
-    console.error("Current question not found:", {
-      currentQuestionIndex,
-      totalQuestions: testData?.total_questions,
-      hasQuestions: !!testData?.questions,
-      questionsLength: testData?.questions?.length,
-    });
-    return <Container className="my-5">No questions available.</Container>;
-  }
-
-  const progress =
-    ((currentQuestionIndex + 1) / testData.total_questions) * 100;
-
-  return (
-    <Container className="test-container">
-      <div className="test-header">
-        <h2>
-          {courseDataRef.current?.title || courseData?.title || "Course Test"}
-        </h2>
-        <p className="text-muted">
-          Question {currentQuestionIndex + 1} of {testData.total_questions}
-        </p>
-        <ProgressBar
-          now={progress}
-          className="test-progress"
-          label={`${Math.round(progress)}%`}
-        />
+      <div className="test-container">
+        <div className="test-card">
+          <div className="error"> {error}</div>
+        </div>
       </div>
+    );
+  }
 
-      <Row className="justify-content-center mt-4">
-        <Col md={8}>
-          <Card className="question-card">
-            <Card.Body>
-              <Card.Title className="question-text">
-                {currentQuestion.question_text}
-              </Card.Title>
-              {currentQuestion.question_hindi_text && (
-                <p className="text-muted fst-italic">
-                  {currentQuestion.question_hindi_text}
-                </p>
+  if (questions.length === 0) {
+    return (
+      <div className="test-container">
+        <div className="test-card">
+          <div className="no-questions">
+            No questions available. Please check back later.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (showResults) {
+    const percentage = Math.round(
+      ((testResult?.score || score) / questions.length) * 100,
+    );
+    const isPassed = testResult
+      ? testResult.status === "passed"
+      : percentage === 100;
+
+    return (
+      <>
+        <div className="test-container">
+          <div className="test-card results-card">
+            <div className="results-content">
+              {isPassed && certificateUrl ? (
+                <div className="results-image">
+                  <div className="certificate-container">
+                    <a
+                      href={certificateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="certificate-link"
+                    >
+                      <img
+                        src={certificateUrl}
+                        alt="Certificate"
+                        className="certificate-image"
+                        onError={(e) => {
+                          console.error("Certificate image failed to load");
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    </a>
+                  </div>
+                  <div className="certificate-actions">
+                    <a
+                      href={certificateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="download-button"
+                    >
+                      Download Certificate
+                    </a>
+
+                    <div className="social-sharing">
+                      <div className="sharing-title">
+                        Share your certificate:
+                      </div>
+                      <div className="sharing-buttons">
+                        <button
+                          className="share-button whatsapp"
+                          onClick={() => shareOnWhatsApp(percentage)}
+                          title="Share on WhatsApp"
+                        >
+                          WhatsApp
+                        </button>
+                        <button
+                          className="share-button linkedin"
+                          onClick={() => shareOnLinkedIn(percentage)}
+                          title="Share on LinkedIn"
+                        >
+                          LinkedIn
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="results-image">
+                  <div className="no-certificate">
+                    <h3>
+                      {isPassed
+                        ? "Certificate Coming Soon"
+                        : "Try Again to Get Certificate"}
+                    </h3>
+                    <p>
+                      {isPassed
+                        ? "Your certificate will be available shortly"
+                        : "Score 80% to earn a certificate"}
+                    </p>
+                  </div>
+                </div>
               )}
 
-              <div className="options-list mt-4">
-                {currentQuestion.options.map((option, index) => (
-                  <div
-                    key={index}
-                    className={`option-item ${selectedAnswer === index ? "selected" : ""}`}
-                    onClick={() => handleOptionSelect(index)}
-                  >
-                    <span className="option-radio">
-                      {selectedAnswer === index ? "●" : "○"}
-                    </span>
-                    <span className="option-text">{option}</span>
+              <div className="results-data">
+                <div className="results-header">
+                  <h1 className="results-title">
+                    {isPassed ? "Congratulations!" : "Better Luck Next Time"}
+                  </h1>
+                  <p className="results-subtitle">
+                    {isPassed
+                      ? "You have successfully passed the Quiz"
+                      : "Keep practicing to improve your score"}
+                  </p>
+                </div>
+
+                <div className="score-section">
+                  <div className="percentage-circle">
+                    <div className="percentage-text">{percentage}%</div>
+                    <div className="score-label">Overall Score</div>
                   </div>
-                ))}
+
+                  <div className="score-details">
+                    <div className="score-item correct">
+                      <div className="score-value">
+                        {testResult?.score || score}
+                      </div>
+                      <div className="score-label">Correct</div>
+                    </div>
+                    <div className="score-item incorrect">
+                      <div className="score-value">
+                        {questions.length - (testResult?.score || score)}
+                      </div>
+                      <div className="score-label">Incorrect</div>
+                    </div>
+                    <div className="score-item total">
+                      <div className="score-value">{questions.length}</div>
+                      <div className="score-label">Total</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="progress-section">
+                  <div className="progress-header">
+                    <div className="progress-label">Progress</div>
+                    <div className="progress-percentage">{percentage}%</div>
+                  </div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${percentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="results-actions">
+                  {isPassed ? (
+                    <button
+                      className="continue-button"
+                      onClick={() => navigate("/Courses")}
+                    >
+                      Back to Courses
+                    </button>
+                  ) : (
+                    <div className="d-flex flex-column align-items-center">
+                      <div className="d-flex-file">
+                        <button
+                          className="restart-button"
+                          onClick={() => {
+                            clearTestState();
+                            window.location.href = `/CoursesTest?user_id=${localStorage.getItem("test_user_id")}&course_id=${courseIdRef.current}`;
+                          }}
+                        >
+                          Retake Quiz
+                        </button>
+                        <button
+                          className="wrong-answers-button"
+                          onClick={handleShowWrongAnswers}
+                        >
+                          Wrong Answers
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </Card.Body>
-          </Card>
+            </div>
 
-          <div className="test-navigation mt-4">
-            <Button
-              variant="outline-secondary"
-              onClick={handlePrevious}
-              disabled={currentQuestionIndex === 0}
-            >
-              Previous
-            </Button>
-
-            {currentQuestionIndex < testData.total_questions - 1 ? (
-              <Button
-                variant="primary"
-                onClick={handleNext}
-                disabled={selectedAnswer === null}
-              >
-                Next
-              </Button>
-            ) : (
-              <Button
-                variant="success"
-                onClick={() => setShowSubmitConfirm(true)}
-                disabled={selectedAnswer === null}
-              >
-                Submit Test
-              </Button>
+            {showWrongAnswersModal && (
+              <div className="wrong-answers-modal">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h2>Wrong Answers ({wrongAnswers.length})</h2>
+                    <button
+                      className="close-button"
+                      onClick={() => setShowWrongAnswersModal(false)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="modal-body">
+                    {wrongAnswers.length === 0 ? (
+                      <div className="no-wrong-answers">
+                        Congratulations! You answered all questions correctly.
+                      </div>
+                    ) : (
+                      wrongAnswers.map((item, index) => (
+                        <div key={index} className="wrong-answer-item">
+                          <div className="question-number">
+                            Question {item.questionNumber}:
+                          </div>
+                          <div className="question-text">{item.question}</div>
+                          {item.question_hindi_text && (
+                            <div className="hindi-question mt-1">
+                              <small className="text-muted">
+                                {item.question_hindi_text}
+                              </small>
+                            </div>
+                          )}
+                          <div className="answer-container">
+                            <div className="user-answer">
+                              <span className="label">Your Answer:</span>
+                              <span className="answer-text">
+                                {item.userAnswer}
+                              </span>
+                            </div>
+                            <div className="correct-answer">
+                              <span className="label">Correct Answer:</span>
+                              <span className="answer-text">
+                                {item.correctAnswer}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      className="close-button"
+                      onClick={() => setShowWrongAnswersModal(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className="test-container">
+      <div className="test-card">
+        {tabSwitchWarning && (
+          <div className="warning-message">
+            Warning: You have switched tabs once. Switching again will end your
+            Quiz.
+          </div>
+        )}
+
+        <div className="progress-bar">
+          <div
+            className="progress-fill"
+            style={{
+              width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+            }}
+          ></div>
+        </div>
+
+        <div className="question-number d-flex justify-content-between align-items-center">
+          Question {currentQuestion + 1} of {questions.length}
+          <div className="timer">Time Left: {timeLeft} seconds</div>
+        </div>
+
+        <h2 className="question">
+          {questions[currentQuestion].question_text}
+          {questions[currentQuestion].question_hindi_text && (
+            <div className="hindi-question mt-2">
+              <small className="text-muted">
+                {questions[currentQuestion].question_hindi_text}
+              </small>
+            </div>
+          )}
+        </h2>
+
+        <div className="options">
+          {questions[currentQuestion].options.map((option, index) => (
+            <div
+              key={index}
+              className={`option ${selectedOption === index ? "selected" : ""}`}
+              onClick={() => handleOptionSelect(index)}
+            >
+              {option}
+              {questions[currentQuestion].options_hindi &&
+                questions[currentQuestion].options_hindi[index] && (
+                  <div
+                    className="text-muted"
+                    style={{ fontSize: "0.85em", marginTop: "2px" }}
+                  >
+                    {questions[currentQuestion].options_hindi[index]}
+                  </div>
+                )}
+            </div>
+          ))}
+        </div>
+
+        <button
+          className="next-button"
+          onClick={handleNextQuestion}
+          disabled={selectedOption === null}
+        >
+          {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
+        </button>
+      </div>
+
+     
+    </div>
   );
 }
 

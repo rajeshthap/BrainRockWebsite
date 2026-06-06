@@ -222,6 +222,9 @@ color: #0056b3;
   color: #fff;
   font-size: 12px !important;
 }
+.option-item{
+cursor: pointer;
+}
 .wrong-answers {
  background: linear-gradient(90deg, #ff9800 0%, #f57c00);
     color: white;
