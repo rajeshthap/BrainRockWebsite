@@ -424,7 +424,7 @@ function CoursesTest() {
                 </div>
               ) : (
                 <div className="results-image">
-                  <div className="no-certificate">
+                  {/* <div className="no-certificate">
                     <h3>
                       {isPassed
                         ? "Certificate Coming Soon"
@@ -435,7 +435,7 @@ function CoursesTest() {
                         ? "Your certificate will be available shortly"
                         : "Score 80% to earn a certificate"}
                     </p>
-                  </div>
+                  </div> */}
                 </div>
               )}
 

@@ -126,21 +126,34 @@ const [termsError, setTermsError] = useState("");
 
       const studentScores = Array.isArray(response.data) ? response.data : (response.data.data || []);
 
-      // Match logic: phone, course_id, and score strictly equals 10
-      const match = studentScores.find(item => 
-        String(item.phone) === String(phone) && 
-        String(item.course_id) === String(selectedCourseId) && 
-        Number(item.score) === 10
-      );
+      // Match logic: phone and course_id to determine the highest applicable tiered discount
+      let matchedStudent = null;
+      let discountRate = 0;
+
+      studentScores.forEach(item => {
+        if (String(item.phone) === String(phone) && String(item.course_id) === String(selectedCourseId)) {
+          const score = Number(item.score);
+          let currentRate = 0;
+          
+          if (score === 10) currentRate = 0.60;      // 100% score (60% discount)
+          else if (score >= 8) currentRate = 0.40;   // 80-99% score (40% discount)
+          else if (score >= 5) currentRate = 0.20;   // 50-79% score (20% discount)
+
+          if (currentRate > discountRate) {
+            discountRate = currentRate;
+            matchedStudent = item;
+          }
+        }
+      });
 
       const selectedCourse = courseData.find(c => String(c.course_id) === String(selectedCourseId));
       if (!selectedCourse) return;
 
       const basePrice = parseFloat(selectedCourse.offer_price) || 0;
 
-      if (match) {
-        // Apply 20% discount on the offer price
-        const discountAmount = basePrice * 0.2;
+      if (matchedStudent && discountRate > 0) {
+        // Apply tiered discount on the offer price
+        const discountAmount = basePrice * discountRate;
         const finalPrice = basePrice - discountAmount;
 
         setPricingInfo({
@@ -150,11 +163,11 @@ const [termsError, setTermsError] = useState("");
         });
 
         setDiscountApplied(true);
-        setDiscountMessage("Offer applied successfully!");
+        setDiscountMessage(`Offer applied successfully! (${(discountRate * 100)}% discount)`);
 
         setFormData(prev => ({
           ...prev,
-          candidate_name: match.full_name || prev.candidate_name,
+          candidate_name: matchedStudent.full_name || prev.candidate_name,
           course_fee: finalPrice.toFixed(2).toString()
         }));
       } else {
@@ -507,13 +520,15 @@ const [termsError, setTermsError] = useState("");
                         },
                       },
                     });
+                  } else {
+                    navigate("/RegisFee");
                   }
                 }}
               >
-                <FaPercentage className="me-2" /> Register & Claim 20% Loyalty Offer
+                <FaPercentage className="me-2" /> Register & Claim Loyalty Offer (Up to 60% Off)
               </Button>
               <div className="text-danger fw-bold text-center" style={{ fontSize: '0.85rem' }}>
-                * 20% additional discount on offer price available for returning students with qualifying scores. To claim offer fill registration form with registered mobile number.
+                * Additional loyalty discount available for returning students: 100% score = 60% off, 80-99% = 40% off, 50-79% = 20% off. To claim, fill registration form with registered mobile number.
               </div>
             </div>
 
@@ -560,7 +575,7 @@ const [termsError, setTermsError] = useState("");
                     <Col xs={5} className="text-end">₹{pricingInfo.basePrice.toFixed(2)}</Col>
                   </Row>
                   <Row className="mb-1 text-success fw-bold">
-                    <Col xs={7}>Loyalty Discount (20% off):</Col>
+                    <Col xs={7}>Loyalty Discount ({pricingInfo.basePrice > 0 ? ((pricingInfo.discountAmount / pricingInfo.basePrice) * 100).toFixed(0) : 0}% off):</Col>
                     <Col xs={5} className="text-end">- ₹{pricingInfo.discountAmount.toFixed(2)}</Col>
                   </Row>
                   <hr className="my-2" />
@@ -907,6 +922,9 @@ const [termsError, setTermsError] = useState("");
                     "Register Now"
                   )}
                 </Button>
+                <div className="text-center mt-3 text-muted" style={{ fontSize: '0.85rem' }}>
+                  Note: No certificate will be generated or viewed for this program.
+                </div>
               </div>
             </Form>
           </div>
