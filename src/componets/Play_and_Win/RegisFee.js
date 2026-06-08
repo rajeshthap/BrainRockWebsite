@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import "../../assets/css/KheloJito.css";
 import axios from "axios";
 import FooterPage from "../footer/FooterPage";
-import RegisFeeImage from "../../assets/images/img-regi.png";
+import RegisFeeImage from "../../assets/images/img-regi.jpg";
 
 
 function RegisFee() {
@@ -279,32 +279,30 @@ try {
       </div>
 
         <div className="khelojito-section">
-         <Container className="mt-4 mb-3">
-           <Row className="align-items-center">
-              {/* Left Side - Back & Image */}
-              <Col md={6} className="mb-4 mb-md-0">
-                {isCourseRegistration && (
-                  <Button
-                    variant="outline-secondary"
-                    className="br-button mb-3"
-                    onClick={() => navigate("/Courses")}
-                  >
-                    ← Back to Courses
-                  </Button>
-                )}
-                <div className="khelo-image-container">
-
-                 <img 
-                   src={RegisFeeImage}
-                   alt="Khelo aur Jeeto" 
-                   className="khelo-image"
-                 />
-               </div>
-             </Col>
+         <Container fluid className="mt-4 mb-3">
+           {isCourseRegistration && (
+                <Button
+                  variant="outline-secondary"
+                  className="br-button mb-3"
+                  onClick={() => navigate("/Courses")}
+                >
+                  ← Back to Courses
+                </Button>
+              )}
+          <Row className="align-items-stretch justify-content-center">
+            <Col xs={12} md={5} className="mb-4 mb-md-0 d-flex">
              
-             {/* Right Side - Form */}
-             <Col md={6}>
-               <div className="khelojito-box text-heading">
+              <div className="khelo-image-container flex-grow-1">
+                <img
+                  src={RegisFeeImage}
+                  alt="Khelo aur Jeeto"
+                  className="khelo-image"
+                />
+              </div>
+            </Col>
+
+            <Col xs={12} md={5} className="d-flex">
+              <div className="khelojito-box text-heading flex-grow-1">
             {/* Success Alert */}
 
             {showSuccess && (
@@ -546,11 +544,7 @@ try {
                 <h4> Skill-Based Game Disclaimer</h4>
                 <p>This quiz platform is designed as a knowledge and skill-based educational game. Winning depends on the participant’s ability to answer questions correctly and is not based on luck or chance.</p>
                 
-                <h4> Payment and Refund Policy</h4>
-                <ul>
-                  <li>The ₹{apiFee !== null ? apiFee : '...'} entry fee is non-refundable once a quiz session begins.</li>
-                  <li>Refunds may only be considered if a technical error prevents the user from accessing the quiz after payment.</li>
-                </ul>
+               
                 
                 <h4> Technical Issues</h4>
                 <p>The platform is not responsible for issues arising from:</p>
@@ -585,11 +579,24 @@ try {
                 <p>The platform does not guarantee any earnings or winnings. Rewards depend solely on the user’s performance and accuracy in the quiz.</p>
                 <p>Points earned in the quiz are equivalent to wallet balance and may be converted into real money subject to platform policies.</p>
 
-                <h4> Contact Information</h4>
-                <p>For any queries or support, users can contact us at: admin@brainrock.in</p>
-                <p>Withdrawals processed within 3–7 working days.</p>
+<h4> Terms and Conditions – Online Quiz Game for Training Courses</h4>
+                 <p>Welcome to our Training Course Quiz. By accessing or using this quiz and registering for training courses, you agree to comply with and be bound by the following Terms and Conditions.</p>
+                 
+                 <h4> Quiz Participation and Discount</h4>
+                 <ul>
+                   <li>To be eligible for the 20% discount on training course fees, users must pass the online quiz with a minimum passing score.</li>
+                   <li>The 20% discount is automatically applied to the course fee upon successful quiz completion.</li>
+                   <li>Users must register with the same mobile number used during the quiz attempt to claim the discount.</li>
+                   <li>The discount is valid for 30 days from the date of quiz completion.</li>
+                   <li>The discount can only be claimed once per user per course.</li>
+                   <li>If a user fails the quiz, they can retake it after registration to earn the discount.</li>
+                 </ul>
+                 
+                 <h4> Contact Information</h4>
+                 <p>For any queries or support, users can contact us at: admin@brainrock.in</p>
+                 <p>Withdrawals processed within 3–7 working days.</p>
 
-                <div className="mt-4">
+                 <div className="mt-4">
                   <Form.Check
                     type="checkbox"
                     label="I agree to the Terms and Conditions"
