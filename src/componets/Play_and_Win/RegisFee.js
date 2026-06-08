@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import "../../assets/css/KheloJito.css";
 import axios from "axios";
 import FooterPage from "../footer/FooterPage";
-import RegisFeeImage from "../../assets/images/img-regi.jpg";
+import RegisFeeImage from "../../assets/images/img-regi.png";
 
 
 function RegisFee() {
