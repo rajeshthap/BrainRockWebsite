@@ -1060,7 +1060,7 @@ const ManageBills = () => {
       </div>
 
       {/* Edit Modal */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} fullscreen>
         <Modal.Header closeButton>
           <Modal.Title>Edit Bill</Modal.Title>
         </Modal.Header>
