@@ -39,25 +39,25 @@ function Career() {
   const [resumeError, setResumeError] = useState(null);
 
   // Fetch Jobs
-  useEffect(() => {
-    fetch(
-      "https://brainrock.in/brainrock/backend/api/job-opening/"
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load job openings");
-        return res.json();
-      })
-      .then((data) => {
-        // ⭐ FILTER: show only jobs that are active (status not “closed” / “inactive”)
-        const activeJobs = data.filter((job) => {
-          const s = job.status?.toLowerCase();
-          return s === "active" || s === "open" || s === "published";
-        });
-        setJobs(activeJobs);
-      })
-      .catch((err) => setJobError(err.message))
-      .finally(() => setJobLoading(false));
-  }, []);
+  // useEffect(() => {
+  //   fetch(
+  //     "https://brainrock.in/brainrock/backend/api/job-opening/"
+  //   )
+  //     .then((res) => {
+  //       if (!res.ok) throw new Error("Failed to load job openings");
+  //       return res.json();
+  //     })
+  //     .then((data) => {
+  //       // ⭐ FILTER: show only jobs that are active (status not “closed” / “inactive”)
+  //       const activeJobs = data.filter((job) => {
+  //         const s = job.status?.toLowerCase();
+  //         return s === "active" || s === "open" || s === "published";
+  //       });
+  //       setJobs(activeJobs);
+  //     })
+  //     .catch((err) => setJobError(err.message))
+  //     .finally(() => setJobLoading(false));
+  // }, []);
 
   // Open Apply Modal
   const handleApplyClick = (jobId) => {
