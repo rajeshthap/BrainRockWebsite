@@ -500,7 +500,7 @@ const [termsError, setTermsError] = useState("");
             <div className="mb-4">
               <Button
                 variant="success"
-                className="br-button w-100 d-flex align-items-center justify-content-center shadow-sm mb-2"
+                className="w-100 d-flex align-items-center justify-content-center mb-2 loyalty-offer-button"
                 onClick={() => {
                   const currentCourse = courseData.find(c => c.course_name === formData.application_for_course);
                   if (currentCourse) {
@@ -954,6 +954,19 @@ const [termsError, setTermsError] = useState("");
         }
         .registration-details p {
           margin-bottom: 8px;
+        }
+        .loyalty-offer-button {
+          padding: 0.8rem 1.5rem;
+          font-size: 1.2rem;
+          font-weight: bold;
+          background: linear-gradient(45deg, #28a745, #218838);
+          border: none;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+          transition: all 0.3s ease-in-out;
+        }
+        .loyalty-offer-button:hover {
+          transform: scale(1.02);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         }
       `}</style>
     </>
