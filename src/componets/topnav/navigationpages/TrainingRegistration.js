@@ -528,7 +528,7 @@ const [termsError, setTermsError] = useState("");
                 <FaPercentage className="me-2" /> Register & Claim Loyalty Offer (Up to 60% Off)
               </Button>
               <div className="text-danger fw-bold text-center" style={{ fontSize: '0.85rem' }}>
-                * Additional loyalty discount available for returning students: 100% score = 60% off, 80-99% = 40% off, 50-79% = 20% off. To claim, fill registration form with registered mobile number.
+                * Get Off up to 60% after take online Quiz.
               </div>
             </div>
 
