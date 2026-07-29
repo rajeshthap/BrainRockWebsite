@@ -15,6 +15,7 @@ import {
   FaFileInvoice,
   FaEnvelope,
 } from "react-icons/fa";
+import { RiUser3Fill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -36,6 +37,8 @@ const WebsiteManagement = () => {
   const [zeeBillsCount, setZeeBillsCount] = useState(0);
   const [kheloJitoUsersCount, setKheloJitoUsersCount] = useState(0);
   const [serviceRenewalsCount, setServiceRenewalsCount] = useState(0);
+  const [counselingCount, setCounselingCount] = useState(0);
+  const [counselingData, setCounselingData] = useState([]);
 
   // Loading and error states
   const [loading, setLoading] = useState({
@@ -46,6 +49,7 @@ const WebsiteManagement = () => {
     zeeBills: false,
     kheloJitoUsers: false,
     serviceRenewals: false,
+    counseling: false,
   });
 
   const [errors, setErrors] = useState({
@@ -56,6 +60,7 @@ const WebsiteManagement = () => {
     zeeBills: null,
     kheloJitoUsers: null,
     serviceRenewals: null,
+    counseling: null,
   });
 
   // Table view states
@@ -441,6 +446,46 @@ const WebsiteManagement = () => {
     fetchServiceRenewals();
   }, []);
 
+  // Fetch Counseling data
+  useEffect(() => {
+    const fetchCounseling = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, counseling: true }));
+        const response = await fetch(
+          "https://brainrock.in/brainrock/backend/api/student-counseling/",
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch counseling data");
+        }
+
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          setCounselingData(data.data);
+          setCounselingCount(data.data.length);
+          setErrors((prev) => ({ ...prev, counseling: null }));
+        } else if (Array.isArray(data)) {
+          setCounselingData(data);
+          setCounselingCount(data.length);
+          setErrors((prev) => ({ ...prev, counseling: null }));
+        } else {
+          throw new Error(data.message || "Failed to fetch counseling data");
+        }
+      } catch (err) {
+        setErrors((prev) => ({ ...prev, counseling: err.message }));
+        setCounselingCount(0);
+      } finally {
+        setLoading((prev) => ({ ...prev, counseling: false }));
+      }
+    };
+
+    fetchCounseling();
+  }, []);
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const handleCardClick = (cardType) => {
@@ -463,35 +508,39 @@ const WebsiteManagement = () => {
     setPaymentStatusFilter("");
   };
 
-  const getModalData = () => {
-    switch (selectedCardType) {
-      case "courses":
-        return coursesData;
-      case "employees":
-        return employeesData;
-      case "projects":
-        return projectsData;
-      case "serviceRenewals":
-        return serviceRenewalsData;
-      default:
-        return [];
-    }
-  };
+const getModalData = () => {
+     switch (selectedCardType) {
+       case "courses":
+         return coursesData;
+       case "employees":
+         return employeesData;
+       case "projects":
+         return projectsData;
+       case "serviceRenewals":
+         return serviceRenewalsData;
+       case "counseling":
+         return counselingData;
+       default:
+         return [];
+     }
+   };
 
-  const getModalTitle = () => {
-    switch (selectedCardType) {
-      case "courses":
-        return "Courses";
-      case "employees":
-        return "Employees";
-      case "projects":
-        return "Projects";
-      case "serviceRenewals":
-        return "Service Renewals";
-      default:
-        return "";
-    }
-  };
+const getModalTitle = () => {
+     switch (selectedCardType) {
+       case "courses":
+         return "Courses";
+       case "employees":
+         return "Employees";
+       case "projects":
+         return "Projects";
+       case "serviceRenewals":
+         return "Service Renewals";
+       case "counseling":
+         return "Counseling Requests";
+       default:
+         return "";
+     }
+   };
 
   const getFilteredData = () => {
     let data = getModalData();
@@ -532,16 +581,25 @@ const WebsiteManagement = () => {
           item.project_name?.toLowerCase().includes(lowerSearch) ||
           item.status?.toLowerCase().includes(lowerSearch),
       );
-    } else if (selectedCardType === "serviceRenewals") {
-      return data.filter((item) => {
-        const matchesSearch =
-          item.domain_name?.toLowerCase().includes(lowerSearch) ||
-          item.renewal_date?.toLowerCase().includes(lowerSearch) ||
-          item.amount?.toLowerCase().includes(lowerSearch) ||
-          item.payment_status?.toLowerCase().includes(lowerSearch);
-        return matchesSearch;
-      });
-    }
+} else if (selectedCardType === "serviceRenewals") {
+       return data.filter((item) => {
+         const matchesSearch =
+           item.domain_name?.toLowerCase().includes(lowerSearch) ||
+           item.renewal_date?.toLowerCase().includes(lowerSearch) ||
+           item.amount?.toLowerCase().includes(lowerSearch) ||
+           item.payment_status?.toLowerCase().includes(lowerSearch);
+         return matchesSearch;
+       });
+     } else if (selectedCardType === "counseling") {
+       return data.filter((item) => {
+         const matchesSearch =
+           item.full_name?.toLowerCase().includes(lowerSearch) ||
+           item.email?.toLowerCase().includes(lowerSearch) ||
+           item.mobile_number?.toLowerCase().includes(lowerSearch) ||
+           item.message?.toLowerCase().includes(lowerSearch);
+         return matchesSearch;
+       });
+     }
 
     return data;
   };
@@ -786,24 +844,65 @@ const WebsiteManagement = () => {
             </tr>
           )}
         </tbody>
-      </table>
-    );
-  };
+</table>
+     );
+   };
 
-  const renderTable = (items) => {
-    switch (selectedCardType) {
-      case "courses":
-        return renderCoursesTable(items);
-      case "employees":
-        return renderEmployeesTable(items);
-      case "projects":
-        return renderProjectsTable(items);
-      case "serviceRenewals":
-        return renderServiceRenewalsTable(items);
-      default:
-        return null;
-    }
-  };
+   const renderCounselingTable = (items) => {
+     return (
+       <table className="temp-rwd-table">
+         <tbody>
+           <tr>
+             <th>S.No</th>
+             <th>Full Name</th>
+             <th>Email</th>
+             <th>Mobile Number</th>
+             <th>Message</th>
+             <th>Created At</th>
+           </tr>
+           {items.length > 0 ? (
+             items.map((item, index) => (
+               <tr key={item.id}>
+                 <td data-th="S.No">
+                   {(currentPage - 1) * itemsPerPage + index + 1}
+                 </td>
+                 <td data-th="Full Name">{item.full_name}</td>
+                 <td data-th="Email">{item.email}</td>
+                 <td data-th="Mobile Number">{item.mobile_number}</td>
+                 <td data-th="Message">{item.message}</td>
+                 <td data-th="Created At">
+                   {formatDate(item.created_at)}
+                 </td>
+               </tr>
+             ))
+           ) : (
+             <tr>
+               <td colSpan="6" className="text-center">
+                 No counseling requests available.
+               </td>
+             </tr>
+           )}
+         </tbody>
+       </table>
+     );
+   };
+
+   const renderTable = (items) => {
+     switch (selectedCardType) {
+       case "courses":
+         return renderCoursesTable(items);
+       case "employees":
+         return renderEmployeesTable(items);
+       case "projects":
+         return renderProjectsTable(items);
+       case "serviceRenewals":
+         return renderServiceRenewalsTable(items);
+       case "counseling":
+         return renderCounselingTable(items);
+       default:
+         return null;
+     }
+   };
 
   const renderDetailModal = () => {
     if (!selectedItem) return null;
@@ -1433,22 +1532,39 @@ const WebsiteManagement = () => {
                 </div>
               </Col>
 
-              {/* Service Renewals Card */}
-              <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
-                <div
-                  className="br-stat-card card-mail"
-                  onClick={() => handleCardClick("serviceRenewals")}
-                  style={{ cursor: "pointer" }}
-                >
-                  <div className="br-stat-icon">
-                    <FaEnvelope />
-                  </div>
-                  <div className="br-stat-details">
-                    <h5>Service Renewals</h5>
-                    <h2>{serviceRenewalsCount}</h2>
-                  </div>
-                </div>
-              </Col>
+{/* Service Renewals Card */}
+               <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
+                 <div
+                   className="br-stat-card card-mail"
+                   onClick={() => handleCardClick("serviceRenewals")}
+                   style={{ cursor: "pointer" }}
+                 >
+                   <div className="br-stat-icon">
+                     <FaEnvelope />
+                   </div>
+                   <div className="br-stat-details">
+                     <h5>Service Renewals</h5>
+                     <h2>{serviceRenewalsCount}</h2>
+                   </div>
+                 </div>
+               </Col>
+
+               {/* Counseling Requests Card */}
+               <Col lg={3} md={4} sm={6} xs={12} className="mb-3">
+                 <div
+                   className="br-stat-card card-counseling"
+                   onClick={() => handleCardClick("counseling")}
+                   style={{ cursor: "pointer" }}
+                 >
+                   <div className="br-stat-icon">
+                     <RiUser3Fill />
+                   </div>
+                   <div className="br-stat-details">
+                     <h5>Counseling Requests</h5>
+                     <h2>{counselingCount}</h2>
+                   </div>
+                 </div>
+               </Col>
             </Row>
           </div>
 

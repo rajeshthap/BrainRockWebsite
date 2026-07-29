@@ -109,6 +109,11 @@
   background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
+/* Counseling - Cyan */
+.card-counseling {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .br-stat-card {

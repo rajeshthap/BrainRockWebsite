@@ -1,20 +1,81 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MdOutlineMail } from "react-icons/md";
 import { MdOutlinePhoneAndroid } from "react-icons/md";
 import { FaInstagram, FaLinkedinIn, FaTwitter } from "react-icons/fa";
 import { PiSignInBold } from "react-icons/pi";
 import { ImFacebook } from "react-icons/im";
+import { Modal, Form, Button, Alert } from "react-bootstrap";
+import axios from "axios";
 import "../../assets/css/Header.css";
 import { RiUser3Fill } from "react-icons/ri";
 
 function Header() {
   const navigate = useNavigate();
+  const [showCounselingModal, setShowCounselingModal] = useState(false);
+  const [counselingForm, setCounselingForm] = useState({
+    full_name: "",
+    email: "",
+    mobile_number: "",
+    message: "",
+  });
+  const [counselingLoading, setCounselingLoading] = useState(false);
+  const [counselingError, setCounselingError] = useState("");
+  const [counselingSuccess, setCounselingSuccess] = useState(false);
 
   const handleLoginClick = (e) => {
-    // Just navigate to the Login route. Avoid preventing default or stopping propagation
-    // which can interfere with navigation in some layouts.
     navigate("/Login");
+  };
+
+  const handleCounselingChange = (e) => {
+    const { name, value } = e.target;
+    setCounselingForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCounselingSubmit = async (e) => {
+    e.preventDefault();
+    setCounselingError("");
+    setCounselingSuccess(false);
+
+    if (!counselingForm.full_name.trim()) {
+      setCounselingError("Name is required");
+      return;
+    }
+    if (!counselingForm.email.trim()) {
+      setCounselingError("Email is required");
+      return;
+    }
+    if (!counselingForm.mobile_number.trim()) {
+      setCounselingError("Phone number is required");
+      return;
+    }
+    if (!counselingForm.message.trim()) {
+      setCounselingError("Message is required");
+      return;
+    }
+
+    setCounselingLoading(true);
+    try {
+      await axios.post(
+        "https://brainrock.in/brainrock/backend/api/student-counseling/",
+        counselingForm
+      );
+      setCounselingSuccess(true);
+      setCounselingForm({
+        full_name: "",
+        email: "",
+        mobile_number: "",
+        message: "",
+      });
+      setTimeout(() => {
+        setShowCounselingModal(false);
+        setCounselingSuccess(false);
+      }, 2000);
+    } catch (err) {
+      setCounselingError("Failed to submit. Please try again.");
+    } finally {
+      setCounselingLoading(false);
+    }
   };
 
   return (
@@ -57,6 +118,16 @@ function Header() {
               >
                 <PiSignInBold className="br-header-icon" />
                 <span>Login</span>
+              </button>
+            </li>
+            <li className="">
+              <button
+                type="button"
+                onClick={() => setShowCounselingModal(true)}
+                className="login-button"
+              >
+                <RiUser3Fill className="br-header-icon" />
+                <span>Counseling</span>
               </button>
             </li>
             <div className="">
@@ -128,6 +199,17 @@ function Header() {
                 <span>Login</span>
               </button>
             </li>
+            <li className="">
+              {" "}
+              <button
+                type="button"
+                onClick={() => setShowCounselingModal(true)}
+                className="login-button"
+              >
+                <RiUser3Fill className="br-header-icon" />
+                <span>Counseling</span>
+              </button>
+            </li>
             <div className="">
               <Link
                 to="https://www.facebook.com/BrainRock.in"
@@ -165,6 +247,83 @@ function Header() {
           </ul>
         </div>
       </div>
+
+      {/* Counseling Modal */}
+      <Modal
+        show={showCounselingModal}
+        onHide={() => {
+          setShowCounselingModal(false);
+          setCounselingError("");
+          setCounselingSuccess(false);
+        }}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Student Counseling</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {counselingSuccess ? (
+            <Alert variant="success">
+              Your counseling request has been submitted successfully!
+            </Alert>
+          ) : (
+            <Form onSubmit={handleCounselingSubmit}>
+              <Form.Group className="mb-3">
+                <Form.Label>Full Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="full_name"
+                  value={counselingForm.full_name}
+                  onChange={handleCounselingChange}
+                  placeholder="Enter your full name"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  name="email"
+                  value={counselingForm.email}
+                  onChange={handleCounselingChange}
+                  placeholder="Enter your email"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Mobile Number</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="mobile_number"
+                  value={counselingForm.mobile_number}
+                  onChange={handleCounselingChange}
+                  placeholder="Enter your phone number"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Message</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={4}
+                  name="message"
+                  value={counselingForm.message}
+                  onChange={handleCounselingChange}
+                  placeholder="Describe your counseling need"
+                />
+              </Form.Group>
+              {counselingError && (
+                <Alert variant="danger">{counselingError}</Alert>
+              )}
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={counselingLoading}
+                className="w-100"
+              >
+                {counselingLoading ? "Submitting..." : "Submit Request"}
+              </Button>
+            </Form>
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }
