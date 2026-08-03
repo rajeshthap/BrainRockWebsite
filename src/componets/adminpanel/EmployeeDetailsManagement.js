@@ -13,6 +13,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEdit, FaTrash, FaFilePdf } from "react-icons/fa";
 import axios from "axios";
 import BrainRockLogo from "../../assets/images/brainrock_logo.png";
 import AdminHeader from "./AdminHeader";
@@ -47,6 +48,7 @@ const EmployeeDetailsManagement = () => {
 
   // State for existing file previews in edit mode
   const [existingFiles, setExistingFiles] = useState({
+    profile_pic: null,
     govt_document: null,
     educational_documents: [],
     experience_certificates: [],
@@ -54,6 +56,7 @@ const EmployeeDetailsManagement = () => {
   });
 
   const [files, setFiles] = useState({
+    profile_pic: null,
     govt_document: null,
     educational_documents: [],
     experience_certificates: [],
@@ -139,6 +142,7 @@ const EmployeeDetailsManagement = () => {
       other_govt_doc_type: "",
     });
     setFiles({
+      profile_pic: null,
       govt_document: null,
       educational_documents: [],
       experience_certificates: [],
@@ -146,6 +150,7 @@ const EmployeeDetailsManagement = () => {
     });
     setEditMode(false);
     setExistingFiles({
+      profile_pic: null,
       govt_document: null,
       educational_documents: [],
       experience_certificates: [],
@@ -165,6 +170,7 @@ const EmployeeDetailsManagement = () => {
     }
 
     // Append files
+    if (files.profile_pic) payload.append("profile_pic", files.profile_pic);
     if (files.govt_document)
       payload.append("govt_document", files.govt_document);
     files.educational_documents.forEach((file) =>
@@ -232,6 +238,7 @@ const EmployeeDetailsManagement = () => {
       other_govt_doc_type: employee.other_govt_doc_type || "",
     });
     setExistingFiles({
+      profile_pic: employee.profile_pic,
       govt_document: employee.govt_document,
       educational_documents: employee.educational_documents || [],
       experience_certificates: employee.experience_certificates || [],
@@ -380,13 +387,14 @@ const EmployeeDetailsManagement = () => {
               body {
                   font-family: Arial, sans-serif;
                   margin: 0;
-                  padding: 24px;
+                  padding: 16px;
+                  font-size: 12px;
                   background: #f5f7fb;
                   color: #1f2937;
               }
               .pdf-shell {
                   max-width: 900px;
-                  margin: 0 auto;
+                  margin: 40px auto;
                   background: #ffffff;
                   border: 1px solid #d9e2ef;
                   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
@@ -397,38 +405,65 @@ const EmployeeDetailsManagement = () => {
                   display: flex;
                   align-items: center;
                   justify-content: space-between;
-                  padding: 20px 28px;
-                  background: linear-gradient(135deg, #0b3d91 0%, #1f6feb 100%);
-                  color: #ffffff;
+                  padding: 16px 28px;
               }
               .pdf-brand {
                   display: flex;
+                  flex-direction: column;
+                  align-items: flex-start;
+                  flex: 1;
+              }
+              .header-actions {
+                  display: flex;
                   align-items: center;
-                  gap: 14px;
+                  justify-content: flex-end;
+                  gap: 12px;
+                  text-align: right;
+                  flex: 1;
+              }
+              .profile-pic-header {
+                  width: 60px;
+                  height: 60px;
+                  border-radius: 50%;
+                  object-fit: cover;
+                  border: 3px solid #e6edf7;
+              }
+              .profile-pic-placeholder-header {
+                  width: 60px; height: 60px; border-radius: 50%; background-color: #e0e0e0;
+                  display: inline-flex; align-items: center; justify-content: center;
+                  color: #777; font-weight: bold; font-size: 10px;
+                  border: 3px solid #e6edf7;
               }
               .pdf-brand img {
-                  width: 70px;
-                  height: 70px;
-                  border-radius: 10px;
+                  width: 60px;
+                  height: 60px;
                   background: #ffffff;
                   padding: 4px;
               }
+              .pdf-header-center {
+                  flex: 2;
+                  text-align: center;
+              }
+                  .pdf-header-center h1{
+                  margin-top:30px;
+                  }
               .pdf-title {
                   margin: 0;
-                  font-size: 22px;
+                  font-size: 20px;
+                  color: #0b3d91;
                   font-weight: 700;
               }
               .pdf-subtitle {
                   margin: 4px 0 0;
-                  font-size: 12px;
-                  opacity: 0.9;
+                  font-size: 10px;
+                  color: #555;
               }
               .pdf-body {
                   padding: 24px 28px 28px;
               }
               .section-title {
                   margin: 0 0 12px;
-                  font-size: 16px;
+                  font-size: 14px;
                   color: #0b3d91;
                   font-weight: 700;
                   border-bottom: 2px solid #e6edf7;
@@ -442,8 +477,7 @@ const EmployeeDetailsManagement = () => {
               td {
                   border: 1px solid #d7e1f0;
                   padding: 10px 12px;
-                  vertical-align: top;
-                  font-size: 13px;
+                  vertical-align: top;                  font-size: 12px;
                   word-wrap: break-word;
               }
               .key {
@@ -476,9 +510,24 @@ const EmployeeDetailsManagement = () => {
                   color: #0b3d91;
                   text-decoration: none;
               }
+              .print-btn {
+                  background-color: #ffffff;
+                  color: #0b3d91;
+                  border: none;
+                  padding: 8px 16px;
+                  border-radius: 6px;
+                  font-weight: 700;
+                  cursor: pointer;
+                  margin-top: 8px;
+                  transition: background-color 0.2s;
+              }
+              .print-btn:hover {
+                  background-color: #f0f0f0;
+              }
               @media print {
                   body { background: #ffffff; padding: 0; }
                   .pdf-shell { box-shadow: none; border: none; }
+                  .print-btn { display: none; }
               }
           </style>
       </head>
@@ -487,21 +536,26 @@ const EmployeeDetailsManagement = () => {
               <div class="pdf-header">
                   <div class="pdf-brand">
                       <img src="${BrainRockLogo}" alt="BrainRock Logo" />
-                      <div>
-                          <h1 class="pdf-title">Employee Details Report</h1>
-                          <p class="pdf-subtitle">BrainRock Workforce Profile</p>
-                      </div>
+                      <p class="pdf-subtitle" style="margin-top: 5px;">Brainrock Consulting Services</p>
                   </div>
-                  <div class="pdf-subtitle">Generated for ${escapeHtml(employee.emp_name || "Employee")}</div>
+                  <div class="pdf-header-center">
+                      <h1 class="pdf-title">BrainRock Employee Details</h1>
+                  </div>
+                  <div class="header-actions">
+                      <div>
+                          <div class="pdf-subtitle">Generated for ${escapeHtml(employee.emp_name || "Employee")}</div>
+                          <button class="print-btn" onclick="window.print()">Print Report</button>
+                      </div>
+                      ${employee.profile_pic
+                        ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
+                        : '<div class="profile-pic-placeholder-header">No Photo</div>'
+                      }
+                  </div>
               </div>
               <div class="pdf-body">
                   <h2 class="section-title">Profile Information</h2>
                   <table>
                       ${tableMarkup}
-                  </table>
-
-                  <h2 class="section-title" style="margin-top: 20px;">Documents</h2>
-                  <table>
                       ${renderDocPreview(employee.govt_document, `${escapeHtml(employee.govt_doc_type ? employee.govt_doc_type.toUpperCase() : "GOVT")} Document`)}
                       ${renderDocListHtmlForPdf(employee.educational_documents, "Educational Documents")}
                       ${renderDocListHtmlForPdf(employee.experience_certificates, "Experience Certificates")}
@@ -519,7 +573,6 @@ const EmployeeDetailsManagement = () => {
     printWindow.document.write(generateEmployeePdfContent(employee));
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
   };
 
   const renderDocumentListWithDelete = (docs, fieldName) => {
@@ -777,6 +830,19 @@ const EmployeeDetailsManagement = () => {
                     <h5 className="mt-4">Upload Documents</h5>
                     <Col md={6}>
                       <Form.Group className="mb-3">
+                        <Form.Label>Profile Picture</Form.Label>
+                        {editMode && existingFiles.profile_pic && (
+                          <div className="d-flex flex-wrap gap-2 mb-2">
+                            {renderFilePreview(existingFiles.profile_pic)}
+                          </div>
+                        )}
+                        <Form.Control
+                          type="file" name="profile_pic" onChange={handleFileChange} accept="image/*"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Government Document</Form.Label>
                         {editMode && existingFiles.govt_document && (
                           <div className="d-flex flex-wrap gap-2 mb-2">
@@ -898,36 +964,40 @@ const EmployeeDetailsManagement = () => {
                           <td>{emp.email}</td>
                           <td>{emp.designation}</td>
                           <td>
-                            <Button
-                              variant="info"
-                              size="sm"
-                              onClick={() => handleView(emp)}
-                            >
-                              View
-                            </Button>
-                            <Button
-                              variant="success"
-                              size="sm"
-                              className="mx-2"
-                              onClick={() => handleDownloadPdf(emp)}
-                            >
-                              Download PDF
-                            </Button>
-                            <Button
-                              variant="warning"
-                              size="sm"
-                              className="mx-2"
-                              onClick={() => handleEdit(emp)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              onClick={() => handleDelete(emp.id)}
-                            >
-                              Delete
-                            </Button>
+                            <div className="d-flex gap-2">
+                              <Button
+                                variant="outline-info"
+                                size="sm"
+                                onClick={() => handleView(emp)}
+                                title="View Details"
+                              >
+                                <FaEye />
+                              </Button>
+                              <Button
+                                variant="outline-success"
+                                size="sm"
+                                onClick={() => handleDownloadPdf(emp)}
+                                title="Download PDF"
+                              >
+                                <FaFilePdf />
+                              </Button>
+                              <Button
+                                variant="outline-warning"
+                                size="sm"
+                                onClick={() => handleEdit(emp)}
+                                title="Edit Employee"
+                              >
+                                <FaEdit />
+                              </Button>
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() => handleDelete(emp.id)}
+                                title="Delete Employee"
+                              >
+                                <FaTrash />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -948,6 +1018,18 @@ const EmployeeDetailsManagement = () => {
         <Modal.Body>
           {selectedEmployee && (
             <div>
+              <div className="text-center mb-4">
+                {selectedEmployee.profile_pic ? (
+                  <img
+                    src={`${DOC_BASE_URL}${selectedEmployee.profile_pic}`}
+                    alt="Profile"
+                    className="rounded-circle"
+                    style={{ width: '120px', height: '120px', objectFit: 'cover', border: '3px solid #eee' }}
+                  />
+                ) : (
+                  <div className="rounded-circle bg-light d-flex justify-content-center align-items-center" style={{ width: '120px', height: '120px' }}>No Photo</div>
+                )}
+              </div>
               <Row>
                 <Col md={6}>
                   <strong>Emp ID:</strong> <p>{selectedEmployee.emp_id}</p>
