@@ -18,6 +18,7 @@ import AdminHeader from "./AdminHeader";
 import LeftNavManagement from "./LeftNavManagement";
 
 const API_URL = "https://brainrock.in/brainrock/backend/api/employee-profile/";
+const DOC_BASE_URL = "https://brainrock.in/brainrock/backend";
 const DOC_DELETE_URL = "https://brainrock.in/brainrock/backend/api/delete-employee-document/";
 
 const EmployeeDetailsManagement = () => {
@@ -272,8 +273,92 @@ const EmployeeDetailsManagement = () => {
 
   const renderDocumentLink = (docPath) => {
       if (!docPath) return "N/A";
-      const baseUrl = "https://brainrock.in/brainrock/backend";
-      return <a href={`${baseUrl}${docPath}`} target="_blank" rel="noopener noreferrer">View Document</a>;
+      return <a href={`${DOC_BASE_URL}${docPath}`} target="_blank" rel="noopener noreferrer">View Document</a>;
+  };
+
+  const generateEmployeePdfContent = (employee) => {
+    const renderDocHtmlForPdf = (docPath, title) => {
+      if (!docPath) return `<p><strong>${title}:</strong> N/A</p>`;
+      const fullUrl = `${DOC_BASE_URL}${docPath}`;
+      const isImage = /\.(jpg|jpeg|png|gif)$/i.test(docPath);
+
+      if (isImage) {
+        return `
+          <p><strong>${title}:</strong></p>
+          <img src="${fullUrl}" alt="${title}" style="max-width: 100%; height: auto; display: block; margin-bottom: 10px;" />
+        `;
+      } else {
+        return `
+          <p><strong>${title}:</strong> <a href="${fullUrl}" target="_blank">${docPath.split('/').pop()}</a></p>
+        `;
+      }
+    };
+
+    const renderDocListHtmlForPdf = (docs, title) => {
+      if (!docs || docs.length === 0) return `<p><strong>${title}:</strong> No documents uploaded.</p>`;
+      let html = `<p><strong>${title}:</strong></p><ul>`;
+      docs.forEach((doc, index) => {
+        const fullUrl = `${DOC_BASE_URL}${doc}`;
+        const isImage = /\.(jpg|jpeg|png|gif)$/i.test(doc);
+        if (isImage) {
+          html += `
+            <li>
+              <img src="${fullUrl}" alt="${title} ${index + 1}" style="max-width: 100%; height: auto; display: block; margin-bottom: 5px;" />
+            </li>
+          `;
+        } else {
+          html += `<li><a href="${fullUrl}" target="_blank">${doc.split('/').pop()}</a></li>`;
+        }
+      });
+      html += `</ul>`;
+      return html;
+    };
+
+    return `
+      <html>
+      <head>
+          <title>Employee Details - ${employee.emp_name}</title>
+          <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              h1 { text-align: center; color: #333; }
+              h2 { border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px; color: #555; }
+              p { margin-bottom: 5px; }
+              strong { font-weight: bold; }
+              ul { list-style-type: none; padding: 0; }
+              li { margin-bottom: 5px; }
+              img { border: 1px solid #ddd; padding: 5px; border-radius: 4px; }
+          </style>
+      </head>
+      <body>
+          <h1>Employee Details: ${employee.emp_name}</h1>
+          <p><strong>Employee ID:</strong> ${employee.emp_id || 'N/A'}</p>
+          <p><strong>Name:</strong> ${employee.emp_name || 'N/A'}</p>
+          <p><strong>Email:</strong> ${employee.email || 'N/A'}</p>
+          <p><strong>Designation:</strong> ${employee.designation || 'N/A'}</p>
+          <p><strong>Job Location:</strong> ${employee.job_location || 'N/A'}</p>
+          <p><strong>Address:</strong> ${employee.address || 'N/A'}</p>
+          <p><strong>Education Qualification:</strong> ${employee.education_qualification || 'N/A'}</p>
+          <p><strong>Work Experience:</strong> ${employee.work_experience || 'N/A'}</p>
+          <p><strong>Certificates/Rewards:</strong> ${employee.certificate_reward || 'N/A'}</p>
+          <p><strong>Technical Skills:</strong> ${employee.technical_skills || 'N/A'}</p>
+          <p><strong>Other Skills:</strong> ${employee.other_skills || 'N/A'}</p>
+
+          <h2>Documents</h2>
+          ${renderDocHtmlForPdf(employee.govt_document, `${employee.govt_doc_type.toUpperCase()} Document`)}
+          ${renderDocListHtmlForPdf(employee.educational_documents, 'Educational Documents')}
+          ${renderDocListHtmlForPdf(employee.experience_certificates, 'Experience Certificates')}
+          ${renderDocListHtmlForPdf(employee.professional_certificates, 'Professional Certificates')}
+      </body>
+      </html>
+    `;
+  };
+
+  const handleDownloadPdf = (employee) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(generateEmployeePdfContent(employee));
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   };
 
   const renderDocumentListWithDelete = (docs, fieldName) => {
@@ -466,6 +551,7 @@ const EmployeeDetailsManagement = () => {
                           <td>{emp.designation}</td>
                           <td>
                             <Button variant="info" size="sm" onClick={() => handleView(emp)}>View</Button>
+                            <Button variant="success" size="sm" className="mx-2" onClick={() => handleDownloadPdf(emp)}>Download PDF</Button>
                             <Button variant="warning" size="sm" className="mx-2" onClick={() => handleEdit(emp)}>Edit</Button>
                             <Button variant="danger" size="sm" onClick={() => handleDelete(emp.id)}>Delete</Button>
                           </td>
