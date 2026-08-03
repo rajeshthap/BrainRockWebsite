@@ -454,10 +454,20 @@ const EmployeeDetailsManagement = () => {
                         <Form.Label>Certificate/Reward</Form.Label>
                         <Form.Control type="text" name="certificate_reward" value={formData.certificate_reward} onChange={handleChange} placeholder="e.g., OCP, J2EE" />
                     </Form.Group></Col>
-                     <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Technical Skills</Form.Label>
-                        <Form.Control type="text" name="technical_skills" value={formData.technical_skills} onChange={handleChange} placeholder="e.g., React, Node.js" />
-                    </Form.Group></Col>
+                     
+                    <Col md={3}>
+  <Form.Group className="mb-3">
+    <Form.Label>Technical Skills</Form.Label>
+    <textarea
+      className="form-control"
+      rows="4"
+      name="technical_skills"
+      value={formData.technical_skills}
+      onChange={handleChange}
+      placeholder="e.g., React.js, JavaScript, HTML, CSS, Node.js"
+    />
+  </Form.Group>
+</Col>
                     <Col md={6}><Form.Group className="mb-3">
                         <Form.Label>Other Skills</Form.Label>
                         <Form.Control type="text" name="other_skills" value={formData.other_skills} onChange={handleChange} placeholder="e.g., Digital Marketing, SEO" />
