@@ -19,7 +19,8 @@ import LeftNavManagement from "./LeftNavManagement";
 
 const API_URL = "https://brainrock.in/brainrock/backend/api/employee-profile/";
 const DOC_BASE_URL = "https://brainrock.in/brainrock/backend";
-const DOC_DELETE_URL = "https://brainrock.in/brainrock/backend/api/delete-employee-document/";
+const DOC_DELETE_URL =
+  "https://brainrock.in/brainrock/backend/api/delete-employee-document/";
 
 const EmployeeDetailsManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -110,7 +111,11 @@ const EmployeeDetailsManagement = () => {
   const handleFileChange = (e) => {
     const { name, files: inputFiles } = e.target;
     if (e.target.multiple) {
-      setFiles((prev) => ({ ...prev, [name]: [...inputFiles] }));
+      const selectedDocs = Array.from(inputFiles);
+      setFiles((prev) => ({
+        ...prev,
+        [name]: [...(prev[name] || []), ...selectedDocs],
+      }));
     } else {
       setFiles((prev) => ({ ...prev, [name]: inputFiles[0] }));
     }
@@ -144,10 +149,10 @@ const EmployeeDetailsManagement = () => {
     });
     setEditMode(false);
     setExistingFiles({
-        govt_document: null,
-        educational_documents: [],
-        experience_certificates: [],
-        professional_certificates: [],
+      govt_document: null,
+      educational_documents: [],
+      experience_certificates: [],
+      professional_certificates: [],
     });
   };
 
@@ -163,10 +168,17 @@ const EmployeeDetailsManagement = () => {
     }
 
     // Append files
-    if (files.govt_document) payload.append("govt_document", files.govt_document);
-    files.educational_documents.forEach(file => payload.append("educational_documents", file));
-    files.experience_certificates.forEach(file => payload.append("experience_certificates", file));
-    files.professional_certificates.forEach(file => payload.append("professional_certificates", file));
+    if (files.govt_document)
+      payload.append("govt_document", files.govt_document);
+    files.educational_documents.forEach((file) =>
+      payload.append("educational_documents", file),
+    );
+    files.experience_certificates.forEach((file) =>
+      payload.append("experience_certificates", file),
+    );
+    files.professional_certificates.forEach((file) =>
+      payload.append("professional_certificates", file),
+    );
 
     try {
       let response;
@@ -209,24 +221,24 @@ const EmployeeDetailsManagement = () => {
     setEditMode(true);
     setSelectedEmployee(employee);
     setFormData({
-        emp_name: employee.emp_name,
-        education_qualification: employee.education_qualification,
-        certificate_reward: employee.certificate_reward,
-        designation: employee.designation,
-        work_experience: employee.work_experience,
-        technical_skills: employee.technical_skills,
-        other_skills: employee.other_skills,
-        email: employee.email,
-        job_location: employee.job_location,
-        address: employee.address,
-        govt_doc_type: employee.govt_doc_type,
-        other_govt_doc_type: employee.other_govt_doc_type || "",
+      emp_name: employee.emp_name,
+      education_qualification: employee.education_qualification,
+      certificate_reward: employee.certificate_reward,
+      designation: employee.designation,
+      work_experience: employee.work_experience,
+      technical_skills: employee.technical_skills,
+      other_skills: employee.other_skills,
+      email: employee.email,
+      job_location: employee.job_location,
+      address: employee.address,
+      govt_doc_type: employee.govt_doc_type,
+      other_govt_doc_type: employee.other_govt_doc_type || "",
     });
     setExistingFiles({
-        govt_document: employee.govt_document,
-        educational_documents: employee.educational_documents || [],
-        experience_certificates: employee.experience_certificates || [],
-        professional_certificates: employee.professional_certificates || [],
+      govt_document: employee.govt_document,
+      educational_documents: employee.educational_documents || [],
+      experience_certificates: employee.experience_certificates || [],
+      professional_certificates: employee.professional_certificates || [],
     });
     // Switch to the "Add/Edit" tab to show the form
     setActiveTab("add");
@@ -250,56 +262,133 @@ const EmployeeDetailsManagement = () => {
   };
 
   const handleDeleteDoc = async (employeeId, field, index) => {
-     if (window.confirm(`Are you sure you want to delete this document?`)) {
-         try {
-             await axios.delete(`${DOC_DELETE_URL}?id=${employeeId}&field=${field}&index=${index}`, {
-                withCredentials: true,
-             });
-             setMessage("Document deleted successfully.");
-             setVariant("success");
-             setShowAlert(true);
-             fetchEmployees(); // Refresh data
-             setShowModal(false); // Close modal
-         } catch (error) {
-             console.error("Doc delete error:", error);
-             setMessage("Failed to delete document.");
-             setVariant("danger");
-             setShowAlert(true);
-         }
-     }
+    if (window.confirm(`Are you sure you want to delete this document?`)) {
+      try {
+        await axios.delete(
+          `${DOC_DELETE_URL}?id=${employeeId}&field=${field}&index=${index}`,
+          {
+            withCredentials: true,
+          },
+        );
+        setMessage("Document deleted successfully.");
+        setVariant("success");
+        setShowAlert(true);
+
+        const updatedEmployees = employees.map((emp) => {
+          if (emp.id !== employeeId) return emp;
+
+          if (field === "govt_document") {
+            return { ...emp, [field]: null };
+          }
+
+          const existingDocs = Array.isArray(emp[field])
+            ? emp[field].filter(Boolean)
+            : emp[field]
+              ? [emp[field]]
+              : [];
+          const newDocs = existingDocs.filter(
+            (_, docIndex) => docIndex !== index,
+          );
+          return { ...emp, [field]: newDocs };
+        });
+
+        setEmployees(updatedEmployees);
+        setSelectedEmployee(
+          updatedEmployees.find((emp) => emp.id === employeeId),
+        );
+        fetchEmployees();
+        setShowModal(false);
+      } catch (error) {
+        console.error("Doc delete error:", error);
+        setMessage("Failed to delete document.");
+        setVariant("danger");
+        setShowAlert(true);
+      }
+    }
   };
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  const normalizeDocList = (docs) => {
+    if (!docs) return [];
+    if (Array.isArray(docs)) return docs.filter(Boolean);
+    if (typeof docs === "string") return [docs].filter(Boolean);
+    if (typeof docs === "object" && docs.path)
+      return [docs.path].filter(Boolean);
+    return [];
+  };
+
+  const getDocumentName = (docPath) => {
+    if (!docPath) return "N/A";
+    const pathString =
+      typeof docPath === "string"
+        ? docPath
+        : docPath.path || docPath.name || "";
+    return pathString.split("/").pop() || pathString;
+  };
+
+  const getDocumentUrl = (docPath) => {
+    if (!docPath) return "";
+    const pathString =
+      typeof docPath === "string"
+        ? docPath
+        : docPath.path || docPath.name || "";
+    if (/^https?:\/\//i.test(pathString)) return pathString;
+    return `${DOC_BASE_URL}${pathString}`;
+  };
+
+  const isImageDocument = (docPath) => {
+    if (!docPath) return false;
+    const fileName = getDocumentName(docPath);
+    return /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(fileName);
+  };
+
   const renderDocumentLink = (docPath) => {
-      if (!docPath) return "N/A";
-      return <a href={`${DOC_BASE_URL}${docPath}`} target="_blank" rel="noopener noreferrer">View Document</a>;
+    if (!docPath) return "N/A";
+    return (
+      <a
+        href={getDocumentUrl(docPath)}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={getDocumentName(docPath)}
+      >
+        View Document
+      </a>
+    );
+  };
+
+  const renderDocumentPreview = (docPath) => {
+    if (!docPath) return "N/A";
+    const fullUrl = getDocumentUrl(docPath);
+
+    if (isImageDocument(docPath)) {
+      return (
+        <a
+          href={fullUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={getDocumentName(docPath)}
+        >
+          View Document
+        </a>
+      );
+    }
+
+    return renderDocumentLink(docPath);
   };
 
   const generateEmployeePdfContent = (employee) => {
     const renderDocHtmlForPdf = (docPath, title) => {
-      if (!docPath) return `<p><strong>${title}:</strong> N/A</p>`;
-      const fullUrl = `${DOC_BASE_URL}${docPath}`;
-      const isImage = /\.(jpg|jpeg|png|gif)$/i.test(docPath);
+      const docList = normalizeDocList(docPath);
+      if (docList.length === 0)
+        return `<p><strong>${title}:</strong> No documents uploaded.</p>`;
 
-      if (isImage) {
-        return `
-          <p><strong>${title}:</strong></p>
-          <img src="${fullUrl}" alt="${title}" style="max-width: 100%; height: auto; display: block; margin-bottom: 10px;" />
-        `;
-      } else {
-        return `
-          <p><strong>${title}:</strong> <a href="${fullUrl}" target="_blank">${docPath.split('/').pop()}</a></p>
-        `;
-      }
-    };
-
-    const renderDocListHtmlForPdf = (docs, title) => {
-      if (!docs || docs.length === 0) return `<p><strong>${title}:</strong> No documents uploaded.</p>`;
       let html = `<p><strong>${title}:</strong></p><ul>`;
-      docs.forEach((doc, index) => {
-        const fullUrl = `${DOC_BASE_URL}${doc}`;
-        const isImage = /\.(jpg|jpeg|png|gif)$/i.test(doc);
+      docList.forEach((doc, index) => {
+        const fullUrl = getDocumentUrl(doc);
+        const label = getDocumentName(doc);
+        const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(label);
+
         if (isImage) {
           html += `
             <li>
@@ -307,11 +396,15 @@ const EmployeeDetailsManagement = () => {
             </li>
           `;
         } else {
-          html += `<li><a href="${fullUrl}" target="_blank">${doc.split('/').pop()}</a></li>`;
+          html += `<li><a href="${fullUrl}" target="_blank">${label}</a></li>`;
         }
       });
       html += `</ul>`;
       return html;
+    };
+
+    const renderDocListHtmlForPdf = (docs, title) => {
+      return renderDocHtmlForPdf(docs, title);
     };
 
     return `
@@ -331,30 +424,30 @@ const EmployeeDetailsManagement = () => {
       </head>
       <body>
           <h1>Employee Details: ${employee.emp_name}</h1>
-          <p><strong>Employee ID:</strong> ${employee.emp_id || 'N/A'}</p>
-          <p><strong>Name:</strong> ${employee.emp_name || 'N/A'}</p>
-          <p><strong>Email:</strong> ${employee.email || 'N/A'}</p>
-          <p><strong>Designation:</strong> ${employee.designation || 'N/A'}</p>
-          <p><strong>Job Location:</strong> ${employee.job_location || 'N/A'}</p>
-          <p><strong>Address:</strong> ${employee.address || 'N/A'}</p>
-          <p><strong>Education Qualification:</strong> ${employee.education_qualification || 'N/A'}</p>
-          <p><strong>Work Experience:</strong> ${employee.work_experience || 'N/A'}</p>
-          <p><strong>Certificates/Rewards:</strong> ${employee.certificate_reward || 'N/A'}</p>
-          <p><strong>Technical Skills:</strong> ${employee.technical_skills || 'N/A'}</p>
-          <p><strong>Other Skills:</strong> ${employee.other_skills || 'N/A'}</p>
+          <p><strong>Employee ID:</strong> ${employee.emp_id || "N/A"}</p>
+          <p><strong>Name:</strong> ${employee.emp_name || "N/A"}</p>
+          <p><strong>Email:</strong> ${employee.email || "N/A"}</p>
+          <p><strong>Designation:</strong> ${employee.designation || "N/A"}</p>
+          <p><strong>Job Location:</strong> ${employee.job_location || "N/A"}</p>
+          <p><strong>Address:</strong> ${employee.address || "N/A"}</p>
+          <p><strong>Education Qualification:</strong> ${employee.education_qualification || "N/A"}</p>
+          <p><strong>Work Experience:</strong> ${employee.work_experience || "N/A"}</p>
+          <p><strong>Certificates/Rewards:</strong> ${employee.certificate_reward || "N/A"}</p>
+          <p><strong>Technical Skills:</strong> ${employee.technical_skills || "N/A"}</p>
+          <p><strong>Other Skills:</strong> ${employee.other_skills || "N/A"}</p>
 
           <h2>Documents</h2>
           ${renderDocHtmlForPdf(employee.govt_document, `${employee.govt_doc_type.toUpperCase()} Document`)}
-          ${renderDocListHtmlForPdf(employee.educational_documents, 'Educational Documents')}
-          ${renderDocListHtmlForPdf(employee.experience_certificates, 'Experience Certificates')}
-          ${renderDocListHtmlForPdf(employee.professional_certificates, 'Professional Certificates')}
+          ${renderDocListHtmlForPdf(employee.educational_documents, "Educational Documents")}
+          ${renderDocListHtmlForPdf(employee.experience_certificates, "Experience Certificates")}
+          ${renderDocListHtmlForPdf(employee.professional_certificates, "Professional Certificates")}
       </body>
       </html>
     `;
   };
 
   const handleDownloadPdf = (employee) => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(generateEmployeePdfContent(employee));
     printWindow.document.close();
     printWindow.focus();
@@ -362,38 +455,69 @@ const EmployeeDetailsManagement = () => {
   };
 
   const renderDocumentListWithDelete = (docs, fieldName) => {
-      if (!docs || docs.length === 0) return <p>No documents uploaded.</p>;
-      return (
-          <ul>
-              {docs.map((doc, index) => (
-                  <li key={index} className="d-flex justify-content-between align-items-center">
-                      {renderDocumentLink(doc)}
-                      <Button 
-                        variant="danger" 
-                        size="sm" 
-                        onClick={() => handleDeleteDoc(selectedEmployee.id, fieldName, index)}
-                      >
-                          Delete
-                      </Button>
-                  </li>
-              ))}
-          </ul>
-      );
+    const docList = normalizeDocList(docs);
+    if (docList.length === 0) return <p>No documents uploaded.</p>;
+    return (
+      <ul>
+        {docList.map((doc, index) => (
+          <li
+            key={`${fieldName}-${index}`}
+            className="d-flex justify-content-between align-items-center mb-2 gap-3"
+          >
+            {renderDocumentPreview(doc)}
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() =>
+                handleDeleteDoc(selectedEmployee.id, fieldName, index)
+              }
+            >
+              Delete
+            </Button>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  const renderSelectedFiles = (fieldName) => {
+    const selectedFiles = files[fieldName] || [];
+    if (!selectedFiles.length) return null;
+
+    return (
+      <div className="small text-muted mt-2">
+        Selected:
+        <ul className="mb-0 ps-3">
+          {selectedFiles.map((file, index) => (
+            <li key={`${fieldName}-${index}`}>
+              {file.name || getDocumentName(file)}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
   };
 
   const renderFilePreview = (filePath) => {
     if (!filePath) return null;
-    const fullUrl = `https://brainrock.in/brainrock/backend${filePath}`;
-    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(filePath);
+    const fullUrl = getDocumentUrl(filePath);
+    const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(
+      getDocumentName(filePath),
+    );
 
     return (
-        <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="file-preview-box">
-            {isImage ? (
-                <img src={fullUrl} alt="preview" className="file-preview-image" />
-            ) : (
-                <div className="file-preview-icon">📄</div>
-            )}
-        </a>
+      <a
+        href={fullUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="file-preview-box"
+      >
+        {isImage ? (
+          <img src={fullUrl} alt="preview" className="file-preview-image" />
+        ) : (
+          <div className="file-preview-icon">📄</div>
+        )}
+      </a>
     );
   };
 
@@ -416,129 +540,362 @@ const EmployeeDetailsManagement = () => {
         <Container fluid className="dashboard-body ">
           <h2 className="mb-4">Employee Management</h2>
           <div className="br-box-container mt-3">
-            <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} id="employee-tabs" className="mb-3">
-              <Tab eventKey="add" title={editMode ? "Edit Employee" : "Add Employee"}>
-                <h4 className="mb-4">{editMode ? "Edit Employee Details" : "Add New Employee"}</h4>
-                {showAlert && <Alert variant={variant} onClose={() => setShowAlert(false)} dismissible>{message}</Alert>}
+            <Tabs
+              activeKey={activeTab}
+              onSelect={(k) => setActiveTab(k)}
+              id="employee-tabs"
+              className="mb-3"
+            >
+              <Tab
+                eventKey="add"
+                title={editMode ? "Edit Employee" : "Add Employee"}
+              >
+                <h4 className="mb-4">
+                  {editMode ? "Edit Employee Details" : "Add New Employee"}
+                </h4>
+                {showAlert && (
+                  <Alert
+                    variant={variant}
+                    onClose={() => setShowAlert(false)}
+                    dismissible
+                  >
+                    {message}
+                  </Alert>
+                )}
                 <Form onSubmit={handleSubmit} className="p-3">
                   <Row>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Employee Name</Form.Label>
-                        <Form.Control type="text" name="emp_name" value={formData.emp_name} onChange={handleChange} placeholder="Enter full name" required />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Email</Form.Label>
-                        <Form.Control type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Enter email address" required />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Designation</Form.Label>
-                        <Form.Control type="text" name="designation" value={formData.designation} onChange={handleChange} placeholder="e.g., Software Engineer" />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Job Location</Form.Label>
-                        <Form.Control type="text" name="job_location" value={formData.job_location} onChange={handleChange} placeholder="e.g., Dehradun" />
-                    </Form.Group></Col>
-                    <Col md={12}><Form.Group className="mb-3">
-                        <Form.Label>Address</Form.Label>
-                        <Form.Control as="textarea" rows={2} name="address" value={formData.address} onChange={handleChange} placeholder="Enter employee's current address" />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Education Qualification</Form.Label>
-                        <Form.Control type="text" name="education_qualification" value={formData.education_qualification} onChange={handleChange} placeholder="e.g., MCA, B.Tech" />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Work Experience</Form.Label>
-                        <Form.Control type="text" name="work_experience" value={formData.work_experience} onChange={handleChange} placeholder="e.g., 5 Years" />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Certificate/Reward</Form.Label>
-                        <Form.Control type="text" name="certificate_reward" value={formData.certificate_reward} onChange={handleChange} placeholder="e.g., OCP, J2EE" />
-                    </Form.Group></Col>
-                     
                     <Col md={3}>
-  <Form.Group className="mb-3">
-    <Form.Label>Technical Skills</Form.Label>
-    <textarea
-      className="form-control"
-      rows="4"
-      name="technical_skills"
-      value={formData.technical_skills}
-      onChange={handleChange}
-      placeholder="e.g., React.js, JavaScript, HTML, CSS, Node.js"
-    />
-  </Form.Group>
-</Col>
-                    <Col md={6}><Form.Group className="mb-3">
-                        <Form.Label>Other Skills</Form.Label>
-                        <Form.Control type="text" name="other_skills" value={formData.other_skills} onChange={handleChange} placeholder="e.g., Digital Marketing, SEO" />
-                    </Form.Group></Col>
-                    <Col md={6}><Form.Group className="mb-3">
-                        <Form.Label>Govt. Doc Type</Form.Label>
-                        <Form.Select name="govt_doc_type" value={formData.govt_doc_type} onChange={handleChange}>
-                            <option value="aadhaar">Aadhaar</option>
-                            <option value="pan">PAN</option> 
-                            <option value="passport">Passport</option>
-                            <option value="voter_id">Voter ID</option>
-                            <option value="driving_license">Driving License</option>
-                            <option value="other">Other</option>
-                        </Form.Select>
-                    </Form.Group></Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Employee Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="emp_name"
+                          value={formData.emp_name}
+                          onChange={handleChange}
+                          placeholder="Enter full name"
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="Enter email address"
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Designation</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="designation"
+                          value={formData.designation}
+                          onChange={handleChange}
+                          placeholder="e.g., Software Engineer"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Job Location</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="job_location"
+                          value={formData.job_location}
+                          onChange={handleChange}
+                          placeholder="e.g., Dehradun"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={12}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Address</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          name="address"
+                          value={formData.address}
+                          onChange={handleChange}
+                          placeholder="Enter employee's current address"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Education Qualification</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="education_qualification"
+                          value={formData.education_qualification}
+                          onChange={handleChange}
+                          placeholder="e.g., MCA, B.Tech"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Work Experience</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="work_experience"
+                          value={formData.work_experience}
+                          onChange={handleChange}
+                          placeholder="e.g., 5 Years"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Certificate/Reward</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="certificate_reward"
+                          value={formData.certificate_reward}
+                          onChange={handleChange}
+                          placeholder="e.g., OCP, J2EE"
+                        />
+                      </Form.Group>
+                    </Col>
 
-                    {formData.govt_doc_type === 'other' && (
-                    <Col md={6}><Form.Group className="mb-3">
-                        <Form.Label>Please specify other document type</Form.Label>
-                        <Form.Control type="text" name="other_govt_doc_type" value={formData.other_govt_doc_type} onChange={handleChange} placeholder="Enter document type" required />
-                    </Form.Group></Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Technical Skills</Form.Label>
+                        <textarea
+                          className="form-control"
+                          rows="4"
+                          name="technical_skills"
+                          value={formData.technical_skills}
+                          onChange={handleChange}
+                          placeholder="e.g., React.js, JavaScript, HTML, CSS, Node.js"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Other Skills</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="other_skills"
+                          value={formData.other_skills}
+                          onChange={handleChange}
+                          placeholder="e.g., Digital Marketing, SEO"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Govt. Doc Type</Form.Label>
+                        <Form.Select
+                          name="govt_doc_type"
+                          value={formData.govt_doc_type}
+                          onChange={handleChange}
+                        >
+                          <option value="aadhaar">Aadhaar</option>
+                          <option value="pan">PAN</option>
+                          <option value="passport">Passport</option>
+                          <option value="voter_id">Voter ID</option>
+                          <option value="driving_license">
+                            Driving License
+                          </option>
+                          <option value="other">Other</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+
+                    {formData.govt_doc_type === "other" && (
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>
+                            Please specify other document type
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="other_govt_doc_type"
+                            value={formData.other_govt_doc_type}
+                            onChange={handleChange}
+                            placeholder="Enter document type"
+                            required
+                          />
+                        </Form.Group>
+                      </Col>
                     )}
 
                     <h5 className="mt-4">Upload Documents</h5>
-                    <Col md={6}><Form.Group className="mb-3">
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Government Document</Form.Label>
                         {editMode && existingFiles.govt_document && (
-                            <div className="d-flex flex-wrap gap-2 mb-2">
-                                {renderFilePreview(existingFiles.govt_document)}
-                            </div>
+                          <div className="d-flex flex-wrap gap-2 mb-2">
+                            {renderFilePreview(existingFiles.govt_document)}
+                          </div>
                         )}
-                        <Form.Control type="file" name="govt_document" onChange={handleFileChange} />
-                    </Form.Group></Col>
-                    <Col md={6}><Form.Group className="mb-3">
+                        <Form.Control
+                          type="file"
+                          name="govt_document"
+                          onChange={handleFileChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Educational Documents</Form.Label>
-                        {editMode && existingFiles.educational_documents.length > 0 && (
+                        {editMode &&
+                          normalizeDocList(existingFiles.educational_documents)
+                            .length > 0 && (
                             <div className="d-flex flex-wrap gap-2 mb-2">
-                                {existingFiles.educational_documents.map((doc, i) => renderFilePreview(doc))}
+                              {normalizeDocList(
+                                existingFiles.educational_documents,
+                              ).map((doc, i) => (
+                                <div key={`educational-${i}`}>
+                                  {renderFilePreview(doc)}
+                                </div>
+                              ))}
                             </div>
-                        )}
-                        <Form.Control type="file" name="educational_documents" onChange={handleFileChange} multiple />
-                    </Form.Group></Col>
-                    <Col md={6}><Form.Group className="mb-3">
+                          )}
+                        <div className="d-flex gap-2 align-items-center">
+                          <Form.Control
+                            id="educational-documents-input"
+                            type="file"
+                            name="educational_documents"
+                            onChange={handleFileChange}
+                            multiple
+                          />
+                          <Button
+                            type="button"
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() =>
+                              document
+                                .getElementById("educational-documents-input")
+                                ?.click()
+                            }
+                          >
+                            Add More
+                          </Button>
+                        </div>
+                        {renderSelectedFiles("educational_documents")}
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Experience Certificates</Form.Label>
-                        {editMode && existingFiles.experience_certificates.length > 0 && (
+                        {editMode &&
+                          normalizeDocList(
+                            existingFiles.experience_certificates,
+                          ).length > 0 && (
                             <div className="d-flex flex-wrap gap-2 mb-2">
-                                {existingFiles.experience_certificates.map((doc, i) => renderFilePreview(doc))}
+                              {normalizeDocList(
+                                existingFiles.experience_certificates,
+                              ).map((doc, i) => (
+                                <div key={`experience-${i}`}>
+                                  {renderFilePreview(doc)}
+                                </div>
+                              ))}
                             </div>
-                        )}
-                        <Form.Control type="file" name="experience_certificates" onChange={handleFileChange} multiple />
-                    </Form.Group></Col>
-                    <Col md={6}><Form.Group className="mb-3">
+                          )}
+                        <div className="d-flex gap-2 align-items-center">
+                          <Form.Control
+                            id="experience-certificates-input"
+                            type="file"
+                            name="experience_certificates"
+                            onChange={handleFileChange}
+                            multiple
+                          />
+                          <Button
+                            type="button"
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() =>
+                              document
+                                .getElementById("experience-certificates-input")
+                                ?.click()
+                            }
+                          >
+                            Add More
+                          </Button>
+                        </div>
+                        {renderSelectedFiles("experience_certificates")}
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Professional Certificates</Form.Label>
-                        {editMode && existingFiles.professional_certificates.length > 0 && (
+                        {editMode &&
+                          normalizeDocList(
+                            existingFiles.professional_certificates,
+                          ).length > 0 && (
                             <div className="d-flex flex-wrap gap-2 mb-2">
-                                {existingFiles.professional_certificates.map((doc, i) => renderFilePreview(doc))}
+                              {normalizeDocList(
+                                existingFiles.professional_certificates,
+                              ).map((doc, i) => (
+                                <div key={`professional-${i}`}>
+                                  {renderFilePreview(doc)}
+                                </div>
+                              ))}
                             </div>
-                        )}
-                        <Form.Control type="file" name="professional_certificates" onChange={handleFileChange} multiple />
-                    </Form.Group></Col>
+                          )}
+                        <div className="d-flex gap-2 align-items-center">
+                          <Form.Control
+                            id="professional-certificates-input"
+                            type="file"
+                            name="professional_certificates"
+                            onChange={handleFileChange}
+                            multiple
+                          />
+                          <Button
+                            type="button"
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() =>
+                              document
+                                .getElementById(
+                                  "professional-certificates-input",
+                                )
+                                ?.click()
+                            }
+                          >
+                            Add More
+                          </Button>
+                        </div>
+                        {renderSelectedFiles("professional_certificates")}
+                      </Form.Group>
+                    </Col>
                   </Row>
-                  <Button type="submit" variant="primary" disabled={isSubmitting}>
-                    {isSubmitting ? "Submitting..." : (editMode ? "Update Employee" : "Add Employee")}
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting
+                      ? "Submitting..."
+                      : editMode
+                        ? "Update Employee"
+                        : "Add Employee"}
                   </Button>
-                  {editMode && <Button variant="secondary" className="ms-2" onClick={resetForm}>Cancel Edit</Button>}
+                  {editMode && (
+                    <Button
+                      variant="secondary"
+                      className="ms-2"
+                      onClick={resetForm}
+                    >
+                      Cancel Edit
+                    </Button>
+                  )}
                 </Form>
               </Tab>
               <Tab eventKey="manage" title="Manage Employees">
                 <h4 className="mb-4">Existing Employees</h4>
                 {loading ? (
-                  <div className="text-center"><Spinner animation="border" /></div>
+                  <div className="text-center">
+                    <Spinner animation="border" />
+                  </div>
                 ) : (
                   <Table striped bordered hover responsive>
                     <thead>
@@ -560,10 +917,36 @@ const EmployeeDetailsManagement = () => {
                           <td>{emp.email}</td>
                           <td>{emp.designation}</td>
                           <td>
-                            <Button variant="info" size="sm" onClick={() => handleView(emp)}>View</Button>
-                            <Button variant="success" size="sm" className="mx-2" onClick={() => handleDownloadPdf(emp)}>Download PDF</Button>
-                            <Button variant="warning" size="sm" className="mx-2" onClick={() => handleEdit(emp)}>Edit</Button>
-                            <Button variant="danger" size="sm" onClick={() => handleDelete(emp.id)}>Delete</Button>
+                            <div className="employee-action-buttons">
+                              <Button
+                                variant="info"
+                                size="sm"
+                                onClick={() => handleView(emp)}
+                              >
+                                View
+                              </Button>
+                              <Button
+                                variant="success"
+                                size="sm"
+                                onClick={() => handleDownloadPdf(emp)}
+                              >
+                                Download PDF
+                              </Button>
+                              <Button
+                                variant="warning"
+                                size="sm"
+                                onClick={() => handleEdit(emp)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => handleDelete(emp.id)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -585,44 +968,87 @@ const EmployeeDetailsManagement = () => {
           {selectedEmployee && (
             <div>
               <Row>
-                <Col md={6}><strong>Emp ID:</strong> <p>{selectedEmployee.emp_id}</p></Col>
-                <Col md={6}><strong>Name:</strong> <p>{selectedEmployee.emp_name}</p></Col>
-                <Col md={6}><strong>Email:</strong> <p>{selectedEmployee.email}</p></Col>
-                <Col md={6}><strong>Designation:</strong> <p>{selectedEmployee.designation}</p></Col>
-                <Col md={6}><strong>Job Location:</strong> <p>{selectedEmployee.job_location}</p></Col>
-                <Col md={6}><strong>Work Experience:</strong> <p>{selectedEmployee.work_experience}</p></Col>
-                <Col md={12}><strong>Address:</strong> <p>{selectedEmployee.address}</p></Col>
-                <Col md={12}><strong>Education:</strong> <p>{selectedEmployee.education_qualification}</p></Col>
-                <Col md={12}><strong>Certificates/Rewards:</strong> <p>{selectedEmployee.certificate_reward}</p></Col>
-                <Col md={12}><strong>Technical Skills:</strong> <p>{selectedEmployee.technical_skills}</p></Col>
-                <Col md={12}><strong>Other Skills:</strong> <p>{selectedEmployee.other_skills}</p></Col>
+                <Col md={6}>
+                  <strong>Emp ID:</strong> <p>{selectedEmployee.emp_id}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Name:</strong> <p>{selectedEmployee.emp_name}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Email:</strong> <p>{selectedEmployee.email}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Designation:</strong>{" "}
+                  <p>{selectedEmployee.designation}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Job Location:</strong>{" "}
+                  <p>{selectedEmployee.job_location}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Work Experience:</strong>{" "}
+                  <p>{selectedEmployee.work_experience}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Address:</strong> <p>{selectedEmployee.address}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Education:</strong>{" "}
+                  <p>{selectedEmployee.education_qualification}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Certificates/Rewards:</strong>{" "}
+                  <p>{selectedEmployee.certificate_reward}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Technical Skills:</strong>{" "}
+                  <p>{selectedEmployee.technical_skills}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Other Skills:</strong>{" "}
+                  <p>{selectedEmployee.other_skills}</p>
+                </Col>
               </Row>
               <hr />
               <h4>Documents</h4>
               <Row>
-                 <Col md={12} className="mb-3">
-                    <strong>{selectedEmployee.govt_doc_type.toUpperCase()} Document:</strong>
-                    <div className="d-flex justify-content-between align-items-center">
-                        {renderDocumentLink(selectedEmployee.govt_document)}
-                        <Button 
-                          variant="danger" 
-                          size="sm" 
-                          onClick={() => handleDeleteDoc(selectedEmployee.id, 'govt_document', 0)}>
-                            Delete
-                        </Button>
-                    </div>
+                <Col md={12} className="mb-3">
+                  <strong>
+                    {selectedEmployee.govt_doc_type.toUpperCase()} Document:
+                  </strong>
+                  <div className="d-flex justify-content-between align-items-center gap-3">
+                    {renderDocumentPreview(selectedEmployee.govt_document)}
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() =>
+                        handleDeleteDoc(selectedEmployee.id, "govt_document", 0)
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </Col>
                 <Col md={12} className="mt-3">
-                    <strong>Educational Documents:</strong>
-                    {renderDocumentListWithDelete(selectedEmployee.educational_documents, 'educational_documents')}
+                  <strong>Educational Documents:</strong>
+                  {renderDocumentListWithDelete(
+                    selectedEmployee.educational_documents,
+                    "educational_documents",
+                  )}
                 </Col>
-                 <Col md={12} className="mt-3">
-                    <strong>Experience Certificates:</strong>
-                    {renderDocumentListWithDelete(selectedEmployee.experience_certificates, 'experience_certificates')}
+                <Col md={12} className="mt-3">
+                  <strong>Experience Certificates:</strong>
+                  {renderDocumentListWithDelete(
+                    selectedEmployee.experience_certificates,
+                    "experience_certificates",
+                  )}
                 </Col>
-                 <Col md={12} className="mt-3">
-                    <strong>Professional Certificates:</strong>
-                    {renderDocumentListWithDelete(selectedEmployee.professional_certificates, 'professional_certificates')}
+                <Col md={12} className="mt-3">
+                  <strong>Professional Certificates:</strong>
+                  {renderDocumentListWithDelete(
+                    selectedEmployee.professional_certificates,
+                    "professional_certificates",
+                  )}
                 </Col>
               </Row>
             </div>
@@ -637,6 +1063,17 @@ const EmployeeDetailsManagement = () => {
 
       <style type="text/css">
         {`
+          .employee-action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+          }
+
+          .employee-action-buttons .btn {
+            white-space: nowrap;
+          }
+
           .file-preview-box {
             display: inline-block;
             width: 80px;
@@ -655,6 +1092,17 @@ const EmployeeDetailsManagement = () => {
           .file-preview-icon {
             font-size: 40px;
             line-height: 80px;
+          }
+
+          @media (max-width: 767px) {
+            .employee-action-buttons {
+              flex-direction: column;
+              align-items: stretch;
+            }
+
+            .employee-action-buttons .btn {
+              width: 100%;
+            }
           }
         `}
       </style>
