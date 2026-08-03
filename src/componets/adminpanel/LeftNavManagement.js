@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Nav, Offcanvas, Collapse } from "react-bootstrap";
 import { FaHandshakeAngle } from "react-icons/fa6";
 
+
 import {
   FaTachometerAlt,
   FaSignOutAlt,
@@ -65,7 +66,7 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
             active: true,
         },
          {
-            icon: <FaTachometerAlt />,
+              icon: <FaUsers />,
             label: "Employee Details",
             path: "/EmployeeDetailsManagement",
             active: true,
