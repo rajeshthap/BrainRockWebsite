@@ -64,6 +64,12 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
             path: "/WebsiteManagement",
             active: true,
         },
+         {
+            icon: <FaTachometerAlt />,
+            label: "Employee Details",
+            path: "/EmployeeDetailsManagement",
+            active: true,
+        },
         {
             icon: <FaImages />,
             label: "Carousel",

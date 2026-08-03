@@ -111,6 +111,7 @@ import Quiz from "./componets/khelo_jito_panel/Quiz";
 import QuizTest from "./componets/Play_and_Win/QuizTest";
 import CoursesTest from "./componets/Play_and_Win/CoursesTest";
 import PayNow from "./componets/adminpanel/pay_now/PayNow";
+import EmployeeDetailsManagement from "./componets/adminpanel/EmployeeDetailsManagement";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -179,7 +180,8 @@ function AppContent() {
     "/WalletPaymentStatus",
     "/Quiz",
     "/QuizTest",
-    "/PayNow"
+    "/PayNow",
+    "/EmployeeDetailsManagement"
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -241,6 +243,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <PayrollCalculations />
+            </ProtectedRoute>
+          }
+        />
+          <Route
+          path="/EmployeeDetailsManagement"
+          element={
+            <ProtectedRoute>
+              <EmployeeDetailsManagement />
             </ProtectedRoute>
           }
         />
