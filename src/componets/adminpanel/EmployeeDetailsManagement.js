@@ -15,6 +15,7 @@ import {
 import { FaEye, FaEdit, FaTrash, FaFilePdf } from "react-icons/fa";
 import axios from "axios";
 import BrainRockLogo from "../../assets/images/brainrock_logo.png";
+import ZeeLogo from "../../assets/images/zeepnglogo.jpeg";
 import AdminHeader from "./AdminHeader";
 import LeftNavManagement from "./LeftNavManagement";
 
@@ -344,6 +345,13 @@ const EmployeeDetailsManagement = () => {
         .replace(/>/g, "&gt;")
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
+    const isZeeEmployee =
+      (employee.firm_name || "").trim() === "ZEE -Zero Error Enterprises";
+    const isBrainrockEmployee =
+      (employee.firm_name || "").trim() === "Brainrock Consulting Services";
+    const accentColor = isZeeEmployee ? "#c1121f" : "#0b3d91";
+    const borderColor = isZeeEmployee ? "#f2b8bf" : "#d7e1f0";
+    const keyBgColor = isZeeEmployee ? "#fff3f4" : "#f4f8ff";
 
     const renderDocPreview = (docPath, title) => {
       if (!docPath) return `<tr><td class="key">${title}</td><td>N/A</td></tr>`;
@@ -430,7 +438,7 @@ const EmployeeDetailsManagement = () => {
                   max-width: 900px;
                   margin: 40px auto;
                   background: #ffffff;
-                  border: 1px solid #d9e2ef;
+                  border: 1px solid ${borderColor};
                   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
                   border-radius: 12px;
                   overflow: hidden;
@@ -484,7 +492,7 @@ const EmployeeDetailsManagement = () => {
               .pdf-title {
                   margin: 0;
                   font-size: 20px;
-                  color: #0b3d91;
+                  color: ${accentColor};
                   font-weight: 700;
               }
               .pdf-subtitle {
@@ -498,9 +506,9 @@ const EmployeeDetailsManagement = () => {
               .section-title {
                   margin: 0 0 12px;
                   font-size: 14px;
-                  color: #0b3d91;
+                  color: ${accentColor};
                   font-weight: 700;
-                  border-bottom: 2px solid #e6edf7;
+                  border-bottom: 2px solid ${borderColor};
                   padding-bottom: 8px;
               }
               table {
@@ -509,16 +517,16 @@ const EmployeeDetailsManagement = () => {
                   table-layout: fixed;
               }
               td {
-                  border: 1px solid #d7e1f0;
+                  border: 1px solid ${borderColor};
                   padding: 10px 12px;
                   vertical-align: top;                  font-size: 12px;
                   word-wrap: break-word;
               }
               .key {
                   width: 32%;
-                  background: #f4f8ff;
+                  background: ${keyBgColor};
                   font-weight: 700;
-                  color: #0b3d91;
+                  color: ${accentColor};
               }
               .doc-list-wrap {
                   display: flex;
@@ -526,22 +534,22 @@ const EmployeeDetailsManagement = () => {
                   gap: 8px;
               }
               .doc-card {
-                  border: 1px solid #d7e1f0;
+                  border: 1px solid ${borderColor};
                   border-radius: 6px;
                   padding: 8px;
-                  background: #fbfdff;
+                  background: ${keyBgColor};
               }
               .doc-image {
                   max-width: 100%;
                   max-height: 200px;
                   display: block;
                   margin: 0 auto;
-                  border: 1px solid #d7e1f0;
+                  border: 1px solid ${borderColor};
                   border-radius: 6px;
                   background: #ffffff;
               }
               a {
-                  color: #0b3d91;
+                  color: ${accentColor};
                   text-decoration: none;
               }
               .print-btn {
@@ -569,8 +577,13 @@ const EmployeeDetailsManagement = () => {
           <div class="pdf-shell">
               <div class="pdf-header">
                   <div class="pdf-brand">
-                      <img src="${BrainRockLogo}" alt="BrainRock Logo" />
-                      <p class="pdf-subtitle" style="margin-top: 5px;">Brainrock Consulting Services</p>
+                      ${
+                        isZeeEmployee
+                          ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "ZEE -Zero Error Enterprises")}</p>`
+                          : isBrainrockEmployee
+                            ? `<img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "Brainrock Consulting Services")}</p>`
+                            : `<p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "Employee")}</p>`
+                      }
                   </div>
                   <div class="pdf-header-center">
                       <h1 class="pdf-title">Employee Details Report</h1>
@@ -610,15 +623,7 @@ const EmployeeDetailsManagement = () => {
     printWindow.focus();
   };
 
-  const uniqueFirmNames = [
-    "all",
-    ...new Set(
-      allEmployees
-        .map((emp) => emp.firm_name)
-        .filter(Boolean)
-        .concat(FIRM_OPTIONS),
-    ),
-  ];
+  const uniqueFirmNames = ["all", ...FIRM_OPTIONS];
 
   const filteredEmployees =
     selectedFirmFilter === "all"
