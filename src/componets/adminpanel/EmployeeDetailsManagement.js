@@ -12,7 +12,6 @@ import {
   Modal,
   Spinner,
 } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
 import { FaEye, FaEdit, FaTrash, FaFilePdf } from "react-icons/fa";
 import axios from "axios";
 import BrainRockLogo from "../../assets/images/brainrock_logo.png";
@@ -28,7 +27,6 @@ const EmployeeDetailsManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  const navigate = useNavigate();
 
   // Form state for adding/editing employee
   const [formData, setFormData] = useState({
@@ -44,7 +42,6 @@ const EmployeeDetailsManagement = () => {
     address: "",
     govt_doc_type: "aadhaar",
     other_govt_doc_type: "",
-    firm_name: "", // Added firm_name field
   });
 
   // State for existing file previews in edit mode
@@ -77,8 +74,30 @@ const EmployeeDetailsManagement = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [activeTab, setActiveTab] = useState("manage");
   const [editMode, setEditMode] = useState(false);
-  const [selectedFirmFilter, setSelectedFirmFilter] = useState("All Firms"); // State for firm filter
-  const [uniqueFirmNames, setUniqueFirmNames] = useState([]); // State for unique firm names
+
+  // Helper functions for document paths and types
+  const getDocumentUrl = (docPath) => {
+    if (!docPath) return "";
+    // Assuming docPath from backend already includes /media/employee_documents/...
+    return `${DOC_BASE_URL}${docPath}`;
+  };
+
+  const getDocumentName = (docPath) => {
+    if (!docPath) return "N/A";
+    return docPath.split("/").pop();
+  };
+
+  const isImageDocument = (docPath) => {
+    if (!docPath) return false;
+    return /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(docPath);
+  };
+
+  const renderDocumentPreviewInModal = (docPath) => {
+    if (!docPath) return "N/A";
+    const fullUrl = getDocumentUrl(docPath);
+    const label = getDocumentName(docPath);
+    return isImageDocument(docPath) ? <img src={fullUrl} alt="preview" className="file-preview-image-small" /> : <span>{label}</span>;
+  };
 
   // Responsive check
   useEffect(() => {
@@ -100,8 +119,6 @@ const EmployeeDetailsManagement = () => {
       const response = await axios.get(API_URL, { withCredentials: true });
       if (response.data.success) {
         setEmployees(response.data.data);
-        const firms = [...new Set(response.data.data.map((emp) => emp.firm_name))];
-        setUniqueFirmNames(["All Firms", ...firms]);
       }
     } catch (error) {
       console.error("Error fetching employees:", error);
@@ -145,7 +162,6 @@ const EmployeeDetailsManagement = () => {
       address: "",
       govt_doc_type: "aadhaar",
       other_govt_doc_type: "",
-      firm_name: "", // Reset firm_name
     });
     setFiles({
       profile_pic: null,
@@ -200,7 +216,7 @@ const EmployeeDetailsManagement = () => {
         setMessage("Employee updated successfully!");
         setActiveTab("manage"); // Redirect to manage tab on successful update
       } else {
-        response = await axios.post(API_URL, payload, { // POST request
+        response = await axios.post(API_URL, payload, {
           headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
         });
@@ -217,7 +233,7 @@ const EmployeeDetailsManagement = () => {
       setVariant("danger");
       setShowAlert(true);
     } finally {
-      setIsSubmitting(false); // Ensure this is always set to false
+      setIsSubmitting(false);
     }
   };
 
@@ -242,7 +258,6 @@ const EmployeeDetailsManagement = () => {
       address: employee.address,
       govt_doc_type: employee.govt_doc_type,
       other_govt_doc_type: employee.other_govt_doc_type || "",
-      firm_name: employee.firm_name || "", // Populate firm_name for editing
     });
     setExistingFiles({
       profile_pic: employee.profile_pic,
@@ -258,11 +273,7 @@ const EmployeeDetailsManagement = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await axios.delete(API_URL, {
-          data: { id, firm_name: selectedEmployee?.firm_name }, // Include firm_name in DELETE request
-          withCredentials: true,
-        });
-
+        await axios.delete(API_URL, { data: { id }, withCredentials: true });
         setMessage("Employee deleted successfully.");
         setVariant("success");
         setShowAlert(true);
@@ -279,7 +290,7 @@ const EmployeeDetailsManagement = () => {
   const handleDeleteDoc = async (employeeId, field, index) => {
     if (window.confirm(`Are you sure you want to delete this document?`)) {
       try {
-        await axios.delete( // DELETE request for documents
+        await axios.delete(
           `${DOC_DELETE_URL}?id=${employeeId}&field=${field}&index=${index}`,
           {
             withCredentials: true,
@@ -301,19 +312,6 @@ const EmployeeDetailsManagement = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const renderDocumentLink = (docPath) => {
-    if (!docPath) return "N/A";
-    return (
-      <a
-        href={`${DOC_BASE_URL}${docPath}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View Document
-      </a>
-    );
-  };
-
   const generateEmployeePdfContent = (employee) => {
     const escapeHtml = (value) =>
       String(value ?? "")
@@ -322,7 +320,6 @@ const EmployeeDetailsManagement = () => {
         .replace(/>/g, "&gt;")
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
-
 
     const renderDocPreview = (docPath, title) => {
       if (!docPath) return `<tr><td class="key">${title}</td><td>N/A</td></tr>`;
@@ -551,7 +548,7 @@ const EmployeeDetailsManagement = () => {
                       <p class="pdf-subtitle" style="margin-top: 5px;">Brainrock Consulting Services</p>
                   </div>
                   <div class="pdf-header-center">
-                      <h1 class="pdf-title">BrainRock Employee Details</h1>
+                      <h1 class="pdf-title">Employee Details Report</h1>
                   </div>
                   <div class="header-actions">
                       <div>
@@ -596,7 +593,7 @@ const EmployeeDetailsManagement = () => {
             key={index}
             className="d-flex justify-content-between align-items-center"
           >
-            {renderDocumentLink(doc)}
+            {renderDocumentPreviewInModal(doc)}
             <Button
               variant="danger"
               size="sm"
@@ -821,27 +818,6 @@ const EmployeeDetailsManagement = () => {
                       </Form.Group>
                     </Col>
 
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Firm Name</Form.Label>
-                        <Form.Select
-                          name="firm_name"
-                          value={formData.firm_name}
-                          onChange={handleChange}
-                          required
-                        >
-                          <option value="">Select Firm</option>
-                          <option value="Brainrock Consulting Services">Brainrock Consulting Services</option>
-                          <option value="ZEE -Zero Error Enterprises">
-                            ZEE -Zero Error Enterprises
-                          </option>
-                          <option value="Diksha Enterprises">Diksha Enterprises</option>
-                          <option value="U.S. Infotech">U.S. Infotech</option>
-                        </Form.Select>
-                      </Form.Group>
-                    </Col>
-
-
                     {formData.govt_doc_type === "other" && (
                       <Col md={6}>
                         <Form.Group className="mb-3">
@@ -972,23 +948,6 @@ const EmployeeDetailsManagement = () => {
               </Tab>
               <Tab eventKey="manage" title="Manage Employees">
                 <h4 className="mb-4">Existing Employees</h4>
-                <Row className="mb-3">
-                  <Col md={4}>
-                    <Form.Group>
-                      <Form.Label>Filter by Firm</Form.Label>
-                      <Form.Select
-                        value={selectedFirmFilter}
-                        onChange={(e) => {
-                          setSelectedFirmFilter(e.target.value);
-                        }}
-                      >
-                        {uniqueFirmNames.map((firm) => (
-                          <option key={firm} value={firm}>{firm}</option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                </Row>
                 {loading ? (
                   <div className="text-center">
                     <Spinner animation="border" />
@@ -1006,11 +965,7 @@ const EmployeeDetailsManagement = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {employees
-                        .filter(
-                          (emp) => selectedFirmFilter === "All Firms" || emp.firm_name === selectedFirmFilter
-                        )
-                        .map((emp, index) => (
+                      {employees.map((emp, index) => (
                         <tr key={emp.id}>
                           <td>{index + 1}</td>
                           <td>{emp.emp_id}</td>
@@ -1134,7 +1089,7 @@ const EmployeeDetailsManagement = () => {
                     {selectedEmployee.govt_doc_type.toUpperCase()} Document:
                   </strong>
                   <div className="d-flex justify-content-between align-items-center">
-                    {renderDocumentLink(selectedEmployee.govt_document)}
+                    {renderDocumentPreviewInModal(selectedEmployee.govt_document)}
                     <Button
                       variant="danger"
                       size="sm"
@@ -1198,6 +1153,20 @@ const EmployeeDetailsManagement = () => {
           .file-preview-icon {
             font-size: 40px;
             line-height: 80px;
+          }
+          .file-preview-image-small {
+              width: 60px;
+              height: 60px;
+              object-fit: cover;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              background-color: #f8f9fa;
+              margin-right: 5px;
+          }
+          .file-preview-link {
+            display: inline-block;
+            text-decoration: none;
+            color: #007bff;
           }
         `}
       </style>
