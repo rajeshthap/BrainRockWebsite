@@ -76,6 +76,7 @@ const EmployeeDetailsManagement = () => {
 
   // Manage tab state
   const [employees, setEmployees] = useState([]);
+  const [allEmployees, setAllEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -125,17 +126,18 @@ const EmployeeDetailsManagement = () => {
   }, []);
 
   // Fetch employees for the "Manage" tab
-  const fetchEmployees = async (firmName = selectedFirmFilter) => {
+  const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const params =
-        firmName && firmName !== "all" ? { firm_name: firmName } : {};
       const response = await axios.get(API_URL, {
-        params,
         withCredentials: true,
       });
       if (response.data.success) {
-        setEmployees(response.data.data);
+        const data = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
+        setAllEmployees(data);
+        setEmployees(data);
       }
     } catch (error) {
       console.error("Error fetching employees:", error);
@@ -148,8 +150,8 @@ const EmployeeDetailsManagement = () => {
   };
 
   useEffect(() => {
-    fetchEmployees(selectedFirmFilter);
-  }, [selectedFirmFilter]);
+    fetchEmployees();
+  }, []);
 
   const handleFileChange = (e) => {
     const { name, files: inputFiles } = e.target;
@@ -244,7 +246,7 @@ const EmployeeDetailsManagement = () => {
       setVariant("success");
       setShowAlert(true);
       resetForm();
-      fetchEmployees(selectedFirmFilter); // Refresh the list
+      fetchEmployees(); // Refresh the list
     } catch (error) {
       console.error("Submission error:", error.response?.data || error.message);
       setMessage(error.response?.data?.message || "An error occurred.");
@@ -299,7 +301,7 @@ const EmployeeDetailsManagement = () => {
         setMessage("Employee deleted successfully.");
         setVariant("success");
         setShowAlert(true);
-        fetchEmployees(selectedFirmFilter);
+        fetchEmployees();
       } catch (error) {
         console.error("Delete error:", error);
         setMessage("Failed to delete employee.");
@@ -611,14 +613,17 @@ const EmployeeDetailsManagement = () => {
   const uniqueFirmNames = [
     "all",
     ...new Set(
-      employees
+      allEmployees
         .map((emp) => emp.firm_name)
         .filter(Boolean)
         .concat(FIRM_OPTIONS),
     ),
   ];
 
-  const filteredEmployees = employees;
+  const filteredEmployees =
+    selectedFirmFilter === "all"
+      ? allEmployees
+      : allEmployees.filter((emp) => emp.firm_name === selectedFirmFilter);
 
   const renderDocumentListWithDelete = (docs, fieldName) => {
     if (!docs || docs.length === 0) return <p>No documents uploaded.</p>;
