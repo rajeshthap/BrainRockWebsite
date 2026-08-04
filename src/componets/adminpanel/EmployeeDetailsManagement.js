@@ -25,7 +25,7 @@ const DOC_DELETE_URL =
   "https://brainrock.in/brainrock/backend/api/delete-employee-document/";
 const FIRM_OPTIONS = [
   "Brainrock Consulting Services",
-  "ZEE -Zero Error Enterprises",
+  "ZEE - Zero Error Enterprises",
   "Diksha Enterprises",
   "U.S. Infotech",
 ];
@@ -345,13 +345,32 @@ const EmployeeDetailsManagement = () => {
         .replace(/>/g, "&gt;")
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
-    const isZeeEmployee =
-      (employee.firm_name || "").trim() === "ZEE -Zero Error Enterprises";
-    const isBrainrockEmployee =
-      (employee.firm_name || "").trim() === "Brainrock Consulting Services";
-    const accentColor = isZeeEmployee ? "#c1121f" : "#0b3d91";
-    const borderColor = isZeeEmployee ? "#f2b8bf" : "#d7e1f0";
-    const keyBgColor = isZeeEmployee ? "#fff3f4" : "#f4f8ff";
+
+    const firmName = (employee.firm_name || "").trim();
+    const firmsForBlackTheme = [
+      "ZEE -Zero Error Enterprises",
+      "Diksha Enterprises",
+      "U.S. Infotech",
+    ];
+
+    const shouldUseBlackTheme = firmsForBlackTheme.includes(firmName);
+    const isZeeEmployee = firmName === "ZEE -Zero Error Enterprises";
+    const isBrainrockEmployee = firmName === "Brainrock Consulting Services";
+
+    const accentColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#c1121f" : "#0b3d91");
+    const borderColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#f2b8bf" : "#d7e1f0");
+    const keyBgColor = shouldUseBlackTheme ? "#f5f5f5" : (isZeeEmployee ? "#fff3f4" : "#f4f8ff");
+
+    let pdfTitle = "Employee Details Report"; // Default title
+    if (firmName === "Brainrock Consulting Services") {
+      pdfTitle = "BrainRock Employee Details";
+    } else if (firmName === "Diksha Enterprises") {
+      pdfTitle = "Diksha Enterprises Employee Details";
+    } else if (firmName === "U.S. Infotech") {
+      pdfTitle = "U.S. Infotech Employee Details";
+    } else if (firmName === "ZEE -Zero Error Enterprises") {
+      pdfTitle = "ZEE -Zero Error Enterprises Employee Details";
+    }
 
     const renderDocPreview = (docPath, title) => {
       if (!docPath) return `<tr><td class="key">${title}</td><td>N/A</td></tr>`;
@@ -431,13 +450,13 @@ const EmployeeDetailsManagement = () => {
                   margin: 0;
                   padding: 16px;
                   font-size: 12px;
-                  background: #f5f7fb;
-                  color: #1f2937;
+                  background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
+                  color: ${shouldUseBlackTheme ? "#000000" : "#1f2937"};
               }
               .pdf-shell {
                   max-width: 900px;
                   margin: 40px auto;
-                  background: #ffffff;
+                  background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
                   border: 1px solid ${borderColor};
                   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
                   border-radius: 12px;
@@ -448,6 +467,7 @@ const EmployeeDetailsManagement = () => {
                   align-items: center;
                   justify-content: space-between;
                   padding: 16px 28px;
+                  background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
               }
               .pdf-brand {
                   display: flex;
@@ -474,7 +494,7 @@ const EmployeeDetailsManagement = () => {
                   width: 60px; height: 60px; border-radius: 50%; background-color: #e0e0e0;
                   display: inline-flex; align-items: center; justify-content: center;
                   color: #777; font-weight: bold; font-size: 10px;
-                  border: 3px solid #e6edf7;
+                  border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};
               }
               .pdf-brand img {
                   width: 60px;
@@ -498,7 +518,7 @@ const EmployeeDetailsManagement = () => {
               .pdf-subtitle {
                   margin: 4px 0 0;
                   font-size: 10px;
-                  color: #555;
+                  color: ${shouldUseBlackTheme ? "#000000" : "#555"};
               }
               .pdf-body {
                   padding: 24px 28px 28px;
@@ -579,14 +599,14 @@ const EmployeeDetailsManagement = () => {
                   <div class="pdf-brand">
                       ${
                         isZeeEmployee
-                          ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "ZEE -Zero Error Enterprises")}</p>`
+                          ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "ZEE - Zero Error Enterprises")}</p>`
                           : isBrainrockEmployee
                             ? `<img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "Brainrock Consulting Services")}</p>`
                             : `<p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "Employee")}</p>`
                       }
                   </div>
                   <div class="pdf-header-center">
-                      <h1 class="pdf-title">Employee Details Report</h1>
+                      <h1 class="pdf-title">${pdfTitle}</h1>
                   </div>
                   <div class="header-actions">
                       <div>
