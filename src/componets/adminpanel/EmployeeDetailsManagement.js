@@ -22,6 +22,12 @@ const API_URL = "https://brainrock.in/brainrock/backend/api/employee-profile/";
 const DOC_BASE_URL = "https://brainrock.in/brainrock/backend";
 const DOC_DELETE_URL =
   "https://brainrock.in/brainrock/backend/api/delete-employee-document/";
+const FIRM_OPTIONS = [
+  "Brainrock Consulting Services",
+  "ZEE -Zero Error Enterprises",
+  "Diksha Enterprises",
+  "U.S. Infotech",
+];
 
 const EmployeeDetailsManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -40,6 +46,7 @@ const EmployeeDetailsManagement = () => {
     email: "",
     job_location: "",
     address: "",
+    firm_name: "Brainrock Consulting Services",
     govt_doc_type: "aadhaar",
     other_govt_doc_type: "",
   });
@@ -74,6 +81,7 @@ const EmployeeDetailsManagement = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [activeTab, setActiveTab] = useState("manage");
   const [editMode, setEditMode] = useState(false);
+  const [selectedFirmFilter, setSelectedFirmFilter] = useState("all");
 
   // Helper functions for document paths and types
   const getDocumentUrl = (docPath) => {
@@ -96,7 +104,11 @@ const EmployeeDetailsManagement = () => {
     if (!docPath) return "N/A";
     const fullUrl = getDocumentUrl(docPath);
     const label = getDocumentName(docPath);
-    return isImageDocument(docPath) ? <img src={fullUrl} alt="preview" className="file-preview-image-small" /> : <span>{label}</span>;
+    return isImageDocument(docPath) ? (
+      <img src={fullUrl} alt="preview" className="file-preview-image-small" />
+    ) : (
+      <span>{label}</span>
+    );
   };
 
   // Responsive check
@@ -113,10 +125,15 @@ const EmployeeDetailsManagement = () => {
   }, []);
 
   // Fetch employees for the "Manage" tab
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (firmName = selectedFirmFilter) => {
     setLoading(true);
     try {
-      const response = await axios.get(API_URL, { withCredentials: true });
+      const params =
+        firmName && firmName !== "all" ? { firm_name: firmName } : {};
+      const response = await axios.get(API_URL, {
+        params,
+        withCredentials: true,
+      });
       if (response.data.success) {
         setEmployees(response.data.data);
       }
@@ -131,8 +148,8 @@ const EmployeeDetailsManagement = () => {
   };
 
   useEffect(() => {
-    fetchEmployees();
-  }, []);
+    fetchEmployees(selectedFirmFilter);
+  }, [selectedFirmFilter]);
 
   const handleFileChange = (e) => {
     const { name, files: inputFiles } = e.target;
@@ -160,6 +177,7 @@ const EmployeeDetailsManagement = () => {
       email: "",
       job_location: "",
       address: "",
+      firm_name: "Brainrock Consulting Services",
       govt_doc_type: "aadhaar",
       other_govt_doc_type: "",
     });
@@ -226,7 +244,7 @@ const EmployeeDetailsManagement = () => {
       setVariant("success");
       setShowAlert(true);
       resetForm();
-      fetchEmployees(); // Refresh the list
+      fetchEmployees(selectedFirmFilter); // Refresh the list
     } catch (error) {
       console.error("Submission error:", error.response?.data || error.message);
       setMessage(error.response?.data?.message || "An error occurred.");
@@ -256,6 +274,7 @@ const EmployeeDetailsManagement = () => {
       email: employee.email,
       job_location: employee.job_location,
       address: employee.address,
+      firm_name: employee.firm_name || "Brainrock Consulting Services",
       govt_doc_type: employee.govt_doc_type,
       other_govt_doc_type: employee.other_govt_doc_type || "",
     });
@@ -270,14 +289,17 @@ const EmployeeDetailsManagement = () => {
     setActiveTab("add");
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, firmName) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await axios.delete(API_URL, { data: { id }, withCredentials: true });
+        await axios.delete(API_URL, {
+          data: { id, firm_name: firmName },
+          withCredentials: true,
+        });
         setMessage("Employee deleted successfully.");
         setVariant("success");
         setShowAlert(true);
-        fetchEmployees();
+        fetchEmployees(selectedFirmFilter);
       } catch (error) {
         console.error("Delete error:", error);
         setMessage("Failed to delete employee.");
@@ -368,6 +390,7 @@ const EmployeeDetailsManagement = () => {
       ["Name", employee.emp_name || "N/A"],
       ["Email", employee.email || "N/A"],
       ["Designation", employee.designation || "N/A"],
+      ["Firm Name", employee.firm_name || "N/A"],
       ["Job Location", employee.job_location || "N/A"],
       ["Address", employee.address || "N/A"],
       ["Education Qualification", employee.education_qualification || "N/A"],
@@ -555,9 +578,10 @@ const EmployeeDetailsManagement = () => {
                           <div class="pdf-subtitle">Generated for ${escapeHtml(employee.emp_name || "Employee")}</div>
                           <button class="print-btn" onclick="window.print()">Print Report</button>
                       </div>
-                      ${employee.profile_pic
-                        ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
-                        : '<div class="profile-pic-placeholder-header">No Photo</div>'
+                      ${
+                        employee.profile_pic
+                          ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
+                          : '<div class="profile-pic-placeholder-header">No Photo</div>'
                       }
                   </div>
               </div>
@@ -583,6 +607,18 @@ const EmployeeDetailsManagement = () => {
     printWindow.document.close();
     printWindow.focus();
   };
+
+  const uniqueFirmNames = [
+    "all",
+    ...new Set(
+      employees
+        .map((emp) => emp.firm_name)
+        .filter(Boolean)
+        .concat(FIRM_OPTIONS),
+    ),
+  ];
+
+  const filteredEmployees = employees;
 
   const renderDocumentListWithDelete = (docs, fieldName) => {
     if (!docs || docs.length === 0) return <p>No documents uploaded.</p>;
@@ -800,6 +836,23 @@ const EmployeeDetailsManagement = () => {
                     </Col>
                     <Col md={6}>
                       <Form.Group className="mb-3">
+                        <Form.Label>Firm Name</Form.Label>
+                        <Form.Select
+                          name="firm_name"
+                          value={formData.firm_name}
+                          onChange={handleChange}
+                          required
+                        >
+                          {FIRM_OPTIONS.map((firm) => (
+                            <option key={firm} value={firm}>
+                              {firm}
+                            </option>
+                          ))}
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Govt. Doc Type</Form.Label>
                         <Form.Select
                           name="govt_doc_type"
@@ -846,7 +899,10 @@ const EmployeeDetailsManagement = () => {
                           </div>
                         )}
                         <Form.Control
-                          type="file" name="profile_pic" onChange={handleFileChange} accept="image/*"
+                          type="file"
+                          name="profile_pic"
+                          onChange={handleFileChange}
+                          accept="image/*"
                         />
                       </Form.Group>
                     </Col>
@@ -948,6 +1004,26 @@ const EmployeeDetailsManagement = () => {
               </Tab>
               <Tab eventKey="manage" title="Manage Employees">
                 <h4 className="mb-4">Existing Employees</h4>
+                <Row className="mb-3 align-items-end">
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>Filter by Firm</Form.Label>
+                      <Form.Select
+                        value={selectedFirmFilter}
+                        onChange={(e) => setSelectedFirmFilter(e.target.value)}
+                      >
+                        <option value="all">All Firms</option>
+                        {uniqueFirmNames
+                          .filter((firm) => firm !== "all")
+                          .map((firm) => (
+                            <option key={firm} value={firm}>
+                              {firm}
+                            </option>
+                          ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
                 {loading ? (
                   <div className="text-center">
                     <Spinner animation="border" />
@@ -965,7 +1041,7 @@ const EmployeeDetailsManagement = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {employees.map((emp, index) => (
+                      {filteredEmployees.map((emp, index) => (
                         <tr key={emp.id}>
                           <td>{index + 1}</td>
                           <td>{emp.emp_id}</td>
@@ -1001,7 +1077,9 @@ const EmployeeDetailsManagement = () => {
                               <Button
                                 variant="outline-danger"
                                 size="sm"
-                                onClick={() => handleDelete(emp.id)}
+                                onClick={() =>
+                                  handleDelete(emp.id, emp.firm_name)
+                                }
                                 title="Delete Employee"
                               >
                                 <FaTrash />
@@ -1033,10 +1111,20 @@ const EmployeeDetailsManagement = () => {
                     src={`${DOC_BASE_URL}${selectedEmployee.profile_pic}`}
                     alt="Profile"
                     className="rounded-circle"
-                    style={{ width: '120px', height: '120px', objectFit: 'cover', border: '3px solid #eee' }}
+                    style={{
+                      width: "120px",
+                      height: "120px",
+                      objectFit: "cover",
+                      border: "3px solid #eee",
+                    }}
                   />
                 ) : (
-                  <div className="rounded-circle bg-light d-flex justify-content-center align-items-center" style={{ width: '120px', height: '120px' }}>No Photo</div>
+                  <div
+                    className="rounded-circle bg-light d-flex justify-content-center align-items-center"
+                    style={{ width: "120px", height: "120px" }}
+                  >
+                    No Photo
+                  </div>
                 )}
               </div>
               <Row>
@@ -1089,7 +1177,9 @@ const EmployeeDetailsManagement = () => {
                     {selectedEmployee.govt_doc_type.toUpperCase()} Document:
                   </strong>
                   <div className="d-flex justify-content-between align-items-center">
-                    {renderDocumentPreviewInModal(selectedEmployee.govt_document)}
+                    {renderDocumentPreviewInModal(
+                      selectedEmployee.govt_document,
+                    )}
                     <Button
                       variant="danger"
                       size="sm"
