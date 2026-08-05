@@ -445,13 +445,13 @@ const EmployeeDetailsManagement = () => {
     let mainTableRows = allProfileRows;
     let specialLayoutEmpIdHtml = '';
 
-    if (isDikshaEmployee || isUSInfotechEmployee) {
+    if (isDikshaEmployee) { // Only apply special Emp ID logic for Diksha
         // Extract Employee ID for separate display
         const empIdRowIndex = allProfileRows.findIndex(row => row[0] === "Employee ID");
         if (empIdRowIndex !== -1) {
             const empIdRow = allProfileRows[empIdRowIndex];
             specialLayoutEmpIdHtml = `<p style="margin-top: 10px; font-weight: bold; font-size: 12px; color: ${accentColor};">Emp ID: ${escapeHtml(empIdRow[1])}</p>`;
-            mainTableRows = allProfileRows.filter(row => row[0] !== "Employee ID");
+            mainTableRows = allProfileRows.filter((row, index) => index !== empIdRowIndex);
         }
     }
 
@@ -492,7 +492,7 @@ const EmployeeDetailsManagement = () => {
                   display: flex;
                   align-items: center;
                   justify-content: space-between;
-                  padding: 16px 28px;
+                  padding: 8px 28px;
                   background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
               }
               .pdf-brand {
