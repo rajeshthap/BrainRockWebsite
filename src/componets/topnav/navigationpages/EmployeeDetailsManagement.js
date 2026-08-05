@@ -12,20 +12,28 @@ import {
   Modal,
   Spinner,
 } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { FaEye, FaEdit, FaTrash, FaFilePdf } from "react-icons/fa";
 import axios from "axios";
+import BrainRockLogo from "../../assets/images/brainrock_logo.png";
+import ZeeLogo from "../../assets/images/zeepnglogo.jpeg";
 import AdminHeader from "./AdminHeader";
 import LeftNavManagement from "./LeftNavManagement";
 
 const API_URL = "https://brainrock.in/brainrock/backend/api/employee-profile/";
 const DOC_BASE_URL = "https://brainrock.in/brainrock/backend";
-const DOC_DELETE_URL = "https://brainrock.in/brainrock/backend/api/delete-employee-document/";
+const DOC_DELETE_URL =
+  "https://brainrock.in/brainrock/backend/api/delete-employee-document/";
+const FIRM_OPTIONS = [
+  "Brainrock Consulting Services",
+  "ZEE - Zero Error Enterprises",
+  "Diksha Enterprises",
+  "U.S. Infotech",
+];
 
 const EmployeeDetailsManagement = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  const navigate = useNavigate();
 
   // Form state for adding/editing employee
   const [formData, setFormData] = useState({
@@ -39,12 +47,14 @@ const EmployeeDetailsManagement = () => {
     email: "",
     job_location: "",
     address: "",
+    firm_name: "Brainrock Consulting Services",
     govt_doc_type: "aadhaar",
     other_govt_doc_type: "",
   });
 
   // State for existing file previews in edit mode
   const [existingFiles, setExistingFiles] = useState({
+    profile_pic: null,
     govt_document: null,
     educational_documents: [],
     experience_certificates: [],
@@ -52,6 +62,7 @@ const EmployeeDetailsManagement = () => {
   });
 
   const [files, setFiles] = useState({
+    profile_pic: null,
     govt_document: null,
     educational_documents: [],
     experience_certificates: [],
@@ -66,11 +77,13 @@ const EmployeeDetailsManagement = () => {
 
   // Manage tab state
   const [employees, setEmployees] = useState([]);
+  const [allEmployees, setAllEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [activeTab, setActiveTab] = useState("manage");
   const [editMode, setEditMode] = useState(false);
+  const [selectedFirmFilter, setSelectedFirmFilter] = useState("all");
 
   // Helper functions for document paths and types
   const getDocumentUrl = (docPath) => {
@@ -81,7 +94,7 @@ const EmployeeDetailsManagement = () => {
 
   const getDocumentName = (docPath) => {
     if (!docPath) return "N/A";
-    return docPath.split('/').pop();
+    return docPath.split("/").pop();
   };
 
   const isImageDocument = (docPath) => {
@@ -89,6 +102,16 @@ const EmployeeDetailsManagement = () => {
     return /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(docPath);
   };
 
+  const renderDocumentPreviewInModal = (docPath) => {
+    if (!docPath) return "N/A";
+    const fullUrl = getDocumentUrl(docPath);
+    const label = getDocumentName(docPath);
+    return isImageDocument(docPath) ? (
+      <img src={fullUrl} alt="preview" className="file-preview-image-small" />
+    ) : (
+      <span>{label}</span>
+    );
+  };
 
   // Responsive check
   useEffect(() => {
@@ -107,9 +130,15 @@ const EmployeeDetailsManagement = () => {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(API_URL, { withCredentials: true });
+      const response = await axios.get(API_URL, {
+        withCredentials: true,
+      });
       if (response.data.success) {
-        setEmployees(response.data.data);
+        const data = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
+        setAllEmployees(data);
+        setEmployees(data);
       }
     } catch (error) {
       console.error("Error fetching employees:", error);
@@ -151,10 +180,12 @@ const EmployeeDetailsManagement = () => {
       email: "",
       job_location: "",
       address: "",
+      firm_name: "Brainrock Consulting Services",
       govt_doc_type: "aadhaar",
       other_govt_doc_type: "",
     });
     setFiles({
+      profile_pic: null,
       govt_document: null,
       educational_documents: [],
       experience_certificates: [],
@@ -162,10 +193,11 @@ const EmployeeDetailsManagement = () => {
     });
     setEditMode(false);
     setExistingFiles({
-        govt_document: null,
-        educational_documents: [],
-        experience_certificates: [],
-        professional_certificates: [],
+      profile_pic: null,
+      govt_document: null,
+      educational_documents: [],
+      experience_certificates: [],
+      professional_certificates: [],
     });
   };
 
@@ -181,10 +213,18 @@ const EmployeeDetailsManagement = () => {
     }
 
     // Append files
-    if (files.govt_document) payload.append("govt_document", files.govt_document);
-    files.educational_documents.forEach(file => payload.append("educational_documents", file));
-    files.experience_certificates.forEach(file => payload.append("experience_certificates", file));
-    files.professional_certificates.forEach(file => payload.append("professional_certificates", file));
+    if (files.profile_pic) payload.append("profile_pic", files.profile_pic);
+    if (files.govt_document)
+      payload.append("govt_document", files.govt_document);
+    files.educational_documents.forEach((file) =>
+      payload.append("educational_documents", file),
+    );
+    files.experience_certificates.forEach((file) =>
+      payload.append("experience_certificates", file),
+    );
+    files.professional_certificates.forEach((file) =>
+      payload.append("professional_certificates", file),
+    );
 
     try {
       let response;
@@ -227,33 +267,38 @@ const EmployeeDetailsManagement = () => {
     setEditMode(true);
     setSelectedEmployee(employee);
     setFormData({
-        emp_name: employee.emp_name,
-        education_qualification: employee.education_qualification,
-        certificate_reward: employee.certificate_reward,
-        designation: employee.designation,
-        work_experience: employee.work_experience,
-        technical_skills: employee.technical_skills,
-        other_skills: employee.other_skills,
-        email: employee.email,
-        job_location: employee.job_location,
-        address: employee.address,
-        govt_doc_type: employee.govt_doc_type,
-        other_govt_doc_type: employee.other_govt_doc_type || "",
+      emp_name: employee.emp_name,
+      education_qualification: employee.education_qualification,
+      certificate_reward: employee.certificate_reward,
+      designation: employee.designation,
+      work_experience: employee.work_experience,
+      technical_skills: employee.technical_skills,
+      other_skills: employee.other_skills,
+      email: employee.email,
+      job_location: employee.job_location,
+      address: employee.address,
+      firm_name: employee.firm_name || "Brainrock Consulting Services",
+      govt_doc_type: employee.govt_doc_type,
+      other_govt_doc_type: employee.other_govt_doc_type || "",
     });
     setExistingFiles({
-        govt_document: employee.govt_document,
-        educational_documents: employee.educational_documents || [],
-        experience_certificates: employee.experience_certificates || [],
-        professional_certificates: employee.professional_certificates || [],
+      profile_pic: employee.profile_pic,
+      govt_document: employee.govt_document,
+      educational_documents: employee.educational_documents || [],
+      experience_certificates: employee.experience_certificates || [],
+      professional_certificates: employee.professional_certificates || [],
     });
     // Switch to the "Add/Edit" tab to show the form
     setActiveTab("add");
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, firmName) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await axios.delete(API_URL, { data: { id }, withCredentials: true });
+        await axios.delete(API_URL, {
+          data: { id, firm_name: firmName },
+          withCredentials: true,
+        });
         setMessage("Employee deleted successfully.");
         setVariant("success");
         setShowAlert(true);
@@ -268,187 +313,392 @@ const EmployeeDetailsManagement = () => {
   };
 
   const handleDeleteDoc = async (employeeId, field, index) => {
-     if (window.confirm(`Are you sure you want to delete this document?`)) {
-         try {
-             await axios.delete(`${DOC_DELETE_URL}?id=${employeeId}&field=${field}&index=${index}`, {
-                withCredentials: true,
-             });
-             setMessage("Document deleted successfully.");
-             setVariant("success");
-             setShowAlert(true);
-             fetchEmployees(); // Refresh data
-             setShowModal(false); // Close modal
-         } catch (error) {
-             console.error("Doc delete error:", error);
-             setMessage("Failed to delete document.");
-             setVariant("danger");
-             setShowAlert(true);
-         }
-     }
+    if (window.confirm(`Are you sure you want to delete this document?`)) {
+      try {
+        await axios.delete(
+          `${DOC_DELETE_URL}?id=${employeeId}&field=${field}&index=${index}`,
+          {
+            withCredentials: true,
+          },
+        );
+        setMessage("Document deleted successfully.");
+        setVariant("success");
+        setShowAlert(true);
+        fetchEmployees(); // Refresh data
+        setShowModal(false); // Close modal
+      } catch (error) {
+        console.error("Doc delete error:", error);
+        setMessage("Failed to delete document.");
+        setVariant("danger");
+        setShowAlert(true);
+      }
+    }
   };
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const renderDocumentPreviewInModal = (docPath) => {
-      if (!docPath) return "N/A";
-      const fullUrl = getDocumentUrl(docPath);
-      const label = getDocumentName(docPath);
-
-      return (
-        <a
-          href={fullUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={label}
-          className="file-preview-link" // Add a class for styling
-        >
-          {isImageDocument(docPath) ? (
-            <img src={fullUrl} alt="preview" className="file-preview-image-small" />
-          ) : (
-            <span>View Document: {label}</span> // Show filename for non-images
-          )}
-        </a>
-      );
-  };
-
   const generateEmployeePdfContent = (employee) => {
-    const BRAINROCK_LOGO_URL = "https://brainrock.in/brainrock/assets/images/logo.png"; // Adjust this URL to your actual logo path
+    const escapeHtml = (value) =>
+      String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 
-    const renderDocHtmlForPdf = (docPath, title) => {
-      if (!docPath || (Array.isArray(docPath) && docPath.length === 0)) {
-        return `<p><strong>${title}:</strong> No documents uploaded.</p>`;
+    const firmName = (employee.firm_name || "Employee").trim();
+    const firmsForBlackTheme = [
+      "ZEE -Zero Error Enterprises",
+      "Diksha Enterprises",
+      "U.S. Infotech",
+    ];
+    
+    const shouldUseBlackTheme = firmsForBlackTheme.includes(firmName);
+    const isZeeEmployee = firmName === "ZEE -Zero Error Enterprises";
+    const isBrainrockEmployee = firmName === "Brainrock Consulting Services";
+
+    const accentColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#c1121f" : "#0b3d91");
+    const borderColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#f2b8bf" : "#d7e1f0");
+    const keyBgColor = shouldUseBlackTheme ? "#f5f5f5" : (isZeeEmployee ? "#fff3f4" : "#f4f8ff");
+    
+    const pdfTitle = `${firmName} Employee Details`;
+
+    const logoHtml = isBrainrockEmployee
+      ? `<img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
+      : isZeeEmployee
+        ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
+        : ''; // No logo for other firms
+
+    const profilePicStyle = isZeeEmployee
+      ? "width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 3px solid #e6edf7;"
+      : "width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #e6edf7;";
+
+    const profilePicHtml = employee.profile_pic
+      ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" style="${profilePicStyle}" />`
+      : `<div style="width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; color: #777; font-weight: bold; font-size: 10px; border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};">No Photo</div>`;
+
+    const renderDocPreview = (docPath, title) => {
+      if (!docPath) return `<tr><td class="key">${title}</td><td>N/A</td></tr>`;
+      const fullUrl = `${DOC_BASE_URL}${docPath}`;
+      const fileName = docPath.split("/").pop();
+      const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(docPath);
+
+      if (isImage) {
+        return `<tr><td class="key">${title}</td><td><img src="${fullUrl}" alt="${title}" class="doc-image" /></td></tr>`;
       }
-      const docList = Array.isArray(docPath) ? docPath : [docPath];
 
-      let html = `<p><strong>${title}:</strong></p><ul>`;
-      docList.forEach((doc, index) => {
-        const fullUrl = getDocumentUrl(doc);
-        const label = getDocumentName(doc);
-        const isImage = isImageDocument(doc);
-        if (isImage) {
-          html += `
-            <li>
-              <img src="${fullUrl}" alt="${title} ${index + 1}" style="max-width: 100%; height: auto; display: block; margin-bottom: 5px;" />
-            </li>
-          `;
-        } else {
-          html += `<li><a href="${fullUrl}" target="_blank">${label}</a></li>`;
-        }
-      });
-      html += `</ul>`;
-      return html;
+      return `<tr><td class="key">${title}</td><td><a href="${fullUrl}" target="_blank">${escapeHtml(fileName)}</a></td></tr>`;
     };
+
+    const renderDocListHtmlForPdf = (docs, title) => {
+      if (!docs || docs.length === 0) {
+        return `<tr><td class="key">${title}</td><td>Document Locked</td></tr>`;
+      }
+
+      const rows = docs
+        .map((doc) => {
+          const fullUrl = `${DOC_BASE_URL}${doc}`;
+          const fileName = doc.split("/").pop();
+          const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(doc);
+
+          if (isImage) {
+            return `<div class="doc-card"><img src="${fullUrl}" alt="${title}" class="doc-image" /></div>`;
+          }
+
+          return `<div class="doc-card"><a href="${fullUrl}" target="_blank">${escapeHtml(fileName)}</a></div>`;
+        })
+        .join("");
+
+      return `
+        <tr>
+          <td class="key">${title}</td>
+          <td>
+            <div class="doc-list-wrap">${rows}</div>
+          </td>
+        </tr>
+      `;
+    };
+
+    const profileRows = [
+      ["Employee ID", employee.emp_id || "N/A"],
+      ["Name", employee.emp_name || "N/A"],
+      ["Email", employee.email || "N/A"],
+      ["Designation", employee.designation || "N/A"],
+      ["Firm Name", employee.firm_name || "N/A"],
+      ["Job Location", employee.job_location || "N/A"],
+      ["Address", employee.address || "N/A"],
+      ["Education Qualification", employee.education_qualification || "N/A"],
+      ["Work Experience", employee.work_experience || "N/A"],
+      ["Certificates / Rewards", employee.certificate_reward || "N/A"],
+      ["Technical Skills", employee.technical_skills || "N/A"],
+      ["Other Skills", employee.other_skills || "N/A"],
+    ];
+
+    const tableMarkup = profileRows
+      .map(
+        ([label, value]) => `
+          <tr>
+            <td class="key">${escapeHtml(label)}</td>
+            <td>${escapeHtml(value)}</td>
+          </tr>
+        `,
+      )
+      .join("");
 
     return `
       <html>
       <head>
-          <title>Employee Details - ${employee.emp_name}</title>
+          <title>Employee Details - ${escapeHtml(employee.emp_name || "Employee")}</title>
           <style>
-              body { font-family: Arial, sans-serif; margin: 20px; color: #333; line-height: 1.6; }
-              .logo { display: block; margin: 0 auto 20px auto; width: 150px; }
-              h1 { text-align: center; color: #0056b3; margin-bottom: 20px; font-size: 28px; }
-              h2 { border-bottom: 2px solid #eee; padding-bottom: 8px; margin-top: 30px; color: #0056b3; font-size: 22px; }
-              p { margin-bottom: 8px; }
-              strong { font-weight: bold; color: #555; }
-              table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 20px; }
-              th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; }
-              th { background-color: #f8f8f8; font-weight: bold; width: 30%; }
-              td { width: 70%; }
-              ul { list-style-type: disc; padding-left: 25px; margin-top: 5px; margin-bottom: 10px; }
-              li { margin-bottom: 5px; }
-              img { border: 1px solid #ddd; padding: 5px; border-radius: 4px; max-width: 100%; height: auto; display: block; margin-top: 5px; }
-              a { color: #007bff; text-decoration: none; }
-              a:hover { text-decoration: underline; }
+              body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 16px;
+                  font-size: 12px;
+                  background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
+                  color: ${shouldUseBlackTheme ? "#000000" : "#1f2937"};
+              }
+              .pdf-shell {
+                  max-width: 900px;
+                  margin: 40px auto;
+                  background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
+                  border: 1px solid ${borderColor};
+                  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+                  border-radius: 12px;
+                  overflow: hidden;
+              }
+              .pdf-header {
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  padding: 16px 28px;
+                  background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
+              }
+              .pdf-brand {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: flex-start;
+                  flex: 1;
+              }
+              .header-actions {
+                  display: flex;
+                  align-items: center;
+                  justify-content: flex-end;
+                  gap: 12px;
+                  text-align: right;
+                  flex: 1;
+              }
+              .profile-pic-header {
+                  width: 60px;
+                  height: 60px;
+                  border-radius: 50%;
+                  object-fit: cover;
+                  border: 3px solid #e6edf7;
+              }
+              .profile-pic-placeholder-header {
+                  width: 60px; height: 60px; border-radius: 50%; background-color: #e0e0e0;
+                  display: inline-flex; align-items: center; justify-content: center;
+                  color: #777; font-weight: bold; font-size: 10px;
+                  border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};
+              }
+              .pdf-brand img {
+                  width: 60px;
+                  height: 60px;
+                  background: #ffffff;
+                  padding: 4px;
+              }
+              .pdf-header-center {
+                  flex: 2;
+                  text-align: center;
+              }
+                  .pdf-header-center h1{
+                  margin-top:30px;
+                  }
+              .pdf-title {
+                  margin: 0;
+                  font-size: 20px;
+                  color: ${accentColor};
+                  font-weight: 700;
+              }
+              .pdf-subtitle {
+                  margin: 4px 0 0;
+                  font-size: 10px;
+                  color: ${shouldUseBlackTheme ? "#000000" : "#555"};
+              }
+              .pdf-body {
+                  padding: 24px 28px 28px;
+              }
+              .section-title {
+                  margin: 0 0 12px;
+                  font-size: 14px;
+                  color: ${accentColor};
+                  font-weight: 700;
+                  border-bottom: 2px solid ${borderColor};
+                  padding-bottom: 8px;
+              }
+              table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  table-layout: fixed;
+              }
+              td {
+                  border: 1px solid ${borderColor};
+                  padding: 10px 12px;
+                  vertical-align: top;                  font-size: 12px;
+                  word-wrap: break-word;
+              }
+              .key {
+                  width: 32%;
+                  background: ${keyBgColor};
+                  font-weight: 700;
+                  color: ${accentColor};
+              }
+              .doc-list-wrap {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 8px;
+              }
+              .doc-card {
+                  border: 1px solid ${borderColor};
+                  border-radius: 6px;
+                  padding: 8px;
+                  background: ${keyBgColor};
+              }
+              .doc-image {
+                  max-width: 100%;
+                  max-height: 200px;
+                  display: block;
+                  margin: 0 auto;
+                  border: 1px solid ${borderColor};
+                  border-radius: 6px;
+                  background: #ffffff;
+              }
+              a {
+                  color: ${accentColor};
+                  text-decoration: none;
+              }
+              .print-btn {
+                  background-color: #ffffff;
+                  color: #0b3d91;
+                  border: none;
+                  padding: 8px 16px;
+                  border-radius: 6px;
+                  font-weight: 700;
+                  cursor: pointer;
+                  margin-top: 8px;
+                  transition: background-color 0.2s;
+              }
+              .print-btn:hover {
+                  background-color: #f0f0f0;
+              }
+              @media print {
+                  body { background: #ffffff; padding: 0; }
+                  .pdf-shell { box-shadow: none; border: none; }
+                  .print-btn { display: none; }
+              }
           </style>
       </head>
       <body>
-          <img src="${BRAINROCK_LOGO_URL}" alt="Brainrock Logo" class="logo" />
-          <h1>Employee Details: ${employee.emp_name}</h1>
-
-          <h2>Documents</h2>
-          <table>
-              <tr>
-                  <th>Employee ID</th>
-                  <td>${employee.emp_id || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Name</th>
-                  <td>${employee.emp_name || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Email</th>
-                  <td>${employee.email || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Designation</th>
-                  <td>${employee.designation || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Job Location</th>
-                  <td>${employee.job_location || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Address</th>
-                  <td>${employee.address || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Education Qualification</th>
-                  <td>${employee.education_qualification || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Work Experience</th>
-                  <td>${employee.work_experience || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Certificates/Rewards</th>
-                  <td>${employee.certificate_reward || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Technical Skills</th>
-                  <td>${employee.technical_skills || 'N/A'}</td>
-              </tr>
-              <tr>
-                  <th>Other Skills</th>
-                  <td>${employee.other_skills || 'N/A'}</td>
-              </tr>
-          </table>
-
-          <h2>Documents</h2>
-          ${renderDocHtmlForPdf(employee.govt_document, `${employee.govt_doc_type ? employee.govt_doc_type.toUpperCase() : 'Government'} Document`)}
-          ${renderDocHtmlForPdf(employee.educational_documents, 'Educational Documents')}
-          ${renderDocHtmlForPdf(employee.experience_certificates, 'Experience Certificates')}
-          ${renderDocHtmlForPdf(employee.professional_certificates, 'Professional Certificates')}
+          <div class="pdf-shell">
+              <div class="pdf-header">
+                  <div class="pdf-brand">
+                      ${
+                        isZeeEmployee
+                          ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "ZEE - Zero Error Enterprises")}</p>`
+                          : isBrainrockEmployee
+                            ? `<img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "Brainrock Consulting Services")}</p>`
+                            : `<p class="pdf-subtitle" style="margin-top: 5px;"> ${escapeHtml(employee.firm_name || "Employee")}</p>`
+                      }
+                  </div>
+                  <div class="pdf-header-center">
+                      <h1 class="pdf-title">${pdfTitle}</h1>
+                  </div>
+                  <div class="header-actions">
+                      <div>
+                          <div class="pdf-subtitle">Generated for ${escapeHtml(employee.emp_name || "Employee")}</div>
+                          <button class="print-btn" onclick="window.print()">Print Report</button>
+                      </div>
+                      ${
+                        employee.profile_pic
+                          ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
+                          : '<div class="profile-pic-placeholder-header">No Photo</div>'
+                      }
+                  </div>
+              </div>
+              <div class="pdf-body">
+                  <h2 class="section-title">Profile Information</h2>
+                  <table>
+                      ${tableMarkup}
+                      ${renderDocPreview(employee.govt_document, `${escapeHtml(employee.govt_doc_type ? employee.govt_doc_type.toUpperCase() : "GOVT")} Document`)}
+                      ${renderDocListHtmlForPdf(employee.educational_documents, "Educational Documents")}
+                      ${renderDocListHtmlForPdf(employee.experience_certificates, "Experience Certificates")}
+                      ${renderDocListHtmlForPdf(employee.professional_certificates, "Professional Certificates")}
+                  </table>
+              </div>
+          </div>
       </body>
       </html>
     `;
   };
 
   const handleDownloadPdf = (employee) => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(generateEmployeePdfContent(employee));
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
   };
 
+  const uniqueFirmNames = ["all", ...FIRM_OPTIONS];
+
+  const filteredEmployees =
+    selectedFirmFilter === "all"
+      ? allEmployees
+      : allEmployees.filter((emp) => emp.firm_name === selectedFirmFilter);
+
   const renderDocumentListWithDelete = (docs, fieldName) => {
-      if (!docs || docs.length === 0) return <p>No documents uploaded.</p>;
-      return (
-          <ul>
-              {docs.map((doc, index) => (
-                  <li key={index} className="d-flex justify-content-between align-items-center">
-                      {renderDocumentPreviewInModal(doc)}
-                      <Button 
-                        variant="danger" 
-                        size="sm" 
-                        onClick={() => handleDeleteDoc(selectedEmployee.id, fieldName, index)}
-                      >
-                          Delete
-                      </Button>
-                  </li>
-              ))}
-          </ul>
-      );
+    if (!docs || docs.length === 0) return <p>Document Locked</p>;
+    return (
+      <ul>
+        {docs.map((doc, index) => (
+          <li
+            key={index}
+            className="d-flex justify-content-between align-items-center"
+          >
+            {renderDocumentPreviewInModal(doc)}
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() =>
+                handleDeleteDoc(selectedEmployee.id, fieldName, index)
+              }
+            >
+              Delete
+            </Button>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  const renderFilePreview = (filePath) => {
+    if (!filePath) return null;
+    const fullUrl = `https://brainrock.in/brainrock/backend${filePath}`;
+    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(filePath);
+
+    return (
+      <a
+        href={fullUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="file-preview-box"
+      >
+        {isImage ? (
+          <img src={fullUrl} alt="preview" className="file-preview-image" />
+        ) : (
+          <div className="file-preview-icon">📄</div>
+        )}
+      </a>
+    );
   };
 
   return (
@@ -470,129 +720,349 @@ const EmployeeDetailsManagement = () => {
         <Container fluid className="dashboard-body ">
           <h2 className="mb-4">Employee Management</h2>
           <div className="br-box-container mt-3">
-            <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} id="employee-tabs" className="mb-3">
-              <Tab eventKey="add" title={editMode ? "Edit Employee" : "Add Employee"}>
-                <h4 className="mb-4">{editMode ? "Edit Employee Details" : "Add New Employee"}</h4>
-                {showAlert && <Alert variant={variant} onClose={() => setShowAlert(false)} dismissible>{message}</Alert>}
+            <Tabs
+              activeKey={activeTab}
+              onSelect={(k) => setActiveTab(k)}
+              id="employee-tabs"
+              className="mb-3"
+            >
+              <Tab
+                eventKey="add"
+                title={editMode ? "Edit Employee" : "Add Employee"}
+              >
+                <h4 className="mb-4">
+                  {editMode ? "Edit Employee Details" : "Add New Employee"}
+                </h4>
+                {showAlert && (
+                  <Alert
+                    variant={variant}
+                    onClose={() => setShowAlert(false)}
+                    dismissible
+                  >
+                    {message}
+                  </Alert>
+                )}
                 <Form onSubmit={handleSubmit} className="p-3">
                   <Row>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Employee Name</Form.Label>
-                        <Form.Control type="text" name="emp_name" value={formData.emp_name} onChange={handleChange} placeholder="Enter full name" required />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Email</Form.Label>
-                        <Form.Control type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Enter email address" required />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Designation</Form.Label>
-                        <Form.Control type="text" name="designation" value={formData.designation} onChange={handleChange} placeholder="e.g., Software Engineer" />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Job Location</Form.Label>
-                        <Form.Control type="text" name="job_location" value={formData.job_location} onChange={handleChange} placeholder="e.g., Dehradun" />
-                    </Form.Group></Col>
-                    <Col md={12}><Form.Group className="mb-3">
-                        <Form.Label>Address</Form.Label>
-                        <Form.Control as="textarea" rows={2} name="address" value={formData.address} onChange={handleChange} placeholder="Enter employee's current address" />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Education Qualification</Form.Label>
-                        <Form.Control type="text" name="education_qualification" value={formData.education_qualification} onChange={handleChange} placeholder="e.g., MCA, B.Tech" />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Work Experience</Form.Label>
-                        <Form.Control type="text" name="work_experience" value={formData.work_experience} onChange={handleChange} placeholder="e.g., 5 Years" />
-                    </Form.Group></Col>
-                    <Col md={3}><Form.Group className="mb-3">
-                        <Form.Label>Certificate/Reward</Form.Label>
-                        <Form.Control type="text" name="certificate_reward" value={formData.certificate_reward} onChange={handleChange} placeholder="e.g., OCP, J2EE" />
-                    </Form.Group></Col>
-                     
                     <Col md={3}>
-  <Form.Group className="mb-3">
-    <Form.Label>Technical Skills</Form.Label>
-    <textarea
-      className="form-control"
-      rows="4"
-      name="technical_skills"
-      value={formData.technical_skills}
-      onChange={handleChange}
-      placeholder="e.g., React.js, JavaScript, HTML, CSS, Node.js"
-    />
-  </Form.Group>
-</Col>
-                    <Col md={6}><Form.Group className="mb-3">
-                        <Form.Label>Other Skills</Form.Label>
-                        <Form.Control type="text" name="other_skills" value={formData.other_skills} onChange={handleChange} placeholder="e.g., Digital Marketing, SEO" />
-                    </Form.Group></Col>
-                    <Col md={6}><Form.Group className="mb-3">
-                        <Form.Label>Govt. Doc Type</Form.Label>
-                        <Form.Select name="govt_doc_type" value={formData.govt_doc_type} onChange={handleChange}>
-                            <option value="aadhaar">Aadhaar</option>
-                            <option value="pan">PAN</option> 
-                            <option value="passport">Passport</option>
-                            <option value="voter_id">Voter ID</option>
-                            <option value="driving_license">Driving License</option>
-                            <option value="other">Other</option>
-                        </Form.Select>
-                    </Form.Group></Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Employee Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="emp_name"
+                          value={formData.emp_name}
+                          onChange={handleChange}
+                          placeholder="Enter full name"
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="Enter email address"
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Designation</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="designation"
+                          value={formData.designation}
+                          onChange={handleChange}
+                          placeholder="e.g., Software Engineer"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Job Location</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="job_location"
+                          value={formData.job_location}
+                          onChange={handleChange}
+                          placeholder="e.g., Dehradun"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={12}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Address</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          name="address"
+                          value={formData.address}
+                          onChange={handleChange}
+                          placeholder="Enter employee's current address"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Education Qualification</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="education_qualification"
+                          value={formData.education_qualification}
+                          onChange={handleChange}
+                          placeholder="e.g., MCA, B.Tech"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Work Experience</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="work_experience"
+                          value={formData.work_experience}
+                          onChange={handleChange}
+                          placeholder="e.g., 5 Years"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Certificate/Reward</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="certificate_reward"
+                          value={formData.certificate_reward}
+                          onChange={handleChange}
+                          placeholder="e.g., OCP, J2EE"
+                        />
+                      </Form.Group>
+                    </Col>
 
-                    {formData.govt_doc_type === 'other' && (
-                    <Col md={6}><Form.Group className="mb-3">
-                        <Form.Label>Please specify other document type</Form.Label>
-                        <Form.Control type="text" name="other_govt_doc_type" value={formData.other_govt_doc_type} onChange={handleChange} placeholder="Enter document type" required />
-                    </Form.Group></Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Technical Skills</Form.Label>
+                        <textarea
+                          className="form-control"
+                          rows="4"
+                          name="technical_skills"
+                          value={formData.technical_skills}
+                          onChange={handleChange}
+                          placeholder="e.g., React.js, JavaScript, HTML, CSS, Node.js"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Other Skills</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="other_skills"
+                          value={formData.other_skills}
+                          onChange={handleChange}
+                          placeholder="e.g., Digital Marketing, SEO"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Firm Name</Form.Label>
+                        <Form.Select
+                          name="firm_name"
+                          value={formData.firm_name}
+                          onChange={handleChange}
+                          required
+                        >
+                          {FIRM_OPTIONS.map((firm) => (
+                            <option key={firm} value={firm}>
+                              {firm}
+                            </option>
+                          ))}
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Govt. Doc Type</Form.Label>
+                        <Form.Select
+                          name="govt_doc_type"
+                          value={formData.govt_doc_type}
+                          onChange={handleChange}
+                        >
+                          <option value="aadhaar">Aadhaar</option>
+                          <option value="pan">PAN</option>
+                          <option value="passport">Passport</option>
+                          <option value="voter_id">Voter ID</option>
+                          <option value="driving_license">
+                            Driving License
+                          </option>
+                          <option value="other">Other</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+
+                    {formData.govt_doc_type === "other" && (
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>
+                            Please specify other document type
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="other_govt_doc_type"
+                            value={formData.other_govt_doc_type}
+                            onChange={handleChange}
+                            placeholder="Enter document type"
+                            required
+                          />
+                        </Form.Group>
+                      </Col>
                     )}
 
                     <h5 className="mt-4">Upload Documents</h5>
-                    <Col md={6}><Form.Group className="mb-3">
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Profile Picture</Form.Label>
+                        {editMode && existingFiles.profile_pic && (
+                          <div className="d-flex flex-wrap gap-2 mb-2">
+                            {renderFilePreview(existingFiles.profile_pic)}
+                          </div>
+                        )}
+                        <Form.Control
+                          type="file"
+                          name="profile_pic"
+                          onChange={handleFileChange}
+                          accept="image/*"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Government Document</Form.Label>
                         {editMode && existingFiles.govt_document && (
-                            <div className="d-flex flex-wrap gap-2 mb-2"> {/* This uses renderFilePreview for form */}
-                                {renderFilePreview(existingFiles.govt_document)}
-                            </div>
+                          <div className="d-flex flex-wrap gap-2 mb-2">
+                            {renderFilePreview(existingFiles.govt_document)}
+                          </div>
                         )}
-                        <Form.Control type="file" name="govt_document" onChange={handleFileChange} />
-                    </Form.Group></Col>
-                    <Col md={6}><Form.Group className="mb-3">
+                        <Form.Control
+                          type="file"
+                          name="govt_document"
+                          onChange={handleFileChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Educational Documents</Form.Label>
-                        {editMode && existingFiles.educational_documents.length > 0 && (
-                            <div className="d-flex flex-wrap gap-2 mb-2"> {/* This uses renderFilePreview for form */}
-                                {existingFiles.educational_documents.map((doc, i) => renderFilePreview(doc))}
+                        {editMode &&
+                          existingFiles.educational_documents.length > 0 && (
+                            <div className="d-flex flex-wrap gap-2 mb-2">
+                              {existingFiles.educational_documents.map(
+                                (doc, i) => renderFilePreview(doc),
+                              )}
                             </div>
-                        )}
-                        <Form.Control type="file" name="educational_documents" onChange={handleFileChange} multiple />
-                    </Form.Group></Col>
-                    <Col md={6}><Form.Group className="mb-3">
+                          )}
+                        <Form.Control
+                          type="file"
+                          name="educational_documents"
+                          onChange={handleFileChange}
+                          multiple
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Experience Certificates</Form.Label>
-                        {editMode && existingFiles.experience_certificates.length > 0 && (
-                            <div className="d-flex flex-wrap gap-2 mb-2"> {/* This uses renderFilePreview for form */}
-                                {existingFiles.experience_certificates.map((doc, i) => renderFilePreview(doc))}
+                        {editMode &&
+                          existingFiles.experience_certificates.length > 0 && (
+                            <div className="d-flex flex-wrap gap-2 mb-2">
+                              {existingFiles.experience_certificates.map(
+                                (doc, i) => renderFilePreview(doc),
+                              )}
                             </div>
-                        )}
-                        <Form.Control type="file" name="experience_certificates" onChange={handleFileChange} multiple />
-                    </Form.Group></Col>
-                    <Col md={6}><Form.Group className="mb-3">
+                          )}
+                        <Form.Control
+                          type="file"
+                          name="experience_certificates"
+                          onChange={handleFileChange}
+                          multiple
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Professional Certificates</Form.Label>
-                        {editMode && existingFiles.professional_certificates.length > 0 && (
-                            <div className="d-flex flex-wrap gap-2 mb-2"> {/* This uses renderFilePreview for form */}
-                                {existingFiles.professional_certificates.map((doc, i) => renderFilePreview(doc))}
+                        {editMode &&
+                          existingFiles.professional_certificates.length >
+                            0 && (
+                            <div className="d-flex flex-wrap gap-2 mb-2">
+                              {existingFiles.professional_certificates.map(
+                                (doc, i) => renderFilePreview(doc),
+                              )}
                             </div>
-                        )}
-                        <Form.Control type="file" name="professional_certificates" onChange={handleFileChange} multiple />
-                    </Form.Group></Col>
+                          )}
+                        <Form.Control
+                          type="file"
+                          name="professional_certificates"
+                          onChange={handleFileChange}
+                          multiple
+                        />
+                      </Form.Group>
+                    </Col>
                   </Row>
-                  <Button type="submit" variant="primary" disabled={isSubmitting}>
-                    {isSubmitting ? "Submitting..." : (editMode ? "Update Employee" : "Add Employee")}
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting
+                      ? "Submitting..."
+                      : editMode
+                        ? "Update Employee"
+                        : "Add Employee"}
                   </Button>
-                  {editMode && <Button variant="secondary" className="ms-2" onClick={resetForm}>Cancel Edit</Button>}
+                  {editMode && (
+                    <Button
+                      variant="secondary"
+                      className="ms-2"
+                      onClick={resetForm}
+                    >
+                      Cancel Edit
+                    </Button>
+                  )}
                 </Form>
               </Tab>
               <Tab eventKey="manage" title="Manage Employees">
                 <h4 className="mb-4">Existing Employees</h4>
+                <Row className="mb-3 align-items-end">
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>Filter by Firm</Form.Label>
+                      <Form.Select
+                        value={selectedFirmFilter}
+                        onChange={(e) => setSelectedFirmFilter(e.target.value)}
+                      >
+                        <option value="all">All Firms</option>
+                        {uniqueFirmNames
+                          .filter((firm) => firm !== "all")
+                          .map((firm) => (
+                            <option key={firm} value={firm}>
+                              {firm}
+                            </option>
+                          ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
                 {loading ? (
-                  <div className="text-center"><Spinner animation="border" /></div>
+                  <div className="text-center">
+                    <Spinner animation="border" />
+                  </div>
                 ) : (
                   <Table striped bordered hover responsive>
                     <thead>
@@ -606,7 +1076,7 @@ const EmployeeDetailsManagement = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {employees.map((emp, index) => (
+                      {filteredEmployees.map((emp, index) => (
                         <tr key={emp.id}>
                           <td>{index + 1}</td>
                           <td>{emp.emp_id}</td>
@@ -614,10 +1084,42 @@ const EmployeeDetailsManagement = () => {
                           <td>{emp.email}</td>
                           <td>{emp.designation}</td>
                           <td>
-                            <Button variant="info" size="sm" onClick={() => handleView(emp)}>View</Button>
-                            <Button variant="success" size="sm" className="mx-2" onClick={() => handleDownloadPdf(emp)}>Download PDF</Button>
-                            <Button variant="warning" size="sm" className="mx-2" onClick={() => handleEdit(emp)}>Edit</Button>
-                            <Button variant="danger" size="sm" onClick={() => handleDelete(emp.id)}>Delete</Button>
+                            <div className="d-flex gap-2">
+                              <Button
+                                variant="outline-info"
+                                size="sm"
+                                onClick={() => handleView(emp)}
+                                title="View Details"
+                              >
+                                <FaEye />
+                              </Button>
+                              <Button
+                                variant="outline-success"
+                                size="sm"
+                                onClick={() => handleDownloadPdf(emp)}
+                                title="Download PDF"
+                              >
+                                <FaFilePdf />
+                              </Button>
+                              <Button
+                                variant="outline-warning"
+                                size="sm"
+                                onClick={() => handleEdit(emp)}
+                                title="Edit Employee"
+                              >
+                                <FaEdit />
+                              </Button>
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() =>
+                                  handleDelete(emp.id, emp.firm_name)
+                                }
+                                title="Delete Employee"
+                              >
+                                <FaTrash />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -638,45 +1140,112 @@ const EmployeeDetailsManagement = () => {
         <Modal.Body>
           {selectedEmployee && (
             <div>
+              <div className="text-center mb-4">
+                {selectedEmployee.profile_pic ? (
+                  <img
+                    src={`${DOC_BASE_URL}${selectedEmployee.profile_pic}`}
+                    alt="Profile"
+                    className="rounded-circle"
+                    style={{
+                      width: "120px",
+                      height: "120px",
+                      objectFit: "cover",
+                      border: "3px solid #eee",
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="rounded-circle bg-light d-flex justify-content-center align-items-center"
+                    style={{ width: "120px", height: "120px" }}
+                  >
+                    No Photo
+                  </div>
+                )}
+              </div>
               <Row>
-                <Col md={6}><strong>Emp ID:</strong> <p>{selectedEmployee.emp_id}</p></Col>
-                <Col md={6}><strong>Name:</strong> <p>{selectedEmployee.emp_name}</p></Col>
-                <Col md={6}><strong>Email:</strong> <p>{selectedEmployee.email}</p></Col>
-                <Col md={6}><strong>Designation:</strong> <p>{selectedEmployee.designation}</p></Col>
-                <Col md={6}><strong>Job Location:</strong> <p>{selectedEmployee.job_location}</p></Col>
-                <Col md={6}><strong>Work Experience:</strong> <p>{selectedEmployee.work_experience}</p></Col>
-                <Col md={12}><strong>Address:</strong> <p>{selectedEmployee.address}</p></Col>
-                <Col md={12}><strong>Education:</strong> <p>{selectedEmployee.education_qualification}</p></Col>
-                <Col md={12}><strong>Certificates/Rewards:</strong> <p>{selectedEmployee.certificate_reward}</p></Col>
-                <Col md={12}><strong>Technical Skills:</strong> <p>{selectedEmployee.technical_skills}</p></Col>
-                <Col md={12}><strong>Other Skills:</strong> <p>{selectedEmployee.other_skills}</p></Col>
+                <Col md={6}>
+                  <strong>Emp ID:</strong> <p>{selectedEmployee.emp_id}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Name:</strong> <p>{selectedEmployee.emp_name}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Email:</strong> <p>{selectedEmployee.email}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Designation:</strong>{" "}
+                  <p>{selectedEmployee.designation}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Job Location:</strong>{" "}
+                  <p>{selectedEmployee.job_location}</p>
+                </Col>
+                <Col md={6}>
+                  <strong>Work Experience:</strong>{" "}
+                  <p>{selectedEmployee.work_experience}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Address:</strong> <p>{selectedEmployee.address}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Education:</strong>{" "}
+                  <p>{selectedEmployee.education_qualification}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Certificates/Rewards:</strong>{" "}
+                  <p>{selectedEmployee.certificate_reward}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Technical Skills:</strong>{" "}
+                  <p>{selectedEmployee.technical_skills}</p>
+                </Col>
+                <Col md={12}>
+                  <strong>Other Skills:</strong>{" "}
+                  <p>{selectedEmployee.other_skills}</p>
+                </Col>
               </Row>
               <hr />
               <h4>Documents</h4>
               <Row>
-                 <Col md={12} className="mb-3">
-                    <strong>{selectedEmployee.govt_doc_type.toUpperCase()} Document:</strong>
-                    <div className="d-flex justify-content-between align-items-center">
-                        {renderDocumentPreviewInModal(selectedEmployee.govt_document)}
-                        <Button 
-                          variant="danger" 
-                          size="sm" 
-                          onClick={() => handleDeleteDoc(selectedEmployee.id, 'govt_document', 0)}>
-                            Delete
-                        </Button>
-                    </div>
+                <Col md={12} className="mb-3">
+                  <strong>
+                    {selectedEmployee.govt_doc_type.toUpperCase()} Document:
+                  </strong>
+                  <div className="d-flex justify-content-between align-items-center">
+                    {renderDocumentPreviewInModal(
+                      selectedEmployee.govt_document,
+                    )}
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() =>
+                        handleDeleteDoc(selectedEmployee.id, "govt_document", 0)
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </Col>
                 <Col md={12} className="mt-3">
-                    <strong>Educational Documents:</strong>
-                    {renderDocumentListWithDelete(selectedEmployee.educational_documents, 'educational_documents')}
+                  <strong>Educational Documents:</strong>
+                  {renderDocumentListWithDelete(
+                    selectedEmployee.educational_documents,
+                    "educational_documents",
+                  )}
                 </Col>
-                 <Col md={12} className="mt-3">
-                    <strong>Experience Certificates:</strong>
-                    {renderDocumentListWithDelete(selectedEmployee.experience_certificates, 'experience_certificates')}
+                <Col md={12} className="mt-3">
+                  <strong>Experience Certificates:</strong>
+                  {renderDocumentListWithDelete(
+                    selectedEmployee.experience_certificates,
+                    "experience_certificates",
+                  )}
                 </Col>
-                 <Col md={12} className="mt-3">
-                    <strong>Professional Certificates:</strong>
-                    {renderDocumentListWithDelete(selectedEmployee.professional_certificates, 'professional_certificates')}
+                <Col md={12} className="mt-3">
+                  <strong>Professional Certificates:</strong>
+                  {renderDocumentListWithDelete(
+                    selectedEmployee.professional_certificates,
+                    "professional_certificates",
+                  )}
                 </Col>
               </Row>
             </div>
@@ -710,11 +1279,6 @@ const EmployeeDetailsManagement = () => {
             font-size: 40px;
             line-height: 80px;
           }
-          .file-preview-link {
-            display: inline-block;
-            text-decoration: none;
-            color: #007bff; /* Bootstrap primary color */
-          }
           .file-preview-image-small {
               width: 60px;
               height: 60px;
@@ -722,7 +1286,12 @@ const EmployeeDetailsManagement = () => {
               border: 1px solid #ddd;
               border-radius: 4px;
               background-color: #f8f9fa;
-              margin-right: 5px; /* Space between image and text if any */
+              margin-right: 5px;
+          }
+          .file-preview-link {
+            display: inline-block;
+            text-decoration: none;
+            color: #007bff;
           }
         `}
       </style>

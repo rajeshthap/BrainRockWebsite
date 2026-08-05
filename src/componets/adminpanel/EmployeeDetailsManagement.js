@@ -346,31 +346,36 @@ const EmployeeDetailsManagement = () => {
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
 
-    const firmName = (employee.firm_name || "").trim();
+    const firmName = (employee.firm_name || "Employee").trim();
     const firmsForBlackTheme = [
-      "ZEE -Zero Error Enterprises",
+      "ZEE - Zero Error Enterprises",
       "Diksha Enterprises",
       "U.S. Infotech",
     ];
-
+    
     const shouldUseBlackTheme = firmsForBlackTheme.includes(firmName);
-    const isZeeEmployee = firmName === "ZEE -Zero Error Enterprises";
+    const isZeeEmployee = firmName === "ZEE - Zero Error Enterprises";
     const isBrainrockEmployee = firmName === "Brainrock Consulting Services";
 
     const accentColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#c1121f" : "#0b3d91");
     const borderColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#f2b8bf" : "#d7e1f0");
     const keyBgColor = shouldUseBlackTheme ? "#f5f5f5" : (isZeeEmployee ? "#fff3f4" : "#f4f8ff");
+    
+    const pdfTitle = `${firmName} Employee Details`;
 
-    let pdfTitle = "Employee Details Report"; // Default title
-    if (firmName === "Brainrock Consulting Services") {
-      pdfTitle = "BrainRock Employee Details";
-    } else if (firmName === "Diksha Enterprises") {
-      pdfTitle = "Diksha Enterprises Employee Details";
-    } else if (firmName === "U.S. Infotech") {
-      pdfTitle = "U.S. Infotech Employee Details";
-    } else if (firmName === "ZEE -Zero Error Enterprises") {
-      pdfTitle = "ZEE -Zero Error Enterprises Employee Details";
-    }
+    const logoHtml = isBrainrockEmployee
+      ? `<img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
+      : isZeeEmployee
+        ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
+        : ''; // No logo for other firms
+
+    const profilePicStyle = isZeeEmployee
+      ? "width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 3px solid #e6edf7;"
+      : "width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #e6edf7;";
+
+    const profilePicHtml = employee.profile_pic
+      ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" style="${profilePicStyle}" />`
+      : `<div style="width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; color: #777; font-weight: bold; font-size: 10px; border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};">No Photo</div>`;
 
     const renderDocPreview = (docPath, title) => {
       if (!docPath) return `<tr><td class="key">${title}</td><td>N/A</td></tr>`;
@@ -387,7 +392,7 @@ const EmployeeDetailsManagement = () => {
 
     const renderDocListHtmlForPdf = (docs, title) => {
       if (!docs || docs.length === 0) {
-        return `<tr><td class="key">${title}</td><td>No documents uploaded.</td></tr>`;
+        return `<tr><td class="key">${title}</td><td>Document Locked</td></tr>`;
       }
 
       const rows = docs
@@ -486,12 +491,12 @@ const EmployeeDetailsManagement = () => {
               .profile-pic-header {
                   width: 60px;
                   height: 60px;
-                  border-radius: 50%;
+                  border-radius: ${isZeeEmployee ? "8px" : "50%"};
                   object-fit: cover;
                   border: 3px solid #e6edf7;
               }
               .profile-pic-placeholder-header {
-                  width: 60px; height: 60px; border-radius: 50%; background-color: #e0e0e0;
+                  width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0;
                   display: inline-flex; align-items: center; justify-content: center;
                   color: #777; font-weight: bold; font-size: 10px;
                   border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};
@@ -651,7 +656,7 @@ const EmployeeDetailsManagement = () => {
       : allEmployees.filter((emp) => emp.firm_name === selectedFirmFilter);
 
   const renderDocumentListWithDelete = (docs, fieldName) => {
-    if (!docs || docs.length === 0) return <p>No documents uploaded.</p>;
+    if (!docs || docs.length === 0) return <p>Document Locked</p>;
     return (
       <ul>
         {docs.map((doc, index) => (
