@@ -348,20 +348,24 @@ const EmployeeDetailsManagement = () => {
 
     const firmName = (employee.firm_name || "Employee").trim();
     const firmsForBlackTheme = [
-      "ZEE -Zero Error Enterprises",
+      "ZEE - Zero Error Enterprises",
       "Diksha Enterprises",
       "U.S. Infotech",
     ];
     
     const shouldUseBlackTheme = firmsForBlackTheme.includes(firmName);
-    const isZeeEmployee = firmName === "ZEE -Zero Error Enterprises";
+    const isZeeEmployee = firmName === "ZEE - Zero Error Enterprises";
+    const isDikshaEmployee = firmName === "Diksha Enterprises";
+    const isUSInfotechEmployee = firmName === "U.S. Infotech";
     const isBrainrockEmployee = firmName === "Brainrock Consulting Services";
 
     const accentColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#c1121f" : "#0b3d91");
     const borderColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#f2b8bf" : "#d7e1f0");
     const keyBgColor = shouldUseBlackTheme ? "#f5f5f5" : (isZeeEmployee ? "#fff3f4" : "#f4f8ff");
     
-    const pdfTitle = `${firmName} Employee Details`;
+    const pdfTitle = isDikshaEmployee || isUSInfotechEmployee
+      ? "Employee Details"
+      : `${firmName} Employee Details`;
 
     const logoHtml = isBrainrockEmployee
       ? `<img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
@@ -369,12 +373,12 @@ const EmployeeDetailsManagement = () => {
         ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
         : ''; // No logo for other firms
 
-    const profilePicStyle = isZeeEmployee
-      ? "width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 3px solid #e6edf7;"
-      : "width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #e6edf7;";
+    // Define specific styles for body profile pictures
+    const bodyProfilePicStyle = `width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 3px solid ${borderColor};`;
+    const defaultHeaderProfilePicStyle = isZeeEmployee ? "width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 3px solid #e6edf7;" : "width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #e6edf7;";
 
     const profilePicHtml = employee.profile_pic
-      ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" style="${profilePicStyle}" />`
+      ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" style="${isDikshaEmployee || isUSInfotechEmployee ? bodyProfilePicStyle : defaultHeaderProfilePicStyle}" />`
       : `<div style="width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; color: #777; font-weight: bold; font-size: 10px; border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};">No Photo</div>`;
 
     const renderDocPreview = (docPath, title) => {
@@ -419,7 +423,7 @@ const EmployeeDetailsManagement = () => {
       `;
     };
 
-    const profileRows = [
+    const allProfileRows = [
       ["Employee ID", employee.emp_id || "N/A"],
       ["Name", employee.emp_name || "N/A"],
       ["Email", employee.email || "N/A"],
@@ -434,7 +438,20 @@ const EmployeeDetailsManagement = () => {
       ["Other Skills", employee.other_skills || "N/A"],
     ];
 
-    const tableMarkup = profileRows
+    let mainTableRows = allProfileRows;
+    let specialLayoutEmpIdHtml = '';
+
+    if (isDikshaEmployee || isUSInfotechEmployee) {
+        // Extract Employee ID for separate display
+        const empIdRowIndex = allProfileRows.findIndex(row => row[0] === "Employee ID");
+        if (empIdRowIndex !== -1) {
+            const empIdRow = allProfileRows[empIdRowIndex];
+            specialLayoutEmpIdHtml = `<p style="margin-top: 10px; font-weight: bold; font-size: 12px; color: ${accentColor};">Emp ID: ${escapeHtml(empIdRow[1])}</p>`;
+            mainTableRows = allProfileRows.filter(row => row[0] !== "Employee ID");
+        }
+    }
+
+    const tableMarkup = mainTableRows
       .map(
         ([label, value]) => `
           <tr>
@@ -491,12 +508,12 @@ const EmployeeDetailsManagement = () => {
               .profile-pic-header {
                   width: 60px;
                   height: 60px;
-                  border-radius: 50%;
+                  border-radius: ${isZeeEmployee ? "8px" : "50%"};
                   object-fit: cover;
                   border: 3px solid #e6edf7;
               }
               .profile-pic-placeholder-header {
-                  width: 60px; height: 60px; border-radius: 50%; background-color: #e0e0e0;
+                  width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0;
                   display: inline-flex; align-items: center; justify-content: center;
                   color: #777; font-weight: bold; font-size: 10px;
                   border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};
@@ -618,17 +635,27 @@ const EmployeeDetailsManagement = () => {
                           <div class="pdf-subtitle">Generated for ${escapeHtml(employee.emp_name || "Employee")}</div>
                           <button class="print-btn" onclick="window.print()">Print Report</button>
                       </div>
-                      ${
-                        employee.profile_pic
-                          ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
-                          : '<div class="profile-pic-placeholder-header">No Photo</div>'
-                      }
+                      ${!(isDikshaEmployee || isUSInfotechEmployee) ? (
+                          employee.profile_pic
+                              ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
+                              : '<div class="profile-pic-placeholder-header">No Photo</div>'
+                      ) : ''}
                   </div>
               </div>
               <div class="pdf-body">
                   <h2 class="section-title">Profile Information</h2>
-                  <table>
-                      ${tableMarkup}
+                  ${isDikshaEmployee || isUSInfotechEmployee ? `
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                      <div style="flex: 1;">
+                        <table>${tableMarkup}</table>
+                      </div>
+                      <div style="flex: 0 0 120px; text-align: center;">
+                        ${profilePicHtml}
+                        ${specialLayoutEmpIdHtml}
+                      </div>
+                    </div>
+                    <table>
+                  ` : `<table>${tableMarkup}`}
                       ${renderDocPreview(employee.govt_document, `${escapeHtml(employee.govt_doc_type ? employee.govt_doc_type.toUpperCase() : "GOVT")} Document`)}
                       ${renderDocListHtmlForPdf(employee.educational_documents, "Educational Documents")}
                       ${renderDocListHtmlForPdf(employee.experience_certificates, "Experience Certificates")}
