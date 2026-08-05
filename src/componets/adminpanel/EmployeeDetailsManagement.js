@@ -639,7 +639,7 @@ const EmployeeDetailsManagement = () => {
                           <div class="pdf-subtitle">Generated for ${escapeHtml(employee.emp_name || "Employee")}</div>
                           <button class="print-btn" onclick="window.print()">Print Report</button>
                       </div>
-                      ${!(isDikshaEmployee || isUSInfotechEmployee) ? (
+                      ${!isDikshaEmployee ? ( // Show header photo for everyone except Diksha
                           employee.profile_pic
                               ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
                               : '<div class="profile-pic-placeholder-header">No Photo</div>'
@@ -652,15 +652,9 @@ const EmployeeDetailsManagement = () => {
                       <!-- Left Column: Profile Info -->
                       <div style="flex: 1.5;">
                         <h2 class="section-title">Profile Information</h2>
-                        <div style="display: flex; gap: 20px; align-items: flex-start;">
-                          <div style="flex: 1;">
-                            <table>${tableMarkup}</table>
-                          </div>
-                          <div style="flex: 0 0 120px; text-align: center;">
-                            ${profilePicHtml}
-                            ${specialLayoutEmpIdHtml}
-                          </div>
-                        </div>
+                        <table>
+                          ${tableMarkup}
+                        </table>
                       </div>
                       <!-- Right Column: Documents -->
                       <div style="flex: 1;">
