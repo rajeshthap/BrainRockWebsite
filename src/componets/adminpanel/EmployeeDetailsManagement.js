@@ -945,7 +945,7 @@ const EmployeeDetailsManagement = () => {
         "S.No",
         "Emp ID",
         "Name",
-        "Email",
+       
         "Designation",
         "Experience",
         "Location",
@@ -983,7 +983,7 @@ const EmployeeDetailsManagement = () => {
         String(index + 1),
         employee.emp_id || "N/A",
         employee.emp_name || "N/A",
-        employee.email || "N/A",
+       
         employee.designation || "N/A",
         employee.work_experience || "N/A",
         employee.job_location || "N/A",
@@ -1023,15 +1023,11 @@ const EmployeeDetailsManagement = () => {
       "S.No": index + 1,
       "Employee ID": employee.emp_id || "N/A",
       Name: employee.emp_name || "N/A",
-      Email: employee.email || "N/A",
+     
       Designation: employee.designation || "N/A",
       "Work Experience": employee.work_experience || "N/A",
       "Job Location": employee.job_location || "N/A",
-      Address: employee.address || "N/A",
-      "Education Qualification": employee.education_qualification || "N/A",
-      "Certificates / Rewards": employee.certificate_reward || "N/A",
-      "Technical Skills": employee.technical_skills || "N/A",
-      "Other Skills": employee.other_skills || "N/A",
+    
     }));
 
     const wb = XLSX.utils.book_new();
