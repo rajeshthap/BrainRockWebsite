@@ -1097,7 +1097,7 @@ const EmployeeDetailsManagement = () => {
                         <th>#</th>
                         <th>Emp ID</th>
                         <th>Name</th>
-                        <th>Email</th>
+                        <th>Work Experience</th>
                         <th>Designation</th>
                         <th>Actions</th>
                       </tr>
@@ -1108,7 +1108,7 @@ const EmployeeDetailsManagement = () => {
                           <td>{index + 1}</td>
                           <td>{emp.emp_id}</td>
                           <td>{emp.emp_name}</td>
-                          <td>{emp.email}</td>
+                          <td>{emp.work_experience}</td>
                           <td>{emp.designation}</td>
                           <td>
                             <div className="d-flex gap-2">

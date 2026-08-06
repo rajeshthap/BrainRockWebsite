@@ -14,6 +14,9 @@ import {
 } from "react-bootstrap";
 import { FaEye, FaEdit, FaTrash, FaFilePdf } from "react-icons/fa";
 import axios from "axios";
+import moment from "moment";
+import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx";
 import BrainRockLogo from "../../assets/images/brainrock_logo.png";
 import ZeeLogo from "../../assets/images/zeepnglogo.jpeg";
 import AdminHeader from "./AdminHeader";
@@ -113,6 +116,25 @@ const EmployeeDetailsManagement = () => {
     );
   };
 
+  const renderFilePreview = (docPath) => {
+    if (!docPath) return null;
+    const fullUrl = getDocumentUrl(docPath);
+    const isImage = isImageDocument(docPath);
+
+    return (
+      <div className="file-preview-box">
+        {isImage ? (
+          <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+            <img src={fullUrl} alt="preview" className="file-preview-image" />
+          </a>
+        ) : (
+          <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="file-preview-link">
+            <FaFilePdf className="file-preview-icon" />
+          </a>
+        )}
+      </div>
+    );
+  };
   // Responsive check
   useEffect(() => {
     const checkDevice = () => {
@@ -346,22 +368,18 @@ const EmployeeDetailsManagement = () => {
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
 
-    const firmName = (employee.firm_name || "Employee").trim();
-    const firmsForBlackTheme = [
-      "ZEE - Zero Error Enterprises",
-      "Diksha Enterprises",
-      "U.S. Infotech", // Added to use the black theme
-    ];
-    
-    const shouldUseBlackTheme = firmsForBlackTheme.includes(firmName);
+    const firmName = (employee.firm_name || "Employee").trim(); // Keep firmName for specific logos/titles
     const isZeeEmployee = firmName === "ZEE - Zero Error Enterprises";
     const isDikshaEmployee = firmName === "Diksha Enterprises";
     const isUSInfotechEmployee = firmName === "U.S. Infotech";
     const isBrainrockEmployee = firmName === "Brainrock Consulting Services";
-    const accentColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#c1121f" : "#0b3d91");
-    const borderColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#f2b8bf" : "#d7e1f0");
-    const keyBgColor = shouldUseBlackTheme ? "#f5f5f5" : (isZeeEmployee ? "#fff3f4" : "#f4f8ff");
-    
+    const shouldUseBlackTheme = isDikshaEmployee || isUSInfotechEmployee;
+
+    // Standardize colors for a clean, white-themed PDF with black text
+    const accentColor = "#000000"; // Always black for titles, key text, and links
+    const borderColor = "#d1d5db"; // Consistent light grey border
+    const keyBgColor = "#FFFFFF"; // Always white background for key cells
+
     let pdfTitle;
     if (isDikshaEmployee) {
       pdfTitle = "Diksha Enterprises Employee Details";
@@ -375,15 +393,17 @@ const EmployeeDetailsManagement = () => {
       ? `<img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
       : isZeeEmployee
         ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
-        : ''; // No logo for other firms
+        : ""; // No logo for other firms
 
     // Define specific styles for body profile pictures
     const bodyProfilePicStyle = `width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 3px solid ${borderColor};`;
-    const defaultHeaderProfilePicStyle = isZeeEmployee ? "width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 3px solid #e6edf7;" : "width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #e6edf7;";
+    const defaultHeaderProfilePicStyle = isZeeEmployee
+      ? "width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 3px solid #e6edf7;"
+      : "width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #e6edf7;";
 
     const profilePicHtml = employee.profile_pic
       ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" style="${isDikshaEmployee || isUSInfotechEmployee ? bodyProfilePicStyle : defaultHeaderProfilePicStyle}" />`
-      : `<div style="width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; color: #777; font-weight: bold; font-size: 10px; border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};">No Photo</div>`;
+      : `<div style="width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; color: #777; font-weight: bold; font-size: 10px; border: 3px solid ${borderColor};">No Photo</div>`;
 
     const renderDocPreview = (docPath, title) => {
       if (!docPath) return `<tr><td class="key">${title}</td><td>N/A</td></tr>`;
@@ -443,16 +463,21 @@ const EmployeeDetailsManagement = () => {
     ];
 
     let mainTableRows = allProfileRows;
-    let specialLayoutEmpIdHtml = '';
+    let specialLayoutEmpIdHtml = "";
 
-    if (isDikshaEmployee) { // Only apply special Emp ID logic for Diksha
-        // Extract Employee ID for separate display
-        const empIdRowIndex = allProfileRows.findIndex(row => row[0] === "Employee ID");
-        if (empIdRowIndex !== -1) {
-            const empIdRow = allProfileRows[empIdRowIndex];
-            specialLayoutEmpIdHtml = `<p style="margin-top: 10px; font-weight: bold; font-size: 12px; color: ${accentColor};">Emp ID: ${escapeHtml(empIdRow[1])}</p>`;
-            mainTableRows = allProfileRows.filter((row, index) => index !== empIdRowIndex);
-        }
+    if (isDikshaEmployee) {
+      // Only apply special Emp ID logic for Diksha
+      // Extract Employee ID for separate display
+      const empIdRowIndex = allProfileRows.findIndex(
+        (row) => row[0] === "Employee ID",
+      );
+      if (empIdRowIndex !== -1) {
+        const empIdRow = allProfileRows[empIdRowIndex];
+        specialLayoutEmpIdHtml = `<p style="margin-top: 10px; font-weight: bold; font-size: 12px; color: ${accentColor};">Emp ID: ${escapeHtml(empIdRow[1])}</p>`;
+        mainTableRows = allProfileRows.filter(
+          (row, index) => index !== empIdRowIndex,
+        );
+      }
     }
 
     const tableMarkup = mainTableRows
@@ -477,7 +502,7 @@ const EmployeeDetailsManagement = () => {
                   padding: 16px;
                   font-size: 12px;
                   background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
-                  color: ${shouldUseBlackTheme ? "#000000" : "#1f2937"};
+                  color: #1f2937; /* Consistent dark grey text for body */
               }
               .pdf-shell {
                   max-width: 900px;
@@ -493,7 +518,7 @@ const EmployeeDetailsManagement = () => {
                   align-items: center;
                   justify-content: space-between;
                   padding: 8px 28px;
-                  background: ${shouldUseBlackTheme ? "#FFFFFF" : "#ffffff"};
+                  background: #FFFFFF; /* Always white header background */
               }
               .pdf-brand {
                   display: flex;
@@ -544,7 +569,7 @@ const EmployeeDetailsManagement = () => {
               .pdf-subtitle {
                   margin: 4px 0 0;
                   font-size: 10px;
-                  color: ${shouldUseBlackTheme ? "#000000" : "#555"};
+                  color: #000000; /* Always black for subtitle */
               }
               .pdf-body {
                   padding: 24px 28px 28px;
@@ -639,15 +664,19 @@ const EmployeeDetailsManagement = () => {
                           <div class="pdf-subtitle">Generated for ${escapeHtml(employee.emp_name || "Employee")}</div>
                           <button class="print-btn" onclick="window.print()">Print Report</button>
                       </div>
-                      ${!isDikshaEmployee ? ( // Show header photo for everyone except Diksha
-                          employee.profile_pic
-                              ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
-                              : '<div class="profile-pic-placeholder-header">No Photo</div>'
-                      ) : ''}
+                      ${
+                        !isDikshaEmployee // Show header photo for everyone except Diksha
+                          ? employee.profile_pic
+                            ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
+                            : '<div class="profile-pic-placeholder-header">No Photo</div>'
+                          : ""
+                      }
                   </div>
               </div>
               <div class="pdf-body">
-                  ${isUSInfotechEmployee ? `
+                  ${
+                    isUSInfotechEmployee
+                      ? `
                     <div style="display: flex; gap: 24px; align-items: flex-start;">
                       <!-- Left Column: Profile Info -->
                       <div style="flex: 1.5;">
@@ -667,20 +696,26 @@ const EmployeeDetailsManagement = () => {
                         </table>
                       </div>
                     </div>
-                  ` : `
+                  `
+                      : `
                     <h2 class="section-title">Profile Information</h2>
-                    ${isDikshaEmployee ? `
+                    ${
+                      isDikshaEmployee
+                        ? `
                       <div style="display: flex; gap: 20px; align-items: flex-start;">
                         <div style="flex: 1;"><table>${tableMarkup}</table></div>
                         <div style="flex: 0 0 120px; text-align: center;">${profilePicHtml}${specialLayoutEmpIdHtml}</div>
                       </div>
-                      <table>` : `<table>${tableMarkup}`}
+                      <table>`
+                        : `<table>${tableMarkup}`
+                    }
                       ${renderDocPreview(employee.govt_document, `${escapeHtml(employee.govt_doc_type ? employee.govt_doc_type.toUpperCase() : "GOVT")} Document`)}
                       ${renderDocListHtmlForPdf(employee.educational_documents, "Educational Documents")}
                       ${renderDocListHtmlForPdf(employee.experience_certificates, "Experience Certificates")}
                       ${renderDocListHtmlForPdf(employee.professional_certificates, "Professional Certificates")}
                     </table>
-                  `}
+                  `
+                  }
               </div>
           </div>
       </body>
@@ -727,25 +762,332 @@ const EmployeeDetailsManagement = () => {
     );
   };
 
-  const renderFilePreview = (filePath) => {
-    if (!filePath) return null;
-    const fullUrl = `https://brainrock.in/brainrock/backend${filePath}`;
-    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(filePath);
+  const formatDateTime = (dateValue) =>
+    moment(dateValue).format("DD MMM YYYY, hh:mm A");
 
-    return (
-      <a
-        href={fullUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="file-preview-box"
-      >
-        {isImage ? (
-          <img src={fullUrl} alt="preview" className="file-preview-image" />
-        ) : (
-          <div className="file-preview-icon">📄</div>
-        )}
-      </a>
-    );
+  const getSelectedFirmEmployees = () =>
+    selectedFirmFilter === "all"
+      ? []
+      : allEmployees.filter((emp) => emp.firm_name === selectedFirmFilter);
+
+  const generateFirmReportHtml = (firmName, employeesData) => {
+    const escapedFirmName = String(firmName || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    const generatedAt = formatDateTime(new Date());
+
+    const buildTableRows = () =>
+      employeesData
+        .map((employee, index) => {
+          const rowValues = [
+            index + 1,
+            employee.emp_id || "N/A",
+            employee.emp_name || "N/A",
+            employee.email || "N/A",
+            employee.designation || "N/A",
+            employee.work_experience || "N/A",
+            employee.job_location || "N/A",
+          ];
+
+          return `
+            <tr>
+              ${rowValues
+                .map(
+                  (value) =>
+                    `<td>${String(value)
+                      .replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")}</td>`,
+                )
+                .join("")}
+            </tr>
+          `;
+        })
+        .join("");
+
+    return `
+      <html>
+        <head>
+          <title>${escapedFirmName} Employee Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2937; background: #f8fafc; }
+            .report-shell { max-width: 1100px; margin: 0 auto; padding: 24px; }
+            .report-card { background: #ffffff; border: 1px solid #d1d5db; border-radius: 12px; overflow: hidden; }
+            .report-header { padding: 24px 28px; background: #0b3d91; color: #fff; }
+            .report-header h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: 0.02em; }
+            .report-header p { margin: 4px 0; opacity: 0.85; }
+            .summary-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px; }
+            .summary-card { flex: 1 1 220px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; }
+            .summary-card strong { display: block; margin-bottom: 8px; color: #0b3d91; }
+            .section { padding: 24px 28px; }
+            .section-title { font-size: 18px; margin: 0 0 16px; color: #0b3d91; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { padding: 12px 14px; border: 1px solid #d1d5db; text-align: left; vertical-align: top; }
+            th { background: #eceff8; font-weight: 700; }
+            tr:nth-child(even) td { background: #fbfbfb; }
+            .footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px 24px; font-size: 12px; color: #6b7280; }
+            .page-footer { display: none; }
+            @media print {
+              body { background: #ffffff; }
+              .report-shell { box-shadow: none; margin: 0; padding: 0; }
+              .footer { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; display: flex; }
+              .page-footer { display: block; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="report-shell">
+            <div class="report-card">
+              <div class="report-header">
+                <h1>${escapedFirmName} Firm Report</h1>
+                <p>Generated on: ${generatedAt}</p>
+                <div class="summary-row">
+                  <div class="summary-card">
+                    <strong>Firm</strong>
+                    <span>${escapedFirmName}</span>
+                  </div>
+                  <div class="summary-card">
+                    <strong>Record Count</strong>
+                    <span>${employeesData.length}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="section">
+                <h2 class="section-title">Employee Records</h2>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>S.No</th>
+                      <th>Emp ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Designation</th>
+                      <th>Work Experience</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${buildTableRows()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="footer no-print">
+              <span>BrainRock Consulting Services</span>
+              <span class="page-footer">Page <span class="pageNumber"></span></span>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const handleExportFirmPdf = () => {
+    if (selectedFirmFilter === "all") {
+      setMessage("Please select a firm before exporting the firm report.");
+      setVariant("danger");
+      setShowAlert(true);
+      return;
+    }
+
+    const firmEmployees = getSelectedFirmEmployees();
+    if (!firmEmployees.length) {
+      setMessage("No data exists for the selected firm.");
+      setVariant("danger");
+      setShowAlert(true);
+      return;
+    }
+
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "a4",
+    });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 40;
+    const contentWidth = pageWidth - margin * 2;
+    const headline = `${selectedFirmFilter} Firm Report`;
+    const generatedAt = formatDateTime(new Date());
+    const firmEmployeesCount = firmEmployees.length;
+
+    let cursorY = 50;
+    const addHeader = () => {
+      // doc.setFillColor(11, 61, 145); // Removed blue background
+      // doc.rect(0, 0, pageWidth, 90, "F");
+      doc.setTextColor("#000000"); // Set text to black
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text(headline, margin, 50);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Generated: ${generatedAt}`, margin, 70);
+      doc.text(`Firm: ${selectedFirmFilter}`, margin + 280, 70); // Adjusted position for better layout without background
+      doc.text(`Records: ${firmEmployeesCount}`, margin + 520, 70);
+      cursorY = 110;
+      doc.setDrawColor(194, 199, 218);
+      doc.line(margin, cursorY - 8, pageWidth - margin, cursorY - 8);
+    };
+
+    const addFooter = (pageNumber) => {
+      doc.setFontSize(9);
+      doc.setTextColor("#6b7280");
+      const footerText = `Page ${pageNumber}`;
+      doc.text(footerText, pageWidth - margin, pageHeight - 20, {
+        align: "right",
+      });
+    };
+
+    const addTableHeader = () => {
+      const headers = [
+        "S.No",
+        "Emp ID",
+        "Name",
+        "Email",
+        "Designation",
+        "Experience",
+        "Location",
+      ];
+      const colWidths = [40, 80, 150, 180, 120, 90, 110];
+      let x = margin;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor("#0b3d91");
+      headers.forEach((text, index) => {
+        doc.rect(x - 4, cursorY - 14, colWidths[index] + 8, 18, "F");
+        doc.setTextColor("#0b3d91");
+        doc.text(text, x, cursorY);
+        x += colWidths[index];
+      });
+      cursorY += 24;
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor("#1f2937");
+      return colWidths;
+    };
+
+    addHeader();
+    const colWidths = addTableHeader();
+
+    firmEmployees.forEach((employee, index) => {
+      if (cursorY > pageHeight - 80) {
+        addFooter(doc.internal.getNumberOfPages());
+        doc.addPage();
+        cursorY = 50;
+        addHeader();
+        addTableHeader();
+      }
+
+      const rowValues = [
+        String(index + 1),
+        employee.emp_id || "N/A",
+        employee.emp_name || "N/A",
+        employee.email || "N/A",
+        employee.designation || "N/A",
+        employee.work_experience || "N/A",
+        employee.job_location || "N/A",
+      ];
+
+      let x = margin;
+      rowValues.forEach((value, colIndex) => {
+        const text = doc.splitTextToSize(value, colWidths[colIndex] - 8);
+        doc.text(text, x, cursorY);
+        x += colWidths[colIndex];
+      });
+      cursorY += 20;
+    });
+
+    addFooter(doc.internal.getNumberOfPages());
+    const filename = `${selectedFirmFilter.replace(/\W+/g, "_")}_Firm_Report_${moment().format("YYYYMMDD_HHmmss")}.pdf`;
+    doc.save(filename);
+  };
+
+  const handleExportFirmExcel = () => {
+    if (selectedFirmFilter === "all") {
+      setMessage("Please select a firm before exporting the firm report.");
+      setVariant("danger");
+      setShowAlert(true);
+      return;
+    }
+
+    const firmEmployees = getSelectedFirmEmployees();
+    if (!firmEmployees.length) {
+      setMessage("No data exists for the selected firm.");
+      setVariant("danger");
+      setShowAlert(true);
+      return;
+    }
+
+    const excelData = firmEmployees.map((employee, index) => ({
+      "S.No": index + 1,
+      "Employee ID": employee.emp_id || "N/A",
+      Name: employee.emp_name || "N/A",
+      Email: employee.email || "N/A",
+      Designation: employee.designation || "N/A",
+      "Work Experience": employee.work_experience || "N/A",
+      "Job Location": employee.job_location || "N/A",
+      Address: employee.address || "N/A",
+      "Education Qualification": employee.education_qualification || "N/A",
+      "Certificates / Rewards": employee.certificate_reward || "N/A",
+      "Technical Skills": employee.technical_skills || "N/A",
+      "Other Skills": employee.other_skills || "N/A",
+    }));
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData, { skipHeader: false });
+    ws["!cols"] = [
+      { wch: 6 },
+      { wch: 16 },
+      { wch: 24 },
+      { wch: 24 },
+      { wch: 18 },
+      { wch: 16 },
+      { wch: 18 },
+      { wch: 28 },
+      { wch: 26 },
+      { wch: 28 },
+      { wch: 26 },
+      { wch: 24 },
+    ];
+
+    const headerRow = [
+      "S.No",
+      "Employee ID",
+      "Name",
+      "Email",
+      "Designation",
+      "Work Experience",
+      "Job Location",
+      "Address",
+      "Education Qualification",
+      "Certificates / Rewards",
+      "Technical Skills",
+      "Other Skills",
+    ];
+    XLSX.utils.sheet_add_aoa(ws, [headerRow], { origin: "A1" });
+
+    const headerStyle = {
+      font: { bold: true },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "FF979797" } },
+        bottom: { style: "thin", color: { rgb: "FF979797" } },
+        left: { style: "thin", color: { rgb: "FF979797" } },
+        right: { style: "thin", color: { rgb: "FF979797" } },
+      },
+      fill: { fgColor: { rgb: "FFEEF2F7" } },
+    };
+
+    headerRow.forEach((_, index) => {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: index });
+      if (!ws[cellAddress]) return;
+      ws[cellAddress].s = headerStyle;
+    });
+
+    const filename = `${selectedFirmFilter.replace(/\W+/g, "_")}_Firm_Report_${moment().format("YYYYMMDD_HHmmss")}.xlsx`;
+    XLSX.utils.book_append_sheet(wb, ws, "Firm Report");
+    XLSX.writeFile(wb, filename);
   };
 
   return (
@@ -1105,6 +1447,23 @@ const EmployeeDetailsManagement = () => {
                       </Form.Select>
                     </Form.Group>
                   </Col>
+                  <Col
+                    md={8}
+                    className="text-md-end d-flex flex-wrap justify-content-md-end gap-2 mt-3 mt-md-0"
+                  >
+                    <Button
+                      variant="outline-primary"
+                      onClick={handleExportFirmPdf}
+                    >
+                      Export Firm PDF
+                    </Button>
+                    <Button
+                      variant="outline-success"
+                      onClick={handleExportFirmExcel}
+                    >
+                      Export Firm Excel
+                    </Button>
+                  </Col>
                 </Row>
                 {loading ? (
                   <div className="text-center">
@@ -1117,7 +1476,7 @@ const EmployeeDetailsManagement = () => {
                         <th>#</th>
                         <th>Emp ID</th>
                         <th>Name</th>
-                        <th>Email</th>
+                        <th>Work Experience</th>
                         <th>Designation</th>
                         <th>Actions</th>
                       </tr>
@@ -1128,7 +1487,7 @@ const EmployeeDetailsManagement = () => {
                           <td>{index + 1}</td>
                           <td>{emp.emp_id}</td>
                           <td>{emp.emp_name}</td>
-                          <td>{emp.email}</td>
+                          <td>{emp.work_experience}</td>
                           <td>{emp.designation}</td>
                           <td>
                             <div className="d-flex gap-2">
