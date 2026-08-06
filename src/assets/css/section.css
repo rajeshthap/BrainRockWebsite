@@ -137,7 +137,7 @@
   padding: var(--br-space-700);
 }
 .testimonial-bg {
-  background-image: url('../../assets/images/testimonial-bg.png');
+ 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -113,14 +113,14 @@
   padding: var(--br-space-700);
 }
 .Trainingimg-banner {
-  background-image: url('../../assets/images/trainingimg.jpg');
+
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   padding: var(--br-space-700);
 }
 .serviceimg-banner {
-  background-image: url('../../assets/images/servicesimg.jpg');
+  /* background-image: url('../../assets/images/servicesimg.jpg'); */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
