@@ -406,7 +406,7 @@ const EmployeeDetailsManagement = () => {
       : `<div style="width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; color: #777; font-weight: bold; font-size: 10px; border: 3px solid ${borderColor};">No Photo</div>`;
 
     const renderDocPreview = (docPath, title) => {
-      if (!docPath) return `<tr><td class="key">${title}</td><td>N/A</td></tr>`;
+      if (!docPath) return `<tr><td class="key">${title}</td><td>Document Locked</td></tr>`;
       const fullUrl = `${DOC_BASE_URL}${docPath}`;
       const fileName = docPath.split("/").pop();
       const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(docPath);
