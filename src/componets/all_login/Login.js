@@ -26,7 +26,8 @@ export default function Login() {
       const cookie = cookies[i];
       const eqPos = cookie.indexOf("=");
       const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      document.cookie =
+        name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     }
   };
 
@@ -56,6 +57,15 @@ export default function Login() {
         return;
       }
 
+      // Check for candidate role - Redirect to InterviewTest
+      if (user.role === "candidate") {
+        navigate("/InterviewTest", {
+          state: { unique_id: user.unique_id },
+          replace: true,
+        });
+        return;
+      }
+
       // Check for training role
       if (user.role === "training") {
         navigate("/TrainingDashBoard", {
@@ -67,7 +77,7 @@ export default function Login() {
 
       // Check for khelo-aur-jeeto role
       if (user.role === "khelo-aur-jeeto") {
-        navigate("/UserDashBoard ", {
+        navigate("/UserDashBoard", {
           state: { unique_id: user.id },
           replace: true,
         });
@@ -75,8 +85,9 @@ export default function Login() {
       }
 
       // Check if user role matches any course name
-      const matchingCourse = courses.find(course => 
-        course.course_name.toLowerCase() === user.role.toLowerCase()
+      const matchingCourse = courses.find(
+        (course) =>
+          course.course_name.toLowerCase() === user.role.toLowerCase()
       );
 
       if (matchingCourse) {
@@ -104,16 +115,28 @@ export default function Login() {
     e.preventDefault();
     setAlertMessage("");
 
-    if (!formData.email_or_phone || !formData.password || !formData.role) {
+    // Validate all fields are filled and role is not the default "Select Role"
+    if (
+      !formData.email_or_phone ||
+      !formData.password ||
+      !formData.role ||
+      formData.role === "Select Role"
+    ) {
       setAlertMessage("Please fill in all fields");
       setShowModifyAlert(true);
       return;
     }
 
-    const result = await login(formData.email_or_phone, formData.password, formData.role);
+    const result = await login(
+      formData.email_or_phone,
+      formData.password,
+      formData.role
+    );
 
     if (!result || !result.success) {
-      setAlertMessage(result?.error?.message || "Login failed. Please check your credentials.");
+      setAlertMessage(
+        result?.error?.message || "Login failed. Please check your credentials."
+      );
       setShowModifyAlert(true);
     }
   };
@@ -124,15 +147,21 @@ export default function Login() {
         <Container className="dashboard-body">
           <div className="br-box-container">
             <div className="br-registration-heading">
-
               <Form onSubmit={handleSubmit}>
                 <Row className="mt-3">
-                  <Col lg={6} md={6} sm={12} className="d-flex justify-content-center align-items-center login-img">
+                  <Col
+                    lg={6}
+                    md={6}
+                    sm={12}
+                    className="d-flex justify-content-center align-items-center login-img"
+                  >
                     <img src={DevoteeImg} className="img-fluid" alt="Login" />
                   </Col>
                   <Col lg={6} md={6} sm={12} className="p-4">
+                    <div>
+                      <h1>Login</h1>
+                    </div>
 
-                    <div> <h1>Login</h1></div>
                     {/* Email / Mobile */}
                     <Form.Group className="mb-3">
                       <Form.Label className="br-label">
@@ -155,7 +184,10 @@ export default function Login() {
                       <Form.Label className="br-label">
                         Password <span className="br-span-star">*</span>
                       </Form.Label>
-                      <div className="password-wrapper" style={{ position: "relative" }}>
+                      <div
+                        className="password-wrapper"
+                        style={{ position: "relative" }}
+                      >
                         <Form.Control
                           type={showPassword ? "text" : "password"}
                           name="password"
@@ -166,8 +198,12 @@ export default function Login() {
                           disabled={authLoading}
                         />
                         <i
-                          className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"} toggle-password`}
-                          onClick={() => !authLoading && setShowPassword(!showPassword)}
+                          className={`fa ${
+                            showPassword ? "fa-eye-slash" : "fa-eye"
+                          } toggle-password`}
+                          onClick={() =>
+                            !authLoading && setShowPassword(!showPassword)
+                          }
                           style={{
                             position: "absolute",
                             right: "10px",
@@ -191,35 +227,37 @@ export default function Login() {
                         className="br-form-control"
                         disabled={authLoading}
                       >
-                        {/* <option value="">Select Role</option> */}
-                           <option value="Select Role">Select Role</option>
+                        <option value="Select Role">Select Role</option>
                         <option value="admin">Admin</option>
-                     
-                      
+                        <option value="candidate">Candidate</option>
                       </Form.Select>
                     </Form.Group>
-                    <div> <span
-                      className="forgot-btn mx-1"
-                      type="button"
-                      onClick={() => navigate("/ForgotPassword")}
-                      disabled={authLoading}
-                    >
-                      Forgot Password ?
-                    </span></div>
+
+                    <div>
+                      <span
+                        className="forgot-btn mx-1"
+                        type="button"
+                        onClick={() => navigate("/ForgotPassword")}
+                        disabled={authLoading}
+                        style={{
+                          cursor: authLoading ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        Forgot Password ?
+                      </span>
+                    </div>
+
                     {/* Buttons */}
                     <div className="br-btn-submit text-center mt-3">
                       <Button
                         type="submit"
                         disabled={authLoading}
-                        className=" btn-login"
+                        className="btn-login"
                       >
                         {authLoading ? "Logging in..." : "Login"}
                       </Button>
-
                     </div>
                   </Col>
-
-
                 </Row>
               </Form>
             </div>

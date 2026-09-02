@@ -112,6 +112,9 @@ import QuizTest from "./componets/Play_and_Win/QuizTest";
 import CoursesTest from "./componets/Play_and_Win/CoursesTest";
 import PayNow from "./componets/adminpanel/pay_now/PayNow";
 import EmployeeDetailsManagement from "./componets/adminpanel/EmployeeDetailsManagement";
+import InterViewManagement from "./componets/adminpanel/interview/InterViewManagement";
+import CandidateInterviewQues from "./componets/adminpanel/interview/CandidateInterviewQues";
+import InterviewTest from "./componets/InterviewTest";
 
 // import Terms from "./componets/pdf_page/Terms";
 function AppContent() {
@@ -181,7 +184,10 @@ function AppContent() {
     "/Quiz",
     "/QuizTest",
     "/PayNow",
-    "/EmployeeDetailsManagement"
+    "/EmployeeDetailsManagement",
+    "/InterViewManagement",
+    "/InterviewTest",
+    "/CandidateInterviewQues"
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -237,8 +243,15 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-
-        <Route
+         <Route
+          path="/InterviewTest"
+          element={
+            <ProtectedRoute>
+              <InterviewTest />
+            </ProtectedRoute>
+          }
+        />
+  <Route
           path="/PayrollCalculations"
           element={
             <ProtectedRoute>
@@ -620,6 +633,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ManageQuiz />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/InterViewManagement"
+          element={
+            <ProtectedRoute>
+              <InterViewManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/CandidateInterviewQues"
+          element={
+            <ProtectedRoute>
+              <CandidateInterviewQues />
             </ProtectedRoute>
           }
         />

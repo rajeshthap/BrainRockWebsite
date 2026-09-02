@@ -35,6 +35,7 @@ import {
   FaCloud,           // Added for IT services
   FaFileInvoice,     // Added for bill generation
   FaTrophy,          // Added for Khelo Jito
+  FaUserTie,         // Added for interview candidates
 } from "react-icons/fa";
 
 import axios from "axios";
@@ -70,6 +71,25 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
             label: "Employee Details",
             path: "/EmployeeDetailsManagement",
             active: true,
+        },
+          {
+            icon: <FaUserTie />,  // Updated icon for payments
+            label: "Interview Management",
+            submenu: [
+               {
+            icon: <FaUserTie />,
+            label: "Interview Candidates",
+            path: "/InterViewManagement",
+            active: true,
+        },
+
+         {
+            icon: <FaUserTie />,
+            label: "Interview Questions",
+            path: "/CandidateInterviewQues",
+            active: true,
+        },
+            ],
         },
         {
             icon: <FaImages />,
@@ -322,6 +342,9 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
                 },
             ],
         },
+      
+        
+       
         {
             icon: <FaFileInvoice />,  // Updated icon
             label: "Bill Generation",
