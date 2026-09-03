@@ -114,6 +114,7 @@ import PayNow from "./componets/adminpanel/pay_now/PayNow";
 import EmployeeDetailsManagement from "./componets/adminpanel/EmployeeDetailsManagement";
 import InterViewManagement from "./componets/adminpanel/interview/InterViewManagement";
 import CandidateInterviewQues from "./componets/adminpanel/interview/CandidateInterviewQues";
+import CandidateInterviewTestScores from "./componets/adminpanel/interview/CandidateInterviewTestScores";
 import InterviewTest from "./componets/InterviewTest";
 
 // import Terms from "./componets/pdf_page/Terms";
@@ -187,7 +188,8 @@ function AppContent() {
     "/EmployeeDetailsManagement",
     "/InterViewManagement",
     "/InterviewTest",
-    "/CandidateInterviewQues"
+    "/CandidateInterviewQues",
+    "/CandidateInterviewTestScores"
   ]);
 
   const hiddenFooter1 = new Set([""]);
@@ -649,6 +651,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <CandidateInterviewQues />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/CandidateInterviewTestScores"
+          element={
+            <ProtectedRoute>
+              <CandidateInterviewTestScores />
             </ProtectedRoute>
           }
         />
