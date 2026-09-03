@@ -58,11 +58,21 @@ const InterviewTest = () => {
     ? Math.round((answeredCount / totalQuestions) * 100)
     : 0;
 
-  // Reset timer when question changes
+  // Warn when user tries to leave the page/tab while test is active
   useEffect(() => {
-    if (!testData || !currentQuestion) return;
-    setTimeLeft(30);
-  }, [currentIndex, testData, currentQuestion]);
+    if (!testData) return;
+
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [testData]);
 
   // Countdown timer per question — auto-advance when time runs out
   useEffect(() => {
@@ -70,6 +80,7 @@ const InterviewTest = () => {
     if (timeLeft <= 0) {
       if (currentIndex < totalQuestions - 1) {
         setCurrentIndex((i) => i + 1);
+        setTimeLeft(30);
       } else {
         setShowSubmitModal(true);
       }
@@ -117,6 +128,16 @@ const InterviewTest = () => {
       setCurrentIndex(idx);
       setTimeLeft(30);
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleNextClick = () => {
+    if (currentIndex < totalQuestions - 1) {
+      goToQuestion(currentIndex + 1);
+    } else {
+      if (window.confirm("You are on the last question. Do you want to submit the test?")) {
+        handleSubmitTest();
+      }
     }
   };
 
@@ -342,22 +363,16 @@ const InterviewTest = () => {
                       </div>
 
                       <div className="d-flex justify-content-end mt-4">
-                        {currentIndex < totalQuestions - 1 ? (
-                          <Button
-                            variant="primary"
-                            onClick={() => goToQuestion(currentIndex + 1)}
-                          >
-                            Next <i className="bi bi-chevron-right ms-1"></i>
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="success"
-                            onClick={() => setShowSubmitModal(true)}
-                            disabled={answeredCount === 0}
-                          >
-                            <i className="bi bi-check2-circle me-1"></i> Finish
-                          </Button>
-                        )}
+                        <Button
+                          variant={currentIndex < totalQuestions - 1 ? "primary" : "success"}
+                          onClick={handleNextClick}
+                        >
+                          {currentIndex < totalQuestions - 1 ? (
+                            <>Next <i className="bi bi-chevron-right ms-1"></i></>
+                          ) : (
+                            <>Submit <i className="bi bi-check2-circle ms-1"></i></>
+                          )}
+                        </Button>
                       </div>
                     </Card.Body>
                   </Card>
@@ -379,7 +394,8 @@ const InterviewTest = () => {
                               className={`interview-nav-btn ${
                                 active ? "active" : ""
                               } ${answered ? "answered" : ""}`}
-                              onClick={() => goToQuestion(idx)}
+                              onClick={answered ? undefined : () => goToQuestion(idx)}
+                              disabled={answered}
                             >
                               {idx + 1}
                             </button>
