@@ -366,7 +366,7 @@ const InterviewTest = () => {
       if (currentIndex < totalQuestions - 1) {
         setCurrentIndex((i) => i + 1);
         setTimeLeft(20);
-      } else {
+      } else if (!submissionCompletedRef.current) {
         handleSubmitTest();
       }
       return;
@@ -558,10 +558,6 @@ const InterviewTest = () => {
       }
       setShowResultModal(true);
     } catch (err) {
-      console.error(
-        "Interview test submission failed:",
-        err.response?.data || err,
-      );
       setResultMsg(
         err.response?.data?.message ||
           "Test submission failed. Please try again.",
@@ -679,7 +675,13 @@ const InterviewTest = () => {
                     </div>
 
                     {/* Document Upload */}
-                    <div className="mb-4">
+                    <div
+                      className="mb-4"
+                      style={{
+                        opacity: showResultModal ? 0.6 : 1,
+                        pointerEvents: showResultModal ? "none" : "auto",
+                      }}
+                    >
                       <h6 className="mb-3">
                         <i className="bi bi-file-earmark-arrow-up me-2"></i>
                         Upload Documents
@@ -876,7 +878,7 @@ const InterviewTest = () => {
           )}
 
           {/* ===== QUIZ SCREEN ===== */}
-          {testData && currentQuestion && (
+          {testData && currentQuestion && !showResultModal && (
             <>
               {/* Violation Warning Banner */}
               {violationCount > 0 && !autoSubmitted && (
