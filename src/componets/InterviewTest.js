@@ -384,18 +384,19 @@ const InterviewTest = () => {
 
   const MAX_FILE_SIZE = 100 * 1024;
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    if (files && files[0]) {
-      const file = files[0];
-      if (file.size > MAX_FILE_SIZE) {
-        setDocError(`${name.replace(/_/g, " ")} must be under 100KB.`);
-        return;
-      }
-      setDocuments((prev) => ({ ...prev, [name]: file }));
-      setDocSubmitted(false);
-    }
-  };
+   const handleFileChange = (e) => {
+     const { name, files } = e.target;
+     if (files && files[0]) {
+       const file = files[0];
+       if (file.size > MAX_FILE_SIZE) {
+         setDocError(`${name.replace(/_/g, " ")} must be under 100KB.`);
+         return;
+       }
+       setDocError("");
+       setDocuments((prev) => ({ ...prev, [name]: file }));
+       setDocSubmitted(false);
+     }
+   };
 
   const handleDocSubmit = async () => {
     if (
@@ -678,8 +679,11 @@ const InterviewTest = () => {
                     <div
                       className="mb-4"
                       style={{
-                        opacity: showResultModal ? 0.6 : 1,
-                        pointerEvents: showResultModal ? "none" : "auto",
+                        opacity: hasExistingDocs || docSubmitted ? 0.6 : 1,
+                        pointerEvents:
+                          hasExistingDocs || docSubmitted
+                            ? "none"
+                            : "auto",
                       }}
                     >
                       <h6 className="mb-3">
@@ -692,13 +696,14 @@ const InterviewTest = () => {
                             Identity Document{" "}
                             <span className="text-danger">*</span>
                           </label>
-                          <input
-                            className="form-control"
-                            type="file"
-                            name="identity_docs"
-                            accept="application/pdf,image/*"
-                            onChange={handleFileChange}
-                          />
+                           <input
+                             className="form-control"
+                             type="file"
+                             name="identity_docs"
+                             accept="application/pdf,image/*"
+                             onChange={handleFileChange}
+                             disabled={hasExistingDocs || docSubmitted}
+                           />
                           <div
                             className={`form-text small ${!documents.identity_docs ? "text-danger" : ""}`}
                           >
@@ -711,13 +716,14 @@ const InterviewTest = () => {
                             Education Certificate{" "}
                             <span className="text-danger">*</span>
                           </label>
-                          <input
-                            className="form-control"
-                            type="file"
-                            name="edu_certificate"
-                            accept="application/pdf"
-                            onChange={handleFileChange}
-                          />
+                           <input
+                             className="form-control"
+                             type="file"
+                             name="edu_certificate"
+                             accept="application/pdf"
+                             onChange={handleFileChange}
+                             disabled={hasExistingDocs || docSubmitted}
+                           />
                           <div
                             className={`form-text small ${!documents.edu_certificate ? "text-danger" : ""}`}
                           >
@@ -730,13 +736,14 @@ const InterviewTest = () => {
                             Experience Document{" "}
                             <span className="text-danger">*</span>
                           </label>
-                          <input
-                            className="form-control"
-                            type="file"
-                            name="experience"
-                            accept="application/pdf,image/*"
-                            onChange={handleFileChange}
-                          />
+                           <input
+                             className="form-control"
+                             type="file"
+                             name="experience"
+                             accept="application/pdf,image/*"
+                             onChange={handleFileChange}
+                             disabled={hasExistingDocs || docSubmitted}
+                           />
                           <div
                             className={`form-text small ${!documents.experience ? "text-danger" : ""}`}
                           >
