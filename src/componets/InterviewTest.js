@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import axios from "axios";
 import {
   Container,
@@ -24,6 +24,8 @@ const api = axios.create({
 
 const API_START =
   "https://brainrock.in/brainrock/backend/api/start-candidate-interview-test/";
+const API_SUBMIT =
+  "https://brainrock.in/brainrock/backend/api/submit-candidate-interview-test/";
 
 const InterviewTest = () => {
   const { user } = useContext(AuthContext);
@@ -42,12 +44,38 @@ const InterviewTest = () => {
   const [submitting, setSubmitting] = useState(false);
   const [resultMsg, setResultMsg] = useState("");
 
+  const [showSwitchWarning, setShowSwitchWarning] = useState(false);
+  const [violationCount, setViolationCount] = useState(0);
+  const [autoSubmitted, setAutoSubmitted] = useState(false);
+
+  // Refs for tab/switch detection - using refs to avoid stale closures
+  const violationCountRef = useRef(0);
+  const isAutoSubmittingRef = useRef(false);
+  const lastViolationTimeRef = useRef(0);
+  const submitTestRef = useRef(null);
+  const answersRef = useRef({});
+  const testDataRef = useRef(null);
+  const pendingViolationRef = useRef(false);
+  const blurTimeRef = useRef(0);
+  const warningShownRef = useRef(false);
+  const totalQuestionsRef = useRef(0);
+
   // Auto-fill candidate ID from logged-in user's unique_id
   useEffect(() => {
     if (user?.unique_id) {
       setCandidateId(user.unique_id);
     }
   }, [user]);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  useEffect(() => {
+    testDataRef.current = testData;
+    totalQuestionsRef.current = testData?.questions?.length || 0;
+  }, [testData]);
 
   // Derived values
   const questions = testData?.questions || [];
@@ -58,25 +86,206 @@ const InterviewTest = () => {
     ? Math.round((answeredCount / totalQuestions) * 100)
     : 0;
 
-  // Warn when user tries to leave the page/tab while test is active
+  // ============================================================
+  // TAB/WINDOW SWITCH DETECTION - Core Security Logic
+  // ============================================================
   useEffect(() => {
     if (!testData) return;
 
+    const DEBOUNCE_MS = 2000; // 2 seconds debounce to prevent rapid false triggers
+
+    /**
+     * Process a violation - either show warning or auto-submit
+     */
+    const processViolation = () => {
+      const now = Date.now();
+      // Debounce - ignore if last violation was too recent
+      if (now - lastViolationTimeRef.current < DEBOUNCE_MS) return;
+      lastViolationTimeRef.current = now;
+
+      // Already auto-submitting, don't process again
+      if (isAutoSubmittingRef.current) return;
+
+      if (violationCountRef.current === 0) {
+        // FIRST VIOLATION - Mark it but don't show warning yet
+        // Warning will be shown when user returns to the tab
+        violationCountRef.current = 1;
+        setViolationCount(1);
+        pendingViolationRef.current = true;
+      } else {
+        // SECOND VIOLATION - Auto submit immediately
+        isAutoSubmittingRef.current = true;
+        setAutoSubmitted(true);
+        submitTestRef.current?.();
+      }
+    };
+
+    /**
+     * Show warning modal if needed (only when user is back on the tab)
+     */
+    const showWarningIfNeeded = () => {
+      // Only show warning if:
+      // 1. This is the first violation
+      // 2. Not already auto-submitting
+      // 3. Warning hasn't been shown for this violation yet
+      if (
+        violationCountRef.current === 1 &&
+        !isAutoSubmittingRef.current &&
+        !warningShownRef.current
+      ) {
+        warningShownRef.current = true;
+        setShowSwitchWarning(true);
+      }
+    };
+
+    /**
+     * Handle tab visibility change (switching tabs)
+     */
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        // User switched AWAY from this tab
+        processViolation();
+      } else if (document.visibilityState === "visible") {
+        // User came BACK to this tab
+        if (pendingViolationRef.current) {
+          pendingViolationRef.current = false;
+          showWarningIfNeeded();
+        }
+      }
+    };
+
+    /**
+     * Handle browser back/forward button
+     */
+    const handlePopState = () => {
+      // Prevent actual navigation by pushing state back
+      window.history.pushState(null, "", window.location.href);
+      
+      // Process violation
+      processViolation();
+      
+      // Show warning immediately since we prevented navigation
+      // (user is still on the page)
+      if (pendingViolationRef.current) {
+        pendingViolationRef.current = false;
+        showWarningIfNeeded();
+      }
+    };
+
+    /**
+     * Handle window blur (opening new browser, switching apps, clicking address bar)
+     */
+    const handleWindowBlur = () => {
+      blurTimeRef.current = Date.now();
+    };
+
+    /**
+     * Handle window focus (user came back to the window)
+     */
+    const handleWindowFocus = () => {
+      // Only process if:
+      // 1. Visibility is still "visible" (not a full tab switch - that's handled by visibilitychange)
+      // 2. Blur happened recently (user actually left and came back)
+      if (document.visibilityState === "visible" && blurTimeRef.current > 0) {
+        const blurDuration = Date.now() - blurTimeRef.current;
+        blurTimeRef.current = 0;
+
+        // If user was away for a noticeable time (more than 300ms)
+        // This catches: opening new browser window, switching to another app, etc.
+        if (blurDuration > 300) {
+          processViolation();
+          if (pendingViolationRef.current) {
+            pendingViolationRef.current = false;
+            showWarningIfNeeded();
+          }
+        }
+      }
+    };
+
+    /**
+     * Handle page unload/close (closing tab, closing browser, navigating away)
+     */
     const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = "";
+      const hasAnswers = Object.keys(answersRef.current).length > 0;
+      
+      if (violationCountRef.current === 0) {
+        // FIRST VIOLATION - Show browser's native warning dialog
+        e.preventDefault();
+        e.returnValue = "";
+        // Mark as first violation
+        violationCountRef.current = 1;
+        setViolationCount(1);
+      } else if (hasAnswers && !isAutoSubmittingRef.current) {
+        // SECOND VIOLATION - Try to auto-submit before the page unloads
+        isAutoSubmittingRef.current = true;
+        setAutoSubmitted(true);
+        
+        // Use sendBeacon for reliable submission during page unload
+        try {
+          const formattedAnswers = Object.keys(answersRef.current).map((qid) => ({
+            question_id: Number(qid),
+            selected: Number(answersRef.current[qid]),
+          }));
+          const payload = {
+            test_id: testDataRef.current?.test_id,
+            answers: formattedAnswers,
+          };
+          const blob = new Blob([JSON.stringify(payload)], {
+            type: "application/json",
+          });
+          navigator.sendBeacon(API_SUBMIT, blob);
+        } catch (err) {
+          console.error("Auto-submit on unload failed:", err);
+        }
+        
+        e.preventDefault();
+        e.returnValue = "Your test has been auto-submitted.";
+      }
     };
 
+    /**
+     * Handle mouse leaving the window (additional detection)
+     */
+    const handleMouseLeave = (e) => {
+      // Only trigger if mouse leaves through top of window (common when switching)
+      if (e.clientY <= 0 && document.visibilityState === "visible") {
+        // Don't process immediately, just note the time
+        // Actual processing happens in handleWindowBlur/Focus
+      }
+    };
+
+    // Initialize history state to prevent back navigation
+    window.history.pushState(null, "", window.location.href);
+
+    // Add all event listeners
+    window.addEventListener("popstate", handlePopState);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focus", handleWindowFocus);
     window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("mouseleave", handleMouseLeave);
 
+    // Cleanup function - remove all listeners
     return () => {
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("focus", handleWindowFocus);
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [testData]);
+  }, [testData]); // Only re-run when testData changes (test starts/ends)
+
+  // Reset auto-submitting flag when submitting state changes to false
+  useEffect(() => {
+    if (!submitting) {
+      isAutoSubmittingRef.current = false;
+    }
+  }, [submitting]);
 
   // Countdown timer per question — auto-advance when time runs out
   useEffect(() => {
-    if (!testData || !currentQuestion) return;
+    if (!testData || !currentQuestion || submitting) return;
     if (timeLeft <= 0) {
       if (currentIndex < totalQuestions - 1) {
         setCurrentIndex((i) => i + 1);
@@ -88,7 +297,7 @@ const InterviewTest = () => {
     }
     const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000);
     return () => clearTimeout(t);
-  }, [timeLeft, currentIndex, testData, currentQuestion, totalQuestions]);
+  }, [timeLeft, currentIndex, testData, currentQuestion, totalQuestions, submitting]);
 
   const handleStartTest = async () => {
     if (!candidateId.trim()) {
@@ -105,6 +314,14 @@ const InterviewTest = () => {
         setCurrentIndex(0);
         setAnswers({});
         setTimeLeft(30);
+        // Reset violation tracking
+        violationCountRef.current = 0;
+        lastViolationTimeRef.current = 0;
+        warningShownRef.current = false;
+        pendingViolationRef.current = false;
+        isAutoSubmittingRef.current = false;
+        setViolationCount(0);
+        setAutoSubmitted(false);
       } else {
         setErrorMsg(res.data?.message || "Failed to start test");
       }
@@ -120,10 +337,12 @@ const InterviewTest = () => {
   };
 
   const handleOptionSelect = (qid, optionIdx) => {
+    if (submitting) return;
     setAnswers((prev) => ({ ...prev, [qid]: optionIdx }));
   };
 
   const goToQuestion = (idx) => {
+    if (submitting) return;
     if (idx >= 0 && idx < totalQuestions) {
       setCurrentIndex(idx);
       setTimeLeft(30);
@@ -132,10 +351,15 @@ const InterviewTest = () => {
   };
 
   const handleNextClick = () => {
+    if (submitting) return;
     if (currentIndex < totalQuestions - 1) {
       goToQuestion(currentIndex + 1);
     } else {
-      if (window.confirm("You are on the last question. Do you want to submit the test?")) {
+      if (
+        window.confirm(
+          "You are on the last question. Do you want to submit the test?"
+        )
+      ) {
         handleSubmitTest();
       }
     }
@@ -143,6 +367,7 @@ const InterviewTest = () => {
 
   const handleSubmitTest = async () => {
     setShowSubmitModal(false);
+    setShowSwitchWarning(false);
     setSubmitting(true);
     setResultMsg("");
     try {
@@ -154,24 +379,21 @@ const InterviewTest = () => {
         test_id: testData?.test_id,
         answers: formattedAnswers,
       };
-      const res = await api.post(
-        "https://brainrock.in/brainrock/backend/api/submit-candidate-interview-test/",
-        payload
-      );
+      const res = await api.post(API_SUBMIT, payload);
       if (res.data && (res.data.success || res.data.score !== undefined)) {
         setResultMsg(
           `You scored ${res.data.score ?? 0} out of ${
             res.data.total_marks ?? totalQuestions
           } (${res.data.percentage ?? 0}%).`
         );
-        setShowResultModal(true);
       } else {
-        setResultMsg(res.data?.message || "Test submitted.");
-        setShowResultModal(true);
+        setResultMsg(res.data?.message || "Test submitted successfully.");
       }
+      setShowResultModal(true);
     } catch (err) {
       setResultMsg(
-        err.response?.data?.message || "Test submission failed. Please try again."
+        err.response?.data?.message ||
+          "Test submission failed. Please try again."
       );
       setShowResultModal(true);
     } finally {
@@ -179,12 +401,25 @@ const InterviewTest = () => {
     }
   };
 
+  // Keep submitTestRef updated with latest handleSubmitTest
+  submitTestRef.current = handleSubmitTest;
+
   const resetTest = () => {
     setTestData(null);
     setAnswers({});
     setCurrentIndex(0);
     setTimeLeft(30);
     setResultMsg("");
+    violationCountRef.current = 0;
+    lastViolationTimeRef.current = 0;
+    warningShownRef.current = false;
+    pendingViolationRef.current = false;
+    isAutoSubmittingRef.current = false;
+    blurTimeRef.current = 0;
+    setViolationCount(0);
+    setAutoSubmitted(false);
+    setShowSwitchWarning(false);
+    setShowResultModal(false);
   };
 
   return (
@@ -193,7 +428,6 @@ const InterviewTest = () => {
       <div className="interview-test-banner">
         <div className="p-2 interview-style">
           <h2 className="breadcrumb-title">Candidate Interview Test</h2>
-        
         </div>
       </div>
 
@@ -217,8 +451,9 @@ const InterviewTest = () => {
                       </div>
                       <h3 className="mt-3 mb-2">Candidate Interview Test</h3>
                       <p className="text-muted mb-0">
-                        Welcome{user?.full_name ? `, ${user.full_name}` : ""}!
-                        Click the button below to start your interview test.
+                        Welcome
+                        {user?.full_name ? `, ${user.full_name}` : ""}! Click
+                        the button below to start your interview test.
                       </p>
                     </div>
 
@@ -227,6 +462,38 @@ const InterviewTest = () => {
                       <div className="candidate-id-value">
                         {candidateId || "Loading..."}
                       </div>
+                    </div>
+
+                    {/* Important Instructions */}
+                    <div className="interview-instructions mb-4 p-3 bg-light rounded border">
+                      <h6 className="mb-2">
+                        <i className="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                        Important Instructions
+                      </h6>
+                      <ul className="mb-0 small text-muted">
+                        <li className="mb-1">
+                          <strong>Do NOT</strong> switch tabs during the test.
+                        </li>
+                        <li className="mb-1">
+                          <strong>Do NOT</strong> open new browser windows or
+                          tabs.
+                        </li>
+                        <li className="mb-1">
+                          <strong>Do NOT</strong> use the browser's back/forward
+                          buttons.
+                        </li>
+                        <li className="mb-1">
+                          <strong>Do NOT</strong> switch to another application
+                          while test is running.
+                        </li>
+                        <li className="mb-1 text-danger">
+                          <strong>1st violation:</strong> Warning will be shown.
+                        </li>
+                        <li className="text-danger">
+                          <strong>2nd violation:</strong> Test will be{" "}
+                          <strong>auto-submitted</strong> immediately.
+                        </li>
+                      </ul>
                     </div>
 
                     <div className="d-grid">
@@ -270,6 +537,35 @@ const InterviewTest = () => {
           {/* ===== QUIZ SCREEN ===== */}
           {testData && currentQuestion && (
             <>
+              {/* Violation Warning Banner */}
+              {violationCount > 0 && !autoSubmitted && (
+                <Alert
+                  variant="warning"
+                  className="mb-3 d-flex align-items-center"
+                >
+                  <i
+                    className="bi bi-exclamation-triangle-fill me-2"
+                    style={{ fontSize: "1.2rem" }}
+                  ></i>
+                  <div>
+                    <strong>Warning:</strong> You have{" "}
+                    <strong>{2 - violationCount}</strong>{" "}
+                    {2 - violationCount === 1 ? "warning" : "warnings"}{" "}
+                    remaining. Next violation will auto-submit your test!
+                  </div>
+                </Alert>
+              )}
+
+              {/* Auto-submit notification */}
+              {autoSubmitted && (
+                <Alert variant="danger" className="mb-3">
+                  <i className="bi bi-x-circle-fill me-2"></i>
+                  <strong>Test Auto-Submitted:</strong> You violated the test
+                  rules multiple times. Your test has been automatically
+                  submitted.
+                </Alert>
+              )}
+
               {/* Header / Progress */}
               <div className="interview-test-header mb-3">
                 <Row className="align-items-center g-2">
@@ -278,7 +574,14 @@ const InterviewTest = () => {
                       <Badge bg="primary" pill>
                         {testData.candidate_id}
                       </Badge>
-                      
+                      {violationCount > 0 && (
+                        <Badge bg="warning" text="dark" pill>
+                          <i className="bi bi-exclamation-triangle me-1"></i>
+                          {2 - violationCount}{" "}
+                          {2 - violationCount === 1 ? "warning" : "warnings"}{" "}
+                          left
+                        </Badge>
+                      )}
                     </div>
                     <div className="mt-1 small text-muted">
                       Question {currentIndex + 1} of {totalQuestions}
@@ -329,15 +632,18 @@ const InterviewTest = () => {
                         Q{currentIndex + 1}. {currentQuestion.question_text}
                       </h5>
 
-                      <div className="interview-timer danger">
+                      <div
+                        className={`interview-timer ${
+                          timeLeft <= 10 ? "danger" : ""
+                        }`}
+                      >
                         <i className="bi bi-clock me-2"></i>
                         Time Left: <strong>{timeLeft}s</strong>
                       </div>
 
                       <div className="interview-options">
                         {currentQuestion.options.map((opt, idx) => {
-                          const selected =
-                            answers[currentQuestion.id] === idx;
+                          const selected = answers[currentQuestion.id] === idx;
                           return (
                             <label
                               key={idx}
@@ -352,6 +658,7 @@ const InterviewTest = () => {
                                 onChange={() =>
                                   handleOptionSelect(currentQuestion.id, idx)
                                 }
+                                disabled={submitting}
                               />
                               <span className="option-letter">
                                 {String.fromCharCode(65 + idx)}
@@ -364,13 +671,23 @@ const InterviewTest = () => {
 
                       <div className="d-flex justify-content-end mt-4">
                         <Button
-                          variant={currentIndex < totalQuestions - 1 ? "primary" : "success"}
+                          variant={
+                            currentIndex < totalQuestions - 1
+                              ? "primary"
+                              : "success"
+                          }
                           onClick={handleNextClick}
+                          disabled={submitting}
                         >
                           {currentIndex < totalQuestions - 1 ? (
-                            <>Next <i className="bi bi-chevron-right ms-1"></i></>
+                            <>
+                              Next <i className="bi bi-chevron-right ms-1"></i>
+                            </>
                           ) : (
-                            <>Submit <i className="bi bi-check2-circle ms-1"></i></>
+                            <>
+                              Submit{" "}
+                              <i className="bi bi-check2-circle ms-1"></i>
+                            </>
                           )}
                         </Button>
                       </div>
@@ -394,8 +711,8 @@ const InterviewTest = () => {
                               className={`interview-nav-btn ${
                                 active ? "active" : ""
                               } ${answered ? "answered" : ""}`}
-                              onClick={answered ? undefined : () => goToQuestion(idx)}
-                              disabled={answered}
+                              onClick={() => goToQuestion(idx)}
+                              disabled={submitting}
                             >
                               {idx + 1}
                             </button>
@@ -403,6 +720,10 @@ const InterviewTest = () => {
                         })}
                       </div>
                       <div className="mt-3 small">
+                        <div className="d-flex align-items-center gap-2 mb-1">
+                          <span className="legend-box current"></span>
+                          <span>Current</span>
+                        </div>
                         <div className="d-flex align-items-center gap-2 mb-1">
                           <span className="legend-box answered"></span>
                           <span>Answered</span>
@@ -424,8 +745,9 @@ const InterviewTest = () => {
       {/* Submit Confirm Modal */}
       <Modal
         show={showSubmitModal}
-        onHide={() => setShowSubmitModal(false)}
+        onHide={() => !submitting && setShowSubmitModal(false)}
         centered
+        backdrop="static"
       >
         <Modal.Header closeButton>
           <Modal.Title>Submit Test?</Modal.Title>
@@ -470,7 +792,10 @@ const InterviewTest = () => {
       {/* Result Modal */}
       <Modal
         show={showResultModal}
-        onHide={() => setShowResultModal(false)}
+        onHide={() => {
+          setShowResultModal(false);
+          navigate("/");
+        }}
         centered
         backdrop="static"
       >
@@ -482,10 +807,79 @@ const InterviewTest = () => {
             <i className="bi bi-trophy"></i>
           </div>
           <h5>{resultMsg || "Your test has been submitted successfully."}</h5>
+          {autoSubmitted && (
+            <p className="text-muted mt-2 small">
+              <i className="bi bi-info-circle me-1"></i>
+              This test was auto-submitted due to multiple tab/window switch
+              violations.
+            </p>
+          )}
         </Modal.Body>
         <Modal.Footer className="justify-content-center">
-          <Button variant="secondary" onClick={() => navigate("/")}>
+          <Button variant="primary" onClick={() => navigate("/")}>
+            <i className="bi bi-house me-1"></i>
             Go to Home
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Switch/Leave Warning Modal - First Violation */}
+      <Modal
+        show={showSwitchWarning}
+        onHide={() => setShowSwitchWarning(false)}
+        centered
+        backdrop="static"
+        keyboard={false}
+      >
+        <Modal.Header className="bg-warning text-dark">
+          <Modal.Title>
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            Warning - Tab/Window Switch Detected
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="text-center mb-3">
+            <i
+              className="bi bi-shield-exclamation"
+              style={{ fontSize: "4rem", color: "#ffc107" }}
+            ></i>
+          </div>
+          <div className="alert alert-danger">
+            <strong>⚠️ FIRST WARNING!</strong>
+          </div>
+          <p className="mb-2">
+            You have switched away from the test window/tab. This is your{" "}
+            <strong>first and only warning</strong>.
+          </p>
+          <ul className="text-danger small">
+            <li>
+              Switching to another <strong>tab</strong>
+            </li>
+            <li>
+              Opening a <strong>new browser window</strong>
+            </li>
+            <li>
+              Using the browser's <strong>back/forward button</strong>
+            </li>
+            <li>
+              Switching to <strong>another application</strong>
+            </li>
+          </ul>
+          <p className="mt-3 mb-0">
+            <strong className="text-danger">
+              If you do ANY of the above again, your test will be AUTOMATICALLY
+              SUBMITTED with your current answers!
+            </strong>
+          </p>
+        </Modal.Body>
+        <Modal.Footer className="justify-content-center">
+          <Button
+            variant="warning"
+            size="lg"
+            onClick={() => setShowSwitchWarning(false)}
+          >
+            <i className="bi bi-check-circle me-2"></i>
+            I Understand - Continue Test
           </Button>
         </Modal.Footer>
       </Modal>

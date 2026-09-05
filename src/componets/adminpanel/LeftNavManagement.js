@@ -84,7 +84,7 @@ const LeftNavManagement = ({ sidebarOpen, setSidebarOpen, isMobile, isTablet }) 
         },
            {
             icon: <FaUserTie />,
-            label: "Scroe Management",
+            label: "Scores Details",
             path: "/CandidateInterviewTestScores",
             active: true,
         },
