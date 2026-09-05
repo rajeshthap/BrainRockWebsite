@@ -15,6 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import { Link } from "react-router-dom";
+import { FaSignOutAlt } from "react-icons/fa";
 import "../assets/css/InterviewTest.css";
 
 const api = axios.create({
@@ -50,7 +51,6 @@ const InterviewTest = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(20);
-  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [resultMsg, setResultMsg] = useState("");
@@ -360,7 +360,7 @@ const InterviewTest = () => {
         setCurrentIndex((i) => i + 1);
         setTimeLeft(20);
       } else {
-        setShowSubmitModal(true);
+        handleSubmitTest();
       }
       return;
     }
@@ -490,7 +490,6 @@ const InterviewTest = () => {
   };
 
   const handleSubmitTest = async () => {
-    setShowSubmitModal(false);
     setShowSwitchWarning(false);
     setSubmitting(true);
     setResultMsg("");
@@ -572,8 +571,20 @@ const InterviewTest = () => {
     <>
       {/* Banner */}
       <div className="interview-test-banner">
-        <div className="p-2 interview-style">
-          <h2 className="breadcrumb-title"> Interview Session Technical</h2>
+        <div className="p-2 interview-style d-flex justify-content-between align-items-center">
+          <h2 className="breadcrumb-title mb-0"> BrainRock Consulting Services</h2>
+          <button
+            type="button"
+            className="btn btn-outline-light btn-sm interview-logout-btn"
+            onClick={() => {
+              if (window.confirm("Are you sure you want to Logout?")) {
+                logout({ redirect: true });
+              }
+            }}
+          >
+            <FaSignOutAlt className="me-1" />
+            Logout
+          </button>
         </div>
       </div>
 
@@ -621,52 +632,46 @@ const InterviewTest = () => {
                           <label className="form-label small text-muted">
                             Identity Document <span className="text-danger">*</span>
                           </label>
-                          <input
-                            className="form-control"
-                            type="file"
-                            name="identity_docs"
-                            accept="application/pdf,image/*"
-                            onChange={handleFileChange}
-                          />
-                          <div className={`form-text small ${documents.identity_docs ? "text-success" : "text-danger"}`}>
-                            {documents.identity_docs
-                              ? "Identity document uploaded successfully."
-                              : "Upload a valid ID proof such as Aadhaar, PAN, Passport, or Driving License."}
-                          </div>
+                           <input
+                             className="form-control"
+                             type="file"
+                             name="identity_docs"
+                             accept="application/pdf,image/*"
+                             onChange={handleFileChange}
+                           />
+                           <div className={`form-text small ${!documents.identity_docs ? "text-danger" : ""}`}>
+                             {!documents.identity_docs && "Upload a valid ID proof such as Aadhaar, PAN, Passport, or Driving License."}
+                           </div>
                         </div>
                         <div className="col-md-6">
                           <label className="form-label small text-muted">
                             Education Certificate <span className="text-danger">*</span>
                           </label>
-                          <input
-                            className="form-control"
-                            type="file"
-                            name="edu_certificate"
-                            accept="application/pdf"
-                            onChange={handleFileChange}
-                          />
-                          <div className={`form-text small ${documents.edu_certificate ? "text-success" : "text-danger"}`}>
-                            {documents.edu_certificate
-                              ? "Education certificate uploaded successfully."
-                              : "Upload one PDF containing your education certificate(s). You may combine 10th, 12th, or any other education certificate into a single PDF."}
-                          </div>
+                           <input
+                             className="form-control"
+                             type="file"
+                             name="edu_certificate"
+                             accept="application/pdf"
+                             onChange={handleFileChange}
+                           />
+                           <div className={`form-text small ${!documents.edu_certificate ? "text-danger" : ""}`}>
+                             {!documents.edu_certificate && "Upload one PDF containing your education certificate(s). You may combine 10th, 12th, or any other education certificate into a single PDF."}
+                           </div>
                         </div>
                         <div className="col-md-6">
                           <label className="form-label small text-muted">
                             Experience Document <span className="text-danger">*</span>
                           </label>
-                          <input
-                            className="form-control"
-                            type="file"
-                            name="experience"
-                            accept="application/pdf,image/*"
-                            onChange={handleFileChange}
-                          />
-                          <div className={`form-text small ${documents.experience ? "text-success" : "text-danger"}`}>
-                            {documents.experience
-                              ? "Experience document uploaded successfully."
-                              : "Upload one PDF or image containing your experience certificate or relevant work proof."}
-                          </div>
+                           <input
+                             className="form-control"
+                             type="file"
+                             name="experience"
+                             accept="application/pdf,image/*"
+                             onChange={handleFileChange}
+                           />
+                           <div className={`form-text small ${!documents.experience ? "text-danger" : ""}`}>
+                             {!documents.experience && "Upload one PDF or image containing your experience certificate or relevant work proof."}
+                           </div>
                         </div>
                       </div>
                       {docError && (
@@ -855,17 +860,17 @@ const InterviewTest = () => {
                       </div>
                     </div>
                   </Col>
-                  <Col xs={12} md={3} className="text-md-end">
-                    <Button
-                      variant="success"
-                      onClick={() => setShowSubmitModal(true)}
-                      disabled={submitting || answeredCount === 0}
-                      className="w-100 w-md-auto"
-                    >
-                      <i className="bi bi-check2-circle me-1"></i>
-                      Submit Test
-                    </Button>
-                  </Col>
+                   <Col xs={12} md={3} className="text-md-end">
+                     <Button
+                       variant="success"
+                       onClick={handleSubmitTest}
+                       disabled={submitting || answeredCount === 0}
+                       className="w-100 w-md-auto"
+                     >
+                       <i className="bi bi-check2-circle me-1"></i>
+                       Submit Test
+                     </Button>
+                   </Col>
                 </Row>
               </div>
 
@@ -997,53 +1002,6 @@ const InterviewTest = () => {
           )}
         </Container>
       </div>
-
-      {/* Submit Confirm Modal */}
-      <Modal
-        show={showSubmitModal}
-        onHide={() => !submitting && setShowSubmitModal(false)}
-        centered
-        backdrop="static"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Submit Test?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          You have answered <strong>{answeredCount}</strong> out of{" "}
-          <strong>{totalQuestions}</strong> questions. Are you sure you want to
-          submit?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowSubmitModal(false)}
-            disabled={submitting}
-          >
-            Continue Test
-          </Button>
-          <Button
-            variant="success"
-            onClick={handleSubmitTest}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                  className="me-2"
-                />
-                Submitting...
-              </>
-            ) : (
-              "Yes, Submit"
-            )}
-          </Button>
-        </Modal.Footer>
-      </Modal>
 
       {/* Result Modal */}
       <Modal
