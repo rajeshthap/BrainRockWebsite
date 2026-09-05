@@ -45,6 +45,7 @@ const InterviewTest = () => {
   const [docError, setDocError] = useState("");
   const [docSubmitted, setDocSubmitted] = useState(false);
   const [docSuccess, setDocSuccess] = useState("");
+  const [existingDocs, setExistingDocs] = useState(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -76,6 +77,33 @@ const InterviewTest = () => {
       setCandidateId(user.unique_id);
     }
   }, [user]);
+
+  // Fetch existing candidate documents
+  useEffect(() => {
+    const fetchCandidateDetails = async () => {
+      if (!candidateId) return;
+      try {
+        const res = await api.get(`candidate/details/?candidate_id=${candidateId}`);
+        if (res.data?.status && res.data?.data) {
+          const docs = {
+            identity_docs: res.data.data.identity_docs || null,
+            edu_certificate: res.data.data.edu_certificate || null,
+            experience: res.data.data.experience || null,
+          };
+          setExistingDocs(docs);
+          const hasAllDocs = docs.identity_docs && docs.edu_certificate && docs.experience;
+          if (hasAllDocs) {
+            setDocSubmitted(true);
+            setDocSuccess("You have submitted documents. Start your test.");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch candidate details:", err);
+      }
+    };
+
+    fetchCandidateDetails();
+  }, [candidateId]);
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -376,6 +404,7 @@ const InterviewTest = () => {
       });
       setDocSubmitted(true);
       setDocSuccess("Documents submitted successfully. Start your test.");
+      setExistingDocs({ ...existingDocs, identity_docs: true, edu_certificate: true, experience: true });
     } catch (err) {
       const status = err.response?.status;
       if (status === 405) {
@@ -537,6 +566,8 @@ const InterviewTest = () => {
     return false;
   };
 
+  const hasExistingDocs = existingDocs?.identity_docs && existingDocs?.edu_certificate && existingDocs?.experience;
+
   return (
     <>
       {/* Banner */}
@@ -643,7 +674,12 @@ const InterviewTest = () => {
                           {docError}
                         </Alert>
                       )}
-                      {docSuccess && (
+                      {hasExistingDocs && (
+                        <Alert variant="success" className="mt-3 small">
+                          You have submitted documents. Start your test.
+                        </Alert>
+                      )}
+                      {docSuccess && !hasExistingDocs && (
                         <Alert variant="success" className="mt-3 small">
                           {docSuccess}
                         </Alert>
@@ -687,7 +723,11 @@ const InterviewTest = () => {
                         onClick={handleDocSubmit}
                         variant="outline-primary"
                         size="lg"
-                        disabled={docUploading || docSubmitted}
+                        disabled={
+                          docUploading ||
+                          docSubmitted ||
+                          (existingDocs?.identity_docs && existingDocs?.edu_certificate && existingDocs?.experience)
+                        }
                       >
                         {docUploading ? (
                           <>
@@ -717,7 +757,7 @@ const InterviewTest = () => {
                         onClick={handleStartTest}
                         variant="primary"
                         size="lg"
-                        disabled={loading || !candidateId || !docSubmitted}
+                        disabled={loading || !candidateId || (!docSubmitted && !(existingDocs?.identity_docs && existingDocs?.edu_certificate && existingDocs?.experience))}
                       >
                         {loading ? (
                           <>
