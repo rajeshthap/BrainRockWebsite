@@ -205,6 +205,7 @@ function AppContent() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/Login" element={<Login />} />
+        <Route path="/admin" element={<Login />} />
 
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
 

@@ -24,6 +24,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const MEDIA_BASE_URL = "https://brainrock.in/brainrock/backend";
+
 const CandidateInterviewTestScores = () => {
   const { user } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -168,8 +170,11 @@ const CandidateInterviewTestScores = () => {
                           <th>S.No</th>
                           <th>Test ID</th>
                           <th>Candidate ID</th>
+                          <th>Full Name</th>
                           <th>Email</th>
+                          <th>Phone</th>
                           <th>Score</th>
+                          <th>Total Q</th>
                           <th>Correct</th>
                           <th>Wrong</th>
                           <th>Status</th>
@@ -188,12 +193,19 @@ const CandidateInterviewTestScores = () => {
                               <td data-th="Candidate ID">
                                 {s.candidate?.candidate_id}
                               </td>
+                              <td data-th="Full Name">
+                                {s.candidate?.full_name || "N/A"}
+                              </td>
                               <td data-th="Email">{s.candidate?.email}</td>
+                              <td data-th="Phone">
+                                {s.candidate?.phone || "N/A"}
+                              </td>
                               <td data-th="Score">
                                 <strong>
                                   {s.score} / {s.total_questions}
                                 </strong>
                               </td>
+                              <td data-th="Total Q">{s.total_questions}</td>
                               <td data-th="Correct">
                                 <Badge bg="success">{s.correct_answers}</Badge>
                               </td>
@@ -230,7 +242,7 @@ const CandidateInterviewTestScores = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="11" className="text-center">
+                            <td colSpan="14" className="text-center">
                               No test scores available.
                             </td>
                           </tr>
@@ -286,27 +298,78 @@ const CandidateInterviewTestScores = () => {
             <>
               <Row className="mb-3">
                 <Col md={3}>
-                  <strong>Candidate:</strong>{" "}
-                  {selectedScore.candidate?.full_name ||
-                    selectedScore.candidate?.email}
+                  <strong>Test ID:</strong> {selectedScore.test_id}
                 </Col>
                 <Col md={3}>
-                  <strong>Score:</strong>{" "}
-                  {selectedScore.score}/{selectedScore.total_questions}
+                  <strong>Candidate ID:</strong>{" "}
+                  {selectedScore.candidate?.candidate_id}
+                </Col>
+                <Col md={3}>
+                  <strong>Full Name:</strong>{" "}
+                  {selectedScore.candidate?.full_name || "N/A"}
+                </Col>
+                <Col md={3}>
+                  <strong>Email:</strong> {selectedScore.candidate?.email}
+                </Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={3}>
+                  <strong>Phone:</strong> {selectedScore.candidate?.phone || "N/A"}
+                </Col>
+                <Col md={3}>
+                  <strong>Status:</strong>{" "}
+                  <Badge bg={selectedScore.status === "submitted" ? "success" : "warning"}>
+                    {selectedScore.status}
+                  </Badge>
+                </Col>
+                <Col md={3}>
+                  <strong>Score:</strong> {selectedScore.score}/{selectedScore.total_questions}
                 </Col>
                 <Col md={3}>
                   <strong>Correct:</strong>{" "}
-                  <Badge bg="success">
-                    {selectedScore.correct_answers}
-                  </Badge>
+                  <Badge bg="success">{selectedScore.correct_answers}</Badge>
                 </Col>
+              </Row>
+              <Row className="mb-3">
                 <Col md={3}>
                   <strong>Wrong:</strong>{" "}
                   <Badge bg="danger">{selectedScore.wrong_answers}</Badge>
                 </Col>
+                <Col md={3}>
+                  <strong>Started At:</strong> {formatDate(selectedScore.started_at)}
+                </Col>
+                <Col md={3}>
+                  <strong>Submitted At:</strong> {formatDate(selectedScore.submitted_at)}
+                </Col>
+                <Col md={3}>
+                  <strong>Identity Docs:</strong>{" "}
+                  {selectedScore.candidate?.identity_docs ? (
+                    <a href={`${MEDIA_BASE_URL}${selectedScore.candidate.identity_docs}`} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary py-0">View</a>
+                  ) : (
+                    "N/A"
+                  )}
+                </Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={3}>
+                  <strong>Edu Certificate:</strong>{" "}
+                  {selectedScore.candidate?.edu_certificate ? (
+                    <a href={`${MEDIA_BASE_URL}${selectedScore.candidate.edu_certificate}`} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary py-0">View</a>
+                  ) : (
+                    "N/A"
+                  )}
+                </Col>
+                <Col md={3}>
+                  <strong>Experience:</strong>{" "}
+                  {selectedScore.candidate?.experience ? (
+                    <a href={`${MEDIA_BASE_URL}${selectedScore.candidate.experience}`} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary py-0">View</a>
+                  ) : (
+                    "N/A"
+                  )}
+                </Col>
               </Row>
 
-              <h6 className="mt-3 text-success">
+              <h6 className="mt-4 text-success">
                 <i className="bi bi-check-circle me-2"></i>
                 Correct Questions ({selectedScore.correct_questions?.length || 0})
               </h6>
@@ -314,16 +377,32 @@ const CandidateInterviewTestScores = () => {
                 <table className="temp-rwd-table mb-4">
                   <tbody>
                     <tr>
+                      <th>#</th>
                       <th>Question</th>
-                      <th>Your Answer</th>
+                      <th>Options</th>
+                      <th>Correct Answer</th>
+                      <th>Marks</th>
                       <th>Category</th>
                     </tr>
-                    {selectedScore.correct_questions.map((q) => (
+                    {selectedScore.correct_questions.map((q, idx) => (
                       <tr key={q.question_id}>
+                        <td data-th="#">{idx + 1}</td>
                         <td data-th="Question">{q.question}</td>
-                        <td data-th="Your Answer">
+                        <td data-th="Options">
+                          <ul className="list-unstyled mb-0 small">
+                            {q.options?.map((opt, optIdx) => (
+                              <li key={optIdx} className="mb-1">
+                                <span className="badge bg-success me-2">{String.fromCharCode(65 + optIdx)}</span>
+                                {opt}
+                                {optIdx === q.correct_answer_index && <span className="text-success ms-1">✓</span>}
+                              </li>
+                            ))}
+                          </ul>
+                        </td>
+                        <td data-th="Correct Answer">
                           <Badge bg="success">{q.correct_answer}</Badge>
                         </td>
+                        <td data-th="Marks">{q.marks}</td>
                         <td data-th="Category">{q.category}</td>
                       </tr>
                     ))}
@@ -333,7 +412,7 @@ const CandidateInterviewTestScores = () => {
                 <p className="text-muted">No correct answers.</p>
               )}
 
-              <h6 className="mt-3 text-danger">
+              <h6 className="mt-4 text-danger">
                 <i className="bi bi-x-circle me-2"></i>
                 Wrong Questions ({selectedScore.wrong_questions?.length || 0})
               </h6>
@@ -341,20 +420,35 @@ const CandidateInterviewTestScores = () => {
                 <table className="temp-rwd-table">
                   <tbody>
                     <tr>
+                      <th>#</th>
                       <th>Question</th>
+                      <th>Options</th>
                       <th>Your Answer</th>
                       <th>Correct Answer</th>
+                      <th>Marks</th>
                       <th>Category</th>
                     </tr>
-                    {selectedScore.wrong_questions.map((q) => (
+                    {selectedScore.wrong_questions.map((q, idx) => (
                       <tr key={q.question_id}>
+                        <td data-th="#">{idx + 1}</td>
                         <td data-th="Question">{q.question}</td>
+                        <td data-th="Options">
+                          <ul className="list-unstyled mb-0 small">
+                            {q.options?.map((opt, optIdx) => (
+                              <li key={optIdx} className="mb-1">
+                                <span className={`badge me-2 ${optIdx === q.correct_answer_index ? 'bg-success' : optIdx === q.your_answer_index ? 'bg-danger' : 'bg-secondary'}`}>{String.fromCharCode(65 + optIdx)}</span>
+                                {opt}
+                              </li>
+                            ))}
+                          </ul>
+                        </td>
                         <td data-th="Your Answer">
                           <Badge bg="danger">{q.your_answer}</Badge>
                         </td>
                         <td data-th="Correct Answer">
                           <Badge bg="success">{q.correct_answer}</Badge>
                         </td>
+                        <td data-th="Marks">{q.marks}</td>
                         <td data-th="Category">{q.category}</td>
                       </tr>
                     ))}

@@ -28,7 +28,7 @@ const API_SUBMIT =
   "https://brainrock.in/brainrock/backend/api/submit-candidate-interview-test/";
 
 const InterviewTest = () => {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [candidateId, setCandidateId] = useState("");
@@ -36,9 +36,19 @@ const InterviewTest = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const [documents, setDocuments] = useState({
+    identity_docs: null,
+    edu_certificate: null,
+    experience: null,
+  });
+  const [docUploading, setDocUploading] = useState(false);
+  const [docError, setDocError] = useState("");
+  const [docSubmitted, setDocSubmitted] = useState(false);
+  const [docSuccess, setDocSuccess] = useState("");
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(20);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -283,13 +293,44 @@ const InterviewTest = () => {
     }
   }, [submitting]);
 
+  // Reset timer to 20s when a new test starts
+  useEffect(() => {
+    if (testData) {
+      setTimeLeft(20);
+    }
+  }, [testData]);
+
+  // Browser back-button logout confirmation
+  useEffect(() => {
+    if (!user) return;
+
+    const handlePopState = (event) => {
+      const confirmLogout = window.confirm("Are you sure you want to Logout?");
+      if (confirmLogout) {
+        if (logout) {
+          logout({ redirect: true });
+        }
+      } else {
+        event.preventDefault();
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [user, logout]);
+
   // Countdown timer per question — auto-advance when time runs out
   useEffect(() => {
     if (!testData || !currentQuestion || submitting) return;
     if (timeLeft <= 0) {
       if (currentIndex < totalQuestions - 1) {
         setCurrentIndex((i) => i + 1);
-        setTimeLeft(30);
+        setTimeLeft(20);
       } else {
         setShowSubmitModal(true);
       }
@@ -299,22 +340,76 @@ const InterviewTest = () => {
     return () => clearTimeout(t);
   }, [timeLeft, currentIndex, testData, currentQuestion, totalQuestions, submitting]);
 
+  const MAX_FILE_SIZE = 100 * 1024;
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      const file = files[0];
+      if (file.size > MAX_FILE_SIZE) {
+        setDocError(`${name.replace(/_/g, " ")} must be under 100KB.`);
+        return;
+      }
+      setDocuments((prev) => ({ ...prev, [name]: file }));
+      setDocSubmitted(false);
+    }
+  };
+
+  const handleDocSubmit = async () => {
+    if (!documents.identity_docs || !documents.edu_certificate || !documents.experience) {
+      setDocError("Please upload all required documents before submitting.");
+      return;
+    }
+
+    setDocError("");
+    setDocSuccess("");
+    setDocUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("candidate_id", candidateId.trim());
+      if (documents.identity_docs) formData.append("identity_docs", documents.identity_docs);
+      if (documents.edu_certificate) formData.append("edu_certificate", documents.edu_certificate);
+      if (documents.experience) formData.append("experience", documents.experience);
+
+      await api.put("candidate/documents/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setDocSubmitted(true);
+      setDocSuccess("Documents submitted successfully. Start your test.");
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 405) {
+        setDocError("Document upload is not available at this time. You may proceed to start the test.");
+        setDocSubmitted(true);
+        setDocSuccess("You may proceed to start your test.");
+      } else {
+        setDocError(
+          err.response?.data?.message ||
+            "Failed to upload documents. Please try again."
+        );
+      }
+    } finally {
+      setDocUploading(false);
+    }
+  };
+
   const handleStartTest = async () => {
     if (!candidateId.trim()) {
       setErrorMsg("Candidate ID not found. Please log in again.");
       return;
     }
+
     setLoading(true);
     setErrorMsg("");
     setResultMsg("");
+
     try {
       const res = await api.post(API_START, { candidate_id: candidateId.trim() });
       if (res.data && res.data.success) {
         setTestData(res.data);
         setCurrentIndex(0);
         setAnswers({});
-        setTimeLeft(30);
-        // Reset violation tracking
+        setTimeLeft(20);
         violationCountRef.current = 0;
         lastViolationTimeRef.current = 0;
         warningShownRef.current = false;
@@ -345,7 +440,7 @@ const InterviewTest = () => {
     if (submitting) return;
     if (idx >= 0 && idx < totalQuestions) {
       setCurrentIndex(idx);
-      setTimeLeft(30);
+      setTimeLeft(20);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -408,7 +503,7 @@ const InterviewTest = () => {
     setTestData(null);
     setAnswers({});
     setCurrentIndex(0);
-    setTimeLeft(30);
+    setTimeLeft(20);
     setResultMsg("");
     violationCountRef.current = 0;
     lastViolationTimeRef.current = 0;
@@ -422,12 +517,32 @@ const InterviewTest = () => {
     setShowResultModal(false);
   };
 
+  const getResultMessage = () => {
+    if (!resultMsg) return "Your test has been submitted successfully.";
+    const scoreMatch = resultMsg.match(/(\d+(?:\.\d+)?)%/);
+    if (scoreMatch) {
+      const percentage = parseFloat(scoreMatch[1]);
+      if (percentage >= 70) {
+        return `Congratulations! You are qualified. Our team will connect with you.`;
+      }
+    }
+    return `You scored below the qualifying mark. Please try again.`;
+  };
+
+  const isQualified = () => {
+    const scoreMatch = resultMsg.match(/(\d+(?:\.\d+)?)%/);
+    if (scoreMatch) {
+      return parseFloat(scoreMatch[1]) >= 70;
+    }
+    return false;
+  };
+
   return (
     <>
       {/* Banner */}
       <div className="interview-test-banner">
         <div className="p-2 interview-style">
-          <h2 className="breadcrumb-title">Candidate Interview Test</h2>
+          <h2 className="breadcrumb-title"> Interview Session Technical</h2>
         </div>
       </div>
 
@@ -449,7 +564,7 @@ const InterviewTest = () => {
                       <div className="interview-icon-wrap">
                         <i className="bi bi-person-badge"></i>
                       </div>
-                      <h3 className="mt-3 mb-2">Candidate Interview Test</h3>
+                      <h3 className="mt-3 mb-2">Interview Session Technical</h3>
                       <p className="text-muted mb-0">
                         Welcome
                         {user?.full_name ? `, ${user.full_name}` : ""}! Click
@@ -462,6 +577,77 @@ const InterviewTest = () => {
                       <div className="candidate-id-value">
                         {candidateId || "Loading..."}
                       </div>
+                    </div>
+
+                    {/* Document Upload */}
+                    <div className="mb-4">
+                      <h6 className="mb-3">
+                        <i className="bi bi-file-earmark-arrow-up me-2"></i>
+                        Upload Documents
+                      </h6>
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <label className="form-label small text-muted">
+                            Identity Document <span className="text-danger">*</span>
+                          </label>
+                          <input
+                            className="form-control"
+                            type="file"
+                            name="identity_docs"
+                            accept="application/pdf,image/*"
+                            onChange={handleFileChange}
+                          />
+                          <div className={`form-text small ${documents.identity_docs ? "text-success" : "text-danger"}`}>
+                            {documents.identity_docs
+                              ? "Identity document uploaded successfully."
+                              : "Upload a valid ID proof such as Aadhaar, PAN, Passport, or Driving License."}
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label small text-muted">
+                            Education Certificate <span className="text-danger">*</span>
+                          </label>
+                          <input
+                            className="form-control"
+                            type="file"
+                            name="edu_certificate"
+                            accept="application/pdf"
+                            onChange={handleFileChange}
+                          />
+                          <div className={`form-text small ${documents.edu_certificate ? "text-success" : "text-danger"}`}>
+                            {documents.edu_certificate
+                              ? "Education certificate uploaded successfully."
+                              : "Upload one PDF containing your education certificate(s). You may combine 10th, 12th, or any other education certificate into a single PDF."}
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label small text-muted">
+                            Experience Document <span className="text-danger">*</span>
+                          </label>
+                          <input
+                            className="form-control"
+                            type="file"
+                            name="experience"
+                            accept="application/pdf,image/*"
+                            onChange={handleFileChange}
+                          />
+                          <div className={`form-text small ${documents.experience ? "text-success" : "text-danger"}`}>
+                            {documents.experience
+                              ? "Experience document uploaded successfully."
+                              : "Upload one PDF or image containing your experience certificate or relevant work proof."}
+                          </div>
+                        </div>
+                      </div>
+                      {docError && (
+                        <Alert variant="danger" className="mt-3 small">
+                          {docError}
+                        </Alert>
+                      )}
+                      {docSuccess && (
+                        <Alert variant="success" className="mt-3 small">
+                          {docSuccess}
+                        </Alert>
+                      )}
                     </div>
 
                     {/* Important Instructions */}
@@ -496,12 +682,42 @@ const InterviewTest = () => {
                       </ul>
                     </div>
 
-                    <div className="d-grid">
+                    <div className="d-grid gap-2">
+                      <Button
+                        onClick={handleDocSubmit}
+                        variant="outline-primary"
+                        size="lg"
+                        disabled={docUploading || docSubmitted}
+                      >
+                        {docUploading ? (
+                          <>
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              aria-hidden="true"
+                              className="me-2"
+                            />
+                            Uploading Documents...
+                          </>
+                        ) : docSubmitted ? (
+                          <>
+                            <i className="bi bi-check-circle me-2"></i>
+                            Documents Submitted
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-file-earmark-arrow-up me-2"></i>
+                            Submit Documents
+                          </>
+                        )}
+                      </Button>
                       <Button
                         onClick={handleStartTest}
                         variant="primary"
                         size="lg"
-                        disabled={loading || !candidateId}
+                        disabled={loading || !candidateId || !docSubmitted}
                       >
                         {loading ? (
                           <>
@@ -806,7 +1022,12 @@ const InterviewTest = () => {
           <div className="result-icon mb-3">
             <i className="bi bi-trophy"></i>
           </div>
-          <h5>{resultMsg || "Your test has been submitted successfully."}</h5>
+          <h5>{getResultMessage()}</h5>
+          {resultMsg && (
+            <p className="text-muted mt-2 small">
+              {resultMsg}
+            </p>
+          )}
           {autoSubmitted && (
             <p className="text-muted mt-2 small">
               <i className="bi bi-info-circle me-1"></i>
@@ -816,10 +1037,17 @@ const InterviewTest = () => {
           )}
         </Modal.Body>
         <Modal.Footer className="justify-content-center">
-          <Button variant="primary" onClick={() => navigate("/")}>
-            <i className="bi bi-house me-1"></i>
-            Go to Home
-          </Button>
+          {isQualified() ? (
+            <Button variant="primary" onClick={() => navigate("/")}>
+              <i className="bi bi-house me-1"></i>
+              Go to Home
+            </Button>
+          ) : (
+            <Button variant="secondary" onClick={() => navigate("/Login")}>
+              <i className="bi bi-box-arrow-left me-1"></i>
+              Go to Login
+            </Button>
+          )}
         </Modal.Footer>
       </Modal>
 

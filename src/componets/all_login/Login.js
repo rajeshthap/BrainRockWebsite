@@ -12,8 +12,17 @@ export default function Login() {
   const [formData, setFormData] = useState({
     email_or_phone: "",
     password: "",
-    role: "",
+    role: "candidate",
   });
+  const isAdminRoute =
+    typeof location !== "undefined" &&
+    location.pathname.toLowerCase().includes("/admin");
+
+  useEffect(() => {
+    if (isAdminRoute) {
+      setFormData((prev) => ({ ...prev, role: "admin" }));
+    }
+  }, [isAdminRoute]);
   const [showPassword, setShowPassword] = useState(false);
   const [showModifyAlert, setShowModifyAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -134,9 +143,11 @@ export default function Login() {
     );
 
     if (!result || !result.success) {
-      setAlertMessage(
-        result?.error?.message || "Login failed. Please check your credentials."
-      );
+      const errorMessage =
+        result?.error?.message ||
+        result?.error?.detail ||
+        "Login failed. Please check your credentials.";
+      setAlertMessage(errorMessage);
       setShowModifyAlert(true);
     }
   };
@@ -220,32 +231,17 @@ export default function Login() {
                       <Form.Label className="br-label">
                         Role <span className="br-span-star">*</span>
                       </Form.Label>
-                      <Form.Select
+                      <Form.Control
+                        type="text"
                         name="role"
                         value={formData.role}
                         onChange={handleChange}
                         className="br-form-control"
-                        disabled={authLoading}
-                      >
-                        <option value="Select Role">Select Role</option>
-                        <option value="admin">Admin</option>
-                        <option value="candidate">Candidate</option>
-                      </Form.Select>
+                        readOnly
+                      />
                     </Form.Group>
 
-                    <div>
-                      <span
-                        className="forgot-btn mx-1"
-                        type="button"
-                        onClick={() => navigate("/ForgotPassword")}
-                        disabled={authLoading}
-                        style={{
-                          cursor: authLoading ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        Forgot Password ?
-                      </span>
-                    </div>
+                    
 
                     {/* Buttons */}
                     <div className="br-btn-submit text-center mt-3">

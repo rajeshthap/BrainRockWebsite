@@ -23,6 +23,27 @@ function AdminHeader({ toggleSidebar, searchTerm, setSearchTerm }) {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!user) return;
+
+    const handlePopState = (event) => {
+      const confirmLogout = window.confirm("Are you sure you want to Logout?");
+      if (confirmLogout) {
+        logout({ redirect: true });
+      } else {
+        event.preventDefault();
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [user, logout]);
+
   // State for user details
   const [userDetails, setUserDetails] = useState({
     first_name: "",
