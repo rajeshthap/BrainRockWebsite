@@ -483,11 +483,12 @@ const InterviewTest = () => {
         setErrorMsg(res.data?.message || "Failed to start test");
       }
     } catch (err) {
-      setErrorMsg(
+      const message =
         err.response?.data?.message ||
-          err.message ||
-          "Failed to start the test. Please try again.",
-      );
+        err.message ||
+        "Failed to start the test. Please try again.";
+      setErrorMsg(message);
+      alert(message);
     } finally {
       setLoading(false);
     }
