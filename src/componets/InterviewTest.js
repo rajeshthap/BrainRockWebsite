@@ -501,6 +501,7 @@ const InterviewTest = () => {
 
   const goToQuestion = (idx) => {
     if (submitting) return;
+    if (idx < currentIndex) return;
     if (idx >= 0 && idx < totalQuestions) {
       setCurrentIndex(idx);
       setTimeLeft(20);
@@ -778,6 +779,9 @@ const InterviewTest = () => {
                       </h6>
                       <ul className="mb-0 small text-muted">
                         <li className="mb-1">
+                           <li className="mb-1">
+                          <strong>Note</strong> Each question has a 20-second time limit. You cannot go back to the previous question.
+                        </li>
                           <strong>Do NOT</strong> switch tabs during the test.
                         </li>
                         <li className="mb-1">
@@ -995,6 +999,7 @@ const InterviewTest = () => {
                       <div className="interview-options">
                         {currentQuestion.options.map((opt, idx) => {
                           const selected = answers[currentQuestion.id] === idx;
+                          const isAnswered = answers[currentQuestion.id] !== undefined;
                           return (
                             <label
                               key={idx}
@@ -1009,7 +1014,7 @@ const InterviewTest = () => {
                                 onChange={() =>
                                   handleOptionSelect(currentQuestion.id, idx)
                                 }
-                                disabled={submitting}
+                                disabled={submitting || isAnswered}
                               />
                               <span className="option-letter">
                                 {String.fromCharCode(65 + idx)}
@@ -1055,15 +1060,18 @@ const InterviewTest = () => {
                         {questions.map((q, idx) => {
                           const answered = answers[q.id] !== undefined;
                           const active = idx === currentIndex;
+                          const skipped = idx < currentIndex && !answered;
                           return (
                             <button
                               type="button"
                               key={q.id}
                               className={`interview-nav-btn ${
                                 active ? "active" : ""
-                              } ${answered ? "answered" : ""}`}
+                              } ${answered ? "answered" : ""} ${
+                                skipped ? "skipped" : ""
+                              }`}
                               onClick={() => goToQuestion(idx)}
-                              disabled={submitting}
+                              disabled={submitting || answered || skipped}
                             >
                               {idx + 1}
                             </button>
@@ -1078,6 +1086,10 @@ const InterviewTest = () => {
                         <div className="d-flex align-items-center gap-2 mb-1">
                           <span className="legend-box answered"></span>
                           <span>Answered</span>
+                        </div>
+                        <div className="d-flex align-items-center gap-2 mb-1">
+                          <span className="legend-box skipped"></span>
+                          <span>Skipped</span>
                         </div>
                         <div className="d-flex align-items-center gap-2">
                           <span className="legend-box"></span>

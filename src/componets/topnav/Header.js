@@ -100,7 +100,7 @@ function Header() {
                 <span>Khelo aur Jeeto</span>
               </Link>{" "}
             </li> */}
-            <li className="">
+            {/* <li className="">
               <a
                 href="https://brjobsedu.com/login"
                 target="_blank"
@@ -109,7 +109,7 @@ function Header() {
               >
                 <span>Course Login</span>
               </a>
-            </li>
+            </li> */}
             <li className="">
               <button
                 type="button"
@@ -177,7 +177,7 @@ function Header() {
                 <span>Khelo aur Jeeto</span>
               </Link>{" "}
             </li> */}
-            <li className="">
+            {/* <li className="">
               {" "}
               <a
                 href="https://brjobsedu.com/login"
@@ -187,7 +187,7 @@ function Header() {
               >
                 <span>Course Login</span>
               </a>
-            </li>
+            </li> */}
             <li className="">
               {" "}
               <button
