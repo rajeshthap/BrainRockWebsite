@@ -9,11 +9,13 @@ export default function Login() {
   const { login, loading: authLoading, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  
   const [formData, setFormData] = useState({
     email_or_phone: "",
     password: "",
     role: "candidate",
   });
+  
   const isAdminRoute =
     typeof location !== "undefined" &&
     location.pathname.toLowerCase().includes("/admin");
@@ -23,10 +25,12 @@ export default function Login() {
       setFormData((prev) => ({ ...prev, role: "admin" }));
     }
   }, [isAdminRoute]);
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showModifyAlert, setShowModifyAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [courses, setCourses] = useState([]);
+  const [showCandidateWarning, setShowCandidateWarning] = useState(false);
 
   // Function to clear all cookies
   const clearAllCookies = () => {
@@ -43,21 +47,19 @@ export default function Login() {
   // This effect runs when the component mounts to clear cookies
   useEffect(() => {
     clearAllCookies();
-
-    // If there's a logout function in AuthContext, call it
     if (logout) {
-      // When mounting the Login page, clear auth without navigating.
       logout({ redirect: false });
     }
-
-    // Clear any location state to prevent redirects to previous pages
     window.history.replaceState({}, document.title);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Combined useEffect for handling redirection based on user role
   useEffect(() => {
     if (user) {
-      // First check for admin role (highest priority)
+      if (showCandidateWarning && showModifyAlert) {
+        return;
+      }
+
       if (user.role === "admin") {
         navigate("/WebsiteManagement", {
           state: { unique_id: user.id },
@@ -66,7 +68,6 @@ export default function Login() {
         return;
       }
 
-      // Check for candidate role - Redirect to InterviewTest
       if (user.role === "candidate") {
         navigate("/InterviewTest", {
           state: { unique_id: user.unique_id },
@@ -75,7 +76,6 @@ export default function Login() {
         return;
       }
 
-      // Check for training role
       if (user.role === "training") {
         navigate("/TrainingDashBoard", {
           state: { unique_id: user.unique_id },
@@ -84,7 +84,6 @@ export default function Login() {
         return;
       }
 
-      // Check for khelo-aur-jeeto role
       if (user.role === "khelo-aur-jeeto") {
         navigate("/UserDashBoard", {
           state: { unique_id: user.id },
@@ -93,7 +92,6 @@ export default function Login() {
         return;
       }
 
-      // Check if user role matches any course name
       const matchingCourse = courses.find(
         (course) =>
           course.course_name.toLowerCase() === user.role.toLowerCase()
@@ -107,24 +105,28 @@ export default function Login() {
         return;
       }
 
-      // Default redirect to HR Dashboard for all other roles
       navigate("/", {
         state: { unique_id: user.id },
         replace: true,
       });
     }
-  }, [user, navigate, courses]);
+  }, [user, navigate, courses, showCandidateWarning, showModifyAlert]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleAlertClose = () => {
+    setShowModifyAlert(false);
+    setShowCandidateWarning(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setAlertMessage("");
+    setShowModifyAlert(false);
 
-    // Validate all fields are filled and role is not the default "Select Role"
     if (
       !formData.email_or_phone ||
       !formData.password ||
@@ -136,17 +138,79 @@ export default function Login() {
       return;
     }
 
-    const result = await login(
-      formData.email_or_phone,
-      formData.password,
-      formData.role
-    );
+    try {
+      const result = await login(
+        formData.email_or_phone,
+        formData.password,
+        formData.role
+      );
 
-    if (!result || !result.success) {
-      const errorMessage =
-        result?.error?.message ||
-        result?.error?.detail ||
-        "Login failed. Please check your credentials.";
+      if (!result || !result.success) {
+        let errorMessage = "Login failed. Please check your credentials.";
+        
+        // Strictly extract ONLY the text message from the API error
+        if (result?.error) {
+          if (typeof result.error === "string") {
+            errorMessage = result.error;
+          } else if (typeof result.error === "object" && result.error !== null) {
+            if (typeof result.error.message === "string") {
+              errorMessage = result.error.message;
+            } else if (typeof result.error.detail === "string") {
+              errorMessage = result.error.detail;
+            } else if (Array.isArray(result.error.non_field_errors)) {
+              errorMessage = result.error.non_field_errors.join(" ");
+            } else if (Array.isArray(result.error)) {
+              errorMessage = result.error.join(" ");
+            } else {
+              // Fallback if it's an unknown object structure
+              const firstVal = Object.values(result.error).find(
+                (v) => typeof v === "string" || Array.isArray(v)
+              );
+              if (typeof firstVal === "string") errorMessage = firstVal;
+              else if (Array.isArray(firstVal)) errorMessage = firstVal.join(" ");
+            }
+          }
+        } else if (result?.message && typeof result.message === "string") {
+          errorMessage = result.message;
+        } else if (result?.detail && typeof result.detail === "string") {
+          errorMessage = result.detail;
+        }
+
+        // Show ONLY the exact error text message
+        setAlertMessage(errorMessage);
+        setShowModifyAlert(true);
+      } else {
+        // Login was successful
+        if (formData.role === "candidate") {
+          setAlertMessage("Login successfully. Candidate login will expire after 24 hours.");
+          setShowModifyAlert(true);
+          setShowCandidateWarning(true);
+        }
+      }
+    } catch (error) {
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      
+      // Catch block to handle network/axios errors and show exact text only
+      if (error?.response?.data) {
+        const errData = error.response.data;
+        if (typeof errData === "string") {
+          errorMessage = errData;
+        } else if (typeof errData === "object" && errData !== null) {
+          if (typeof errData.detail === "string") errorMessage = errData.detail;
+          else if (typeof errData.message === "string") errorMessage = errData.message;
+          else if (Array.isArray(errData.non_field_errors)) errorMessage = errData.non_field_errors.join(" ");
+          else {
+            const firstVal = Object.values(errData).find(
+              (v) => typeof v === "string" || Array.isArray(v)
+            );
+            if (typeof firstVal === "string") errorMessage = firstVal;
+            else if (Array.isArray(firstVal)) errorMessage = firstVal.join(" ");
+          }
+        }
+      } else if (error?.message && typeof error.message === "string") {
+        errorMessage = error.message;
+      }
+
       setAlertMessage(errorMessage);
       setShowModifyAlert(true);
     }
@@ -241,8 +305,6 @@ export default function Login() {
                       />
                     </Form.Group>
 
-                    
-
                     {/* Buttons */}
                     <div className="br-btn-submit text-center mt-3">
                       <Button
@@ -260,10 +322,12 @@ export default function Login() {
           </div>
         </Container>
       </div>
+      
+      {/* Modify Alert Box */}
       <ModifyAlert
         message={alertMessage}
         show={showModifyAlert}
-        setShow={setShowModifyAlert}
+        setShow={handleAlertClose}
       />
     </>
   );
