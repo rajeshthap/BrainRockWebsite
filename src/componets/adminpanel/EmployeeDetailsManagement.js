@@ -164,6 +164,71 @@ const EmployeeDetailsManagement = () => {
     }
   };
 
+  const clearSelectedFile = (fieldName, index = null) => {
+    setFiles((prev) => {
+      const currentValue = prev[fieldName];
+      if (Array.isArray(currentValue)) {
+        if (index === null) {
+          return { ...prev, [fieldName]: [] };
+        }
+        return {
+          ...prev,
+          [fieldName]: currentValue.filter(
+            (_, fileIndex) => fileIndex !== index,
+          ),
+        };
+      }
+
+      return { ...prev, [fieldName]: null };
+    });
+  };
+
+  const renderSelectedUploadFiles = (fieldName) => {
+    const currentValue = files[fieldName];
+
+    if (Array.isArray(currentValue)) {
+      if (!currentValue.length) return null;
+
+      return (
+        <div className="d-flex flex-wrap gap-2 mb-2">
+          {currentValue.map((file, index) => (
+            <div key={`${file.name}-${index}`} className="selected-file-chip">
+              <span className="selected-file-name">{file.name}</span>
+              <Button
+                type="button"
+                variant="outline-danger"
+                size="sm"
+                className="ms-2"
+                onClick={() => clearSelectedFile(fieldName, index)}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (!currentValue) return null;
+
+    return (
+      <div className="d-flex flex-wrap gap-2 mb-2">
+        <div className="selected-file-chip">
+          <span className="selected-file-name">{currentValue.name}</span>
+          <Button
+            type="button"
+            variant="outline-danger"
+            size="sm"
+            className="ms-2"
+            onClick={() => clearSelectedFile(fieldName)}
+          >
+            Remove
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -233,13 +298,11 @@ const EmployeeDetailsManagement = () => {
         payload.append("id", selectedEmployee.id);
         response = await axios.put(API_URL, payload, {
           withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
         });
         setMessage("Employee updated successfully!");
         setActiveTab("manage"); // Redirect to manage tab on successful update
       } else {
         response = await axios.post(API_URL, payload, {
-          headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
         });
         setMessage("Employee added successfully!");
@@ -251,7 +314,13 @@ const EmployeeDetailsManagement = () => {
       fetchEmployees(); // Refresh the list
     } catch (error) {
       console.error("Submission error:", error.response?.data || error.message);
-      setMessage(error.response?.data?.message || "An error occurred.");
+      const backendMessage =
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        error.response?.data?.error ||
+        error.message ||
+        "An error occurred.";
+      setMessage(backendMessage);
       setVariant("danger");
       setShowAlert(true);
     } finally {
@@ -353,16 +422,28 @@ const EmployeeDetailsManagement = () => {
       "Diksha Enterprises",
       "U.S. Infotech", // Added to use the black theme
     ];
-    
+
     const shouldUseBlackTheme = firmsForBlackTheme.includes(firmName);
     const isZeeEmployee = firmName === "ZEE - Zero Error Enterprises";
     const isDikshaEmployee = firmName === "Diksha Enterprises";
     const isUSInfotechEmployee = firmName === "U.S. Infotech";
     const isBrainrockEmployee = firmName === "Brainrock Consulting Services";
-    const accentColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#c1121f" : "#0b3d91");
-    const borderColor = shouldUseBlackTheme ? "#000000" : (isZeeEmployee ? "#f2b8bf" : "#d7e1f0");
-    const keyBgColor = shouldUseBlackTheme ? "#f5f5f5" : (isZeeEmployee ? "#fff3f4" : "#f4f8ff");
-    
+    const accentColor = shouldUseBlackTheme
+      ? "#000000"
+      : isZeeEmployee
+        ? "#c1121f"
+        : "#0b3d91";
+    const borderColor = shouldUseBlackTheme
+      ? "#000000"
+      : isZeeEmployee
+        ? "#f2b8bf"
+        : "#d7e1f0";
+    const keyBgColor = shouldUseBlackTheme
+      ? "#f5f5f5"
+      : isZeeEmployee
+        ? "#fff3f4"
+        : "#f4f8ff";
+
     let pdfTitle;
     if (isDikshaEmployee) {
       pdfTitle = "Diksha Enterprises Employee Details";
@@ -376,18 +457,21 @@ const EmployeeDetailsManagement = () => {
       ? `<img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
       : isZeeEmployee
         ? `<img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" />`
-        : ''; // No logo for other firms
+        : ""; // No logo for other firms
 
     // Define specific styles for body profile pictures
     const bodyProfilePicStyle = `width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 3px solid ${borderColor};`;
-    const defaultHeaderProfilePicStyle = isZeeEmployee ? "width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 3px solid #e6edf7;" : "width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #e6edf7;";
+    const defaultHeaderProfilePicStyle = isZeeEmployee
+      ? "width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 3px solid #e6edf7;"
+      : "width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #e6edf7;";
 
     const profilePicHtml = employee.profile_pic
       ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" style="${isDikshaEmployee || isUSInfotechEmployee ? bodyProfilePicStyle : defaultHeaderProfilePicStyle}" />`
       : `<div style="width: 60px; height: 60px; border-radius: ${isZeeEmployee ? "8px" : "50%"}; background-color: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; color: #777; font-weight: bold; font-size: 10px; border: 3px solid ${shouldUseBlackTheme ? "#000000" : "#e6edf7"};">Locked</div>`;
 
     const renderDocPreview = (docPath, title) => {
-      if (!docPath) return `<tr><td class="key">${title}</td><td>Document Locked</td></tr>`;
+      if (!docPath)
+        return `<tr><td class="key">${title}</td><td>Document Locked</td></tr>`;
       const fullUrl = `${DOC_BASE_URL}${docPath}`;
       const fileName = docPath.split("/").pop();
       const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(docPath);
@@ -444,16 +528,21 @@ const EmployeeDetailsManagement = () => {
     ];
 
     let mainTableRows = allProfileRows;
-    let specialLayoutEmpIdHtml = '';
+    let specialLayoutEmpIdHtml = "";
 
-    if (isDikshaEmployee) { // Only apply special Emp ID logic for Diksha
-        // Extract Employee ID for separate display
-        const empIdRowIndex = allProfileRows.findIndex(row => row[0] === "Employee ID");
-        if (empIdRowIndex !== -1) {
-            const empIdRow = allProfileRows[empIdRowIndex];
-            specialLayoutEmpIdHtml = `<p style="margin-top: 10px; font-weight: bold; font-size: 12px; color: ${accentColor};">Emp ID: ${escapeHtml(empIdRow[1])}</p>`;
-            mainTableRows = allProfileRows.filter((row, index) => index !== empIdRowIndex);
-        }
+    if (isDikshaEmployee) {
+      // Only apply special Emp ID logic for Diksha
+      // Extract Employee ID for separate display
+      const empIdRowIndex = allProfileRows.findIndex(
+        (row) => row[0] === "Employee ID",
+      );
+      if (empIdRowIndex !== -1) {
+        const empIdRow = allProfileRows[empIdRowIndex];
+        specialLayoutEmpIdHtml = `<p style="margin-top: 10px; font-weight: bold; font-size: 12px; color: ${accentColor};">Emp ID: ${escapeHtml(empIdRow[1])}</p>`;
+        mainTableRows = allProfileRows.filter(
+          (row, index) => index !== empIdRowIndex,
+        );
+      }
     }
 
     const tableMarkup = mainTableRows
@@ -640,15 +729,19 @@ const EmployeeDetailsManagement = () => {
                           <div class="pdf-subtitle">Generated for ${escapeHtml(employee.emp_name || "Employee")}</div>
                           <button class="print-btn" onclick="window.print()">Print Report</button>
                       </div>
-                      ${!isDikshaEmployee ? ( // Show header photo for everyone except Diksha
-                          employee.profile_pic
-                              ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
-                              : '<div class="profile-pic-placeholder-header">Locked</div>'
-                      ) : ''}
+                      ${
+                        !isDikshaEmployee // Show header photo for everyone except Diksha
+                          ? employee.profile_pic
+                            ? `<img src="${DOC_BASE_URL}${employee.profile_pic}" alt="Profile Picture" class="profile-pic-header" />`
+                            : '<div class="profile-pic-placeholder-header">Locked</div>'
+                          : ""
+                      }
                   </div>
               </div>
               <div class="pdf-body">
-                  ${isUSInfotechEmployee ? `
+                  ${
+                    isUSInfotechEmployee
+                      ? `
                     <div style="display: flex; gap: 24px; align-items: flex-start;">
                       <!-- Left Column: Profile Info -->
                       <div style="flex: 1.5;">
@@ -668,20 +761,26 @@ const EmployeeDetailsManagement = () => {
                         </table>
                       </div>
                     </div>
-                  ` : `
+                  `
+                      : `
                     <h2 class="section-title">Profile Information</h2>
-                    ${isDikshaEmployee ? `
+                    ${
+                      isDikshaEmployee
+                        ? `
                       <div style="display: flex; gap: 20px; align-items: flex-start;">
                         <div style="flex: 1;"><table>${tableMarkup}</table></div>
                         <div style="flex: 0 0 120px; text-align: center;">${profilePicHtml}${specialLayoutEmpIdHtml}</div>
                       </div>
-                      <table>` : `<table>${tableMarkup}`}
+                      <table>`
+                        : `<table>${tableMarkup}`
+                    }
                       ${renderDocPreview(employee.govt_document, `${escapeHtml(employee.govt_doc_type ? employee.govt_doc_type.toUpperCase() : "GOVT")} Document`)}
                       ${renderDocListHtmlForPdf(employee.educational_documents, "Educational Documents")}
                       ${renderDocListHtmlForPdf(employee.experience_certificates, "Experience Certificates")}
                       ${renderDocListHtmlForPdf(employee.professional_certificates, "Professional Certificates")}
                     </table>
-                  `}
+                  `
+                  }
               </div>
           </div>
       </body>
@@ -782,7 +881,8 @@ const EmployeeDetailsManagement = () => {
         : "#f4f8ff";
 
     const employeeRows = employees
-      .map((emp, index) => `
+      .map(
+        (emp, index) => `
         <tr>
           <td class="key">${index + 1}</td>
           <td>${escapeHtml(emp.emp_id || "N/A")}</td>
@@ -790,7 +890,8 @@ const EmployeeDetailsManagement = () => {
           <td>${escapeHtml(emp.work_experience || "N/A")}</td>
           <td>${escapeHtml(emp.designation || "N/A")}</td>
         </tr>
-      `)
+      `,
+      )
       .join("");
 
     return `
@@ -913,11 +1014,12 @@ const EmployeeDetailsManagement = () => {
           <div class="pdf-shell">
                <div class="pdf-header">
                     <div class="pdf-brand">
-                        ${isZeeEmployee
-                          ? `<div style="display: flex; align-items: center; gap: 10px;"><img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 0;"> ${escapeHtml(firmName)}</p></div>`
-                          : isBrainrockEmployee
-                            ? `<div style="display: flex; align-items: center; gap: 10px;"><img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 0;"> ${escapeHtml(firmName)}</p></div>`
-                            : `<p class="pdf-subtitle" style="margin-top: 0;"> ${escapeHtml(firmDisplayName)}</p>`
+                        ${
+                          isZeeEmployee
+                            ? `<div style="display: flex; align-items: center; gap: 10px;"><img src="${ZeeLogo}" alt="ZEE Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 0;"> ${escapeHtml(firmName)}</p></div>`
+                            : isBrainrockEmployee
+                              ? `<div style="display: flex; align-items: center; gap: 10px;"><img src="${BrainRockLogo}" alt="BrainRock Logo" style="width: 80px; height: 80px; object-fit: contain;" /><p class="pdf-subtitle" style="margin-top: 0;"> ${escapeHtml(firmName)}</p></div>`
+                              : `<p class="pdf-subtitle" style="margin-top: 0;"> ${escapeHtml(firmDisplayName)}</p>`
                         }
                     </div>
                    <div class="pdf-header-center">
@@ -985,9 +1087,9 @@ const EmployeeDetailsManagement = () => {
     const excelData = employeesToUse.map((emp, index) => ({
       "S.No": index + 1,
       "Emp ID": emp.emp_id || "",
-      "Name": emp.emp_name || "",
+      Name: emp.emp_name || "",
       "Work Experience": emp.work_experience || "",
-      "Designation": emp.designation || "",
+      Designation: emp.designation || "",
       "Firm Name": emp.firm_name || "",
     }));
 
@@ -1261,6 +1363,7 @@ const EmployeeDetailsManagement = () => {
                             {renderFilePreview(existingFiles.profile_pic)}
                           </div>
                         )}
+                        {renderSelectedUploadFiles("profile_pic")}
                         <Form.Control
                           type="file"
                           name="profile_pic"
@@ -1277,6 +1380,7 @@ const EmployeeDetailsManagement = () => {
                             {renderFilePreview(existingFiles.govt_document)}
                           </div>
                         )}
+                        {renderSelectedUploadFiles("govt_document")}
                         <Form.Control
                           type="file"
                           name="govt_document"
@@ -1295,6 +1399,7 @@ const EmployeeDetailsManagement = () => {
                               )}
                             </div>
                           )}
+                        {renderSelectedUploadFiles("educational_documents")}
                         <Form.Control
                           type="file"
                           name="educational_documents"
@@ -1314,6 +1419,7 @@ const EmployeeDetailsManagement = () => {
                               )}
                             </div>
                           )}
+                        {renderSelectedUploadFiles("experience_certificates")}
                         <Form.Control
                           type="file"
                           name="experience_certificates"
@@ -1334,6 +1440,7 @@ const EmployeeDetailsManagement = () => {
                               )}
                             </div>
                           )}
+                        {renderSelectedUploadFiles("professional_certificates")}
                         <Form.Control
                           type="file"
                           name="professional_certificates"
@@ -1387,13 +1494,25 @@ const EmployeeDetailsManagement = () => {
                     </Form.Group>
                   </Col>
                   <Col md={8} className="d-flex gap-2 align-items-end">
-                    <Button variant="outline-success" size="sm" onClick={handleFirmWisePdf}>
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      onClick={handleFirmWisePdf}
+                    >
                       Download PDF
                     </Button>
-                    <Button variant="outline-success" size="sm" onClick={handleFirmWiseExcel}>
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      onClick={handleFirmWiseExcel}
+                    >
                       Download Excel
                     </Button>
-                    <Button variant="outline-primary" size="sm" onClick={handleFirmWisePrint}>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={handleFirmWisePrint}
+                    >
                       Print
                     </Button>
                   </Col>
@@ -1497,7 +1616,7 @@ const EmployeeDetailsManagement = () => {
                     className="rounded-circle bg-light d-flex justify-content-center align-items-center"
                     style={{ width: "120px", height: "120px" }}
                   >
-                   Locked
+                    Locked
                   </div>
                 )}
               </div>
@@ -1631,6 +1750,25 @@ const EmployeeDetailsManagement = () => {
             display: inline-block;
             text-decoration: none;
             color: #007bff;
+          }
+          .selected-file-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border: 1px solid #d9dee7;
+            border-radius: 4px;
+            background: #f8f9fa;
+            margin-bottom: 8px;
+            max-width: 100%;
+          }
+          .selected-file-name {
+            display: inline-block;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 12px;
           }
         `}
       </style>
