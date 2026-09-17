@@ -85,6 +85,8 @@ const EmployeeDetailsManagement = () => {
   const [activeTab, setActiveTab] = useState("manage");
   const [editMode, setEditMode] = useState(false);
   const [selectedFirmFilter, setSelectedFirmFilter] = useState("all");
+  const [showAllEmployeesModal, setShowAllEmployeesModal] = useState(false);
+  const [allEmployeesPreviewHtml, setAllEmployeesPreviewHtml] = useState("");
 
   // Helper functions for document paths and types
   const getDocumentUrl = (docPath) => {
@@ -1131,6 +1133,189 @@ const EmployeeDetailsManagement = () => {
     }, 250);
   };
 
+
+  // Generate one combined document containing the COMPLETE details of
+  // every employee. Each employee starts on a new printable page.
+  const generateAllEmployeesPdfContent = (employeesList) => {
+    if (!employeesList || employeesList.length === 0) return "";
+
+    const firstEmployeeHtml = generateEmployeePdfContent(employeesList[0]);
+
+    // Reuse the same styling already used by the individual employee PDF.
+    const styleStart = firstEmployeeHtml.indexOf("<style>");
+    const styleEnd = firstEmployeeHtml.indexOf("</style>");
+    const sharedStyles =
+      styleStart !== -1 && styleEnd !== -1
+        ? firstEmployeeHtml.slice(styleStart + 7, styleEnd)
+        : "";
+
+    const employeePages = employeesList
+      .map((employee, index) => {
+        const employeeHtml = generateEmployeePdfContent(employee);
+        const bodyStart = employeeHtml.indexOf("<body>");
+        const bodyEnd = employeeHtml.indexOf("</body>");
+        const bodyContent =
+          bodyStart !== -1 && bodyEnd !== -1
+            ? employeeHtml.slice(bodyStart + 6, bodyEnd)
+            : employeeHtml;
+
+        return `
+          <div class="combined-employee-page" data-employee-index="${index}">
+            ${bodyContent}
+          </div>
+        `;
+      })
+      .join("");
+
+    const escapeHtml = (value) =>
+      String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    const firmNames = [
+      ...new Set(
+        employeesList
+          .map((employee) => employee.firm_name)
+          .filter(Boolean),
+      ),
+    ];
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>All Employees - Employee Details</title>
+        <style>
+          ${sharedStyles}
+
+          body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+          }
+
+          .combined-employee-page {
+            width: 100%;
+            page-break-after: always;
+            break-after: page;
+            padding: 0;
+            margin: 0;
+          }
+
+          .combined-employee-page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+          }
+
+          .combined-employee-page .pdf-shell {
+            margin: 20px auto;
+            box-shadow: none;
+          }
+
+          .combined-summary {
+            max-width: 900px;
+            margin: 20px auto 0;
+            padding: 12px 20px;
+            border: 1px solid #d7e1f0;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            background: #f8fbff;
+          }
+
+          @media print {
+            .combined-summary {
+              display: none;
+            }
+
+            .combined-employee-page {
+              page-break-after: always;
+              break-after: page;
+            }
+
+            .combined-employee-page:last-child {
+              page-break-after: auto;
+              break-after: auto;
+            }
+
+            .combined-employee-page .pdf-shell {
+              margin: 0 auto;
+              border-radius: 0;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="combined-summary">
+          <strong>All Employee Details</strong><br />
+          Total Employees: ${employeesList.length}<br />
+          Firms Included: ${escapeHtml(firmNames.join(", ") || "All Firms")}<br />
+          Generated on: ${escapeHtml(new Date().toLocaleDateString())}
+        </div>
+        ${employeePages}
+      </body>
+      </html>
+    `;
+  };
+
+  // Employees used by the bulk View / PDF actions.
+  // This works for both "All Firms" and any single selected firm.
+  const getBulkEmployees = () => {
+    if (selectedFirmFilter === "all") {
+      return Array.isArray(allEmployees) ? allEmployees : [];
+    }
+
+    return Array.isArray(filteredEmployees) ? filteredEmployees : [];
+  };
+
+  const handleViewAllEmployeesPdf = () => {
+    const employeesToUse = getBulkEmployees();
+
+    if (employeesToUse.length === 0) {
+      setMessage("No employees found.");
+      setVariant("danger");
+      setShowAlert(true);
+      return;
+    }
+
+    const htmlContent = generateAllEmployeesPdfContent(employeesToUse);
+    setAllEmployeesPreviewHtml(htmlContent);
+    setShowAllEmployeesModal(true);
+  };
+
+  const handleDownloadAllEmployeesPdf = () => {
+    const employeesToUse = getBulkEmployees();
+
+    if (employeesToUse.length === 0) {
+      setMessage("No employees found.");
+      setVariant("danger");
+      setShowAlert(true);
+      return;
+    }
+
+    const htmlContent = generateAllEmployeesPdfContent(employeesToUse);
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+      setMessage("Please allow pop-ups in your browser to download the PDF.");
+      setVariant("danger");
+      setShowAlert(true);
+      return;
+    }
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -1493,14 +1678,43 @@ const EmployeeDetailsManagement = () => {
                       </Form.Select>
                     </Form.Group>
                   </Col>
-                  <Col md={8} className="d-flex gap-2 align-items-end">
+                  <Col md={8} className="d-flex gap-2 align-items-end flex-wrap">
+                    {/*
+                      BULK COMPLETE-DETAIL ACTIONS
+                      These buttons are intentionally ALWAYS visible.
+                      - All Firms: allEmployees are used.
+                      - Single Firm: filteredEmployees are used.
+                    */}
                     <Button
-                      variant="outline-success"
+                      variant="outline-info"
                       size="sm"
-                      onClick={handleFirmWisePdf}
+                      onClick={handleViewAllEmployeesPdf}
+                      disabled={getBulkEmployees().length === 0}
+                      title={
+                        selectedFirmFilter === "all"
+                          ? "View complete details of all employees"
+                          : `View complete details of all employees of ${selectedFirmFilter}`
+                      }
                     >
-                      Download PDF
+                      <FaEye className="me-1" />
+                      View All Details
                     </Button>
+
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={handleDownloadAllEmployeesPdf}
+                      disabled={getBulkEmployees().length === 0}
+                      title={
+                        selectedFirmFilter === "all"
+                          ? "Download complete details of all employees in one PDF"
+                          : `Download complete details of all employees of ${selectedFirmFilter} in one PDF`
+                      }
+                    >
+                      <FaFilePdf className="me-1" />
+                      Download All PDF
+                    </Button>
+
                     <Button
                       variant="outline-success"
                       size="sm"
@@ -1508,6 +1722,15 @@ const EmployeeDetailsManagement = () => {
                     >
                       Download Excel
                     </Button>
+
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      onClick={handleFirmWisePdf}
+                    >
+                      Download Summary PDF
+                    </Button>
+
                     <Button
                       variant="outline-primary"
                       size="sm"
@@ -1589,6 +1812,55 @@ const EmployeeDetailsManagement = () => {
           </div>
         </Container>
       </div>
+
+      {/* All Employees Combined PDF Preview Modal */}
+      <Modal
+        show={showAllEmployeesModal}
+        onHide={() => setShowAllEmployeesModal(false)}
+        size="xl"
+        fullscreen="lg-down"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            All Employees Details Preview
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ padding: 0, background: "#f1f5f9" }}>
+          <iframe
+            title="All Employees Details Preview"
+            srcDoc={allEmployeesPreviewHtml}
+            style={{
+              width: "100%",
+              height: "75vh",
+              border: "none",
+              background: "#fff",
+            }}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <span className="me-auto text-muted small">
+            {(selectedFirmFilter === "all" ? allEmployees : filteredEmployees).length} employee(s) included in this single PDF.
+          </span>
+          <Button
+            variant="secondary"
+            onClick={() => setShowAllEmployeesModal(false)}
+          >
+            Close
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleDownloadAllEmployeesPdf}
+            disabled={
+              (selectedFirmFilter === "all" ? allEmployees : filteredEmployees)
+                .length === 0
+            }
+          >
+            <FaFilePdf className="me-1" />
+            {selectedFirmFilter === "all" ? "Download All PDF" : "Download Firm PDF"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* View Employee Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
