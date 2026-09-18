@@ -27,6 +27,18 @@ const ContactUsQuery = () => {
   // State for selected contact
   const [selectedContact, setSelectedContact] = useState(null);
   const [showContactModal, setShowContactModal] = useState(false);
+  
+  // Selection state for bulk delete
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  
+  // Delete modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteType, setDeleteType] = useState(null); // 'single' or 'bulk'
+  const [contactToDelete, setContactToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   // Responsive check
   useEffect(() => {
@@ -130,6 +142,99 @@ const ContactUsQuery = () => {
   // Handle page change
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
+  // Selection handlers
+  const handleSelectAll = (checked) => {
+    setSelectAll(checked);
+    if (checked) {
+      setSelectedIds(paginatedContacts.map(contact => contact.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectContact = (id, checked) => {
+    setSelectedIds(prev => 
+      checked ? [...prev, id] : prev.filter(selectedId => selectedId !== id)
+    );
+    // Update selectAll state
+    if (!checked) {
+      setSelectAll(false);
+    } else if (selectedIds.length + 1 === paginatedContacts.length) {
+      setSelectAll(true);
+    }
+  };
+
+  // Reset selection on page change
+  useEffect(() => {
+    setSelectedIds([]);
+    setSelectAll(false);
+  }, [currentPage]);
+
+  // Single delete handler
+  const handleSingleDelete = (contact) => {
+    setContactToDelete(contact);
+    setDeleteType('single');
+    setShowDeleteModal(true);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+  };
+
+  // Bulk delete handler
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setDeleteType('bulk');
+    setShowDeleteModal(true);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+  };
+
+// Execute delete
+  const executeDelete = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+
+    try {
+      const idsToDelete = deleteType === 'single' && contactToDelete 
+        ? [contactToDelete.id] 
+        : selectedIds;
+      
+      const response = await fetch(`${API_BASE_URL}/api/contact-us/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ ids: idsToDelete }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete contact query');
+      }
+      
+      setContactQueries(prev => prev.filter(q => !idsToDelete.includes(q.id)));
+      
+      setDeleteSuccess(true);
+      setShowDeleteModal(false);
+      setSelectedIds([]);
+      setSelectAll(false);
+      setContactToDelete(null);
+    } catch (err) {
+      setDeleteError(err.message);
+      console.error('Error deleting contact query:', err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteType(null);
+    setContactToDelete(null);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+  };
+
   return (
     <div className="dashboard-container">
       <LeftNavManagement
@@ -170,6 +275,13 @@ const ContactUsQuery = () => {
                     <table className="temp-rwd-table">
                       <tbody>
                         <tr>
+                          <th style={{ width: '40px' }}>
+                            <input
+                              type="checkbox"
+                              checked={selectAll}
+                              onChange={(e) => handleSelectAll(e.target.checked)}
+                            />
+                          </th>
                           <th>S.No</th>
                           <th>Name</th>
                           <th>Email</th>
@@ -183,6 +295,13 @@ const ContactUsQuery = () => {
                         {paginatedContacts.length > 0 ? (
                           paginatedContacts.map((query, index) => (
                             <tr key={query.id}>
+                              <td data-th="Select" style={{ width: '40px' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedIds.includes(query.id)}
+                                  onChange={(e) => handleSelectContact(query.id, e.target.checked)}
+                                />
+                              </td>
                               <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                               <td data-th="Name">{query.full_name}</td>
                               <td data-th="Email">{query.email}</td>
@@ -199,15 +318,23 @@ const ContactUsQuery = () => {
                                   variant="primary" 
                                   size="sm"
                                   onClick={() => handleViewContact(query)}
+                                  className="me-1"
                                 >
                                   View
+                                </Button>
+                                <Button 
+                                  variant="danger" 
+                                  size="sm"
+                                  onClick={() => handleSingleDelete(query)}
+                                >
+                                  Delete
                                 </Button>
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="8" className="text-center">
+                            <td colSpan="9" className="text-center">
                               No contact queries found matching your search.
                             </td>
                           </tr>
@@ -219,26 +346,40 @@ const ContactUsQuery = () => {
               
                 {/* --- PAGINATION CONTROLS --- */}
                 {totalPages > 1 && (
-                  <div className="d-flex justify-content-center mt-4">
-                    <Pagination>
-                      <Pagination.Prev 
-                        onClick={() => handlePageChange(currentPage - 1)} 
-                        disabled={currentPage === 1}
-                      />
-                      {[...Array(totalPages).keys()].map(page => (
-                        <Pagination.Item 
-                          key={page + 1} 
-                          active={page + 1 === currentPage}
-                          onClick={() => handlePageChange(page + 1)}
+                  <div className="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                      {selectedIds.length > 0 && (
+                        <Button 
+                          variant="danger" 
+                          size="sm"
+                          onClick={handleBulkDelete}
+                          disabled={deleting}
                         >
-                          {page + 1}
-                        </Pagination.Item>
-                      ))}
-                      <Pagination.Next 
-                        onClick={() => handlePageChange(currentPage + 1)} 
-                        disabled={currentPage === totalPages}
-                      />
-                    </Pagination>
+                          Delete Selected ({selectedIds.length})
+                        </Button>
+                      )}
+                    </div>
+                    <div className="d-flex justify-content-center">
+                      <Pagination>
+                        <Pagination.Prev 
+                          onClick={() => handlePageChange(currentPage - 1)} 
+                          disabled={currentPage === 1}
+                        />
+                        {[...Array(totalPages).keys()].map(page => (
+                          <Pagination.Item 
+                            key={page + 1} 
+                            active={page + 1 === currentPage}
+                            onClick={() => handlePageChange(page + 1)}
+                          >
+                            {page + 1}
+                          </Pagination.Item>
+                        ))}
+                        <Pagination.Next 
+                          onClick={() => handlePageChange(currentPage + 1)} 
+                          disabled={currentPage === totalPages}
+                        />
+                      </Pagination>
+                    </div>
                   </div>
                 )}
               </>
@@ -286,6 +427,51 @@ const ContactUsQuery = () => {
           <Button variant="secondary" onClick={handleCloseModal}>
             Close
           </Button>
+        </Modal.Footer>
+      </Modal>
+      
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{deleteType === 'bulk' ? 'Delete Multiple Queries' : 'Delete Contact Query'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {deleteSuccess ? (
+            <Alert variant="success">
+              {deleteType === 'bulk' 
+                ? `Successfully deleted ${selectedIds.length} contact queries.` 
+                : 'Contact query deleted successfully.'}
+            </Alert>
+          ) : (
+            <>
+              {deleteError && <Alert variant="danger">{deleteError}</Alert>}
+              <p>
+                {deleteType === 'bulk' 
+                  ? `Are you sure you want to delete ${selectedIds.length} selected contact query${selectedIds.length > 1 ? 'ies' : ''}? This action cannot be undone.`
+                  : `Are you sure you want to delete the contact query from "${contactToDelete?.full_name}" (${contactToDelete?.email})? This action cannot be undone.`}
+              </p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          {deleteSuccess ? (
+            <Button variant="primary" onClick={handleCloseDeleteModal}>
+              OK
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={handleCloseDeleteModal} disabled={deleting}>
+                Cancel
+              </Button>
+              <Button 
+                variant="danger" 
+                onClick={executeDelete} 
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </>
+          )}
         </Modal.Footer>
       </Modal>
     </div>

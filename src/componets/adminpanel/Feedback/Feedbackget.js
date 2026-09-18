@@ -30,6 +30,18 @@ const Feedbackget = () => {
   const [replyError, setReplyError] = useState(null);
   const [replySuccess, setReplySuccess] = useState(false);
   
+  // Selection state for bulk delete
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  
+  // Delete modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteType, setDeleteType] = useState(null); // 'single' or 'bulk'
+  const [feedbackToDelete, setFeedbackToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  
   // Responsive check
   useEffect(() => {
     const checkDevice = () => {
@@ -94,6 +106,98 @@ const Feedbackget = () => {
   const totalPages = Math.ceil(filteredFeedbacks.length / itemsPerPage);
   
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  
+  // Selection handlers
+  const handleSelectAll = (checked) => {
+    setSelectAll(checked);
+    if (checked) {
+      setSelectedIds(currentItems.map(feedback => feedback.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectFeedback = (id, checked) => {
+    setSelectedIds(prev => 
+      checked ? [...prev, id] : prev.filter(selectedId => selectedId !== id)
+    );
+    if (!checked) {
+      setSelectAll(false);
+    } else if (selectedIds.length + 1 === currentItems.length) {
+      setSelectAll(true);
+    }
+  };
+
+  // Reset selection on page change
+  useEffect(() => {
+    setSelectedIds([]);
+    setSelectAll(false);
+  }, [currentPage]);
+
+  // Single delete handler
+  const handleSingleDelete = (feedback) => {
+    setFeedbackToDelete(feedback);
+    setDeleteType('single');
+    setShowDeleteModal(true);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+  };
+
+  // Bulk delete handler
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setDeleteType('bulk');
+    setShowDeleteModal(true);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+  };
+
+  // Execute delete
+  const executeDelete = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+
+    try {
+      const idsToDelete = deleteType === 'single' && feedbackToDelete 
+        ? [feedbackToDelete.id] 
+        : selectedIds;
+      
+      const response = await fetch('https://brainrock.in/brainrock/backend/api/feedback/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ ids: idsToDelete }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete feedback');
+      }
+      
+      setFeedbacks(prev => prev.filter(f => !idsToDelete.includes(f.id)));
+      
+      setDeleteSuccess(true);
+      setShowDeleteModal(false);
+      setSelectedIds([]);
+      setSelectAll(false);
+      setFeedbackToDelete(null);
+    } catch (err) {
+      setDeleteError(err.message);
+      console.error('Error deleting feedback:', err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteType(null);
+    setFeedbackToDelete(null);
+    setDeleteError(null);
+    setDeleteSuccess(false);
+  };
   
   // Format date for display in the requested format
   const formatDate = (dateString) => {
@@ -271,6 +375,13 @@ const Feedbackget = () => {
                     <table className="temp-rwd-table">
                       <tbody>
                         <tr>
+                          <th style={{ width: '40px' }}>
+                            <input
+                              type="checkbox"
+                              checked={selectAll}
+                              onChange={(e) => handleSelectAll(e.target.checked)}
+                            />
+                          </th>
                           <th>S.No</th>
                           <th>Email</th>
                           <th>Message</th>
@@ -282,6 +393,13 @@ const Feedbackget = () => {
                         {currentItems.length > 0 ? (
                           currentItems.map((feedback, index) => (
                             <tr key={feedback.id}>
+                              <td data-th="Select" style={{ width: '40px' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedIds.includes(feedback.id)}
+                                  onChange={(e) => handleSelectFeedback(feedback.id, e.target.checked)}
+                                />
+                              </td>
                               <td data-th="S.No">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                               <td data-th="Email">{feedback.email}</td>
                               <td data-th="Message">
@@ -300,15 +418,23 @@ const Feedbackget = () => {
                                   variant="primary" 
                                   size="sm" 
                                   onClick={() => handleViewFeedback(feedback)}
+                                  className="me-1"
                                 >
                                   View
+                                </Button>
+                                <Button 
+                                  variant="danger" 
+                                  size="sm"
+                                  onClick={() => handleSingleDelete(feedback)}
+                                >
+                                  Delete
                                 </Button>
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="6" className="text-center">
+                            <td colSpan="7" className="text-center">
                               No feedback data available.
                             </td>
                           </tr>
@@ -320,26 +446,40 @@ const Feedbackget = () => {
                 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="d-flex justify-content-center mt-4">
-                    <Pagination>
-                      <Pagination.Prev 
-                        onClick={() => handlePageChange(currentPage - 1)} 
-                        disabled={currentPage === 1}
-                      />
-                      {[...Array(totalPages).keys()].map(page => (
-                        <Pagination.Item 
-                          key={page + 1} 
-                          active={page + 1 === currentPage}
-                          onClick={() => handlePageChange(page + 1)}
+                  <div className="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                      {selectedIds.length > 0 && (
+                        <Button 
+                          variant="danger" 
+                          size="sm"
+                          onClick={handleBulkDelete}
+                          disabled={deleting}
                         >
-                          {page + 1}
-                        </Pagination.Item>
-                      ))}
-                      <Pagination.Next 
-                        onClick={() => handlePageChange(currentPage + 1)} 
-                        disabled={currentPage === totalPages}
-                      />
-                    </Pagination>
+                          Delete Selected ({selectedIds.length})
+                        </Button>
+                      )}
+                    </div>
+                    <div className="d-flex justify-content-center">
+                      <Pagination>
+                        <Pagination.Prev 
+                          onClick={() => handlePageChange(currentPage - 1)} 
+                          disabled={currentPage === 1}
+                        />
+                        {[...Array(totalPages).keys()].map(page => (
+                          <Pagination.Item 
+                            key={page + 1} 
+                            active={page + 1 === currentPage}
+                            onClick={() => handlePageChange(page + 1)}
+                          >
+                            {page + 1}
+                          </Pagination.Item>
+                        ))}
+                        <Pagination.Next 
+                          onClick={() => handlePageChange(currentPage + 1)} 
+                          disabled={currentPage === totalPages}
+                        />
+                      </Pagination>
+                    </div>
                   </div>
                 )}
               </>
@@ -445,6 +585,51 @@ const Feedbackget = () => {
           >
             {sendingReply ? 'Sending...' : 'Send Reply'}
           </Button>
+        </Modal.Footer>
+      </Modal>
+      
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{deleteType === 'bulk' ? 'Delete Multiple Feedback' : 'Delete Feedback'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {deleteSuccess ? (
+            <Alert variant="success">
+              {deleteType === 'bulk' 
+                ? `Successfully deleted ${selectedIds.length} feedback entries.` 
+                : 'Feedback deleted successfully.'}
+            </Alert>
+          ) : (
+            <>
+              {deleteError && <Alert variant="danger">{deleteError}</Alert>}
+              <p>
+                {deleteType === 'bulk' 
+                  ? `Are you sure you want to delete ${selectedIds.length} selected feedback ${selectedIds.length > 1 ? 'entries' : 'entry'}? This action cannot be undone.`
+                  : `Are you sure you want to delete the feedback from "${feedbackToDelete?.email}"? This action cannot be undone.`}
+              </p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          {deleteSuccess ? (
+            <Button variant="primary" onClick={handleCloseDeleteModal}>
+              OK
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={handleCloseDeleteModal} disabled={deleting}>
+                Cancel
+              </Button>
+              <Button 
+                variant="danger" 
+                onClick={executeDelete} 
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </>
+          )}
         </Modal.Footer>
       </Modal>
     </div>

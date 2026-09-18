@@ -91,6 +91,16 @@ const WebsiteManagement = () => {
   // Detail view modal states
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+
+  // Counseling selection and delete states
+  const [selectedCounselingIds, setSelectedCounselingIds] = useState([]);
+  const [selectAllCounseling, setSelectAllCounseling] = useState(false);
+  const [showCounselingDeleteModal, setShowCounselingDeleteModal] = useState(false);
+  const [counselingDeleteType, setCounselingDeleteType] = useState(null); // 'single' or 'bulk'
+  const [counselingToDelete, setCounselingToDelete] = useState(null);
+  const [deletingCounseling, setDeletingCounseling] = useState(false);
+  const [counselingDeleteError, setCounselingDeleteError] = useState(null);
+  const [counselingDeleteSuccess, setCounselingDeleteSuccess] = useState(false);
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -848,44 +858,68 @@ const getModalTitle = () => {
      );
    };
 
-   const renderCounselingTable = (items) => {
-     return (
-       <table className="temp-rwd-table">
-         <tbody>
-           <tr>
-             <th>S.No</th>
-             <th>Full Name</th>
-             <th>Email</th>
-             <th>Mobile Number</th>
-             <th>Message</th>
-             <th>Created At</th>
-           </tr>
-           {items.length > 0 ? (
-             items.map((item, index) => (
-               <tr key={item.id}>
-                 <td data-th="S.No">
-                   {(currentPage - 1) * itemsPerPage + index + 1}
-                 </td>
-                 <td data-th="Full Name">{item.full_name}</td>
-                 <td data-th="Email">{item.email}</td>
-                 <td data-th="Mobile Number">{item.mobile_number}</td>
-                 <td data-th="Message">{item.message}</td>
-                 <td data-th="Created At">
-                   {formatDate(item.created_at)}
-                 </td>
-               </tr>
-             ))
-           ) : (
-             <tr>
-               <td colSpan="6" className="text-center">
-                 No counseling requests available.
-               </td>
-             </tr>
-           )}
-         </tbody>
-       </table>
-     );
-   };
+const renderCounselingTable = (items) => {
+      return (
+        <table className="temp-rwd-table">
+          <tbody>
+            <tr>
+              <th style={{ width: '40px' }}>
+                <input
+                  type="checkbox"
+                  checked={selectAllCounseling}
+                  onChange={(e) => handleCounselingSelectAll(e.target.checked)}
+                />
+              </th>
+              <th>S.No</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Mobile Number</th>
+              <th>Message</th>
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+            {items.length > 0 ? (
+              items.map((item, index) => (
+                <tr key={item.id}>
+                  <td data-th="Select" style={{ width: '40px' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedCounselingIds.includes(item.id)}
+                      onChange={(e) => handleCounselingSelect(item.id, e.target.checked)}
+                    />
+                  </td>
+                  <td data-th="S.No">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
+                  <td data-th="Full Name">{item.full_name}</td>
+                  <td data-th="Email">{item.email}</td>
+                  <td data-th="Mobile Number">{item.mobile_number}</td>
+                  <td data-th="Message">{item.message}</td>
+                  <td data-th="Created At">
+                    {formatDate(item.created_at)}
+                  </td>
+                  <td data-th="Action">
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleCounselingSingleDelete(item)}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center">
+                  No counseling requests available.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      );
+    };
 
    const renderTable = (items) => {
      switch (selectedCardType) {
@@ -1397,6 +1431,99 @@ const getModalTitle = () => {
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
+  // Counseling selection handlers
+  const handleCounselingSelectAll = (checked) => {
+    setSelectAllCounseling(checked);
+    if (checked) {
+      setSelectedCounselingIds(currentItems.map(item => item.id));
+    } else {
+      setSelectedCounselingIds([]);
+    }
+  };
+
+  const handleCounselingSelect = (id, checked) => {
+    setSelectedCounselingIds(prev => 
+      checked ? [...prev, id] : prev.filter(selectedId => selectedId !== id)
+    );
+    if (!checked) {
+      setSelectAllCounseling(false);
+    } else if (selectedCounselingIds.length + 1 === currentItems.length) {
+      setSelectAllCounseling(true);
+    }
+  };
+
+  // Reset selection on page change
+  useEffect(() => {
+    setSelectedCounselingIds([]);
+    setSelectAllCounseling(false);
+  }, [currentPage]);
+
+  // Counseling single delete handler
+  const handleCounselingSingleDelete = (item) => {
+    setCounselingToDelete(item);
+    setCounselingDeleteType('single');
+    setShowCounselingDeleteModal(true);
+    setCounselingDeleteError(null);
+    setCounselingDeleteSuccess(false);
+  };
+
+  // Counseling bulk delete handler
+  const handleCounselingBulkDelete = () => {
+    if (selectedCounselingIds.length === 0) return;
+    setCounselingDeleteType('bulk');
+    setShowCounselingDeleteModal(true);
+    setCounselingDeleteError(null);
+    setCounselingDeleteSuccess(false);
+  };
+
+  // Execute counseling delete
+  const executeCounselingDelete = async () => {
+    setDeletingCounseling(true);
+    setCounselingDeleteError(null);
+    setCounselingDeleteSuccess(false);
+
+    try {
+      const idsToDelete = counselingDeleteType === 'single' && counselingToDelete 
+        ? [counselingToDelete.id] 
+        : selectedCounselingIds;
+      
+      const response = await fetch(`${API_BASE_URL}/student-counseling/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ ids: idsToDelete }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete counseling request');
+      }
+      
+      setCounselingData(prev => prev.filter(c => !idsToDelete.includes(c.id)));
+      setCounselingCount(prev => prev - idsToDelete.length);
+      
+      setCounselingDeleteSuccess(true);
+      setShowCounselingDeleteModal(false);
+      setSelectedCounselingIds([]);
+      setSelectAllCounseling(false);
+      setCounselingToDelete(null);
+    } catch (err) {
+      setCounselingDeleteError(err.message);
+      console.error('Error deleting counseling request:', err);
+    } finally {
+      setDeletingCounseling(false);
+    }
+  };
+
+  const handleCloseCounselingDeleteModal = () => {
+    setShowCounselingDeleteModal(false);
+    setCounselingDeleteType(null);
+    setCounselingToDelete(null);
+    setCounselingDeleteError(null);
+    setCounselingDeleteSuccess(false);
+  };
+
   return (
     <div className="dashboard-container">
       <LeftNavManagement
@@ -1642,30 +1769,44 @@ const getModalTitle = () => {
                     <div className="col-md-12">{renderTable(currentItems)}</div>
                   </Row>
 
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="d-flex justify-content-center mt-4">
-                      <Pagination>
-                        <Pagination.Prev
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                        />
-                        {[...Array(totalPages).keys()].map((page) => (
-                          <Pagination.Item
-                            key={page + 1}
-                            active={page + 1 === currentPage}
-                            onClick={() => handlePageChange(page + 1)}
-                          >
-                            {page + 1}
-                          </Pagination.Item>
-                        ))}
-                        <Pagination.Next
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                        />
-                      </Pagination>
+                  {/* Delete Selected Button & Pagination */}
+                  <div className="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                      {selectedCardType === "counseling" && selectedCounselingIds.length > 0 && (
+                        <Button 
+                          variant="danger" 
+                          size="sm"
+                          onClick={handleCounselingBulkDelete}
+                          disabled={deletingCounseling}
+                        >
+                          Delete Selected ({selectedCounselingIds.length})
+                        </Button>
+                      )}
                     </div>
-                  )}
+                    <div className="d-flex justify-content-center">
+                      {totalPages > 1 && (
+                        <Pagination>
+                          <Pagination.Prev
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                          />
+                          {[...Array(totalPages).keys()].map((page) => (
+                            <Pagination.Item
+                              key={page + 1}
+                              active={page + 1 === currentPage}
+                              onClick={() => handlePageChange(page + 1)}
+                            >
+                              {page + 1}
+                            </Pagination.Item>
+                          ))}
+                          <Pagination.Next
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                          />
+                        </Pagination>
+                      )}
+                    </div>
+                  </div>
                 </>
               )}
             </div>
@@ -1678,6 +1819,51 @@ const getModalTitle = () => {
       {selectedCardType === "serviceRenewals" &&
         renderServiceRenewalDetailModal()}
       {renderAddServiceRenewalModal()}
+
+      {/* Counseling Delete Confirmation Modal */}
+      <Modal show={showCounselingDeleteModal} onHide={handleCloseCounselingDeleteModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{counselingDeleteType === 'bulk' ? 'Delete Multiple Counseling Requests' : 'Delete Counseling Request'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {counselingDeleteSuccess ? (
+            <Alert variant="success">
+              {counselingDeleteType === 'bulk' 
+                ? `Successfully deleted ${selectedCounselingIds.length} counseling requests.` 
+                : 'Counseling request deleted successfully.'}
+            </Alert>
+          ) : (
+            <>
+              {counselingDeleteError && <Alert variant="danger">{counselingDeleteError}</Alert>}
+              <p>
+                {counselingDeleteType === 'bulk' 
+                  ? `Are you sure you want to delete ${selectedCounselingIds.length} selected counseling request${selectedCounselingIds.length > 1 ? 's' : ''}? This action cannot be undone.`
+                  : `Are you sure you want to delete the counseling request from "${counselingToDelete?.full_name}" (${counselingToDelete?.email})? This action cannot be undone.`}
+              </p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          {counselingDeleteSuccess ? (
+            <Button variant="primary" onClick={handleCloseCounselingDeleteModal}>
+              OK
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={handleCloseCounselingDeleteModal} disabled={deletingCounseling}>
+                Cancel
+              </Button>
+              <Button 
+                variant="danger" 
+                onClick={executeCounselingDelete} 
+                disabled={deletingCounseling}
+              >
+                {deletingCounseling ? 'Deleting...' : 'Delete'}
+              </Button>
+            </>
+          )}
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
