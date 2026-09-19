@@ -9,10 +9,13 @@ import { Modal, Form, Button, Alert } from "react-bootstrap";
 import axios from "axios";
 import "../../assets/css/Header.css";
 import { RiUser3Fill } from "react-icons/ri";
+import JobRegis from "../pages/JobRegis";
+
 
 function Header() {
   const navigate = useNavigate();
   const [showCounselingModal, setShowCounselingModal] = useState(false);
+  const [showJobModal, setShowJobModal] = useState(false);
   const [counselingForm, setCounselingForm] = useState({
     full_name: "",
     email: "",
@@ -25,6 +28,10 @@ function Header() {
 
   const handleLoginClick = (e) => {
     navigate("/Login");
+  };
+
+  const handleJobApplyClick = () => {
+    setShowJobModal(true);
   };
 
   const handleCounselingChange = (e) => {
@@ -95,21 +102,6 @@ function Header() {
           </div>
 
           <ul className="d-flex mb-0 list-unstyled br-header">
-            {/* <li className="">
-              <Link to="/KheloJito" className="login-button">
-                <span>Khelo aur Jeeto</span>
-              </Link>{" "}
-            </li> */}
-            {/* <li className="">
-              <a
-                href="https://brjobsedu.com/login"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="login-button"
-              >
-                <span>Course Login</span>
-              </a>
-            </li> */}
             <li className="">
               <button
                 type="button"
@@ -128,6 +120,16 @@ function Header() {
               >
                 <RiUser3Fill className="br-header-icon" />
                 <span>Counseling</span>
+              </button>
+            </li>
+            <li className="">
+              <button
+                type="button"
+                onClick={handleJobApplyClick}
+                className="login-button"
+              >
+                <RiUser3Fill className="br-header-icon" />
+                <span>Job Apply</span>
               </button>
             </li>
             <div className="">
@@ -172,24 +174,7 @@ function Header() {
       <div className="main-mobile-header">
         <div className="d-flex justify-content-between align-items-center main-header">
           <ul className="d-flex mb-0 list-unstyled br-header">
-            {/* <li className="">
-              <Link to="/KheloJito" className="login-button">
-                <span>Khelo aur Jeeto</span>
-              </Link>{" "}
-            </li> */}
-            {/* <li className="">
-              {" "}
-              <a
-                href="https://brjobsedu.com/login"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="login-button"
-              >
-                <span>Course Login</span>
-              </a>
-            </li> */}
             <li className="">
-              {" "}
               <button
                 type="button"
                 onClick={handleLoginClick}
@@ -200,7 +185,6 @@ function Header() {
               </button>
             </li>
             <li className="">
-              {" "}
               <button
                 type="button"
                 onClick={() => setShowCounselingModal(true)}
@@ -208,6 +192,16 @@ function Header() {
               >
                 <RiUser3Fill className="br-header-icon" />
                 <span>Counseling</span>
+              </button>
+            </li>
+            <li className="">
+              <button
+                type="button"
+                onClick={handleJobApplyClick}
+                className="login-button"
+              >
+                <RiUser3Fill className="br-header-icon" />
+                <span>Job Apply</span>
               </button>
             </li>
             <div className="">
@@ -324,6 +318,9 @@ function Header() {
           )}
         </Modal.Body>
       </Modal>
+
+      {/* Job Apply Modal */}
+      <JobRegis show={showJobModal} onHide={() => setShowJobModal(false)} />
     </div>
   );
 }
