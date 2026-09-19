@@ -66,6 +66,7 @@ const InterViewManagement = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [autoFillMsg, setAutoFillMsg] = useState("");
 
   // ====== Job Openings state ======
   const [jobs, setJobs] = useState([]);
@@ -152,7 +153,8 @@ const InterViewManagement = () => {
 
   useEffect(() => {
     fetchCandidates();
-    fetchCategories(); // Fetch categories on component mount
+    fetchCategories();
+    fetchJobs();
   }, []);
 
   useEffect(() => {
@@ -215,6 +217,31 @@ const InterViewManagement = () => {
     setFormData({ ...formData, [name]: value });
     validateField(name, value, !!selectedCandidate);
     if (errorMsg) setErrorMsg("");
+  };
+
+  const handleEmailBlur = () => {
+    const emailVal = formData.email.trim().toLowerCase();
+    if (!emailVal) return;
+    const match = jobs.find(
+      (j) => j.email && j.email.toLowerCase() === emailVal
+    );
+    if (match) {
+      setFormData((prev) => {
+        const updated = { ...prev, name: match.full_name || prev.name };
+        if (match.category) {
+          const catArr = Array.isArray(match.category)
+            ? match.category
+            : [match.category];
+          updated.category = catArr;
+        }
+        return updated;
+      });
+      setAutoFillMsg(
+      
+      );
+    } else {
+      setAutoFillMsg("");
+    }
   };
 
   // Handle checkbox selection for categories
@@ -747,7 +774,32 @@ const InterViewManagement = () => {
         </Modal.Header>
         <Modal.Body>
           <Form>
+          
             <Form.Group className="mb-3">
+              <Form.Label>
+                Email <span className="br-span-star">*</span>
+              </Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleEmailBlur}
+                placeholder="Enter email"
+                isInvalid={!!errors.email}
+                disabled={isSubmitting}
+              />
+
+              <Form.Control.Feedback type="invalid">
+                {errors.email}
+              </Form.Control.Feedback>
+            </Form.Group>
+            {autoFillMsg && (
+              <Alert variant="info" className="mb-3">
+                {autoFillMsg}
+              </Alert>
+            )}
+              <Form.Group className="mb-3">
               <Form.Label>
                 Name <span className="br-span-star">*</span>
               </Form.Label>
@@ -762,23 +814,6 @@ const InterViewManagement = () => {
               />
               <Form.Control.Feedback type="invalid">
                 {errors.name}
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>
-                Email <span className="br-span-star">*</span>
-              </Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter email"
-                isInvalid={!!errors.email}
-                disabled={isSubmitting}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.email}
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-3">
