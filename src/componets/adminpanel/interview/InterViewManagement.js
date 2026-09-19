@@ -21,6 +21,9 @@ const API_URL =
 const JOB_API_URL =
   "https://brainrock.in/brainrock/backend/api/job-openings/";
 
+const CATEGORY_API_URL =
+  "https://brainrock.in/brainrock/backend/api/candidate-interview-categories/";
+
 const api = axios.create({
   baseURL: "https://brainrock.in/brainrock/backend/api/",
   withCredentials: true,
@@ -39,6 +42,9 @@ const InterViewManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // State for dynamic categories from API
+  const [categoryList, setCategoryList] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,11 +53,15 @@ const InterViewManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  
+  // Updated formData to include category as an array
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    category: [],
   });
+  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -84,6 +94,18 @@ const InterViewManagement = () => {
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
+  // ====== Fetch Categories ======
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get(CATEGORY_API_URL);
+      if (response.data && Array.isArray(response.data.categories)) {
+        setCategoryList(response.data.categories);
+      }
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
+    }
+  };
+
   // ====== Fetch Candidates ======
   const fetchCandidates = async () => {
     try {
@@ -105,9 +127,6 @@ const InterViewManagement = () => {
   };
 
   // ====== Fetch Job Openings ======
-  // Handles BOTH response formats:
-  //   1) Plain array:  [ {...}, {...} ]
-  //   2) Wrapped:      { success: true, data: [ {...}, {...} ] }
   const fetchJobs = async () => {
     try {
       setJobLoading(true);
@@ -133,9 +152,9 @@ const InterViewManagement = () => {
 
   useEffect(() => {
     fetchCandidates();
+    fetchCategories(); // Fetch categories on component mount
   }, []);
 
-  // Fetch jobs whenever the Job Applications tab is activated (always fresh data)
   useEffect(() => {
     if (activeTab === "jobs") {
       fetchJobs();
@@ -198,6 +217,19 @@ const InterViewManagement = () => {
     if (errorMsg) setErrorMsg("");
   };
 
+  // Handle checkbox selection for categories
+  const handleCategoryChange = (e) => {
+    const { value, checked } = e.target;
+    setFormData((prev) => {
+      const currentCategories = Array.isArray(prev.category) ? prev.category : [];
+      if (checked) {
+        return { ...prev, category: [...currentCategories, value] };
+      } else {
+        return { ...prev, category: currentCategories.filter((cat) => cat !== value) };
+      }
+    });
+  };
+
   const validateBeforeSubmit = (isEdit) => {
     let temp = {};
     if (!formData.name) temp.name = "Name is required";
@@ -210,7 +242,7 @@ const InterViewManagement = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", email: "", password: "" });
+    setFormData({ name: "", email: "", password: "", category: [] });
     setErrors({});
     setSelectedCandidate(null);
   };
@@ -223,7 +255,8 @@ const InterViewManagement = () => {
 
   const handleEditClick = (c) => {
     setSelectedCandidate(c);
-    setFormData({ name: c.name, email: c.email, password: "" });
+    const categoryArr = Array.isArray(c.category) ? c.category : (c.category ? [c.category] : []);
+    setFormData({ name: c.name, email: c.email, password: "", category: categoryArr });
     setErrors({});
     setShowEditModal(true);
     setErrorMsg("");
@@ -239,7 +272,12 @@ const InterViewManagement = () => {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
-      await api.post(API_URL, formData);
+      const payload = {
+        ...formData,
+        category: formData.category, // Already an array
+      };
+
+      await api.post(API_URL, payload);
       setSuccessMsg("Candidate added successfully!");
       setShowAddModal(false);
       resetForm();
@@ -269,8 +307,10 @@ const InterViewManagement = () => {
         candidate_id: selectedCandidate.candidate_id,
         name: formData.name,
         email: formData.email,
+        category: formData.category // Already an array
       };
       if (formData.password) payload.password = formData.password;
+      
       await api.put(API_URL, payload);
       setSuccessMsg("Candidate updated successfully!");
       setShowEditModal(false);
@@ -375,7 +415,6 @@ const InterViewManagement = () => {
       year: "numeric",
     });
   };
-  
 
   const getResumeUrl = (path) => {
     if (!path) return "";
@@ -385,7 +424,6 @@ const InterViewManagement = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
       <LeftNavManagement
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -393,48 +431,28 @@ const InterViewManagement = () => {
         isTablet={isTablet}
       />
 
-      {/* Main Content */}
       <div className="main-content">
-        {/* Header */}
         <AdminHeader toggleSidebar={toggleSidebar} />
 
-        {/* Dashboard Body */}
         <Container fluid className="dashboard-body">
           <div className="br-box-container">
-            {/* Global alerts */}
             {successMsg && (
-              <Alert
-                variant="success"
-                dismissible
-                onClose={() => setSuccessMsg("")}
-              >
+              <Alert variant="success" dismissible onClose={() => setSuccessMsg("")}>
                 {successMsg}
               </Alert>
             )}
             {errorMsg && (
-              <Alert
-                variant="danger"
-                dismissible
-                onClose={() => setErrorMsg("")}
-              >
+              <Alert variant="danger" dismissible onClose={() => setErrorMsg("")}>
                 {errorMsg}
               </Alert>
             )}
             {jobSuccessMsg && (
-              <Alert
-                variant="success"
-                dismissible
-                onClose={() => setJobSuccessMsg("")}
-              >
+              <Alert variant="success" dismissible onClose={() => setJobSuccessMsg("")}>
                 {jobSuccessMsg}
               </Alert>
             )}
             {jobErrorMsg && (
-              <Alert
-                variant="danger"
-                dismissible
-                onClose={() => setJobErrorMsg("")}
-              >
+              <Alert variant="danger" dismissible onClose={() => setJobErrorMsg("")}>
                 {jobErrorMsg}
               </Alert>
             )}
@@ -443,7 +461,6 @@ const InterViewManagement = () => {
               <h2 className="mb-0">Interview Management</h2>
             </div>
 
-            {/* Tabs */}
             <Tabs
               activeKey={activeTab}
               onSelect={(k) => setActiveTab(k)}
@@ -497,6 +514,7 @@ const InterViewManagement = () => {
                               <th>Candidate ID</th>
                               <th>Name</th>
                               <th>Email</th>
+                              <th>Category</th>
                               <th className="text-center">Action</th>
                             </tr>
 
@@ -504,19 +522,17 @@ const InterViewManagement = () => {
                               currentItems.map((c, index) => (
                                 <tr key={c.candidate_id}>
                                   <td data-th="S.No">
-                                    {(currentPage - 1) * itemsPerPage +
-                                      index +
-                                      1}
+                                    {(currentPage - 1) * itemsPerPage + index + 1}
                                   </td>
                                   <td data-th="Candidate ID">
                                     {c.candidate_id}
                                   </td>
                                   <td data-th="Name">{c.name}</td>
                                   <td data-th="Email">{c.email}</td>
-                                  <td
-                                    data-th="Action"
-                                    className="text-center"
-                                  >
+                                  <td data-th="Category">
+                                    {Array.isArray(c.category) ? c.category.join(", ") : (c.category || "—")}
+                                  </td>
+                                  <td data-th="Action" className="text-center">
                                     <Button
                                       variant="warning"
                                       size="sm"
@@ -537,7 +553,7 @@ const InterViewManagement = () => {
                               ))
                             ) : (
                               <tr>
-                                <td colSpan="5" className="text-center">
+                                <td colSpan="6" className="text-center">
                                   No candidates data available.
                                 </td>
                               </tr>
@@ -547,7 +563,6 @@ const InterViewManagement = () => {
                       </div>
                     </Row>
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
                       <div className="d-flex justify-content-center mt-4">
                         <Pagination>
@@ -637,9 +652,7 @@ const InterViewManagement = () => {
                               currentJobItems.map((j, index) => (
                                 <tr key={j.id}>
                                   <td data-th="S.No">
-                                    {(jobCurrentPage - 1) * itemsPerPage +
-                                      index +
-                                      1}
+                                    {(jobCurrentPage - 1) * itemsPerPage + index + 1}
                                   </td>
                                   <td data-th="ID">{j.id}</td>
                                   <td data-th="Full Name">{j.full_name}</td>
@@ -665,10 +678,7 @@ const InterViewManagement = () => {
                                   <td data-th="Applied On">
                                     {formatDate(j.created_at)}
                                   </td>
-                                  <td
-                                    data-th="Action"
-                                    className="text-center"
-                                  >
+                                  <td data-th="Action" className="text-center">
                                     <Button
                                       variant="info"
                                       size="sm"
@@ -699,14 +709,11 @@ const InterViewManagement = () => {
                       </div>
                     </Row>
 
-                    {/* Job Pagination */}
                     {jobTotalPages > 1 && (
                       <div className="d-flex justify-content-center mt-4">
                         <Pagination>
                           <Pagination.Prev
-                            onClick={() =>
-                              handleJobPageChange(jobCurrentPage - 1)
-                            }
+                            onClick={() => handleJobPageChange(jobCurrentPage - 1)}
                             disabled={jobCurrentPage === 1}
                           />
                           {[...Array(jobTotalPages).keys()].map((page) => (
@@ -719,9 +726,7 @@ const InterViewManagement = () => {
                             </Pagination.Item>
                           ))}
                           <Pagination.Next
-                            onClick={() =>
-                              handleJobPageChange(jobCurrentPage + 1)
-                            }
+                            onClick={() => handleJobPageChange(jobCurrentPage + 1)}
                             disabled={jobCurrentPage === jobTotalPages}
                           />
                         </Pagination>
@@ -792,6 +797,28 @@ const InterViewManagement = () => {
               <Form.Control.Feedback type="invalid">
                 {errors.password}
               </Form.Control.Feedback>
+            </Form.Group>
+            
+            {/* Dynamic Category Checkboxes */}
+            <Form.Group className="mb-3">
+              <Form.Label>Category</Form.Label>
+              <div className="d-flex flex-wrap gap-3 mt-2 border p-3 rounded">
+                {categoryList.length > 0 ? (
+                  categoryList.map((cat) => (
+                    <Form.Check
+                      key={cat}
+                      type="checkbox"
+                      label={cat}
+                      value={cat}
+                      checked={formData.category.includes(cat)}
+                      onChange={handleCategoryChange}
+                      disabled={isSubmitting}
+                    />
+                  ))
+                ) : (
+                  <span className="text-muted">Loading categories...</span>
+                )}
+              </div>
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -884,6 +911,28 @@ const InterViewManagement = () => {
               <Form.Control.Feedback type="invalid">
                 {errors.password}
               </Form.Control.Feedback>
+            </Form.Group>
+
+            {/* Dynamic Category Checkboxes */}
+            <Form.Group className="mb-3">
+              <Form.Label>Category</Form.Label>
+              <div className="d-flex flex-wrap gap-3 mt-2 border p-3 rounded">
+                {categoryList.length > 0 ? (
+                  categoryList.map((cat) => (
+                    <Form.Check
+                      key={cat}
+                      type="checkbox"
+                      label={cat}
+                      value={cat}
+                      checked={formData.category.includes(cat)}
+                      onChange={handleCategoryChange}
+                      disabled={isSubmitting}
+                    />
+                  ))
+                ) : (
+                  <span className="text-muted">Loading categories...</span>
+                )}
+              </div>
             </Form.Group>
           </Form>
         </Modal.Body>
