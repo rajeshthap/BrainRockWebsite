@@ -17,12 +17,14 @@ const GenerateBill = () => {
 
   const [brainrockValidation, setBrainrockValidation] = useState({
     isDuplicate: false,
+    duplicateMessage: "",
     suggestedBillNumber: "",
     isValidating: false,
   });
 
   const [zeeValidation, setZeeValidation] = useState({
     isDuplicate: false,
+    duplicateMessage: "",
     suggestedBillNumber: "",
     isValidating: false,
   });
@@ -44,6 +46,25 @@ const GenerateBill = () => {
   };
 
   const currentBillPrefix = generateBillNumberPrefix();
+
+  const getCurrentFiscalYear = () => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const fyStartYear = currentMonth < 3 ? currentYear - 1 : currentYear;
+    const fyEndYear = fyStartYear + 1;
+    return `${fyStartYear}-${String(fyEndYear).slice(-2)}`;
+  };
+
+  const currentFiscalYear = getCurrentFiscalYear();
+
+  const extractFiscalYear = (billNumber) => {
+    if (!billNumber) return null;
+    const match = billNumber.toString().match(/^(\d{4})-(\d{2})/);
+    if (match) {
+      return `${match[1]}-${match[2]}`;
+    }
+    return null;
+  };
 
   const extractLastNumber = (billNumber) => {
     if (!billNumber) return null;
@@ -101,10 +122,10 @@ const GenerateBill = () => {
         setBillNumberApiError(null);
         
         const suggestedBR = calculateNextBillNumber([...brainrockNumbers, ...zeeNumbers], currentBillPrefix);
-        setBrainrockValidation(prev => ({ ...prev, suggestedBillNumber: suggestedBR }));
+        setBrainrockValidation(prev => ({ ...prev, isDuplicate: false, duplicateMessage: "", suggestedBillNumber: suggestedBR }));
         
         const suggestedZEE = calculateNextBillNumber([...brainrockNumbers, ...zeeNumbers], currentBillPrefix);
-        setZeeValidation(prev => ({ ...prev, suggestedBillNumber: suggestedZEE }));
+        setZeeValidation(prev => ({ ...prev, isDuplicate: false, duplicateMessage: "", suggestedBillNumber: suggestedZEE }));
         
       } catch (error) {
         console.error("Error fetching bill numbers:", error);
@@ -117,30 +138,57 @@ const GenerateBill = () => {
     fetchBillNumbers();
   }, []);
 
-  const validateBillNumber = useCallback((billNumber, setValidation) => {
+  const validateBillNumber = useCallback((billNumber, setValidation, billType = "") => {
     if (!billNumber || billNumber.trim() === "") {
-      setValidation(prev => ({ ...prev, isDuplicate: false, isValidating: false }));
-      return;
+      setValidation(prev => ({ ...prev, isDuplicate: false, isValidating: false, duplicateMessage: "" }));
+      return { isDuplicate: false, duplicateMessage: "" };
     }
 
     const trimmedBillNo = billNumber.trim();
-    const isDuplicate = allBillNumbers.some(
-      existing => existing.toLowerCase() === trimmedBillNo.toLowerCase()
+    const exactMatchExists = allBillNumbers.some(
+      existing => existing && existing.toLowerCase() === trimmedBillNo.toLowerCase()
     );
 
-    setValidation(prev => ({
-      ...prev,
-      isDuplicate,
-      isValidating: false
-    }));
-
-    if (!isDuplicate) {
+    if (!exactMatchExists) {
       const suggested = calculateNextBillNumber([...allBillNumbers, trimmedBillNo], currentBillPrefix);
-      setValidation(prev => ({ ...prev, suggestedBillNumber: suggested }));
+      setValidation(prev => ({
+        ...prev,
+        isDuplicate: false,
+        suggestedBillNumber: suggested,
+        isValidating: false,
+        duplicateMessage: ""
+      }));
+      return { isDuplicate: false, duplicateMessage: "" };
     }
-  }, [allBillNumbers]);
 
-  const handleBillNumberChange = (value, setFormData, formDataKey, setValidation) => {
+    const enteredFiscalYear = extractFiscalYear(trimmedBillNo);
+    const isSameFiscalYear = enteredFiscalYear ? enteredFiscalYear === currentFiscalYear : true;
+
+    const billLabel = billType === "ukssovm" ? "BrainRock" : billType === "zee" ? "Zee" : "Bill";
+    const duplicateMsg = `Bill ${billLabel} with this bill number already exists for this fiscal year.`;
+
+    if (isSameFiscalYear) {
+      setValidation(prev => ({
+        ...prev,
+        isDuplicate: true,
+        isValidating: false,
+        duplicateMessage: duplicateMsg
+      }));
+      return { isDuplicate: true, duplicateMessage: duplicateMsg };
+    } else {
+      const suggested = calculateNextBillNumber([...allBillNumbers, trimmedBillNo], currentBillPrefix);
+      setValidation(prev => ({
+        ...prev,
+        isDuplicate: false,
+        suggestedBillNumber: suggested,
+        isValidating: false,
+        duplicateMessage: ""
+      }));
+      return { isDuplicate: false, duplicateMessage: "" };
+    }
+  }, [allBillNumbers, currentBillPrefix, currentFiscalYear]);
+
+  const handleBillNumberChange = (value, setFormData, formDataKey, setValidation, billType) => {
     setFormData(prev => ({
       ...prev,
       [formDataKey]: value
@@ -155,7 +203,14 @@ const GenerateBill = () => {
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      validateBillNumber(value, setValidation);
+      const result = validateBillNumber(value, setValidation, billType);
+      if (result.isDuplicate) {
+        setMessage(result.duplicateMessage);
+        setVariant("danger");
+        setShowAlert(true);
+      } else {
+        setShowAlert(false);
+      }
     }, 300);
   };
 
@@ -369,9 +424,9 @@ const GenerateBill = () => {
       let dataToSend;
 
       if (selectedBillType === "ukssovm") {
-        if (brainrockValidation.isDuplicate) {
-          throw new Error("Bill number already exists. Please use a different bill number.");
-        }
+         if (brainrockValidation.isDuplicate) {
+           throw new Error(brainrockValidation.duplicateMessage || "Bill number already exists. Please use a different bill number.");
+         }
 
         if (!ukssoMFormData.billNumber || !ukssoMFormData.billTo) {
           throw new Error("Please fill in all required fields");
@@ -405,9 +460,9 @@ const GenerateBill = () => {
           total_paid: totals.totalPaid,
         };
       } else if (selectedBillType === "zee") {
-        if (zeeValidation.isDuplicate) {
-          throw new Error("Bill number already exists. Please use a different bill number.");
-        }
+         if (zeeValidation.isDuplicate) {
+           throw new Error(zeeValidation.duplicateMessage || "Bill number already exists. Please use a different bill number.");
+         }
 
         // Zee bill validation
         if (!zeeFormData.billNo || !zeeFormData.billTo) {
@@ -654,16 +709,16 @@ const GenerateBill = () => {
                             placeholder="Enter bill number"
                             name="billNumber"
                             value={ukssoMFormData.billNumber}
-                            onChange={(e) => handleBillNumberChange(e.target.value, setUkssoMFormData, "billNumber", setBrainrockValidation)}
+                             onChange={(e) => handleBillNumberChange(e.target.value, setUkssoMFormData, "billNumber", setBrainrockValidation, "ukssovm")}
                             isInvalid={brainrockValidation.isDuplicate}
                             required
                             style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
-                          {brainrockValidation.isDuplicate && (
-                            <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
-                              Bill number already exists
-                            </Form.Control.Feedback>
-                          )}
+                           {brainrockValidation.isDuplicate && (
+                             <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                               {brainrockValidation.duplicateMessage}
+                             </Form.Control.Feedback>
+                           )}
                           {brainrockValidation.isValidating && (
                             <div className="text-muted small mt-1">Validating...</div>
                           )}
@@ -901,11 +956,12 @@ const GenerateBill = () => {
                             servicesAmount: 0,
                             items: [{ productName: "", description: "", quantity: 1, rate: 0 }],
                           });
-                          setBrainrockValidation(prev => ({
-                            ...prev,
-                            isDuplicate: false,
-                            suggestedBillNumber: calculateNextBillNumber(allBillNumbers, currentBillPrefix)
-                          }));
+                           setBrainrockValidation(prev => ({
+                             ...prev,
+                             isDuplicate: false,
+                             duplicateMessage: "",
+                             suggestedBillNumber: calculateNextBillNumber(allBillNumbers, currentBillPrefix)
+                           }));
                         }}
                         className="flex-grow-1"
                       >
@@ -938,16 +994,16 @@ const GenerateBill = () => {
                             placeholder="Enter bill number"
                             name="billNo"
                             value={zeeFormData.billNo}
-                            onChange={(e) => handleBillNumberChange(e.target.value, setZeeFormData, "billNo", setZeeValidation)}
+                             onChange={(e) => handleBillNumberChange(e.target.value, setZeeFormData, "billNo", setZeeValidation, "zee")}
                             isInvalid={zeeValidation.isDuplicate}
                             required
                             style={{ fontSize: "0.9rem", padding: "0.4rem 0.6rem" }}
                           />
-                          {zeeValidation.isDuplicate && (
-                            <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
-                              Bill number already exists
-                            </Form.Control.Feedback>
-                          )}
+                           {zeeValidation.isDuplicate && (
+                             <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                               {zeeValidation.duplicateMessage}
+                             </Form.Control.Feedback>
+                           )}
                           {zeeValidation.isValidating && (
                             <div className="text-muted small mt-1">Validating...</div>
                           )}
@@ -1171,11 +1227,12 @@ const GenerateBill = () => {
                             servicesAmount: 0,
                             items: [{ product: "", description: "", phase: "", price: 0 }],
                           });
-                          setZeeValidation(prev => ({
-                            ...prev,
-                            isDuplicate: false,
-                            suggestedBillNumber: calculateNextBillNumber(allBillNumbers, currentBillPrefix)
-                          }));
+                           setZeeValidation(prev => ({
+                             ...prev,
+                             isDuplicate: false,
+                             duplicateMessage: "",
+                             suggestedBillNumber: calculateNextBillNumber(allBillNumbers, currentBillPrefix)
+                           }));
                         }}
                         className="flex-grow-1"
                       >
